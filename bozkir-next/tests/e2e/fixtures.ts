@@ -4,7 +4,7 @@ import { test as base, expect, type Page } from '@playwright/test';
 export const ADMIN_USER = process.env.E2E_ADMIN_USER ?? 'bozkir';
 export const ADMIN_PASS = process.env.E2E_ADMIN_PASS ?? 'Bozkir.1905';
 
-/** Admin oturumu açar ve `storageState` üretir; admin testleri bunu kullanır. */
+/** Admin oturumu açar ve panele girer. */
 export async function loginAdmin(page: Page): Promise<void> {
   await page.goto('/admin/login');
   await page.getByLabel('Kullanıcı adı').fill(ADMIN_USER);
@@ -14,12 +14,29 @@ export async function loginAdmin(page: Page): Promise<void> {
   await expect(page.locator('main')).toBeVisible();
 }
 
-/** Admin oturumsuz, açık oturumlu bir test context'i sağlar. */
+/** Suite boyunca paylaşılan admin storageState (tek login). */
+let storageStatePromise: Promise<Awaited<ReturnType<import('@playwright/test').BrowserContext['storageState']>>> | null = null;
+
+async function getAdminStorageState(browser: import('@playwright/test').Browser): Promise<Awaited<ReturnType<import('@playwright/test').BrowserContext['storageState']>>> {
+  if (!storageStatePromise) {
+    storageStatePromise = (async () => {
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      await loginAdmin(page);
+      const state = await context.storageState();
+      await context.close();
+      return state;
+    })();
+  }
+  return storageStatePromise;
+}
+
+/** Admin oturumlu bir test context'i sağlar (tek login, storageState ile paylaşılır). */
 export const test = base.extend<{ adminPage: Page }>({
   adminPage: async ({ browser }, use) => {
-    const context = await browser.newContext();
+    const state = await getAdminStorageState(browser);
+    const context = await browser.newContext({ storageState: state });
     const page = await context.newPage();
-    await loginAdmin(page);
     await use(page);
     await context.close();
   },

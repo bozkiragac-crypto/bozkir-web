@@ -1,7 +1,8 @@
 import { SignJWT, jwtVerify } from 'jose';
 
 export const AUTH_COOKIE = 'bozkir_admin';
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 gün
+// Tarayıcı açık kalsa bile bu süre sonunda yeniden giriş gerekir (12 saat).
+const MAX_AGE_SECONDS = 60 * 60 * 12;
 
 export interface SessionPayload {
   sub: string;

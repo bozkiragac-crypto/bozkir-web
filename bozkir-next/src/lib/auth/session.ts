@@ -1,15 +1,16 @@
 import { cookies } from 'next/headers';
-import { AUTH_COOKIE, SESSION_MAX_AGE, signSessionToken, verifySessionToken, type SessionPayload } from './token';
+import { AUTH_COOKIE, signSessionToken, verifySessionToken, type SessionPayload } from './token';
 
 export async function createSession(payload: SessionPayload): Promise<void> {
   const token = await signSessionToken(payload);
   const store = await cookies();
+  // "Session cookie": maxAge/expires verilmez → tarayıcı kapanınca silinir,
+  // böylece site/tarayıcı yeniden açıldığında tekrar giriş istenir.
   store.set(AUTH_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    maxAge: SESSION_MAX_AGE,
   });
 }
 

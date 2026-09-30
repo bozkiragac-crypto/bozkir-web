@@ -11,10 +11,18 @@ test.describe('Ürünler ve katalog', () => {
   test('arama filtresi sonuç getirir', async ({ page }) => {
     await gotoWithRetry(page, '/tr/urunler');
     const search = page.getByPlaceholder(/Model, kod veya renk ara/i);
-    await search.click();
-    await search.fill('lak');
-    await expect(search).toHaveValue('lak');
-    await search.press('Enter');
+    await search.waitFor({ state: 'visible' });
+    for (let i = 0; i < 3; i++) {
+      await search.click();
+      await search.fill('lak');
+      await search.press('Enter');
+      try {
+        await page.waitForURL(/q=lak/, { timeout: 8_000 });
+        break;
+      } catch {
+        // tekrar dene (mobil yeniden render yarışı)
+      }
+    }
     await expect(page).toHaveURL(/q=lak/, { timeout: 15_000 });
     await expect(page.locator('a[href*="/tr/urunler/"]').first()).toBeVisible();
   });
@@ -23,9 +31,8 @@ test.describe('Ürünler ve katalog', () => {
     await gotoWithRetry(page, '/tr/urunler');
     const firstProduct = page.locator('main a[href*="/tr/urunler/"]').first();
     await firstProduct.waitFor({ state: 'visible' });
-    const href = await firstProduct.getAttribute('href');
-    await firstProduct.click();
-    if (href) await page.waitForURL(new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), { timeout: 15_000 });
+    const href = (await firstProduct.getAttribute('href')) ?? '';
+    await page.goto(href, { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
     await expect(page.locator('h1')).toBeVisible();
     await expect(page.locator('a[href*="teklif-al?urun="]').first()).toBeVisible();

@@ -41,6 +41,7 @@ test.describe('Admin yeni özellikler', () => {
   });
 
   test('owner menüde Kullanıcılar/Ayarlar görünür', async ({ adminPage }) => {
+    await adminPage.goto('/admin');
     await expect(adminPage.getByRole('link', { name: 'Kullanıcılar' }).first()).toBeVisible();
     await expect(adminPage.getByRole('link', { name: 'Ayarlar' }).first()).toBeVisible();
   });
