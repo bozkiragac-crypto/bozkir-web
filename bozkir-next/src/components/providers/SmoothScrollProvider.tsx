@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from 'react';
 import Lenis from 'lenis';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
+import { setLenis } from '@/lib/lenis';
 
 /**
  * Lenis smooth scroll + ScrollTrigger senkronu.
@@ -23,6 +24,9 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
 
     // ScrollTrigger'ı Lenis'in scroll pozisyonuyla besle.
     lenis.on('scroll', ScrollTrigger.update);
+
+    // Tek örneği paylaş (ScrollToTop vb. için).
+    setLenis(lenis);
 
     const raf = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(raf);
@@ -78,6 +82,7 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('visibilitychange', onVisibility);
       ro.disconnect();
       gsap.ticker.remove(raf);
+      setLenis(null);
       lenis.destroy();
       document.documentElement.classList.remove('lenis', 'lenis-smooth');
     };

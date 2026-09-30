@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Phone, Mail, MapPin, Clock, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageCircle, Navigation, ExternalLink } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
 import { PageHero } from '@/components/ui/PageHero';
@@ -106,34 +106,63 @@ export default async function ContactPage({ params }: PageProps) {
         </div>
 
         {depotCoords && (
-          <div className="mt-16">
-            <p className="text-eyebrow">{c.depotTitle}</p>
-            <div className="mt-5 grid gap-6 md:grid-cols-[1fr_2fr]">
-              <div className="rounded-lg border border-border bg-surface p-7">
-                <MapPin className="h-5 w-5 text-muted-strong" />
-                {s.warehouse.address && (
-                  <p className="mt-4 text-sm leading-relaxed text-muted-strong">{s.warehouse.address}</p>
-                )}
-                <a
-                  href={`https://www.google.com/maps?q=${encodeURIComponent(depotCoords)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex text-sm font-medium text-foreground underline underline-offset-4"
-                >
-                  {depotCoords}
-                </a>
+          <section className="mt-20">
+            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-stretch">
+              <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface p-8 md:p-10">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[color:var(--color-accent-soft)]/20 blur-3xl"
+                />
+                <div className="relative">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background">
+                    <MapPin className="h-5 w-5" />
+                  </span>
+                  <p className="text-eyebrow mt-6">{c.depotTitle}</p>
+                  <h2 className="text-headline mt-3 text-3xl md:text-4xl">{c.depotTitle}</h2>
+                  <p className="mt-4 max-w-md leading-relaxed text-muted-strong">{c.depotDescription}</p>
+                  {s.warehouse.address && (
+                    <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-muted-strong">
+                      <MapPin className="mt-0.5 h-4 w-4 flex-none" />
+                      {s.warehouse.address}
+                    </p>
+                  )}
+                </div>
+
+                <div className="relative mt-8 border-t border-border pt-6">
+                  <p className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">{c.coordinates}</p>
+                  <p className="numerals mt-1 text-sm font-medium">{depotCoords}</p>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(depotCoords)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+                    >
+                      <Navigation className="h-4 w-4" /> {c.directions}
+                    </a>
+                    <a
+                      href={`https://www.google.com/maps?q=${encodeURIComponent(depotCoords)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium transition-colors hover:bg-surface-2"
+                    >
+                      <ExternalLink className="h-4 w-4" /> {c.openInMaps}
+                    </a>
+                  </div>
+                </div>
               </div>
-              <div className="overflow-hidden rounded-lg border border-border">
+
+              <div className="overflow-hidden rounded-2xl border border-border">
                 <iframe
                   title={c.depotMapTitle}
                   src={`https://www.google.com/maps?q=${encodeURIComponent(depotCoords)}&output=embed`}
-                  className="h-[320px] w-full sm:h-[420px]"
+                  className="h-[320px] w-full lg:h-full"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                 />
               </div>
             </div>
-          </div>
+          </section>
         )}
       </Container>
     </>

@@ -24,11 +24,28 @@ test.describe('Favoriler, karşılaştırma ve paylaşım', () => {
   });
 
   test('ürün detayında WhatsApp paylaş butonu wa.me linki üretir', async ({ page }) => {
-    await page.goto('/tr/urunler');
-    await page.locator('a[href*="/tr/urunler/"]').first().click();
+    await page.goto('/tr/urunler', { waitUntil: 'domcontentloaded' });
+    const product = page.locator('main a[href*="/tr/urunler/"]').first();
+    await product.waitFor({ state: 'visible' });
+    const href = (await product.getAttribute('href')) ?? '';
+    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
     const share = page.locator('a[href*="wa.me/?text="]').first();
     await expect(share).toBeVisible();
-    const href = await share.getAttribute('href');
-    expect(href).toContain('wa.me/?text=');
+    const shareHref = await share.getAttribute('href');
+    expect(shareHref).toContain('wa.me/?text=');
+  });
+
+  test('ürün detayında "WhatsApp ile sor" ürüne özel mesaj içerir', async ({ page }) => {
+    await page.goto('/tr/urunler', { waitUntil: 'domcontentloaded' });
+    const product = page.locator('main a[href*="/tr/urunler/"]').first();
+    await product.waitFor({ state: 'visible' });
+    const href = (await product.getAttribute('href')) ?? '';
+    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
+    const ask = page.locator('a[href*="wa.me/9"][href*="text="]').first();
+    await expect(ask).toBeVisible();
+    const askHref = await ask.getAttribute('href');
+    expect(decodeURIComponent(askHref ?? '')).toContain('teklifi');
   });
 });

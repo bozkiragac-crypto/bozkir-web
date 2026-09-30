@@ -234,6 +234,15 @@ export const dictionaries = {
         home: 'Ana Sayfa',
         products: 'Ürünler',
       },
+      maintenance: {
+        title: 'Kısa bir bakımdayız',
+        body: 'Siteyi sizin için güncelliyoruz. Kısa süre içinde yeniden hizmetinizde olacağız.',
+        contactTitle: 'Bize ulaşın',
+        phone: 'Telefon',
+        whatsapp: 'WhatsApp',
+        email: 'E-posta',
+        hours: 'Çalışma Saatleri',
+      },
       about: {
         metaTitle: 'Hakkımızda | Bozkır Ağaç Ürünleri',
         metaDescription: "1979'a dayanan sektör tecrübesi, 2016'da kurumsallaşma. Bozkır Ağaç Ürünleri'nin hikâyesi.",
@@ -283,6 +292,10 @@ export const dictionaries = {
         mapTitle: 'Bozkır Ağaç Ürünleri konum',
         depotTitle: 'Depo konumu',
         depotMapTitle: 'Bozkır Ağaç Ürünleri depo konumu',
+        depotDescription: 'Sevkiyat ve stok için depomuzu ziyaret edebilirsiniz.',
+        directions: 'Yol tarifi al',
+        openInMaps: 'Haritada aç',
+        coordinates: 'Koordinatlar',
       },
       catalog: {
         metaTitle: 'Katalog | Bozkır Ağaç Ürünleri',
@@ -314,7 +327,10 @@ export const dictionaries = {
         metaDescription: 'Seçtiğiniz ürünleri yan yana karşılaştırın ve toplu teklif isteyin.',
       },
       whatsapp: {
-        message: 'Merhaba, web sitenizden bilgi almak istiyorum.',
+        message:
+          'Merhaba, Bozkır Ağaç Ürünleri hakkında bilgi ve fiyat teklifi almak istiyorum. Yardımcı olabilir misiniz?',
+        productMessage:
+          'Merhaba, {product} ürünü için bilgi ve fiyat teklifi almak istiyorum. {url}',
         aria: 'WhatsApp ile yazın',
         label: "WhatsApp'tan yaz",
         cursor: 'Yaz',
@@ -768,6 +784,15 @@ export const dictionaries = {
         home: 'Home',
         products: 'Products',
       },
+      maintenance: {
+        title: 'We are briefly under maintenance',
+        body: 'We are updating the site for you. We will be back in service shortly.',
+        contactTitle: 'Reach us',
+        phone: 'Phone',
+        whatsapp: 'WhatsApp',
+        email: 'Email',
+        hours: 'Working Hours',
+      },
       about: {
         metaTitle: 'About | Bozkır Wood Products',
         metaDescription: 'Industry experience dating back to 1979, corporate structure since 2016. The story of Bozkır Wood Products.',
@@ -817,6 +842,10 @@ export const dictionaries = {
         mapTitle: 'Bozkır Wood Products location',
         depotTitle: 'Warehouse location',
         depotMapTitle: 'Bozkır Wood Products warehouse location',
+        depotDescription: 'You can visit our warehouse for shipping and stock.',
+        directions: 'Get directions',
+        openInMaps: 'Open in Maps',
+        coordinates: 'Coordinates',
       },
       catalog: {
         metaTitle: 'Catalog | Bozkır Wood Products',
@@ -848,7 +877,9 @@ export const dictionaries = {
         metaDescription: 'Compare your selected products side by side and request a combined quote.',
       },
       whatsapp: {
-        message: 'Hello, I would like to get information from your website.',
+        message:
+          'Hello, I would like information and a price quote for Bozkır Wood Products. Could you help me?',
+        productMessage: 'Hello, I would like information and a price quote for {product}. {url}',
         aria: 'Message on WhatsApp',
         label: 'Message on WhatsApp',
         cursor: 'Chat',
@@ -1302,6 +1333,15 @@ export const dictionaries = {
         home: 'الرئيسية',
         products: 'المنتجات',
       },
+      maintenance: {
+        title: 'نحن في صيانة قصيرة',
+        body: 'نعمل على تحديث الموقع من أجلكم. سنعود للخدمة قريباً.',
+        contactTitle: 'تواصل معنا',
+        phone: 'الهاتف',
+        whatsapp: 'واتساب',
+        email: 'البريد الإلكتروني',
+        hours: 'ساعات العمل',
+      },
       about: {
         metaTitle: 'من نحن | منتجات بوزكير الخشبية',
         metaDescription: 'خبرة في القطاع تعود إلى 1979، وهيكل مؤسسي منذ 2016. قصة منتجات بوزكير الخشبية.',
@@ -1351,6 +1391,10 @@ export const dictionaries = {
         mapTitle: 'موقع منتجات بوزكير الخشبية',
         depotTitle: 'موقع المستودع',
         depotMapTitle: 'موقع مستودع منتجات بوزكير الخشبية',
+        depotDescription: 'يمكنكم زيارة مستودعنا للشحن والمخزون.',
+        directions: 'احصل على الاتجاهات',
+        openInMaps: 'افتح في الخرائط',
+        coordinates: 'الإحداثيات',
       },
       catalog: {
         metaTitle: 'الكتالوج | منتجات بوزكير الخشبية',
@@ -1382,7 +1426,8 @@ export const dictionaries = {
         metaDescription: 'قارن المنتجات المحددة جنباً إلى جنب واطلب عرض سعر جماعي.',
       },
       whatsapp: {
-        message: 'مرحباً، أود الحصول على معلومات من موقعكم الإلكتروني.',
+        message: 'مرحباً، أود الحصول على معلومات وعرض سعر لمنتجات بوزكير الخشبية. هل يمكنكم مساعدتي؟',
+        productMessage: 'مرحباً، أود الحصول على معلومات وعرض سعر لمنتج {product}. {url}',
         aria: 'راسلنا عبر واتساب',
         label: 'راسلنا عبر واتساب',
         cursor: 'راسلنا',

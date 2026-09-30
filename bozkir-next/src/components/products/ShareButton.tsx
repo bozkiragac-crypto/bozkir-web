@@ -9,17 +9,19 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/** Ürün detayında WhatsApp ile paylaş butonu. */
+/** Ürün detayında WhatsApp ile paylaş butonu (ürün bağlamlı mesaj). */
 export function ShareButton({ name, url, className }: { name: string; url: string; className?: string }) {
-  const { t } = useDictionary();
-  const href = `https://wa.me/?text=${encodeURIComponent(`${name} ${url}`)}`;
+  const { dict } = useDictionary();
+  const template = dict.pages.whatsapp.productMessage;
+  const text = template.replace('{product}', name).replace('{url}', url).replace(/\s+/g, ' ').trim();
+  const href = `https://wa.me/?text=${encodeURIComponent(text)}`;
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={t('common.share')}
-      title={t('common.share')}
+      aria-label={dict.common.share}
+      title={dict.common.share}
       onClick={(e) => e.stopPropagation()}
       className={cn(
         'flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground',
@@ -27,6 +29,41 @@ export function ShareButton({ name, url, className }: { name: string; url: strin
       )}
     >
       <WhatsAppIcon className="h-4 w-4" />
+    </a>
+  );
+}
+
+/** Ürün detayında "WhatsApp ile sor" — ürüne özel mesajla satıcıya yazar. */
+export function WhatsAppAskButton({
+  name,
+  code,
+  url,
+  phone,
+  className,
+}: {
+  name: string;
+  code?: string;
+  url: string;
+  phone: string;
+  className?: string;
+}) {
+  const { dict } = useDictionary();
+  const product = code ? `${name} (${code})` : name;
+  const text = dict.pages.whatsapp.productMessage.replace('{product}', product).replace('{url}', url).replace(/\s+/g, ' ').trim();
+  const number = phone.replace(/[^\d]/g, '');
+  const href = `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        'inline-flex h-11 items-center gap-2 rounded-full border border-[#25D366]/40 px-5 text-sm font-medium text-[#128C4A] transition-colors hover:bg-[#25D366]/10',
+        className,
+      )}
+    >
+      <WhatsAppIcon className="h-4 w-4" />
+      {dict.pages.whatsapp.label}
     </a>
   );
 }

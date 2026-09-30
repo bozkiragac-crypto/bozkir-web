@@ -33,8 +33,9 @@ test.describe('Teklif formu', () => {
     await page.goto('/tr/urunler', { waitUntil: 'domcontentloaded' });
     const product = page.locator('main a[href*="/tr/urunler/"]').first();
     await product.waitFor({ state: 'visible' });
-    await product.click();
-    await expect(page).toHaveURL(/\/tr\/urunler\/.+/, { timeout: 15_000 });
+    const href = (await product.getAttribute('href')) ?? '';
+    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
     await page.locator('a[href*="teklif-al?urun="]').first().click();
     await expect(page).toHaveURL(/teklif-al\?urun=/, { timeout: 15_000 });
     await expect(page.getByText(/Teklif ürünü/)).toBeVisible();

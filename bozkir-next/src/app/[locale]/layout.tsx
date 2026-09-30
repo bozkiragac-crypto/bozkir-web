@@ -11,6 +11,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab';
 import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
+import { ScrollToTop } from '@/components/providers/ScrollToTop';
 import { CursorProvider } from '@/components/providers/CursorProvider';
 import { FavoritesProvider } from '@/components/providers/FavoritesProvider';
 import { CompareBar } from '@/components/products/CompareBar';
@@ -83,6 +84,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         <DictionaryProvider locale={typed} dictionary={dict}>
           <FavoritesProvider>
             <SmoothScrollProvider>
+              <ScrollToTop />
               <CursorProvider />
               <a
                 href="#main"

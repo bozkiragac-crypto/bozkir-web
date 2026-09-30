@@ -11,7 +11,7 @@ import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { ProductGallery } from '@/components/products/ProductGallery';
 import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
-import { ShareButton } from '@/components/products/ShareButton';
+import { ShareButton, WhatsAppAskButton } from '@/components/products/ShareButton';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
@@ -147,6 +147,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   className="h-11 w-11"
                 />
               </div>
+            </div>
+
+            <div className="mt-4">
+              <WhatsAppAskButton
+                name={product.name}
+                code={product.code}
+                url={localeUrl(locale, `/urunler/${product.slug}`)}
+                phone={settings.whatsapp || settings.phone}
+              />
             </div>
 
             <Link href="/urunler" className="mt-8 inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">

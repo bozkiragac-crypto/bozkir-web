@@ -1,7 +1,6 @@
 'use client';
 
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
-import { LocaleSwitcher } from './LocaleSwitcher';
 import { Instagram, Facebook, MessageCircle, ChevronDown } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import type { SiteSettings } from '@/lib/data/settings';
@@ -163,7 +162,6 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
             <Link href="/cerez-politikasi" className="link-underline transition-colors hover:text-foreground">
               {t('footer.cookies')}
             </Link>
-            <LocaleSwitcher compact />
           </div>
         </div>
       </Container>
