@@ -29,7 +29,14 @@ jobs:
             git fetch --all
             git reset --hard origin/main
             cd bozkir-next
-            docker compose up -d --build
+            # Yeni imajı derle ve servisleri başlat
+            docker compose build app
+            docker compose up -d
+            # Şema migrasyonu (idempotent) — container içinde çalıştırılır
+            docker compose exec -T app node scripts/db-migrate.mjs
+            # Bir kez: içerik + kategori/marka tohumlaması (idempotent, mevcut veriyi ezmez)
+            docker compose exec -T app node scripts/seed-catalog-meta.mjs || true
+            docker compose exec -T app node scripts/seed-content-i18n.mjs || true
             # Sağlık kontrolü (DB + storage dahil)
             for i in $(seq 1 20); do
               if curl -fsS "http://localhost/api/health?deep=1" >/dev/null; then
