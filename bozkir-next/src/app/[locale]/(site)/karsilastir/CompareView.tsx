@@ -8,12 +8,14 @@ import { useFavorites } from '@/components/providers/FavoritesProvider';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
+import { ShareListButton, useImportFromUrl } from '@/components/products/ListImport';
 import type { Product } from '@/types/product';
 
 export function CompareView() {
   const { compare, ready, removeCompare, clearCompare, favorites, toggleCompare } = useFavorites();
   const { t, locale } = useDictionary();
   const [details, setDetails] = useState<Record<string, Product>>({});
+  const { imported } = useImportFromUrl('compare');
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +53,9 @@ export function CompareView() {
         crumbs={[{ label: t('common.home'), href: '/' }, { label: t('compare.title') }]}
       />
       <Container className="pb-28">
+        {imported > 0 && (
+          <p className="mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">{t('favorites.imported')}</p>
+        )}
         {!ready ? (
           <p className="py-20 text-center text-sm text-muted">{t('common.loading')}</p>
         ) : items.length === 0 ? (
@@ -74,6 +79,7 @@ export function CompareView() {
                 {items.length}/4 {t('compare.counter')} {items.length < 2 && t('compare.minTwo')}
               </p>
               <div className="flex flex-wrap gap-3">
+                <ShareListButton slugs={compare.map((c) => c.slug)} />
                 <button
                   type="button"
                   onClick={clearCompare}

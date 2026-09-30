@@ -931,6 +931,53 @@ export async function saveAboutContent(input: AboutInput): Promise<{ ok: boolean
   return { ok: true };
 }
 
+/* ---------------- Toplu çeviri ---------------- */
+
+export type TranslationKind = 'product' | 'category' | 'campaign' | 'catalog' | 'content';
+
+export interface TranslationUpdate {
+  kind: TranslationKind;
+  id: string;
+  fields: Record<string, string>;
+}
+
+/** Toplu çeviri aracından tek bir kaydın çeviri alanlarını günceller. */
+export async function saveTranslations(updates: TranslationUpdate[]): Promise<{ ok: boolean; saved: number; error?: string }> {
+  const admin = await requireAdminUser();
+  const db = getDb();
+  if (!db) return { ok: false, saved: 0, error: 'Veritabanı bağlantısı yok.' };
+
+  const tables = { product: products, category: categories, campaign: campaigns, catalog: catalogs, content: contentItems } as const;
+  const allowed: Record<TranslationKind, string[]> = {
+    product: ['nameEn', 'nameAr', 'catEn', 'catAr'],
+    category: ['nameEn', 'nameAr'],
+    campaign: ['titleEn', 'titleAr'],
+    catalog: ['titleEn', 'titleAr'],
+    content: ['titleEn', 'titleAr'],
+  };
+
+  let saved = 0;
+  for (const u of updates) {
+    const table = tables[u.kind];
+    if (!table) continue;
+    const set: Record<string, string | null> = {};
+    for (const field of allowed[u.kind]) {
+      if (field in u.fields) set[field] = (u.fields[field] ?? '').trim() || null;
+    }
+    if (Object.keys(set).length === 0) continue;
+    try {
+      await db.update(table).set(set).where(eq(table.id, u.id));
+      saved++;
+    } catch {
+      // tek kayıt hatası akışı bozmasın
+    }
+  }
+
+  await logActivity(admin, 'update', 'translation', undefined, `Toplu çeviri: ${saved} kayıt güncellendi`);
+  await flushSiteCaches();
+  return { ok: true, saved };
+}
+
 /* ---------------- Teklif talepleri ---------------- */
 
 export async function deleteQuoteRequest(id: string): Promise<{ ok: boolean; error?: string }> {

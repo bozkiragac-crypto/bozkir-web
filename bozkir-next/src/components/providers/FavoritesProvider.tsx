@@ -30,6 +30,8 @@ interface Ctx {
   toggleCompare: (product: ProductRef) => void;
   removeCompare: (slug: string) => void;
   clearCompare: () => void;
+  /** Paylaşılan linkten gelen ürünleri listeye ekler (varsa atlar). */
+  importRefs: (refs: ProductRef[], target: 'favorites' | 'compare') => void;
 }
 
 const FavoritesContext = createContext<Ctx | null>(null);
@@ -104,6 +106,33 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const clearCompare = useCallback(() => setCompare([]), []);
 
+  const importRefs = useCallback((refs: ProductRef[], target: 'favorites' | 'compare') => {
+    if (refs.length === 0) return;
+    if (target === 'compare') {
+      setCompare((prev) => {
+        const seen = new Set(prev.map((p) => p.slug));
+        const merged = [...prev];
+        for (const r of refs) {
+          if (seen.has(r.slug) || merged.length >= MAX_COMPARE) continue;
+          merged.push({ ...r });
+          seen.add(r.slug);
+        }
+        return merged;
+      });
+    } else {
+      setFavorites((prev) => {
+        const seen = new Set(prev.map((p) => p.slug));
+        const merged = [...prev];
+        for (const r of refs) {
+          if (seen.has(r.slug) || merged.length >= MAX_FAVORITES) continue;
+          merged.push({ ...r });
+          seen.add(r.slug);
+        }
+        return merged;
+      });
+    }
+  }, []);
+
   const value = useMemo<Ctx>(
     () => ({
       favorites,
@@ -117,8 +146,9 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       toggleCompare,
       removeCompare,
       clearCompare,
+      importRefs,
     }),
-    [favorites, compare, ready, isFavorite, inCompare, toggleFavorite, removeFavorite, clearFavorites, toggleCompare, removeCompare, clearCompare],
+    [favorites, compare, ready, isFavorite, inCompare, toggleFavorite, removeFavorite, clearFavorites, toggleCompare, removeCompare, clearCompare, importRefs],
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;

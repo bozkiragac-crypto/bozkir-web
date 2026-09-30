@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import { Inter, Fraunces, Caveat } from 'next/font/google';
-import Script from 'next/script';
 import '../globals.css';
 import { isLocale, localeDir, localeHtmlLang, locales, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
@@ -17,6 +16,9 @@ import { FavoritesProvider } from '@/components/providers/FavoritesProvider';
 import { CompareBar } from '@/components/products/CompareBar';
 import { CampaignPopupServer } from '@/components/campaigns/CampaignPopupServer';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
+import { ConsentProvider } from '@/components/consent/ConsentProvider';
+import { CookieBanner } from '@/components/consent/CookieBanner';
+import { AnalyticsScripts } from '@/components/consent/AnalyticsScripts';
 import { siteConfig } from '@/config/site';
 import { buildMetadata, organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 
@@ -83,38 +85,32 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       </head>
       <body className="antialiased">
         <DictionaryProvider locale={typed} dictionary={dict}>
-          <FavoritesProvider>
-            <SmoothScrollProvider>
-              <ScrollToTop />
-              <CursorProvider />
-              <a
-                href="#main"
-                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-foreground focus:px-5 focus:py-3 focus:text-background"
-              >
-                {dict.nav.skipToContent}
-              </a>
-              <Header categories={categories} />
-              <main id="main">{children}</main>
-              <Footer s={settings} categories={categories} />
-              <WhatsAppFab locale={typed} />
-              <CompareBar />
-              <CampaignPopupServer locale={typed} />
-            </SmoothScrollProvider>
-          </FavoritesProvider>
+          <ConsentProvider>
+            <FavoritesProvider>
+              <SmoothScrollProvider>
+                <ScrollToTop />
+                <CursorProvider />
+                <a
+                  href="#main"
+                  className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-foreground focus:px-5 focus:py-3 focus:text-background"
+                >
+                  {dict.nav.skipToContent}
+                </a>
+                <Header categories={categories} />
+                <main id="main">{children}</main>
+                <Footer s={settings} categories={categories} />
+                <WhatsAppFab locale={typed} />
+                <CompareBar />
+                <CampaignPopupServer locale={typed} />
+                <CookieBanner />
+                {process.env.NEXT_PUBLIC_ANALYTICS_ID && (
+                  <AnalyticsScripts id={process.env.NEXT_PUBLIC_ANALYTICS_ID} />
+                )}
+              </SmoothScrollProvider>
+            </FavoritesProvider>
+          </ConsentProvider>
         </DictionaryProvider>
       </body>
-
-      {process.env.NEXT_PUBLIC_ANALYTICS_ID && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_ANALYTICS_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="ga-init" strategy="afterInteractive">
-            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_ANALYTICS_ID}');`}
-          </Script>
-        </>
-      )}
     </html>
   );
 }

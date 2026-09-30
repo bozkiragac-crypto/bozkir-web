@@ -23,6 +23,7 @@ node_modules/
 coverage/
 playwright-report/
 test-results/
+bozkir-next/.auth/
 /src/**/*.tsbuildinfo
 
 # ---- OS / editör ----

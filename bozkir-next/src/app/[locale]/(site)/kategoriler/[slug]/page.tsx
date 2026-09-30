@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { notFound } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { Suspense } from 'react';
 import { getCategories, getCategoryBySlug } from '@/lib/api/categories';
 import { getProducts } from '@/lib/api/products';
 import { buildMetadata, breadcrumbJsonLd } from '@/lib/seo';
@@ -10,16 +11,24 @@ import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
 import { ProductCard } from '@/components/products/ProductCard';
+import { CategorySearch } from '@/components/products/CategorySearch';
 import { Reveal } from '@/components/animations/Reveal';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
+const PAGE_SIZE = 24;
+
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export const revalidate = 600;
 export const dynamicParams = true;
+
+function str(v: string | string[] | undefined) {
+  return typeof v === 'string' ? v : undefined;
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug, locale: localeParam } = await params;
@@ -44,20 +53,33 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
-export default async function CategoryPage({ params }: PageProps) {
-  const { slug, locale: localeParam } = await params;
+export default async function CategoryPage({ params, searchParams }: PageProps) {
+  const [{ slug, locale: localeParam }, sp] = await Promise.all([params, searchParams]);
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
   const dict = getDictionary(locale ?? 'tr');
-  const [category, all, { items }] = await Promise.all([
+  const q = str(sp.q);
+  const page = Math.max(1, parseInt(str(sp.sayfa) ?? '1', 10) || 1);
+
+  const [category, all, result] = await Promise.all([
     getCategoryBySlug(slug, locale),
     getCategories(locale),
-    getProducts({ category: slug, limit: 60 }, locale),
+    getProducts({ category: slug, query: q, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }, locale),
   ]);
 
   if (!category) notFound();
 
+  const items = result.items;
+  const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
   const others = all.filter((c) => c.featured && c.slug !== category.slug).slice(0, 4);
+
+  const buildHref = (target: number) => {
+    const p = new URLSearchParams();
+    if (q) p.set('q', q);
+    if (target > 1) p.set('sayfa', String(target));
+    const qs = p.toString();
+    return `/kategoriler/${category.slug}${qs ? `?${qs}` : ''}`;
+  };
 
   return (
     <>
@@ -85,7 +107,13 @@ export default async function CategoryPage({ params }: PageProps) {
           { label: dict.nav.collections, href: '/kategoriler' },
           { label: category.name },
         ]}
-      />
+      >
+        <div className="mt-10">
+          <Suspense fallback={<div className="h-12" />}>
+            <CategorySearch />
+          </Suspense>
+        </div>
+      </PageHero>
 
       <Container className="pb-16">
         <Reveal>
@@ -103,13 +131,36 @@ export default async function CategoryPage({ params }: PageProps) {
         {items.length > 0 ? (
           <>
             <p className="numerals mb-8 text-sm text-muted">
-              {items.length} {dict.catalog.title.toLocaleLowerCase(locale ?? 'tr')}
+              {result.total} {dict.catalog.title.toLocaleLowerCase(locale ?? 'tr')}
+              {totalPages > 1 ? ` · ${dict.common.page} ${page}/${totalPages}` : ''}
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
               {items.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <nav className="mt-16 flex items-center justify-between border-t border-border pt-8" aria-label={dict.common.page}>
+                {page > 1 ? (
+                  <Link href={buildHref(page - 1)} scroll={false} className="inline-flex items-center gap-2 text-sm font-medium">
+                    <ArrowLeft className="h-4 w-4" /> {dict.common.prev}
+                  </Link>
+                ) : (
+                  <span />
+                )}
+                <span className="numerals text-sm text-muted">
+                  {page} / {totalPages}
+                </span>
+                {page < totalPages ? (
+                  <Link href={buildHref(page + 1)} scroll={false} className="inline-flex items-center gap-2 text-sm font-medium">
+                    {dict.common.next} <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </nav>
+            )}
           </>
         ) : (
           <div className="rounded-lg border border-border bg-surface p-10 text-center">

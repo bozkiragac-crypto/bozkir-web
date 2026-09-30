@@ -23,13 +23,15 @@ test.describe('Favoriler, karşılaştırma ve paylaşım', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
-  test('ürün detayında WhatsApp paylaş butonu wa.me linki üretir', async ({ page }) => {
+  test('ürün detayında paylaş menüsü WhatsApp wa.me linki üretir', async ({ page }) => {
     await page.goto('/tr/urunler', { waitUntil: 'domcontentloaded' });
     const product = page.locator('main a[href*="/tr/urunler/"]').first();
     await product.waitFor({ state: 'visible' });
     const href = (await product.getAttribute('href')) ?? '';
     await page.goto(href, { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
+    // Paylaş menüsünü aç.
+    await page.getByRole('button', { name: 'Paylaş', exact: true }).first().click();
     const share = page.locator('a[href*="wa.me/?text="]').first();
     await expect(share).toBeVisible();
     const shareHref = await share.getAttribute('href');

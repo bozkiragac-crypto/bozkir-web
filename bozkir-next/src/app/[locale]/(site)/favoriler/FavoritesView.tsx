@@ -8,6 +8,7 @@ import { useFavorites } from '@/components/providers/FavoritesProvider';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
+import { ShareListButton, useImportFromUrl } from '@/components/products/ListImport';
 import type { Product } from '@/types/product';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,7 @@ export function FavoritesView() {
   const { favorites, ready, removeFavorite, clearFavorites, toggleCompare, inCompare, compare } = useFavorites();
   const { t, locale } = useDictionary();
   const [details, setDetails] = useState<Record<string, Product>>({});
+  const { imported } = useImportFromUrl('favorites');
 
   // Saklanan hafif referansları güncel ürün verisiyle tazele (yoksa eski haliyle göster).
   useEffect(() => {
@@ -52,6 +54,9 @@ export function FavoritesView() {
         crumbs={[{ label: t('common.home'), href: '/' }, { label: t('favorites.title') }]}
       />
       <Container className="pb-28">
+        {imported > 0 && (
+          <p className="mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">{t('favorites.imported')}</p>
+        )}
         {!ready ? (
           <p className="py-20 text-center text-sm text-muted">{t('common.loading')}</p>
         ) : items.length === 0 ? (
@@ -75,6 +80,7 @@ export function FavoritesView() {
                 {items.length} · {compare.length}/4 {t('compare.counter')}
               </p>
               <div className="flex gap-3">
+                <ShareListButton slugs={favorites.map((f) => f.slug)} />
                 <button
                   type="button"
                   onClick={clearFavorites}

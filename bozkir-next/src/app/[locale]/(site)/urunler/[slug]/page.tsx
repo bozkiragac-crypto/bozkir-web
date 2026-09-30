@@ -45,7 +45,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${product.name} | ${dict.meta.brand}`,
     description: desc,
     path: `/urunler/${product.slug}`,
-    image: product.images[0] ?? product.thumbnail,
+    // Dinamik OG görseli: opengraph-image.tsx dosya-convention ile üretilir.
+    image: null,
     locale,
   });
 }
@@ -151,6 +152,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 <ShareButton
                   name={product.name}
                   url={localeUrl(locale, `/urunler/${product.slug}`)}
+                  imageUrl={image}
                   className="h-11 w-11"
                 />
               </div>

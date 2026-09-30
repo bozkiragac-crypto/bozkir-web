@@ -6,7 +6,8 @@ interface BuildMetadataInput {
   title: string;
   description?: string;
   path?: string;
-  image?: string;
+  /** `null` verilirse OG görseli dosya-convention (opengraph-image) tarafından üretilir. */
+  image?: string | null;
   /** Next.js Metadata OpenGraph yalnızca bu türleri kabul eder. */
   type?: 'website' | 'article';
   noIndex?: boolean;
@@ -35,7 +36,7 @@ export function buildMetadata({
 }: BuildMetadataInput): Metadata {
   const withLocale = locale ? `/${locale}${path === '/' ? '' : path}` : path;
   const url = absoluteUrl(withLocale);
-  const imageUrl = image.startsWith('http') ? image : absoluteUrl(image);
+  const imageUrl = image ? (image.startsWith('http') ? image : absoluteUrl(image)) : null;
 
   // hreflang: her dil için aynı yolun karşılığı + x-default.
   const languages: Record<string, string> = {};
@@ -58,13 +59,13 @@ export function buildMetadata({
       siteName: siteConfig.legalName,
       locale: locale === 'en' ? 'en_US' : locale === 'ar' ? 'ar_AR' : 'tr_TR',
       type,
-      images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
+      ...(imageUrl ? { images: [{ url: imageUrl, width: 1200, height: 630, alt: title }] } : {}),
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      ...(imageUrl ? { images: [imageUrl] } : {}),
     },
   };
 }

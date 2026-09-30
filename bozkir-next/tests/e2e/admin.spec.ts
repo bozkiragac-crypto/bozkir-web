@@ -10,7 +10,7 @@ test.describe('Admin giriş ve güvenlik', () => {
   });
 
   test('korumalı rota oturumsuz login’e yönlendirir', async ({ page }) => {
-    await page.goto('/admin/urunler');
+    await page.goto('/admin/urunler', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/admin\/login/);
   });
 

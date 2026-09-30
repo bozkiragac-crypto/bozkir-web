@@ -21,6 +21,7 @@ import {
   Menu,
   X,
   Info,
+  Languages,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
@@ -36,6 +37,7 @@ const items = [
   { href: '/admin/kataloglar', label: 'Kataloglar', icon: BookOpen },
   { href: '/admin/icerik', label: 'İçerik', icon: FileText },
   { href: '/admin/hakkimizda', label: 'Hakkımızda', icon: Info },
+  { href: '/admin/ceviri', label: 'Toplu Çeviri', icon: Languages },
   { href: '/admin/teklifler', label: 'Teklifler', icon: Inbox },
   { href: '/admin/medya', label: 'Medya', icon: Images },
   { href: '/admin/kullanicilar', label: 'Kullanıcılar', icon: Users, ownerOnly: true },
