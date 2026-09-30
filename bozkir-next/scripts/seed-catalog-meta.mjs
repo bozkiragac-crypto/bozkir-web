@@ -70,5 +70,35 @@ for (const br of brands) {
   b++;
 }
 
+// Kataloglar (fallback ile eşdeğer; DB boşsa bir varsayılan eklenir).
+const catalogs = [
+  {
+    slug: 'yildiz-trend-2026-2028',
+    title: 'Yıldız Trend 2026–28 · MDF Lam & Suntalam Kartelası',
+    title_en: 'Yıldız Trend 2026–28 · MDF Lam & Suntalam Colour Chart',
+    title_ar: 'يلدز تريند 2026–28 · كتالوج ألوان MDF Lam وسونتالام',
+    description:
+      'Yıldız Entegre Yıldız Trend serisi MDF lam ve suntalam dekor kartelası. Güncel dekor ve renk seçenekleri.',
+    description_en: 'Yıldız Entegre Yıldız Trend series MDF lam and suntalam decor chart. Current decor and colour options.',
+    description_ar: 'كتالوج ألوان سلسلة يلدز تريند من يلدز إنتيغري لـ MDF المبطّن والسونتالام. خيارات الديكور والألوان الحالية.',
+    year: 2026,
+    cover: '/images/categories/mdflam.webp',
+    pdf: '/catalog/yildiz-trend-2026-2028-mdflam-suntalam.pdf',
+    sort: 1,
+  },
+];
+
+let cat = 0;
+for (const c of catalogs) {
+  const exists = await client.query('SELECT 1 FROM catalogs WHERE slug = $1', [c.slug]);
+  if (exists.rowCount) continue;
+  await client.query(
+    `INSERT INTO catalogs (slug, title, title_en, title_ar, description, description_en, description_ar, year, cover, pdf_url, sort_order, is_active)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,true)`,
+    [c.slug, c.title, c.title_en, c.title_ar, c.description, c.description_en, c.description_ar, c.year, c.cover, c.pdf, c.sort],
+  );
+  cat++;
+}
+
 await client.end();
-console.log(`Kategori eklendi: ${c}, marka eklendi: ${b}.`);
+console.log(`Kategori eklendi: ${c}, marka eklendi: ${b}, katalog eklendi: ${cat}.`);
