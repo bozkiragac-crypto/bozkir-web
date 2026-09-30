@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: bozkir-next
+
+jobs:
+  quality:
+    name: Lint · Typecheck · Unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: bozkir-next/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:unit
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: bozkir-next/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://www.bozkiragac.com
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: [build]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bozkir
+          POSTGRES_PASSWORD: bozkir
+          POSTGRES_DB: bozkir
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U bozkir" --health-interval 10s
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://bozkir:bozkir@localhost:5432/bozkir
+      AUTH_SECRET: ci-e2e-secret-please-change-0123456789abcdef
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      S3_ENDPOINT: ''
+      QUOTE_RATE_LIMIT_MAX: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: bozkir-next/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Şema uygula + yönetici oluştur
+        run: |
+          npm run db:migrate
+          npm run admin:reset -- bozkir "Bozkir.1905"
+      - name: Build
+        run: npm run build
+      # Playwright webServer, BASE_URL verilmediği için `npm run start`'ı kendisi başlatır.
+      - run: npm run test:e2e -- --project=chromium
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: bozkir-next/playwright-report/
+          retention-days: 7

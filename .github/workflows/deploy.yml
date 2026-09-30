@@ -1,0 +1,43 @@
+name: Deploy (VPS)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: VPS'e dağıt
+    runs-on: ubuntu-latest
+    # CI'nin yeşil olmasını beklemek isterseniz: needs: [quality, build]
+    steps:
+      - name: SSH ile deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+            cd ${{ secrets.VPS_PATH }}
+            git fetch --all
+            git reset --hard origin/main
+            cd bozkir-next
+            docker compose up -d --build
+            # Sağlık kontrolü (DB + storage dahil)
+            for i in $(seq 1 20); do
+              if curl -fsS "http://localhost/api/health?deep=1" >/dev/null; then
+                echo "Sağlıklı ✓"
+                exit 0
+              fi
+              sleep 3
+            done
+            echo "Sağlık kontrolü başarısız" >&2
+            docker compose logs --tail=80 app
+            exit 1

@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+backups
+.env
+.env*.local
+README.md
+deploy
+Dockerfile
+.dockerignore
+coverage
+playwright-report
+test-results
+tests
+*.tsbuildinfo

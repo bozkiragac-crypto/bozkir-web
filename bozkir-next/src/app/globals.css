@@ -1,0 +1,340 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   BOZKIR AĞAÇ — DESIGN TOKENS
+   Editoryal/magazine yön: Fraunces (display) + Inter (UI).
+   Semantik CSS değişkenleri tema (açık/koyu) ile değişir; Tailwind tema
+   renkleri bu değişkenlere bağlanır.
+   ========================================================================== */
+@theme {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font-fraunces), 'Times New Roman', Georgia, serif;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 34px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  /* Çentikli cihazlarda üst güvenli alanı header yüksekliğine ekler. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Karşılaştırma çubuğu açıkken FAB ve mobil CTA yer değiştirir. */
+  --compare-h: 0px;
+  --header-height: calc(68px + var(--safe-top));
+  --container-max: 1440px;
+
+  /* Açık tema */
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --surface-2: #efefec;
+  --fg: #111111;
+  --muted: #8a8a90;
+  --muted-strong: #6f6f76;
+  --border: #e8e8e5;
+  --border-strong: #d7d7d1;
+  --accent: #8d8474;
+  --accent-soft: #b3a98f;
+
+  --grain-opacity: 0.035;
+  --scrollbar-thumb: #d0d0cb;
+
+  color-scheme: light;
+}
+
+/* Karşılaştırma çubuğu görünürken alt içerikler yukarı kayar. */
+html[data-compare='1'] {
+  --compare-h: 5rem;
+}
+
+html[data-compare='1'] [data-product-cta] {
+  display: none;
+}
+
+/* --- RTL (Arapça) -----------------------------------------------------------
+   Tailwind'in mantıksal özellikleri (ms-*, me-*, ps-*, pe-*, start/end) zaten
+   yön değiştirir. Burada yön değiştirmeyen fiziksel yardımcılar ters çevrilir. */
+[dir='rtl'] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+[dir='rtl'] .rtl-text-start {
+  text-align: right;
+}
+
+[dir='rtl'] .container-x {
+  direction: rtl;
+}
+
+[data-theme='dark'] {
+  --bg: #0e0e10;
+  --surface: #16161a;
+  --surface-2: #1e1e23;
+  --fg: #f2f2f0;
+  --muted: #8f8f98;
+  --muted-strong: #b4b4bc;
+  --border: rgba(255, 255, 255, 0.11);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --accent: #b3a98f;
+  --accent-soft: #cfc3a6;
+
+  --grain-opacity: 0.06;
+  --scrollbar-thumb: #3a3a42;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Smooth scroll Lenis ile yönetilir. Global scroll-behavior, Lenis ve
+       ScrollTrigger pin'leriyle çakışıp kasmaya yol açtığı için kapalı. */
+    scroll-behavior: auto;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  html.lenis {
+    scroll-behavior: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* `hidden` yerine `clip`: scroll container OLUŞTURMAZ, sticky/pin bozulmaz. */
+    overflow-x: clip;
+    transition: background-color 0.4s var(--ease-out-expo), color 0.4s var(--ease-out-expo);
+  }
+
+  /* İnce film greni — düz yüzeylere dokunsal premium his.
+     Header ve modalların (z-80+) altında kalır, tıklamayı engellemez. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    display: block;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* İnce scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  .container-x {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: clamp(20px, 4.2vw, 56px);
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+  }
+
+  .text-display {
+    font-family: var(--font-display);
+    font-size: clamp(2.35rem, 9vw, 7.75rem);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  /* Hero başlığı: modern sans, sıkı takip (serif değil). */
+  .text-hero {
+    font-family: var(--font-sans);
+    font-size: clamp(2.1rem, 7.4vw, 5.8rem);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  /* El yazısı vurgu (Caveat) — okunaklı, hafif eğimli. */
+  .text-hand {
+    font-family: var(--font-hand), var(--font-sans), cursive;
+    font-weight: 600;
+    font-size: 1.08em;
+    letter-spacing: 0;
+    line-height: 0.95;
+  }
+
+  .text-headline {
+    font-family: var(--font-display);
+    font-size: clamp(2.1rem, 4.8vw, 4.2rem);
+    line-height: 1.02;
+    letter-spacing: -0.022em;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  .text-editorial {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+
+  .text-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted-strong);
+  }
+
+  .text-caption {
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    color: var(--muted-strong);
+  }
+
+  .rule {
+    height: 1px;
+    background: var(--border);
+    border: 0;
+  }
+
+  .numerals {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .pt-header {
+    padding-top: var(--header-height);
+  }
+
+  /* İskelet (yükleme) */
+  .skeleton {
+    background: linear-gradient(100deg, var(--surface-2) 30%, var(--surface) 50%, var(--surface-2) 70%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s linear infinite;
+    border-radius: var(--radius-sm);
+  }
+  @keyframes skeleton-shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Özel imleç aktifken native imleci gizle (metin alanları hariç). */
+  html.has-cursor,
+  html.has-cursor *:not(input):not(textarea):not(select) {
+    cursor: none !important;
+  }
+  html.has-cursor.cursor-native,
+  html.has-cursor.cursor-native * {
+    cursor: auto !important;
+  }
+  html.has-cursor.cursor-native input,
+  html.has-cursor.cursor-native textarea {
+    cursor: text !important;
+  }
+
+  /* Hover'da kayan alt çizgi (nav / footer linkleri). */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 0.35s var(--ease-out-expo);
+  }
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+
+  /* Yumuşak yükselti */
+  .elevate {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 24px 60px -30px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* Reveal başlangıç durumu GSAP tarafından (boyamadan önce) uygulanır. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  body::after {
+    display: none;
+  }
+}

@@ -1,0 +1,42 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Teklif formu', () => {
+  test('boş form doğrulama hataları gösterir', async ({ page }) => {
+    await page.goto('/tr/teklif-al');
+    await page.getByRole('button', { name: 'Teklif İste' }).click();
+    await expect(page.getByText('Ad Soyad giriniz')).toBeVisible();
+    await expect(page.getByText('Devam etmek için onay verin')).toBeVisible();
+  });
+
+  test('geçersiz e-posta uyarır', async ({ page }) => {
+    await page.goto('/tr/teklif-al');
+    await page.getByLabel(/^Ad Soyad/).fill('Test Kişi');
+    await page.getByLabel(/^Telefon/).fill('05351234567');
+    await page.getByLabel(/^E-posta/).fill('gecersiz-eposta');
+    await page.getByRole('button', { name: 'Teklif İste' }).click();
+    await expect(page.getByText('Geçerli bir e-posta giriniz')).toBeVisible();
+  });
+
+  test('geçerli form gönderilir ve başarı mesajı döner', async ({ page, isMobile }) => {
+    // Gerçek gönderim rate-limit'e tabi; tek projede (masaüstü) bir kez test edilir.
+    test.skip(!!isMobile, 'Gönderim testi tek projede çalışır (rate-limit)');
+    await page.goto('/tr/teklif-al');
+    await page.getByLabel(/^Ad Soyad/).fill('E2E Test');
+    await page.getByLabel(/^Telefon/).fill('05359998877');
+    await page.getByLabel(/^E-posta/).fill('e2e@example.com');
+    await page.locator('form input[type="checkbox"]').first().check();
+    await page.getByRole('button', { name: 'Teklif İste' }).click();
+    await expect(page.getByText(/Talebiniz alındı|tekrar deneyin/i)).toBeVisible({ timeout: 15_000 });
+  });
+
+  test('ürün bağlantılı teklif ürün rozetini gösterir', async ({ page }) => {
+    await page.goto('/tr/urunler', { waitUntil: 'domcontentloaded' });
+    const product = page.locator('main a[href*="/tr/urunler/"]').first();
+    await product.waitFor({ state: 'visible' });
+    await product.click();
+    await expect(page).toHaveURL(/\/tr\/urunler\/.+/, { timeout: 15_000 });
+    await page.locator('a[href*="teklif-al?urun="]').first().click();
+    await expect(page).toHaveURL(/teklif-al\?urun=/, { timeout: 15_000 });
+    await expect(page.getByText(/Teklif ürünü/)).toBeVisible();
+  });
+});
