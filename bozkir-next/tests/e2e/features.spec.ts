@@ -15,8 +15,11 @@ test.describe('Yeni özellikler', () => {
     const res = await gotoWithRetry(page, '/tr/sss');
     expect(res?.status()).toBeLessThan(400);
     await expect(page.locator('h1')).toBeVisible();
-    const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
-    expect(ld.some((t) => t.includes('FAQPage'))).toBeTruthy();
+    await expect
+      .poll(async () => (await page.locator('script[type="application/ld+json"]').allTextContents()).some((t) => t.includes('FAQPage')), {
+        timeout: 10_000,
+      })
+      .toBe(true);
   });
 
   test('footerda SSS bağlantısı var', async ({ page }) => {

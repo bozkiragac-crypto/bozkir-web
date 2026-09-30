@@ -35,6 +35,10 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'gsap', '@react-three/drei'],
+    // Server Action gövde limiti: görsel/PDF yüklemeleri (varsayılan 1 MB yetmiyor).
+    serverActions: {
+      bodySizeLimit: '25mb',
+    },
   },
   async headers() {
     return [

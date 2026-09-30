@@ -76,6 +76,6 @@ test.describe('Admin CRUD: kategori & marka (oturumlu)', () => {
   test('hakkımızda içerik sayfası', async ({ adminPage }) => {
     await adminPage.goto('/admin/hakkimizda');
     await expect(adminPage.getByRole('heading', { name: 'Hakkımızda İçeriği' })).toBeVisible();
-    await expect(adminPage.getByText('Öğeler')).toBeVisible();
+    await expect(adminPage.getByRole('heading', { name: 'İstatistikler' })).toBeVisible();
   });
 });

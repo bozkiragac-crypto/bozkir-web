@@ -37,6 +37,14 @@ export const test = base.extend<{ adminPage: Page }>({
     const state = await getAdminStorageState(browser);
     const context = await browser.newContext({ storageState: state });
     const page = await context.newPage();
+    // Sekme bazlı oturum işareti (sessionStorage storageState ile taşınmaz).
+    await page.addInitScript(() => {
+      try {
+        sessionStorage.setItem('bozkir_admin_tab', '1');
+      } catch {
+        // yok say
+      }
+    });
     await use(page);
     await context.close();
   },

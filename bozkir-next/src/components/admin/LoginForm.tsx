@@ -28,6 +28,11 @@ export function LoginForm() {
       setError(res.error ?? 'Giriş yapılamadı.');
       return;
     }
+    try {
+      sessionStorage.setItem('bozkir_admin_tab', '1');
+    } catch {
+      // yok say
+    }
     router.replace('/admin');
     router.refresh();
   }

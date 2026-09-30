@@ -3,6 +3,7 @@ import { Inter, Fraunces, Caveat } from 'next/font/google';
 import '../globals.css';
 import { getSession } from '@/lib/auth/session';
 import { AdminShell } from '@/components/admin/AdminShell';
+import { AdminTabGuard } from '@/components/admin/AdminTabGuard';
 import { themeScript } from '@/components/layout/DocumentAssets';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
@@ -32,6 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           {/* Giriş sayfası: kabuk olmadan gösterilir. */}
           {session?.admin ? (
             <AdminShell username={session.username || session.email || session.name} role={session.role}>
+              <AdminTabGuard />
               {children}
             </AdminShell>
           ) : (

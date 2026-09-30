@@ -824,6 +824,113 @@ export async function deleteContentItem(id: string): Promise<{ ok: boolean; erro
   return { ok: true };
 }
 
+/* ---------------- Hakkımızda içeriği (yapılandırılmış) ---------------- */
+
+export interface AboutStatInput {
+  value: string;
+  label: string;
+  labelEn?: string;
+  labelAr?: string;
+}
+export interface AboutValueInput {
+  title: string;
+  text: string;
+  titleEn?: string;
+  titleAr?: string;
+  textEn?: string;
+  textAr?: string;
+}
+export interface AboutMilestoneInput {
+  year: string;
+  title: string;
+  text: string;
+  titleEn?: string;
+  titleAr?: string;
+  textEn?: string;
+  textAr?: string;
+}
+export interface AboutInput {
+  stats: AboutStatInput[];
+  values: AboutValueInput[];
+  timeline: AboutMilestoneInput[];
+}
+
+/** Hakkımızda içeriğini (istatistik/değer/zaman çizelgesi) topluca kaydeder. */
+export async function saveAboutContent(input: AboutInput): Promise<{ ok: boolean; error?: string }> {
+  const admin = await requireAdminUser();
+  const db = getDb();
+  if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+
+  const KEY = 'about';
+
+  // about bloğunu garanti altına al.
+  await db
+    .insert(contentBlocks)
+    .values({ key: KEY, title: 'Hakkımızda', isActive: true, updatedAt: new Date() })
+    .onConflictDoNothing({ target: contentBlocks.key });
+
+  // Mevcut about öğelerini değiştir.
+  await db.delete(contentItems).where(eq(contentItems.blockKey, KEY));
+
+  const rows: (typeof contentItems.$inferInsert)[] = [];
+  let order = 0;
+
+  for (const s of input.stats ?? []) {
+    if (!s.value.trim() && !s.label.trim()) continue;
+    rows.push({
+      blockKey: KEY,
+      tag: 'stat',
+      title: s.value.trim(),
+      description: s.label.trim(),
+      titleEn: s.value.trim(),
+      titleAr: s.value.trim(),
+      descriptionEn: s.labelEn?.trim() || null,
+      descriptionAr: s.labelAr?.trim() || null,
+      sortOrder: order++,
+      isActive: true,
+    });
+  }
+  for (const v of input.values ?? []) {
+    if (!v.title.trim() && !v.text.trim()) continue;
+    rows.push({
+      blockKey: KEY,
+      tag: 'value',
+      title: v.title.trim(),
+      description: v.text.trim(),
+      titleEn: v.titleEn?.trim() || null,
+      titleAr: v.titleAr?.trim() || null,
+      descriptionEn: v.textEn?.trim() || null,
+      descriptionAr: v.textAr?.trim() || null,
+      sortOrder: order++,
+      isActive: true,
+    });
+  }
+  for (const m of input.timeline ?? []) {
+    if (!m.year.trim() && !m.title.trim()) continue;
+    rows.push({
+      blockKey: KEY,
+      tag: 'timeline',
+      title: m.year.trim(),
+      description: m.title.trim(),
+      linkUrl: m.text.trim(),
+      titleEn: m.year.trim(),
+      titleAr: m.year.trim(),
+      descriptionEn: m.titleEn?.trim() || null,
+      descriptionAr: m.titleAr?.trim() || null,
+      tagEn: m.textEn?.trim() || null,
+      tagAr: m.textAr?.trim() || null,
+      sortOrder: order++,
+      isActive: true,
+    });
+  }
+
+  if (rows.length > 0) await db.insert(contentItems).values(rows);
+
+  await logActivity(admin, 'update', 'content', KEY, 'Hakkımızda içeriği güncellendi');
+  await flushSiteCaches();
+  return { ok: true };
+}
+
 /* ---------------- Teklif talepleri ---------------- */
 
 export async function deleteQuoteRequest(id: string): Promise<{ ok: boolean; error?: string }> {
