@@ -30,6 +30,12 @@ export interface SiteSettings {
     instagram: string;
     facebook: string;
   };
+  /** Girişte gösterilecek kampanya popup'ı aktif mi. */
+  popupEnabled: boolean;
+  /** Popup'ta gösterilecek kampanya id'si (boşsa ilk aktif kampanya). */
+  popupCampaignId: string;
+  /** Genel webhook URL'i; tanımlıysa olaylarda JSON POST atılır. */
+  webhookUrl: string;
   /** Vitrinde gösterilecek kategori slug sırası (boşsa varsayılan). */
   featuredOrder: string[];
 }
@@ -46,6 +52,9 @@ function defaults(): SiteSettings {
     address: { ...siteConfig.address },
     warehouse: { ...siteConfig.warehouse },
     social: { ...siteConfig.social },
+    popupEnabled: false,
+    popupCampaignId: '',
+    webhookUrl: '',
     featuredOrder: [],
   };
 }

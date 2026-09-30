@@ -12,6 +12,7 @@ const corporateLinkKeys = [
   { key: 'nav.about', href: '/hakkimizda' },
   { key: 'nav.dealers', href: '/bayilikler' },
   { key: 'nav.catalogs', href: '/katalog' },
+  { key: 'nav.faq', href: '/sss' },
   { key: 'nav.contact', href: '/iletisim' },
   { key: 'nav.quote', href: '/teklif-al' },
 ];

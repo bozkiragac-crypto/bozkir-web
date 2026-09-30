@@ -157,6 +157,8 @@ export const adminUsers = pgTable('admin_users', {
   isActive: boolean('is_active').notNull().default(true),
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
   passwordHash: text('password_hash').notNull(),
+  totpSecret: text('totp_secret'),
+  totpEnabled: boolean('totp_enabled').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

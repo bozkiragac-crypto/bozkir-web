@@ -19,6 +19,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    command: postgres -c shared_buffers=256MB -c max_connections=100
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
     restart: unless-stopped
 
   storage:
@@ -28,6 +34,11 @@ services:
       - storage-data:/data
     ports:
       - '127.0.0.1:8333:8333'
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
     restart: unless-stopped
 
   app:
@@ -84,6 +95,19 @@ services:
         max-file: '3'
     restart: unless-stopped
 
+  # Opsiyonel izleme (Uptime Kuma). Etkinleştirmek için:
+  #   docker compose --profile monitoring up -d
+  # Arayüz: http://127.0.0.1:3001  → app izleme: http://app:3000/api/health?deep=1
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    profiles: ['monitoring']
+    volumes:
+      - uptime-data:/app/data
+    ports:
+      - '127.0.0.1:3001:3001'
+    restart: unless-stopped
+
 volumes:
   db-data:
   storage-data:
+  uptime-data:

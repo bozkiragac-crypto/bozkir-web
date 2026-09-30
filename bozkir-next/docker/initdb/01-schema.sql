@@ -150,6 +150,8 @@ CREATE TABLE IF NOT EXISTS admin_users (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     last_login_at TIMESTAMPTZ,
     password_hash TEXT NOT NULL,
+    totp_secret TEXT,
+    totp_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

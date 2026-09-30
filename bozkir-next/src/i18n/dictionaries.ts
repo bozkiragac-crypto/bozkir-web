@@ -32,6 +32,7 @@ export const dictionaries = {
       themeToggle: 'Tema değiştir',
       allCategories: 'Tüm Kategoriler',
       featuredProducts: 'Öne Çıkan Ürünler',
+      faq: 'Sıkça Sorulan Sorular',
     },
     search: {
       label: 'Site içi arama',
@@ -582,6 +583,7 @@ export const dictionaries = {
       themeToggle: 'Toggle theme',
       allCategories: 'All Categories',
       featuredProducts: 'Featured Products',
+      faq: 'Frequently Asked Questions',
     },
     search: {
       label: 'Site search',
@@ -1131,6 +1133,7 @@ export const dictionaries = {
       themeToggle: 'تغيير المظهر',
       allCategories: 'جميع الفئات',
       featuredProducts: 'منتجات مميزة',
+      faq: 'الأسئلة الشائعة',
     },
     search: {
       label: 'بحث في الموقع',

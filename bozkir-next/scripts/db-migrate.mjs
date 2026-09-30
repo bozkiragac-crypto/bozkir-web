@@ -30,6 +30,8 @@ const statements = [
   `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ`,
   `ALTER TABLE admin_users ALTER COLUMN email DROP NOT NULL`,
   `CREATE UNIQUE INDEX IF NOT EXISTS admin_users_username_key ON admin_users (username)`,
+  `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS totp_secret TEXT`,
+  `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN NOT NULL DEFAULT FALSE`,
 
   // site ayarları
   `CREATE TABLE IF NOT EXISTS site_settings (

@@ -35,17 +35,4 @@ test.describe('Favoriler, karşılaştırma ve paylaşım', () => {
     const shareHref = await share.getAttribute('href');
     expect(shareHref).toContain('wa.me/?text=');
   });
-
-  test('ürün detayında "WhatsApp ile sor" ürüne özel mesaj içerir', async ({ page }) => {
-    await page.goto('/tr/urunler', { waitUntil: 'domcontentloaded' });
-    const product = page.locator('main a[href*="/tr/urunler/"]').first();
-    await product.waitFor({ state: 'visible' });
-    const href = (await product.getAttribute('href')) ?? '';
-    await page.goto(href, { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
-    const ask = page.locator('a[href*="wa.me/9"][href*="text="]').first();
-    await expect(ask).toBeVisible();
-    const askHref = await ask.getAttribute('href');
-    expect(decodeURIComponent(askHref ?? '')).toContain('teklifi');
-  });
 });

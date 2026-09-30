@@ -18,6 +18,9 @@ interface PageProps {
   params: Promise<{ slug: string; locale: string }>;
 }
 
+export const revalidate = 600;
+export const dynamicParams = true;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug, locale: localeParam } = await params;
   const localeParamOrNull = localeParam ?? undefined;

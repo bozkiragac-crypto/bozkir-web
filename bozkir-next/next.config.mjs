@@ -14,7 +14,7 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   // Node-only paketler edge/middleware bundle'ına girmesin.
-  serverExternalPackages: ['pg', 'bcryptjs'],
+  serverExternalPackages: ['pg', 'bcryptjs', 'sharp'],
   // Kökte ikinci bir lockfile olduğu için workspace kökünü sabitler.
   outputFileTracingRoot: __dirname,
   images: {

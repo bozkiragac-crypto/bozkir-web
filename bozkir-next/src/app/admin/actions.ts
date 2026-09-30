@@ -7,9 +7,11 @@ import { getDb } from '@/lib/db/client';
 import { adminUsers, brands, campaigns, catalogs, categories, contentBlocks, contentItems, products, quoteRequests } from '@/lib/db/schema';
 import { createSession, destroySession } from '@/lib/auth/session';
 import { parseImageField, serializeImageField, validateUpload, MAX_PDF_MB, ALLOWED_PDF_MIME } from '@/lib/media';
+import { optimizeImage } from '@/lib/image-optimize';
 import { DATA_TAGS } from '@/lib/data/tags';
 import { deleteObject, objectKeyFromUrl, putObject, publicUrl, toObjectKey } from '@/lib/storage/s3';
-import { logActivity, requireAdminUser } from '@/lib/admin/guard';
+import { logActivity, requireAdminUser, requireOwner } from '@/lib/admin/guard';
+import { createTotpSecret, totpKeyUri, verifyTotp } from '@/lib/auth/totp';
 import { parseCsv } from '@/lib/csv';
 import { slugify } from '@/lib/slug';
 
@@ -36,7 +38,14 @@ async function flushSiteCaches() {
 
 /* ---------------- Auth ---------------- */
 
-export async function signIn(identifier: string, password: string): Promise<{ ok: boolean; error?: string }> {
+export interface SignInResult {
+  ok: boolean;
+  error?: string;
+  /** Şifre doğru ancak 2FA kodu gerekli. */
+  requiresTotp?: boolean;
+}
+
+export async function signIn(identifier: string, password: string, totp?: string): Promise<SignInResult> {
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -54,6 +63,13 @@ export async function signIn(identifier: string, password: string): Promise<{ ok
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) return { ok: false, error: 'Kullanıcı adı veya şifre hatalı.' };
 
+  // 2FA etkinse kod doğrulanmadan oturum açılmaz.
+  if (user.totpEnabled && user.totpSecret) {
+    if (!totp) return { ok: false, requiresTotp: true };
+    const codeOk = await verifyTotp(user.totpSecret, totp);
+    if (!codeOk) return { ok: false, requiresTotp: true, error: 'Doğrulama kodu hatalı.' };
+  }
+
   await db.update(adminUsers).set({ lastLoginAt: new Date() }).where(eq(adminUsers.id, user.id));
   await createSession({
     sub: user.id,
@@ -64,6 +80,39 @@ export async function signIn(identifier: string, password: string): Promise<{ ok
     admin: true,
   });
   await logActivity(user, 'login', 'auth', user.id, 'Giriş yapıldı');
+  return { ok: true };
+}
+
+/** 2FA kurulumu başlatır: secret + otpauth URI döndürür (henüz etkinleştirmez). */
+export async function startTotpSetup(): Promise<{ ok: boolean; secret?: string; uri?: string; error?: string }> {
+  const admin = await requireAdminUser();
+  const secret = createTotpSecret();
+  const uri = totpKeyUri(admin.username ?? admin.email ?? 'admin', secret);
+  return { ok: true, secret, uri };
+}
+
+/** Girilen kodla 2FA'yı doğrulayıp etkinleştirir. */
+export async function enableTotp(secret: string, code: string): Promise<{ ok: boolean; error?: string }> {
+  const admin = await requireAdminUser();
+  const db = getDb();
+  if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  const ok = await verifyTotp(secret, code);
+  if (!ok) return { ok: false, error: 'Kod doğrulanamadı.' };
+  await db.update(adminUsers).set({ totpSecret: secret, totpEnabled: true }).where(eq(adminUsers.id, admin.id));
+  await logActivity(admin, 'update', 'auth', admin.id, '2FA etkinleştirildi');
+  return { ok: true };
+}
+
+/** 2FA'yı kapatır (mevcut kod gerekir). */
+export async function disableTotp(code: string): Promise<{ ok: boolean; error?: string }> {
+  const admin = await requireAdminUser();
+  const db = getDb();
+  if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!admin.totpSecret || !admin.totpEnabled) return { ok: false, error: '2FA zaten kapalı.' };
+  const ok = await verifyTotp(admin.totpSecret, code);
+  if (!ok) return { ok: false, error: 'Kod doğrulanamadı.' };
+  await db.update(adminUsers).set({ totpEnabled: false, totpSecret: null }).where(eq(adminUsers.id, admin.id));
+  await logActivity(admin, 'update', 'auth', admin.id, '2FA kapatıldı');
   return { ok: true };
 }
 
@@ -98,9 +147,22 @@ export async function uploadMedia(
 
   if (!MEDIA_FOLDERS.includes(folder)) return { error: 'Geçersiz klasör.' };
 
-  const key = `${folder}/${ownerId ?? 'drafts'}/${crypto.randomUUID()}.${extOf(file.name, file.type)}`;
+  const original = Buffer.from(await file.arrayBuffer());
+  let body: Buffer = original;
+  let contentType = file.type || 'image/jpeg';
+  let ext = extOf(file.name, file.type);
+
+  // Görselleri optimize et (boyut küçültme + WebP). PDF'e dokunma.
+  if (!isPdf) {
+    const optimized = await optimizeImage(original, contentType);
+    body = optimized.buffer as Buffer;
+    contentType = optimized.contentType;
+    ext = optimized.ext;
+  }
+
+  const key = `${folder}/${ownerId ?? 'drafts'}/${crypto.randomUUID()}.${ext}`;
   try {
-    await putObject(key, Buffer.from(await file.arrayBuffer()), file.type || 'image/jpeg');
+    await putObject(key, body, contentType);
   } catch {
     return { error: 'Yükleme başarısız. Depolama bağlantısını kontrol edin.' };
   }
@@ -109,7 +171,7 @@ export async function uploadMedia(
 }
 
 export async function deleteMedia(url: string): Promise<void> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const key = toObjectKey(url);
   if (key) {
     await deleteObject(key);
@@ -119,7 +181,7 @@ export async function deleteMedia(url: string): Promise<void> {
 
 /** Medya kütüphanesinden nesne anahtarıyla siler. */
 export async function deleteMediaKey(key: string): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const objectKey = toObjectKey(key) ?? key;
   if (!objectKey) return { ok: false, error: 'Geçersiz anahtar.' };
   await deleteObject(objectKey);
@@ -216,7 +278,7 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
 }
 
 export async function deleteProduct(id: string): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -244,7 +306,7 @@ export async function setProductActive(id: string, isActive: boolean): Promise<{
 }
 
 export async function bulkDeleteProducts(ids: string[]): Promise<{ ok: boolean; deleted: number }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db || ids.length === 0) return { ok: false, deleted: 0 };
 
@@ -397,7 +459,7 @@ export async function saveCampaign(input: CampaignInput): Promise<{ ok: boolean;
 }
 
 export async function deleteCampaign(id: string): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -476,7 +538,7 @@ export async function saveCatalog(input: CatalogInput): Promise<{ ok: boolean; e
 }
 
 export async function deleteCatalog(id: string): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -560,7 +622,7 @@ export async function saveCategory(input: CategoryInput): Promise<{ ok: boolean;
 }
 
 export async function deleteCategory(id: string): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -630,7 +692,7 @@ export async function saveBrand(input: BrandInput): Promise<{ ok: boolean; error
 }
 
 export async function deleteBrand(id: string): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -747,7 +809,7 @@ export async function saveContentItem(input: ContentItemInput): Promise<{ ok: bo
 }
 
 export async function deleteContentItem(id: string): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -765,7 +827,7 @@ export async function deleteContentItem(id: string): Promise<{ ok: boolean; erro
 /* ---------------- Teklif talepleri ---------------- */
 
 export async function deleteQuoteRequest(id: string): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 

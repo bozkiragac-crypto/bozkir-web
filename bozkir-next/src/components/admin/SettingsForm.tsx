@@ -11,9 +11,11 @@ const field = 'h-11 w-full rounded-md border border-border bg-surface px-3 text-
 export function SettingsForm({
   initial,
   categories,
+  campaigns = [],
 }: {
   initial: SiteSettings;
   categories: { slug: string; name: string }[];
+  campaigns?: { id: string; title: string }[];
 }) {
   const router = useRouter();
   const [form, setForm] = useState<SiteSettings>(initial);
@@ -111,6 +113,52 @@ export function SettingsForm({
             </Label>
             <Label t="Koordinatlar (enlem,boylam)" full>
               <input className={field} value={form.warehouse.coords} onChange={(e) => setForm({ ...form, warehouse: { ...form.warehouse, coords: e.target.value } })} placeholder="36.250556,36.181472" />
+            </Label>
+          </div>
+        </div>
+
+        <div className={`${section} lg:col-span-2`}>
+          <p className="font-medium">Kampanya popup</p>
+          <p className="mt-1 text-sm text-muted-strong">Siteye girişte bir kez gösterilen kampanya modalı (günde 1 kez).</p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <label className="flex h-11 items-center gap-3 rounded-md border border-border bg-surface px-4 sm:col-span-2">
+              <input
+                type="checkbox"
+                checked={form.popupEnabled}
+                onChange={(e) => setForm({ ...form, popupEnabled: e.target.checked })}
+              />
+              <span className="text-sm">Popup&apos;ı etkinleştir</span>
+            </label>
+            <Label t="Gösterilecek kampanya" full>
+              <select
+                className={field}
+                value={form.popupCampaignId}
+                onChange={(e) => setForm({ ...form, popupCampaignId: e.target.value })}
+              >
+                <option value="">İlk aktif kampanya</option>
+                {campaigns.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </Label>
+          </div>
+        </div>
+
+        <div className={`${section} lg:col-span-2`}>
+          <p className="font-medium">Webhook</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Tanımlanırsa olaylarda (ör. yeni teklif) JSON POST atılır. Slack/CRM/e-posta entegrasyonları bu URL üzerinden yapılabilir.
+          </p>
+          <div className="mt-5">
+            <Label t="Webhook URL" full>
+              <input
+                className={field}
+                value={form.webhookUrl}
+                onChange={(e) => setForm({ ...form, webhookUrl: e.target.value })}
+                placeholder="https://hooks.example.com/..."
+              />
             </Label>
           </div>
         </div>

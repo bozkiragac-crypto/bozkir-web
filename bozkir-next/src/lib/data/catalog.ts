@@ -233,6 +233,17 @@ export async function fetchProductBySlug(slug: string, locale?: Locale): Promise
   return found ? toProduct(found, locale) : null;
 }
 
+/** Aynı kategoriden ilgili ürünler (mevcut ürün hariç, en fazla `limit`). */
+export async function fetchRelatedProducts(slug: string, locale?: Locale, limit = 4): Promise<Product[]> {
+  const items = await getProductsIndex();
+  const current = items.find((i) => i.slug === slug);
+  if (!current) return [];
+  return items
+    .filter((i) => i.categorySlug === current.categorySlug && i.slug !== slug)
+    .slice(0, limit)
+    .map((i) => toProduct(i, locale));
+}
+
 export async function fetchCategories(locale?: Locale): Promise<Category[]> {
   const items = await getProductsIndex();
   // DB kategori meta verisi (varsa) fallback'in önüne geçer.

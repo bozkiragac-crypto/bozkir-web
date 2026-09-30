@@ -2,22 +2,27 @@ import type { Metadata } from 'next';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { getProductBySlug } from '@/lib/api/products';
-import { getSiteSettings, telHref } from '@/lib/data/settings';
+import { getProductBySlug, getRelatedProducts } from '@/lib/api/products';
+import { siteConfig } from '@/config/site';
+import { telHref } from '@/lib/phone';
 import { buildMetadata, breadcrumbJsonLd, localeUrl } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { ProductGallery } from '@/components/products/ProductGallery';
+import { ProductCard } from '@/components/products/ProductCard';
 import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
-import { ShareButton, WhatsAppAskButton } from '@/components/products/ShareButton';
+import { ShareButton } from '@/components/products/ShareButton';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>;
 }
+
+export const revalidate = 600;
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug, locale: localeParam } = await params;
@@ -50,11 +55,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
   const dict = getDictionary(locale ?? 'tr');
-  const [product, settings] = await Promise.all([
+  const [product] = await Promise.all([
     getProductBySlug(slug, locale),
-    getSiteSettings(),
   ]);
   if (!product) notFound();
+
+  const settings = siteConfig;
+  const related = await getRelatedProducts(product.slug, locale, 4);
 
   const image = product.images[0] ?? product.thumbnail;
 
@@ -149,21 +156,25 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="mt-4">
-              <WhatsAppAskButton
-                name={product.name}
-                code={product.code}
-                url={localeUrl(locale, `/urunler/${product.slug}`)}
-                phone={settings.whatsapp || settings.phone}
-              />
-            </div>
-
             <Link href="/urunler" className="mt-8 inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
               <ArrowLeft className="h-4 w-4" /> {dict.common.allProducts}
             </Link>
           </div>
         </div>
       </Container>
+
+      {related.length > 0 && (
+        <Container className="pb-40 md:pb-32">
+          <div className="border-t border-border pt-12">
+            <h2 className="text-headline text-2xl md:text-3xl">{dict.product.related}</h2>
+            <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
+              {related.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        </Container>
+      )}
 
       {/* Mobil sabit CTA çubuğu */}
       <div

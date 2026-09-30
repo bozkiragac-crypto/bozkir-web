@@ -1,6 +1,6 @@
 import type { Locale } from '@/i18n/config';
 import type { Product, ProductFilters, ProductQueryResult } from '@/types/product';
-import { fetchProductBySlug, fetchProducts } from '@/lib/data/catalog';
+import { fetchProductBySlug, fetchProducts, fetchRelatedProducts } from '@/lib/data/catalog';
 import { apiGet, hasRemoteApi } from './client';
 
 function toQuery(filters: ProductFilters = {}, locale?: Locale) {
@@ -54,6 +54,23 @@ export async function getProductBySlug(slug: string, locale?: Locale): Promise<P
   } catch {
     // Uzak API düşerse yerel katmana düş.
     return fetchProductBySlug(slug, locale);
+  }
+}
+
+/** Aynı kategoriden ilgili ürünler. */
+export async function getRelatedProducts(slug: string, locale?: Locale, limit = 4): Promise<Product[]> {
+  if (!hasRemoteApi()) {
+    return fetchRelatedProducts(slug, locale, limit);
+  }
+  try {
+    const items = (await getProducts({ category: undefined, limit: 100 }, locale)).items;
+    const current = items.find((i) => i.slug === slug);
+    if (!current) return [];
+    return items
+      .filter((i) => i.categorySlug === current.categorySlug && i.slug !== slug)
+      .slice(0, limit);
+  } catch {
+    return fetchRelatedProducts(slug, locale, limit);
   }
 }
 

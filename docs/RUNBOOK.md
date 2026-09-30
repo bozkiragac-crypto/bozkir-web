@@ -21,8 +21,33 @@ Gerekli GitHub Actions secret'ları:
 - **Hafif:** `GET /api/health` → `{ ok, uptime, version }` (süreç ayakta mı).
 - **Derin:** `GET /api/health?deep=1` → DB ve nesne depolamayı gerçekten yoklar;
   biri düşükse `503` + `{ db, storage }` durumu. Docker healthcheck bunu kullanır.
-- Dış uptime izleme için `/api/health?deep=1` uç noktasını 1–5 dk aralıkla kontrol edin.
-- `APP_VERSION` env'i ile sürüm bilgisi raporlanır (deploy'da `GIT_SHA` verilebilir).
+- **Uptime Kuma** (opsiyonel, compose profili):
+  ```bash
+  docker compose --profile monitoring up -d
+  # Arayüz: http://127.0.0.1:3001
+  # Monitör URL: http://app:3000/api/health?deep=1  (60sn aralık, 503 = down)
+  ```
+  Sunucu dışından izleme için ayrı bir Uptime Kuma instance'ından `https://www.bozkiragac.com/api/health?deep=1` izleyin.
+- Loglar JSON formatında (`docker logs`) — log toplayıcılar tarafından okunabilir. `SENTRY_DSN` tanımlanırsa istemci/sunucu hataları Sentry'ye gider.
+- **Webhook:** Ayarlar > Webhook URL tanımlıysa yeni tekliflerde JSON POST atılır (`quote.created`).
+
+## VPS Optimizasyon Notları
+
+- **nginx**: keepalive upstream, gzip, `/_next/static` + `/_next/image` + medya için 1 yıl immutable cache; API ve login için hız sınırı; `server_tokens off`.
+- **Uygulama**: statik/ISR üretim + `revalidate`; derin healthcheck; graceful shutdown; log rotation (`10m × 3`).
+- **Postgres**: `shared_buffers=256MB`, `max_connections=100`; `DB_POOL_MAX` uygulama tarafında sınırlanır.
+- **Docker**: her serviste `json-file` log rotation; `restart: unless-stopped`; app `stop_grace_period: 30s`.
+- **Öneri (VPS boyutu)**: minimum 2 vCPU / 4 GB RAM. Docker build için ek geçici bellek.
+- **TLS**: nginx önüne certbot; sonrasında HSTS başlığı eklenebilir.
+
+## Sağlık Kontrolleri
+
+| Kontrol | Komut |
+| --- | --- |
+| Servisler | `docker compose ps` |
+| App (derin) | `curl -fsS "http://localhost/api/health?deep=1"` |
+| DB | `docker exec bozkir-next-db-1 pg_isready -U bozkir` |
+| Loglar | `docker compose logs -f app` |
 
 ## Bakım Modu
 

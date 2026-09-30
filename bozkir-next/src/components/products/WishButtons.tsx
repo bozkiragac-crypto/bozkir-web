@@ -4,6 +4,7 @@ import { Heart, Scale, Check } from 'lucide-react';
 import { useFavorites, type ProductRef } from '@/components/providers/FavoritesProvider';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics';
 
 const base =
   'flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground';
@@ -22,6 +23,7 @@ export function FavoriteButton({ product, className }: { product: ProductRef; cl
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        track(active ? 'favorite_remove' : 'favorite_add', { slug: product.slug });
         toggleFavorite(product);
       }}
       className={cn(base, active && 'border-transparent bg-foreground text-background', className)}
@@ -47,6 +49,7 @@ export function CompareButton({ product, className }: { product: ProductRef; cla
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        track(active ? 'compare_remove' : 'compare_add', { slug: product.slug });
         toggleCompare(product);
       }}
       className={cn(base, active && 'border-transparent bg-foreground text-background', full && 'opacity-40', className)}

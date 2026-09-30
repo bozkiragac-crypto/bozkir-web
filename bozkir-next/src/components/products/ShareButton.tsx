@@ -2,6 +2,7 @@
 
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
@@ -22,7 +23,10 @@ export function ShareButton({ name, url, className }: { name: string; url: strin
       rel="noopener noreferrer"
       aria-label={dict.common.share}
       title={dict.common.share}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        track('share', { channel: 'whatsapp', name });
+      }}
       className={cn(
         'flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground',
         className,
@@ -33,37 +37,3 @@ export function ShareButton({ name, url, className }: { name: string; url: strin
   );
 }
 
-/** Ürün detayında "WhatsApp ile sor" — ürüne özel mesajla satıcıya yazar. */
-export function WhatsAppAskButton({
-  name,
-  code,
-  url,
-  phone,
-  className,
-}: {
-  name: string;
-  code?: string;
-  url: string;
-  phone: string;
-  className?: string;
-}) {
-  const { dict } = useDictionary();
-  const product = code ? `${name} (${code})` : name;
-  const text = dict.pages.whatsapp.productMessage.replace('{product}', product).replace('{url}', url).replace(/\s+/g, ' ').trim();
-  const number = phone.replace(/[^\d]/g, '');
-  const href = `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={cn(
-        'inline-flex h-11 items-center gap-2 rounded-full border border-[#25D366]/40 px-5 text-sm font-medium text-[#128C4A] transition-colors hover:bg-[#25D366]/10',
-        className,
-      )}
-    >
-      <WhatsAppIcon className="h-4 w-4" />
-      {dict.pages.whatsapp.label}
-    </a>
-  );
-}

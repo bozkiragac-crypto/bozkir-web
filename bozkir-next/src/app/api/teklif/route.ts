@@ -5,6 +5,7 @@ import { quoteRequests } from '@/lib/db/schema';
 import { putObject, storageConfigured } from '@/lib/storage/s3';
 import { clientIp, isRateLimited } from '@/lib/ratelimit';
 import { isAllowedAttachment } from '@/lib/file-signature';
+import { sendWebhook } from '@/lib/webhooks';
 
 export const runtime = 'nodejs';
 
@@ -137,6 +138,20 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  // Webhook (tanımlıysa) — talebi engellemez.
+  void sendWebhook('quote.created', {
+    fullName: d.fullName,
+    company: d.company || '',
+    phone: d.phone,
+    email: d.email,
+    product: d.product || '',
+    productSlug: d.productSlug || '',
+    quantity: d.quantity || '',
+    dimensions: d.dimensions || '',
+    note: d.note || '',
+    hasAttachment: !!attachmentKey,
+  });
 
   return NextResponse.json({ ok: true, message: 'Talebiniz alındı. En kısa sürede dönüş yapacağız.' });
 }

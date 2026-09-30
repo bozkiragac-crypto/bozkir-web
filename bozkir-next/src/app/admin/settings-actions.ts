@@ -3,11 +3,11 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getDb } from '@/lib/db/client';
 import { siteSettings } from '@/lib/db/schema';
-import { requireAdminUser, logActivity } from '@/lib/admin/guard';
+import { requireOwner, logActivity } from '@/lib/admin/guard';
 import { SETTINGS_TAG, type SiteSettings } from '@/lib/data/settings';
 
 export async function saveSiteSettings(input: SiteSettings): Promise<{ ok: boolean; error?: string }> {
-  const admin = await requireAdminUser();
+  const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -34,6 +34,9 @@ export async function saveSiteSettings(input: SiteSettings): Promise<{ ok: boole
       instagram: input.social.instagram.trim(),
       facebook: input.social.facebook.trim(),
     },
+    popupEnabled: !!input.popupEnabled,
+    popupCampaignId: (input.popupCampaignId ?? '').trim(),
+    webhookUrl: (input.webhookUrl ?? '').trim(),
     featuredOrder: (input.featuredOrder ?? []).map((s) => s.trim()).filter(Boolean),
   };
 

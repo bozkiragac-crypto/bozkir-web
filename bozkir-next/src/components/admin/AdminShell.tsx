@@ -38,16 +38,17 @@ const items = [
   { href: '/admin/hakkimizda', label: 'Hakkımızda', icon: Info },
   { href: '/admin/teklifler', label: 'Teklifler', icon: Inbox },
   { href: '/admin/medya', label: 'Medya', icon: Images },
-  { href: '/admin/kullanicilar', label: 'Kullanıcılar', icon: Users },
-  { href: '/admin/ayarlar', label: 'Ayarlar', icon: Settings },
+  { href: '/admin/kullanicilar', label: 'Kullanıcılar', icon: Users, ownerOnly: true },
+  { href: '/admin/ayarlar', label: 'Ayarlar', icon: Settings, ownerOnly: true },
   { href: '/admin/aktivite', label: 'Aktivite', icon: History },
 ];
 
-function NavList({ onNavigate }: { onNavigate?: () => void }) {
+function NavList({ onNavigate, role }: { onNavigate?: () => void; role: string }) {
   const pathname = usePathname();
+  const visible = items.filter((i) => !i.ownerOnly || role === 'owner');
   return (
     <nav className="flex flex-col gap-1" aria-label="Yönetim menüsü">
-      {items.map((item) => {
+      {visible.map((item) => {
         const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
         const Icon = item.icon;
         return (
@@ -139,7 +140,7 @@ export function AdminShell({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <NavList onNavigate={() => setOpen(false)} />
+            <NavList onNavigate={() => setOpen(false)} role={role} />
             <UserBox username={username} role={role} />
           </div>
         </div>
@@ -153,7 +154,7 @@ export function AdminShell({
             </Link>
             <ThemeToggle />
           </div>
-          <NavList />
+          <NavList role={role} />
           <UserBox username={username} role={role} />
         </aside>
 

@@ -15,6 +15,7 @@ import { ScrollToTop } from '@/components/providers/ScrollToTop';
 import { CursorProvider } from '@/components/providers/CursorProvider';
 import { FavoritesProvider } from '@/components/providers/FavoritesProvider';
 import { CompareBar } from '@/components/products/CompareBar';
+import { CampaignPopupServer } from '@/components/campaigns/CampaignPopupServer';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { siteConfig } from '@/config/site';
 import { buildMetadata, organizationJsonLd, websiteJsonLd } from '@/lib/seo';
@@ -97,6 +98,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
               <Footer s={settings} categories={categories} />
               <WhatsAppFab locale={typed} />
               <CompareBar />
+              <CampaignPopupServer locale={typed} />
             </SmoothScrollProvider>
           </FavoritesProvider>
         </DictionaryProvider>

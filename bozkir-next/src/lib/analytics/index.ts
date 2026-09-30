@@ -15,7 +15,13 @@ export type AnalyticsEvent =
   | 'search'
   | 'filter_used'
   | 'project_view'
-  | 'cta_click';
+  | 'cta_click'
+  | 'favorite_add'
+  | 'favorite_remove'
+  | 'compare_add'
+  | 'compare_remove'
+  | 'share'
+  | 'whatsapp_click';
 
 /**
  * Merkezi analytics yardımcı katmanı. Bileşenler doğrudan gtag çağırmaz.

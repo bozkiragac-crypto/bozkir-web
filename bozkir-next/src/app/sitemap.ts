@@ -37,6 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/hakkimizda', priority: 0.6, freq: 'monthly' },
     { path: '/bayilikler', priority: 0.6, freq: 'monthly' },
     { path: '/katalog', priority: 0.6, freq: 'monthly' },
+    { path: '/sss', priority: 0.5, freq: 'monthly' },
     { path: '/iletisim', priority: 0.6, freq: 'monthly' },
     { path: '/teklif-al', priority: 0.7, freq: 'monthly' },
   ];
