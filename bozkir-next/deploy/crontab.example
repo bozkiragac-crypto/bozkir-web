@@ -1,0 +1,11 @@
+# Bozkır Ağaç — örnek crontab (VPS1'de `crontab -e`).
+# Sırlar /etc/bozkir-backup.env içinde (chmod 600) tutulur; script onu okur.
+
+# Gece 03:00 — tam yedek + off-site (ikinci VPS) + bildirim
+0 3 * * * cd /opt/bozkir-web/bozkir-next && ./scripts/backup-cron.sh
+
+# Ayda bir (1. gün 04:30) — restore tatbikatı (geçici DB'ye geri yükleme)
+30 4 1 * * cd /opt/bozkir-web/bozkir-next && ./scripts/verify-backup.sh >> backups/logs/verify.log 2>&1
+
+# Günlük 09:00 — sağlık kontrolü başarısızsa bildirim (Uptime Kuma yoksa)
+0 9 * * * curl -fsS http://localhost/api/health?deep=1 >/dev/null || curl -fsS -m 10 -H 'Content-Type: application/json' -d '{"text":"❌ Bozkır Ağaç sağlık kontrolü başarısız"}' "$ALERT_WEBHOOK_URL" >/dev/null 2>&1

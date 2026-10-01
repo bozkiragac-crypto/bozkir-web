@@ -1,7 +1,10 @@
 name: Deploy (VPS)
 
 on:
-  push:
+  # CI başarıyla tamamlandığında otomatik dağıt (testler geçmeden canlıya çıkmaz).
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -13,9 +16,10 @@ jobs:
   deploy:
     name: VPS'e dağıt
     runs-on: ubuntu-latest
-    # CI'nin yeşil olmasını beklemek isterseniz: needs: [quality, build]
+    # Yalnızca CI yeşilse veya manuel tetiklemede çalışır.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: SSH ile deploy
+      - name: SSH ile deploy (yedek + sürüm + otomatik rollback)
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -24,27 +28,55 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           script_stop: true
           script: |
-            set -e
+            set -eo pipefail
             cd ${{ secrets.VPS_PATH }}
             git fetch --all
             git reset --hard origin/main
             cd bozkir-next
-            # Yeni imajı derle ve servisleri başlat
-            docker compose build app
-            docker compose up -d
-            # Şema migrasyonu (idempotent) — container içinde çalıştırılır
+
+            # 0) Migrasyon öncesi hızlı yedek (başarısızsa deploy durur).
+            mkdir -p backups/pre-deploy
+            docker compose exec -T db pg_dump -U "${POSTGRES_USER:-bozkir}" "${POSTGRES_DB:-bozkir}" \
+              | gzip > "backups/pre-deploy/pre-$(date +%Y%m%d_%H%M%S).sql.gz"
+            # Son 10 pre-deploy yedeği kalsın.
+            ls -1t backups/pre-deploy/*.sql.gz 2>/dev/null | tail -n +11 | xargs -r rm -f || true
+
+            # 1) Sürümlü imaj: önceki sürümü hatırla, yeni sürümü etiketle.
+            PREV_TAG="$(cat .last-good-tag 2>/dev/null || true)"
+            TAG="$(git rev-parse --short HEAD)"
+            echo "Dağıtılan sürüm: $TAG (önceki: ${PREV_TAG:-yok})"
+            APP_TAG="$TAG" docker compose build app
+            APP_TAG="$TAG" docker compose up -d
+            # App IP'si değişti; nginx upstream DNS'ini yeniden çöz.
+            docker compose restart nginx >/dev/null
+
+            # 2) Şema migrasyonu (idempotent) + tohumlama (mevcut veriyi ezmez).
             docker compose exec -T app node scripts/db-migrate.mjs
-            # Bir kez: içerik + kategori/marka tohumlaması (idempotent, mevcut veriyi ezmez)
             docker compose exec -T app node scripts/seed-catalog-meta.mjs || true
             docker compose exec -T app node scripts/seed-content-i18n.mjs || true
-            # Sağlık kontrolü (DB + storage dahil)
+
+            # 3) Sağlık kontrolü; başarısızsa önceki sürüme otomatik dön.
+            OK=0
             for i in $(seq 1 20); do
-              if curl -fsS "http://localhost/api/health?deep=1" >/dev/null; then
-                echo "Sağlıklı ✓"
-                exit 0
-              fi
+              if curl -fsS "http://localhost/api/health?deep=1" >/dev/null; then OK=1; break; fi
               sleep 3
             done
-            echo "Sağlık kontrolü başarısız" >&2
-            docker compose logs --tail=80 app
-            exit 1
+            if [ "$OK" != "1" ]; then
+              echo "Sağlık kontrolü başarısız; önceki sürüme dönülüyor..." >&2
+              if [ -n "$PREV_TAG" ]; then
+                APP_TAG="$PREV_TAG" docker compose up -d
+                docker compose restart nginx >/dev/null
+                echo "Rollback tamam: $PREV_TAG" >&2
+              fi
+              docker compose logs --tail=80 app
+              exit 1
+            fi
+
+            echo "$TAG" > .last-good-tag
+
+            # Eski sürüm imajlarını buda (son 5 kalsın).
+            docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}' \
+              | grep '^bozkir-app:' | awk 'NR>5 {print $2}' \
+              | xargs -r docker rmi -f >/dev/null 2>&1 || true
+
+            echo "Sağlıklı ✓ (sürüm: $TAG)"

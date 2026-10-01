@@ -2,8 +2,9 @@
  * Next.js instrumentation: sunucu başlarken bir kez çalışır.
  * Graceful shutdown için SIGTERM/SIGINT yakalanır; DB havuzu kapatılır.
  *
- * Not: `@/lib/db/client` yalnızca Node runtime'da ve çalışma zamanında yüklenir;
- * edge/middleware bundle'ına `pg` (net/tls) girmemesi için import gizlenir.
+ * Not: Havuza modül importu ile değil, `client.ts`'in `globalThis`'e kaydettiği
+ * referans üzerinden erişilir; böylece edge bundle'a `pg` girmez ve üretimde
+ * `@/` yol takma adı çözümleme hatası oluşmaz.
  */
 export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME !== 'nodejs') return;
@@ -14,11 +15,8 @@ export async function register(): Promise<void> {
     shuttingDown = true;
     console.log(`[shutdown] ${signal} alındı, kapatılıyor...`);
     try {
-      // Dinamik, analiz edilemeyen import: webpack `pg`'yi bu bundle'a almaz.
-      const mod = (await eval('import("@/lib/db/client")')) as {
-        closeDb: () => Promise<void>;
-      };
-      await mod.closeDb();
+      const pool = (globalThis as { __bozkirDbPool?: { end: () => Promise<void> } }).__bozkirDbPool;
+      if (pool) await pool.end();
     } catch (err) {
       console.error('[shutdown] db kapatma hatası:', err);
     }

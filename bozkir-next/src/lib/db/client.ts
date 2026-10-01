@@ -23,6 +23,8 @@ export function getDb(): NodePgDatabase<typeof schema> | null {
       console.error('[db] pool error:', err.message);
     });
     db = drizzle(pool, { schema });
+    // Graceful shutdown (instrumentation) modül çözümlemesi yapmadan havuza erişebilsin.
+    (globalThis as Record<string, unknown>).__bozkirDbPool = pool;
   }
   return db;
 }
@@ -33,6 +35,7 @@ export async function closeDb(): Promise<void> {
   const p = pool;
   pool = null;
   db = null;
+  delete (globalThis as Record<string, unknown>).__bozkirDbPool;
   try {
     await p.end();
   } catch {

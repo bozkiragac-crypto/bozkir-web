@@ -1,8 +1,19 @@
 # Bozkır Ağaç — full-stack Docker (Postgres + SeaweedFS S3 + Next + nginx)
 # Kullanım: docker compose up -d --build
 # Uygulama değişkenleri: .env.local  |  Compose değişkenleri: .env
+#
+# Sürümlü dağıtım/rollback: APP_TAG=<git-sha> docker compose up -d
+# PITR: Postgres WAL arşivi `wal-archive` hacmine yazılır (backup.sh bu hacmi de yedekler).
 
 services:
+  # WAL arşiv hacmini postgres kullanıcısına hazırlar (tek seferlik).
+  wal-init:
+    image: alpine:3.20
+    command: sh -c "mkdir -p /wal && chown -R 70:70 /wal"
+    volumes:
+      - wal-archive:/wal
+    restart: 'no'
+
   db:
     image: postgres:16-alpine
     environment:
@@ -11,15 +22,37 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-bozkir}
     volumes:
       - db-data:/var/lib/postgresql/data
+      - wal-archive:/wal-archive
       - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+      - ./docker/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     ports:
       - '127.0.0.1:5432:5432'
+    depends_on:
+      wal-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-bozkir} -d ${POSTGRES_DB:-bozkir}']
       interval: 10s
       timeout: 5s
       retries: 10
-    command: postgres -c shared_buffers=256MB -c max_connections=100
+    # PITR: wal_level=replica + WAL arşivleme (archive_timeout ile en fazla 5 dk veri kaybı).
+    # Base backup `pg_basebackup` ile alınır (özel pg_hba replication izinleri).
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - max_connections=100
+      - -c
+      - hba_file=/etc/postgresql/pg_hba.conf
+      - -c
+      - wal_level=replica
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_timeout=300
+      - -c
+      - archive_command=test -f /wal-archive/%f || cp %p /wal-archive/%f
     logging:
       driver: json-file
       options:
@@ -42,6 +75,7 @@ services:
     restart: unless-stopped
 
   app:
+    image: bozkir-app:${APP_TAG:-latest}
     build:
       context: .
       args:
@@ -58,7 +92,7 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY:-any}
       S3_BUCKET: ${S3_BUCKET:-bozkir-media}
       S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-/media}
-      APP_VERSION: ${APP_VERSION:-dev}
+      APP_VERSION: ${APP_TAG:-dev}
       MAINTENANCE_MODE: ${MAINTENANCE_MODE:-0}
       TRUSTED_PROXY: ${TRUSTED_PROXY:-1}
     depends_on:
@@ -110,5 +144,6 @@ services:
 
 volumes:
   db-data:
+  wal-archive:
   storage-data:
   uptime-data:
