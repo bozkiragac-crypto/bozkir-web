@@ -25,6 +25,9 @@ export interface Product {
   brand?: string;
   featured?: boolean;
   sortOrder?: number;
+  /** Admin'den düzenlenebilir SEO başlığı/açıklaması (boşsa otomatik üretilir). */
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export interface ProductFilters {
@@ -36,9 +39,13 @@ export interface ProductFilters {
   size?: string;
   application?: string;
   query?: string;
+  /** Sıralama: varsayılan en yeni. */
+  sort?: ProductSort;
   limit?: number;
   offset?: number;
 }
+
+export type ProductSort = 'newest' | 'name-asc' | 'name-desc' | 'code-asc';
 
 export interface ProductQueryResult {
   items: Product[];

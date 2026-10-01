@@ -44,8 +44,8 @@
   --surface: #ffffff;
   --surface-2: #efefec;
   --fg: #111111;
-  --muted: #8a8a90;
-  --muted-strong: #6f6f76;
+  --muted: #6d6d76;
+  --muted-strong: #5c5c66;
   --border: #e8e8e5;
   --border-strong: #d7d7d1;
   --accent: #8d8474;
@@ -97,6 +97,35 @@ html[data-compare='1'] [data-product-cta] {
   --scrollbar-thumb: #3a3a42;
 
   color-scheme: dark;
+}
+
+/* Durum renkleri: tema-duyarlı, AA kontrast hedefli. */
+.text-danger {
+  color: #b91c1c;
+}
+[data-theme='dark'] .text-danger {
+  color: #fca5a5;
+}
+.text-success {
+  color: #15803d;
+}
+[data-theme='dark'] .text-success {
+  color: #86efac;
+}
+
+/* Sayfa geçişi fade'i (GSAP yerine CSS; ilk yük JS'ini küçültür). */
+@media (prefers-reduced-motion: no-preference) {
+  .page-fade {
+    animation: page-fade-in 0.4s ease-out;
+  }
+  @keyframes page-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }
 
 @layer base {

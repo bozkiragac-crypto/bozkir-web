@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Suspense } from 'react';
 import { getCategories, getCategoryBySlug } from '@/lib/api/categories';
 import { getProducts } from '@/lib/api/products';
-import { buildMetadata, breadcrumbJsonLd } from '@/lib/seo';
+import { buildMetadata, breadcrumbJsonLd, absoluteUrl } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
@@ -48,7 +48,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: category.seoTitle ?? `${category.name} | Bozkır Ağaç Ürünleri`,
     description: category.seoDescription ?? category.description,
     path: `/kategoriler/${category.slug}`,
-    image: category.heroImage,
+    // Dinamik OG görseli: opengraph-image.tsx dosya-convention ile üretilir.
+    image: null,
     locale,
   });
 }
@@ -98,6 +99,23 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
           ),
         }}
       />
+      {items.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'ItemList',
+              itemListElement: items.map((p, i) => ({
+                '@type': 'ListItem',
+                position: i + 1,
+                url: absoluteUrl(`/${locale ?? 'tr'}/urunler/${p.slug}`),
+                name: p.name,
+              })),
+            }),
+          }}
+        />
+      )}
       <PageHero
         eyebrow={dict.nav.collections}
         title={category.name}
@@ -144,7 +162,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               <nav className="mt-16 flex items-center justify-between border-t border-border pt-8" aria-label={dict.common.page}>
                 {page > 1 ? (
                   <Link href={buildHref(page - 1)} scroll={false} className="inline-flex items-center gap-2 text-sm font-medium">
-                    <ArrowLeft className="h-4 w-4" /> {dict.common.prev}
+                    <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" /> {dict.common.prev}
                   </Link>
                 ) : (
                   <span />
@@ -154,7 +172,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 </span>
                 {page < totalPages ? (
                   <Link href={buildHref(page + 1)} scroll={false} className="inline-flex items-center gap-2 text-sm font-medium">
-                    {dict.common.next} <ArrowRight className="h-4 w-4" />
+                    {dict.common.next} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
                   </Link>
                 ) : (
                   <span />
@@ -185,7 +203,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                     className="group flex items-center justify-between rounded-md border border-border p-5 transition-colors hover:bg-surface"
                   >
                     <span className="font-medium tracking-tight">{c.name}</span>
-                    <ArrowRight className="h-4 w-4 text-muted transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="h-4 w-4 text-muted transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
                   </Link>
                 </li>
               ))}

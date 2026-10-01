@@ -1,11 +1,12 @@
 'use client';
 
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
-import { Instagram, Facebook, MessageCircle, ChevronDown } from 'lucide-react';
+import { Instagram, Facebook, MessageCircle, ChevronDown, Clock } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import type { SiteSettings } from '@/lib/data/settings';
 import { telHref } from '@/lib/phone';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { track } from '@/lib/analytics';
 import type { Category } from '@/types/category';
 
 const corporateLinkKeys = [
@@ -27,7 +28,14 @@ function Social({ s }: { s: SiteSettings }) {
       <a href={s.social.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className={item}>
         <Facebook className="h-5 w-5" />
       </a>
-      <a href={s.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className={item}>
+      <a
+        href={s.whatsapp}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="WhatsApp"
+        onClick={() => track('whatsapp_click', { source: 'footer' })}
+        className={item}
+      >
         <MessageCircle className="h-5 w-5" />
       </a>
     </div>
@@ -46,10 +54,16 @@ function Brand({ s }: { s: SiteSettings }) {
 }
 
 function Contact({ s }: { s: SiteSettings }) {
+  const { locale } = useDictionary();
+  const hours = locale === 'en' ? s.hoursEn : locale === 'ar' ? s.hoursAr : s.hours;
   return (
     <ul className="space-y-3 text-sm text-muted-strong">
       <li>
-        <a href={telHref(s.phone)} className="link-underline transition-colors hover:text-foreground">
+        <a
+          href={telHref(s.phone)}
+          onClick={() => track('phone_click', { source: 'footer' })}
+          className="link-underline transition-colors hover:text-foreground"
+        >
           {s.phone}
         </a>
       </li>
@@ -62,6 +76,12 @@ function Contact({ s }: { s: SiteSettings }) {
       <li>
         {s.address.postalCode} {s.address.locality} / {s.address.region}
       </li>
+      {hours && (
+        <li className="flex items-start gap-2">
+          <Clock className="mt-0.5 h-4 w-4 flex-none text-muted" />
+          <span>{hours}</span>
+        </li>
+      )}
     </ul>
   );
 }

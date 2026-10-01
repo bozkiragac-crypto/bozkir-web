@@ -5,6 +5,7 @@ import { getSiteSettings, telHref } from '@/lib/data/settings';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
+import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pickLocaleText } from '@/lib/data/catalog';
@@ -75,9 +76,21 @@ export default async function ContactPage({ params }: PageProps) {
               </>
             );
             return item.href ? (
-              <a key={item.label} href={item.href} className="bg-surface p-7 transition-colors hover:bg-surface-2">
-                {content}
-              </a>
+              item.href.startsWith('tel:') || item.href.includes('wa.me') ? (
+                <TrackedLink
+                  key={item.label}
+                  href={item.href}
+                  event={item.href.startsWith('tel:') ? 'phone_click' : 'whatsapp_click'}
+                  source="contact_info"
+                  className="bg-surface p-7 transition-colors hover:bg-surface-2"
+                >
+                  {content}
+                </TrackedLink>
+              ) : (
+                <a key={item.label} href={item.href} className="bg-surface p-7 transition-colors hover:bg-surface-2">
+                  {content}
+                </a>
+              )
             ) : (
               <div key={item.label} className="bg-surface p-7">
                 {content}
@@ -90,9 +103,14 @@ export default async function ContactPage({ params }: PageProps) {
           <ButtonLink href="/teklif-al" size="lg" className="w-full justify-center sm:w-auto">
             {c.ctaQuote}
           </ButtonLink>
-          <ButtonLink href={s.whatsapp} size="lg" variant="outline" className="w-full justify-center sm:w-auto">
+          <TrackedLink
+            href={s.whatsapp}
+            event="whatsapp_click"
+            source="contact_cta"
+            className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full border border-border-strong px-7 text-[0.95rem] font-medium tracking-tight text-foreground transition-[transform,background-color,color,border-color] duration-300 ease-[var(--ease-out-expo)] hover:-translate-y-0.5 hover:bg-foreground hover:text-background active:scale-[0.985] sm:w-auto"
+          >
             {c.ctaWhatsapp}
-          </ButtonLink>
+          </TrackedLink>
         </div>
 
         <div className="mt-16 overflow-hidden rounded-lg border border-border">

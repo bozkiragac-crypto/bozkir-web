@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getProductBySlug, getRelatedProducts } from '@/lib/api/products';
 import { siteConfig } from '@/config/site';
 import { telHref } from '@/lib/phone';
-import { buildMetadata, breadcrumbJsonLd, localeUrl } from '@/lib/seo';
+import { buildMetadata, breadcrumbJsonLd, absoluteUrl, localeUrl } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
@@ -14,6 +14,7 @@ import { ProductGallery } from '@/components/products/ProductGallery';
 import { ProductCard } from '@/components/products/ProductCard';
 import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
 import { ShareButton } from '@/components/products/ShareButton';
+import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
@@ -42,8 +43,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     product.shortDescription ??
     `${product.name}${product.code ? ` (${product.code})` : ''} · ${product.category}. ${dict.meta.brandTagline}`;
   return buildMetadata({
-    title: `${product.name} | ${dict.meta.brand}`,
-    description: desc,
+    title: product.seoTitle ?? `${product.name} | ${dict.meta.brand}`,
+    description: product.seoDescription ?? desc,
     path: `/urunler/${product.slug}`,
     // Dinamik OG görseli: opengraph-image.tsx dosya-convention ile üretilir.
     image: null,
@@ -80,11 +81,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
+    description: product.shortDescription ?? `${product.name}${product.code ? ` (${product.code})` : ''} · ${product.category}`,
     sku: product.code || undefined,
     category: product.category,
-    image: image ? [image] : undefined,
+    image: image ? [absoluteUrl(image)] : undefined,
     brand: { '@type': 'Brand', name: dict.meta.brand },
     url: localeUrl(locale, `/urunler/${product.slug}`),
+    ...(product.face
+      ? { additionalProperty: [{ '@type': 'PropertyValue', name: dict.compare.surface, value: product.face }] }
+      : {}),
   };
 
   const specs: { label: string; value: string }[] = [];
@@ -94,6 +99,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   return (
     <>
+      <ProductViewTracker slug={product.slug} name={product.name} category={product.category} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <script
         type="application/ld+json"
@@ -159,7 +165,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </div>
 
             <Link href="/urunler" className="mt-8 inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
-              <ArrowLeft className="h-4 w-4" /> {dict.common.allProducts}
+              <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" /> {dict.common.allProducts}
             </Link>
           </div>
         </div>

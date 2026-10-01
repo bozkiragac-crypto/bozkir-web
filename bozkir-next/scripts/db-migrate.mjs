@@ -23,6 +23,10 @@ const statements = [
   // products.is_active
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE`,
 
+  // ürün SEO alanları (admin'den düzenlenebilir)
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_title TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_description TEXT`,
+
   // admin_users genişletme
   `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS username TEXT`,
   `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'owner'`,
@@ -149,6 +153,15 @@ const statements = [
      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
    )`,
   `CREATE INDEX IF NOT EXISTS brands_sort_idx ON brands (sort_order)`,
+
+  // Performans indeksleri (idempotent).
+  `CREATE INDEX IF NOT EXISTS products_active_created_idx ON products (is_active, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS products_code_idx ON products (code)`,
+  `CREATE INDEX IF NOT EXISTS quote_requests_created_idx ON quote_requests (created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS campaigns_active_window_idx ON campaigns (is_active, starts_at, ends_at)`,
+  `CREATE INDEX IF NOT EXISTS categories_slug_idx ON categories (slug)`,
+  `CREATE INDEX IF NOT EXISTS catalogs_slug_idx ON catalogs (slug)`,
+  `CREATE INDEX IF NOT EXISTS content_blocks_active_sort_idx ON content_blocks (is_active, sort_order)`,
 ];
 
 const client = new Client({ connectionString: process.env.DATABASE_URL });

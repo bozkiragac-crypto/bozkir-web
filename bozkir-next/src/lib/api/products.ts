@@ -7,6 +7,7 @@ function toQuery(filters: ProductFilters = {}, locale?: Locale) {
   const params = new URLSearchParams();
   if (filters.category) params.set('category', filters.category);
   if (filters.query) params.set('q', filters.query);
+  if (filters.sort) params.set('sort', filters.sort);
   params.set('limit', String(filters.limit ?? 24));
   params.set('offset', String(filters.offset ?? 0));
   if (locale) params.set('locale', locale);
@@ -75,7 +76,7 @@ export async function getRelatedProducts(slug: string, locale?: Locale, limit = 
 }
 
 /** Tüm ürünler (sitemap için) — sayfalama ile toplanır. */
-export async function getAllProducts(max = 1000): Promise<Product[]> {
+export async function getAllProducts(max = Number.POSITIVE_INFINITY): Promise<Product[]> {
   const out: Product[] = [];
   let offset = 0;
   const limit = 100;

@@ -17,7 +17,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: dict.pages.kvkk.metaTitle,
     description: dict.pages.kvkk.metaDescription,
     path: '/kvkk',
-    noIndex: true,
     locale: lang,
   });
 }

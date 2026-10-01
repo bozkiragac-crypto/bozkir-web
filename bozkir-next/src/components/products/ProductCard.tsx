@@ -54,7 +54,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <h3 className="mt-1 text-sm font-medium tracking-tight sm:text-base">{product.name}</h3>
           <p className={cn('mt-1 text-xs text-muted-strong sm:text-sm', !product.face && 'capitalize')}>
             {product.category}
-            {product.face ? ` · Yüzey ${product.face}` : ''}
+            {product.face ? ` · ${t('product.surface')} ${product.face}` : ''}
           </p>
         </div>
         <ArrowUpRight className="mt-1 h-4 w-4 flex-none text-muted transition-colors group-hover:text-foreground" />

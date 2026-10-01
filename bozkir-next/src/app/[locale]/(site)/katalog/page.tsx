@@ -19,7 +19,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: dict.pages.catalog.metaTitle,
     description: dict.pages.catalog.metaDescription,
     path: '/katalog',
-    image: '/images/categories/mdflam.webp',
     locale: lang,
   });
 }

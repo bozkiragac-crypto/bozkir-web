@@ -107,7 +107,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
                 className="group mt-5 inline-flex items-center gap-2 text-sm font-medium lg:mt-7"
               >
                 {t('home.story.collectionCta')}
-                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 rtl:-scale-x-100" />
               </Link>
 
               <dl className="mt-8 hidden max-w-md grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-6 text-sm lg:grid">

@@ -17,7 +17,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: dict.pages.privacy.metaTitle,
     description: dict.pages.privacy.metaDescription,
     path: '/gizlilik',
-    noIndex: true,
     locale: lang,
   });
 }

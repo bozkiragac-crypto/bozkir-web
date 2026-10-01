@@ -1,30 +1,27 @@
 import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
-import { Inter, Fraunces, Caveat } from 'next/font/google';
 import '../globals.css';
 import { isLocale, localeDir, localeHtmlLang, locales, type Locale } from '@/i18n/config';
+import { fontVariables } from '@/lib/fonts';
 import { getDictionary } from '@/i18n/dictionaries';
 import { getPrimaryCategories } from '@/lib/api/categories';
 import { getSiteSettings } from '@/lib/data/settings';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab';
-import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
+import { DeferredSmoothScroll } from '@/components/providers/DeferredSmoothScroll';
 import { ScrollToTop } from '@/components/providers/ScrollToTop';
 import { CursorProvider } from '@/components/providers/CursorProvider';
 import { FavoritesProvider } from '@/components/providers/FavoritesProvider';
 import { CompareBar } from '@/components/products/CompareBar';
 import { CampaignPopupServer } from '@/components/campaigns/CampaignPopupServer';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
+import { ToastProvider } from '@/components/ui/ToastProvider';
 import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import { AnalyticsScripts } from '@/components/consent/AnalyticsScripts';
 import { siteConfig } from '@/config/site';
 import { buildMetadata, organizationJsonLd, websiteJsonLd } from '@/lib/seo';
-
-const inter = Inter({ subsets: ['latin', 'latin-ext'], variable: '--font-inter', display: 'swap' });
-const fraunces = Fraunces({ subsets: ['latin', 'latin-ext'], variable: '--font-fraunces', display: 'swap' });
-const caveat = Caveat({ subsets: ['latin', 'latin-ext'], variable: '--font-hand', display: 'swap' });
 
 // Varsayılan açık tema; yalnızca kullanıcı koyu seçtiyse koyu uygulanır.
 const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t!=='dark')t='light';document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}catch(e){}})();`;
@@ -67,7 +64,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       lang={localeHtmlLang[typed]}
       dir={localeDir[typed]}
       data-locale={typed}
-      className={`${inter.variable} ${fraunces.variable} ${caveat.variable}`}
+      className={fontVariables}
     >
       <head>
         {/* Tema, ilk boyamadan önce uygulanır (FOUC yok). */}
@@ -85,30 +82,32 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       </head>
       <body className="antialiased">
         <DictionaryProvider locale={typed} dictionary={dict}>
-          <ConsentProvider>
-            <FavoritesProvider>
-              <SmoothScrollProvider>
-                <ScrollToTop />
-                <CursorProvider />
-                <a
-                  href="#main"
-                  className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-foreground focus:px-5 focus:py-3 focus:text-background"
-                >
-                  {dict.nav.skipToContent}
-                </a>
-                <Header categories={categories} />
-                <main id="main">{children}</main>
-                <Footer s={settings} categories={categories} />
-                <WhatsAppFab locale={typed} />
-                <CompareBar />
-                <CampaignPopupServer locale={typed} />
-                <CookieBanner />
-                {process.env.NEXT_PUBLIC_ANALYTICS_ID && (
-                  <AnalyticsScripts id={process.env.NEXT_PUBLIC_ANALYTICS_ID} />
-                )}
-              </SmoothScrollProvider>
-            </FavoritesProvider>
-          </ConsentProvider>
+          <ToastProvider>
+            <ConsentProvider>
+              <FavoritesProvider>
+                <DeferredSmoothScroll>
+                  <ScrollToTop />
+                  <CursorProvider />
+                  <a
+                    href="#main"
+                    className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-foreground focus:px-5 focus:py-3 focus:text-background"
+                  >
+                    {dict.nav.skipToContent}
+                  </a>
+                  <Header categories={categories} />
+                  <main id="main">{children}</main>
+                  <Footer s={settings} categories={categories} />
+                  <WhatsAppFab locale={typed} />
+                  <CompareBar />
+                  <CampaignPopupServer locale={typed} />
+                  <CookieBanner />
+                  {process.env.NEXT_PUBLIC_ANALYTICS_ID && (
+                    <AnalyticsScripts id={process.env.NEXT_PUBLIC_ANALYTICS_ID} />
+                  )}
+                </DeferredSmoothScroll>
+              </FavoritesProvider>
+            </ConsentProvider>
+          </ToastProvider>
         </DictionaryProvider>
       </body>
     </html>

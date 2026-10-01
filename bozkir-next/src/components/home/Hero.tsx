@@ -104,7 +104,7 @@ export function Hero() {
           <div data-hero-item className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
             <MagneticButton className="[&>a]:w-full sm:[&>a]:w-auto">
               <ButtonLink href="/urunler" size="lg" className="w-full justify-center bg-white text-[#111] hover:bg-white/90 sm:w-auto">
-                {t('home.hero.ctaProducts')} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                {t('home.hero.ctaProducts')} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
               </ButtonLink>
             </MagneticButton>
             <ButtonLink

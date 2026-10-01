@@ -20,6 +20,7 @@ export function ProductFilter({ categories }: ProductFilterProps) {
   const locale = typeof routeParams?.locale === 'string' ? routeParams.locale : 'tr';
   const [query, setQuery] = useState(params.get('q') ?? '');
   const activeCategory = params.get('kategori') ?? '';
+  const activeSort = params.get('sirala') ?? '';
 
   useEffect(() => {
     setQuery(params.get('q') ?? '');
@@ -27,6 +28,8 @@ export function ProductFilter({ categories }: ProductFilterProps) {
 
   function update(next: Record<string, string | null>) {
     const sp = new URLSearchParams(params.toString());
+    // Filtre/sıralama değişince ilk sayfaya dön.
+    sp.delete('sayfa');
     Object.entries(next).forEach(([k, v]) => {
       if (v) sp.set(k, v);
       else sp.delete(k);
@@ -39,9 +42,15 @@ export function ProductFilter({ categories }: ProductFilterProps) {
     update({ kategori: value || null });
   }
 
+  function onSortChange(value: string) {
+    track('filter_used', { filter: 'sort', value });
+    update({ sirala: value || null });
+  }
+
   return (
     <div className="flex flex-col gap-4 border-y border-border py-5 md:flex-row md:items-center md:justify-between">
       <form
+        role="search"
         onSubmit={(e) => {
           e.preventDefault();
           track('search', { query });
@@ -51,6 +60,7 @@ export function ProductFilter({ categories }: ProductFilterProps) {
       >
         <Search className="h-4 w-4 text-muted" />
         <input
+          type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('catalog.searchPlaceholder')}
@@ -87,6 +97,21 @@ export function ProductFilter({ categories }: ProductFilterProps) {
               {c.name}
             </option>
           ))}
+        </select>
+
+        <label className="sr-only" htmlFor="sort-filter">
+          {t('catalog.sort')}
+        </label>
+        <select
+          id="sort-filter"
+          value={activeSort}
+          onChange={(e) => onSortChange(e.target.value)}
+          className="h-11 w-full rounded-full border border-border bg-transparent px-4 text-sm outline-none focus-visible:outline-foreground sm:w-auto"
+        >
+          <option value="">{t('catalog.sortNewest')}</option>
+          <option value="name-asc">{t('catalog.sortNameAsc')}</option>
+          <option value="name-desc">{t('catalog.sortNameDesc')}</option>
+          <option value="code-asc">{t('catalog.sortCode')}</option>
         </select>
       </div>
     </div>

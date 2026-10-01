@@ -93,7 +93,7 @@ export function CompareView() {
                     items.length >= 2 ? 'bg-foreground text-background' : 'pointer-events-none bg-surface-2 text-muted'
                   }`}
                 >
-                  {t('compare.quoteAll')} <ArrowRight className="h-4 w-4" />
+                  {t('compare.quoteAll')} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
                 </Link>
               </div>
             </div>
@@ -110,7 +110,7 @@ export function CompareView() {
                           type="button"
                           onClick={() => removeCompare(ref.slug)}
                           aria-label={t('quote.removeProduct')}
-                          className="float-right flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-strong transition hover:border-foreground hover:text-foreground"
+                          className="float-end flex h-11 w-11 items-center justify-center rounded-full border border-border text-muted-strong transition hover:border-foreground hover:text-foreground"
                         >
                           <X className="h-4 w-4" />
                         </button>

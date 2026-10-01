@@ -118,7 +118,7 @@ export function CampaignSlider({ campaigns }: { campaigns: Campaign[] }) {
                       href={c.linkUrl}
                       className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-medium text-[#111] transition-transform hover:-translate-y-0.5"
                     >
-                      {c.linkLabel || t('home.campaign.readMore')} <ArrowRight className="h-4 w-4" />
+                      {c.linkLabel || t('home.campaign.readMore')} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
                     </Link>
                   )}
                 </div>

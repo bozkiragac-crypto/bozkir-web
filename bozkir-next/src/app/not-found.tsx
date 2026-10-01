@@ -1,12 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
-import { Inter, Fraunces, Caveat } from 'next/font/google';
 import './globals.css';
-import { getServerDictionary } from '@/i18n/server';
-
-const inter = Inter({ subsets: ['latin', 'latin-ext'], variable: '--font-inter', display: 'swap' });
-const fraunces = Fraunces({ subsets: ['latin', 'latin-ext'], variable: '--font-fraunces', display: 'swap' });
-const caveat = Caveat({ subsets: ['latin', 'latin-ext'], variable: '--font-hand', display: 'swap' });
+import { fontVariables } from '@/lib/fonts';
+import { dictFor } from '@/i18n/server';
 
 const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t!=='dark')t='light';document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}catch(e){}})();`;
 
@@ -17,13 +13,16 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover' };
 
-/** Dil öneği tutmayan (örn. eski) adresler için uygulama düzeyi 404. */
-export default async function NotFound() {
-  const { locale, dict } = await getServerDictionary();
-  const nf = dict.pages.notFound;
+/**
+ * Dil öneği tutmayan (örn. eski) adresler için uygulama düzeyi 404.
+ * Statik kalabilmesi için `headers()` kullanılmaz; varsayılan dil (TR) sözlüğü kullanılır.
+ */
+export default function NotFound() {
+  const locale = 'tr';
+  const nf = dictFor(locale).pages.notFound;
 
   return (
-    <html lang={locale} className={`${inter.variable} ${fraunces.variable} ${caveat.variable}`}>
+    <html lang={locale} className={fontVariables}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

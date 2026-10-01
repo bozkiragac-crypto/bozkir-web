@@ -16,14 +16,15 @@ export async function submitQuote(payload: QuoteRequest, file?: File | null): Pr
   form.set('quantity', payload.quantity ?? '');
   form.set('dimensions', payload.dimensions ?? '');
   form.set('note', payload.note ?? '');
+  form.set('consent', payload.consent ? 'true' : 'false');
   form.set('website', ''); // honeypot
   if (file) form.set('attachment', file);
 
   try {
     const res = await fetch('/api/teklif', { method: 'POST', body: form });
     const data = (await res.json().catch(() => null)) as QuoteResponse | null;
-    if (!data) return { ok: false, message: 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.' };
-    return data;
+    if (!data) return { ok: false, message: 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.', status: res.status };
+    return { ...data, status: res.status };
   } catch {
     return { ok: false, message: 'Bağlantı hatası. Lütfen tekrar deneyin veya bizi arayın.' };
   }

@@ -35,11 +35,21 @@ function getClient(): S3Client {
   return client;
 }
 
+let bucketReady = false;
+
 export async function ensureBucket(): Promise<void> {
+  // Bucket bir kez doğrulandıktan sonra her healthcheck'te yeniden oluşturmayı deneme.
+  if (bucketReady) return;
   try {
     await getClient().send(new CreateBucketCommand({ Bucket: MEDIA_BUCKET }));
-  } catch {
-    // zaten var
+    bucketReady = true;
+  } catch (err) {
+    const name = (err as { name?: string })?.name ?? '';
+    if (name === 'BucketAlreadyOwnedByYou' || name === 'BucketAlreadyExists') {
+      bucketReady = true;
+      return;
+    }
+    throw err;
   }
 }
 

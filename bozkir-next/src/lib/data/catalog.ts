@@ -89,6 +89,8 @@ interface IndexItem {
   nameAr: string;
   catEn: string;
   catAr: string;
+  seoTitle: string;
+  seoDescription: string;
 }
 
 interface RawRow {
@@ -103,6 +105,8 @@ interface RawRow {
   nameAr?: string | null;
   catEn?: string | null;
   catAr?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
 }
 
 function buildIndex(rows: RawRow[]): IndexItem[] {
@@ -140,6 +144,8 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       nameAr: String(row.nameAr ?? '').trim(),
       catEn: String(row.catEn ?? '').trim(),
       catAr: String(row.catAr ?? '').trim(),
+      seoTitle: String(row.seoTitle ?? '').trim(),
+      seoDescription: String(row.seoDescription ?? '').trim(),
     });
   }
   return out;
@@ -185,6 +191,8 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
     face: item.face,
     images,
     thumbnail: images[0],
+    seoTitle: item.seoTitle || undefined,
+    seoDescription: item.seoDescription || undefined,
   };
 }
 
@@ -219,12 +227,23 @@ export async function fetchProducts(
     }
   }
 
-  const total = items.length;
+  const mapped = items.map((i) => toProduct(i, locale));
+
+  // Sıralama: varsayılan en yeni (index zaten created_at DESC).
+  if (filters.sort === 'name-asc') {
+    mapped.sort((a, b) => a.name.localeCompare(b.name, locale ?? 'tr'));
+  } else if (filters.sort === 'name-desc') {
+    mapped.sort((a, b) => b.name.localeCompare(a.name, locale ?? 'tr'));
+  } else if (filters.sort === 'code-asc') {
+    mapped.sort((a, b) => (a.code ?? '').localeCompare(b.code ?? '', 'tr'));
+  }
+
+  const total = mapped.length;
   const offset = Math.max(0, filters.offset ?? 0);
   const limit = Math.min(100, Math.max(1, filters.limit ?? 24));
-  const page = items.slice(offset, offset + limit);
+  const page = mapped.slice(offset, offset + limit);
 
-  return { items: page.map((i) => toProduct(i, locale)), total };
+  return { items: page, total };
 }
 
 export async function fetchProductBySlug(slug: string, locale?: Locale): Promise<Product | null> {

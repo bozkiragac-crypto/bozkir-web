@@ -51,7 +51,7 @@ export function MegaMenu({ categories, open, onClose, onPointerEnter, onPointerL
                   onClick={onClose}
                 >
                   <span>{category.name}</span>
-                  <ArrowRight className="h-4 w-4 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                  <ArrowRight className="h-4 w-4 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 rtl:-scale-x-100" />
                 </Link>
               </li>
             ))}
@@ -61,7 +61,7 @@ export function MegaMenu({ categories, open, onClose, onPointerEnter, onPointerL
             onClick={onClose}
             className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-foreground"
           >
-            {t('common.viewAll')} <ArrowRight className="h-4 w-4" />
+            {t('common.viewAll')} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
           </Link>
         </div>
 

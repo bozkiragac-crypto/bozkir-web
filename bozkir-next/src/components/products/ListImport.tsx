@@ -5,6 +5,7 @@ import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigat
 import { Share2, Link2, Check } from 'lucide-react';
 import { useFavorites, type ProductRef } from '@/components/providers/FavoritesProvider';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { useToast } from '@/components/ui/ToastProvider';
 import { track } from '@/lib/analytics';
 
 /** URL'deki `?liste=slug,slug` ürünlerini çekip hedef listeye aktarır; sonra parametreyi temizler. */
@@ -66,6 +67,7 @@ export function useImportFromUrl(target: 'favorites' | 'compare'): { imported: n
 export function ShareListButton({ slugs }: { slugs: string[] }) {
   const { t, dict, locale } = useDictionary();
   const pathname = usePathname();
+  const toast = useToast();
   const [copied, setCopied] = useState(false);
   const [canNative, setCanNative] = useState(false);
 
@@ -94,6 +96,7 @@ export function ShareListButton({ slugs }: { slugs: string[] }) {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
+      toast(t('common.copied'));
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // yok say

@@ -23,6 +23,7 @@ const schema = z.object({
   quantity: z.string().max(60).optional().default(''),
   dimensions: z.string().max(120).optional().default(''),
   note: z.string().max(2000).optional().default(''),
+  consent: z.literal('true', { message: 'KVKK onayı gerekli.' }),
   website: z.string().max(0).optional().default(''), // honeypot
 });
 
@@ -55,11 +56,16 @@ export async function POST(request: Request) {
     quantity: String(form.get('quantity') ?? '').trim(),
     dimensions: String(form.get('dimensions') ?? '').trim(),
     note: String(form.get('note') ?? '').trim(),
+    consent: String(form.get('consent') ?? '').trim(),
     website: String(form.get('website') ?? '').trim(),
   });
 
   if (!parsed.success) {
-    return NextResponse.json({ ok: false, message: 'Lütfen alanları kontrol edin.' }, { status: 422 });
+    const consentIssue = parsed.error.issues.some((i) => i.path[0] === 'consent');
+    return NextResponse.json(
+      { ok: false, message: consentIssue ? 'Devam etmek için KVKK onayı gereklidir.' : 'Lütfen alanları kontrol edin.' },
+      { status: 422 },
+    );
   }
   if (parsed.data.website) {
     // Bot: sessizce başarılı gibi davran.

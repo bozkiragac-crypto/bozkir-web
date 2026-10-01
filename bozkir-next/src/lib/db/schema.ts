@@ -16,6 +16,8 @@ export const products = pgTable(
     nameAr: text('name_ar'),
     catEn: text('cat_en'),
     catAr: text('cat_ar'),
+    seoTitle: text('seo_title'),
+    seoDescription: text('seo_description'),
   },
   (t) => [index('products_cat_idx').on(t.cat), index('products_created_idx').on(t.createdAt)],
 );

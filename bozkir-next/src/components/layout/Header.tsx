@@ -198,6 +198,8 @@ export function Header({ categories }: HeaderProps) {
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label={t('nav.menu')}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
               className={cn(
                 'flex h-11 w-11 items-center justify-center rounded-full xl:hidden',
                 onDark ? 'text-white' : 'text-foreground',

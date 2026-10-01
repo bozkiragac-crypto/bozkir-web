@@ -18,6 +18,8 @@ interface ProductFormProps {
     nameAr?: string | null;
     catEn?: string | null;
     catAr?: string | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
   };
 }
 
@@ -34,6 +36,8 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
   const [nameAr, setNameAr] = useState(initial?.nameAr ?? '');
   const [catEn, setCatEn] = useState(initial?.catEn ?? '');
   const [catAr, setCatAr] = useState(initial?.catAr ?? '');
+  const [seoTitle, setSeoTitle] = useState(initial?.seoTitle ?? '');
+  const [seoDescription, setSeoDescription] = useState(initial?.seoDescription ?? '');
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +57,8 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       nameAr,
       catEn,
       catAr,
+      seoTitle,
+      seoDescription,
     });
     setBusy(false);
     if (!res.ok) {
@@ -115,6 +121,28 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori (AR)</span>
           <input value={catAr} onChange={(e) => setCatAr(e.target.value)} className={field} dir="rtl" />
+        </label>
+      </fieldset>
+
+      <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
+        <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">SEO (boşsa otomatik üretilir)</legend>
+        <label className="grid gap-2">
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Başlık</span>
+          <input
+            value={seoTitle}
+            onChange={(e) => setSeoTitle(e.target.value)}
+            className={field}
+            placeholder="Ürün adı | Bozkır Ağaç Ürünleri"
+          />
+        </label>
+        <label className="grid gap-2">
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Açıklama</span>
+          <input
+            value={seoDescription}
+            onChange={(e) => setSeoDescription(e.target.value)}
+            className={field}
+            placeholder="Arama sonuçlarında görünecek kısa açıklama"
+          />
         </label>
       </fieldset>
 

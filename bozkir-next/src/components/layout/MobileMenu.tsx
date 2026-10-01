@@ -1,12 +1,13 @@
 'use client';
 
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { Category } from '@/types/category';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface MobileMenuProps {
   open: boolean;
@@ -16,6 +17,8 @@ interface MobileMenuProps {
 
 export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
   const { t, navLabel } = useDictionary();
+  const menuRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, menuRef);
 
   // Açıkken arka plan kaymasın.
   useEffect(() => {
@@ -27,8 +30,23 @@ export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
     };
   }, [open]);
 
+  // Escape ile kapat.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   return (
     <div
+      id="mobile-menu"
+      ref={menuRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('nav.menu')}
       className={cn(
         'fixed inset-0 z-[90] overflow-y-auto overscroll-contain bg-background pb-[var(--safe-bottom)] transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] xl:hidden',
         open ? 'pointer-events-auto opacity-100' : 'pointer-events-none translate-y-4 opacity-0',
@@ -39,7 +57,7 @@ export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
     >
       <div className="flex h-[var(--header-height)] items-center justify-between px-5">
         <span className="text-sm font-semibold tracking-[0.18em] uppercase">{siteConfig.name}</span>
-        <button onClick={onClose} aria-label={t('nav.close')} className="p-2">
+        <button onClick={onClose} aria-label={t('nav.close')} className="inline-flex h-11 w-11 items-center justify-center">
           <X className="h-6 w-6" />
         </button>
       </div>

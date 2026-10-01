@@ -9,16 +9,37 @@ const extraHosts = (process.env.NEXT_PUBLIC_MEDIA_HOSTS ?? '')
   .map((s) => s.trim())
   .filter(Boolean);
 
+const isDev = process.env.NODE_ENV !== 'production';
+
+// GA4 (googletagmanager/google-analytics) ve Google Maps iframe'lerine izin veren CSP.
+// Next'in satır içi script'leri (hydration/theme) için 'unsafe-inline' gerekir.
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.google-analytics.com https://www.googletagmanager.com",
+  'frame-src https://www.google.com https://maps.google.com',
+  "media-src 'self' https:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+].join('; ');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   // Node-only paketler edge/middleware bundle'ına girmesin.
-  serverExternalPackages: ['pg', 'bcryptjs', 'sharp'],
+  serverExternalPackages: ['pg', 'bcryptjs', 'sharp', '@aws-sdk/client-s3'],
   // Kökte ikinci bir lockfile olduğu için workspace kökünü sabitler.
   outputFileTracingRoot: __dirname,
   images: {
     formats: ['image/avif', 'image/webp'],
+    // Gerçek grid/hero genişliklerine göre daraltıldı (gereksiz varyant üretimini azaltır).
+    deviceSizes: [640, 828, 1080, 1280, 1600, 1920, 2560],
     // Same-origin API görselleri (örn. /api/image?id=...) sorgu dizesiyle izinli.
     localPatterns: [{ pathname: '/**' }],
     remotePatterns: [
@@ -49,10 +70,18 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Content-Security-Policy', value: csp },
         ],
       },
     ];
   },
 };
 
-export default nextConfig;
+// Bundle analizi yalnızca ANALYZE=true iken yüklenir (üretim imajında devDependency yok).
+let withBundleAnalyzer = (config) => config;
+if (process.env.ANALYZE === 'true') {
+  const { default: bundleAnalyzer } = await import('@next/bundle-analyzer');
+  withBundleAnalyzer = bundleAnalyzer({ enabled: true });
+}
+
+export default withBundleAnalyzer(nextConfig);

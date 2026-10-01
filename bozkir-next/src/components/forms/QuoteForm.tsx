@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { cloneElement, isValidElement, useState, type ReactElement, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X } from 'lucide-react';
+import { X, MessageCircle, Phone } from 'lucide-react';
+import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { track } from '@/lib/analytics';
 import { submitQuote } from '@/lib/api/quote';
 import { Button } from '@/components/ui/Button';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { siteConfig } from '@/config/site';
 
 const MAX_FILE_MB = 10;
 const ALLOWED = ['application/pdf', 'image/jpeg', 'image/png', 'image/vnd.dwg', 'application/acad'];
@@ -41,6 +43,7 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [sent, setSent] = useState(false);
   const [excluded, setExcluded] = useState<string[]>([]);
   const { t } = useDictionary();
 
@@ -114,11 +117,57 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
         quantity: values.quantity,
         dimensions: values.dimensions,
         note: values.note,
+        consent: values.consent,
       },
       file,
     );
-    setResult({ ok: res.ok, message: res.ok ? t('quote.success') : t('quote.errorGeneric') });
-    if (res.ok) reset({ product: productLabel });
+    if (res.ok) {
+      setSent(true);
+      reset({ product: productLabel });
+      return;
+    }
+    const message =
+      res.status === 429
+        ? t('quote.errorRate')
+        : res.status === 422
+          ? t('quote.errorValidation')
+          : t('quote.errorGeneric');
+    setResult({ ok: false, message });
+  }
+
+  const waHref = `${siteConfig.whatsapp}?text=${encodeURIComponent(t('pages.whatsapp.message'))}`;
+
+  if (sent) {
+    return (
+      <div role="status" aria-live="polite" className="rounded-xl border border-border bg-surface p-8">
+        <p className="text-lg font-medium text-success">{t('quote.success')}</p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => track('whatsapp_click', { source: 'quote_success' })}
+            className="inline-flex h-12 items-center gap-2 rounded-full bg-[#25D366] px-6 text-sm font-medium text-white"
+          >
+            <MessageCircle className="h-4 w-4" /> WhatsApp
+          </a>
+          <a
+            href={siteConfig.phoneHref}
+            onClick={() => track('phone_click', { source: 'quote_success' })}
+            className="inline-flex h-12 items-center gap-2 rounded-full border border-border px-6 text-sm font-medium"
+          >
+            <Phone className="h-4 w-4" /> {siteConfig.phone}
+          </a>
+        </div>
+        <button
+          type="button"
+          onClick={() => setSent(false)}
+          className="mt-6 text-sm text-muted-strong underline underline-offset-4 hover:text-foreground"
+        >
+          {t('quote.submit')}
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -141,13 +190,13 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">
                     {p.name}
-                    {p.code && <span className="numerals ml-2 text-sm text-muted-strong">{p.code}</span>}
+                    {p.code && <span className="numerals ms-2 text-sm text-muted-strong">{p.code}</span>}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => removeProduct(p.slug)}
-                  className="flex h-9 w-9 flex-none items-center justify-center rounded-full border border-border text-muted-strong transition hover:border-foreground hover:text-foreground"
+                  className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-border text-muted-strong transition hover:border-foreground hover:text-foreground"
                   aria-label={`${p.name} ${t('quote.removeProduct')}`}
                 >
                   <X className="h-4 w-4" />
@@ -159,44 +208,52 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
       )}
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label={`${t('quote.fullName')} *`} error={errors.fullName?.message}>
-          <input className={fieldClass} {...register('fullName')} autoComplete="name" />
+        <Field id="fullName" label={`${t('quote.fullName')} *`} error={errors.fullName?.message}>
+          <input id="fullName" className={fieldClass} {...register('fullName')} autoComplete="name" />
         </Field>
-        <Field label={t('quote.company')} error={errors.company?.message}>
-          <input className={fieldClass} {...register('company')} autoComplete="organization" />
+        <Field id="company" label={t('quote.company')} error={errors.company?.message}>
+          <input id="company" className={fieldClass} {...register('company')} autoComplete="organization" />
         </Field>
-        <Field label={`${t('quote.phone')} *`} error={errors.phone?.message}>
-          <input className={fieldClass} {...register('phone')} inputMode="tel" autoComplete="tel" />
+        <Field id="phone" label={`${t('quote.phone')} *`} error={errors.phone?.message}>
+          <input id="phone" className={fieldClass} {...register('phone')} inputMode="tel" autoComplete="tel" />
         </Field>
-        <Field label={`${t('quote.email')} *`} error={errors.email?.message}>
-          <input className={fieldClass} {...register('email')} inputMode="email" autoComplete="email" />
+        <Field id="email" label={`${t('quote.email')} *`} error={errors.email?.message}>
+          <input id="email" className={fieldClass} {...register('email')} inputMode="email" autoComplete="email" />
         </Field>
-        <Field label={t('quote.productField')} error={errors.product?.message}>
+        <Field id="product" label={t('quote.productField')} error={errors.product?.message}>
           <input
+            id="product"
             className={`${fieldClass} ${active.length > 0 ? 'opacity-70' : ''}`}
             {...register('product')}
             readOnly={active.length > 0}
             placeholder={t('quote.productPlaceholder')}
           />
         </Field>
-        <Field label={t('quote.quantity')} error={errors.quantity?.message}>
-          <input className={fieldClass} {...register('quantity')} inputMode="numeric" />
+        <Field id="quantity" label={t('quote.quantity')} error={errors.quantity?.message}>
+          <input id="quantity" className={fieldClass} {...register('quantity')} inputMode="numeric" />
         </Field>
       </div>
 
-      <Field label={t('quote.dimensionsField')} error={errors.dimensions?.message}>
-        <input className={fieldClass} {...register('dimensions')} placeholder={t('quote.dimensionsPlaceholder')} />
+      <Field id="dimensions" label={t('quote.dimensionsField')} error={errors.dimensions?.message}>
+        <input
+          id="dimensions"
+          className={fieldClass}
+          {...register('dimensions')}
+          placeholder={t('quote.dimensionsPlaceholder')}
+        />
       </Field>
 
-      <Field label={t('quote.note')} error={errors.note?.message}>
+      <Field id="note" label={t('quote.note')} error={errors.note?.message}>
         <textarea
+          id="note"
           className="min-h-28 w-full rounded-md border border-border bg-surface px-4 py-3 text-sm outline-none transition-colors focus:border-foreground"
           {...register('note')}
         />
       </Field>
 
-        <Field label={`${t('quote.attachment')} (${t('quote.attachmentHint')})`} error={fileError ?? undefined}>
+      <Field id="attachment" label={`${t('quote.attachment')} (${t('quote.attachmentHint')})`} error={fileError ?? undefined}>
         <input
+          id="attachment"
           type="file"
           accept=".pdf,.jpg,.jpeg,.png,.dwg"
           onChange={onFileChange}
@@ -204,18 +261,35 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
         />
       </Field>
 
-      <label className="flex items-start gap-3 text-sm text-muted-strong">
-        <input type="checkbox" {...register('consent')} className="mt-1" />
-        <span>{t('quote.consent')}</span>
-      </label>
-      {errors.consent && <p className="text-sm text-red-600">{errors.consent.message}</p>}
+      <div>
+        <label className="flex items-start gap-3 text-sm text-muted-strong">
+          <input
+            type="checkbox"
+            {...register('consent')}
+            aria-invalid={errors.consent ? true : undefined}
+            aria-describedby={errors.consent ? 'consent-error' : undefined}
+            className="mt-1"
+          />
+          <span>
+            {t('quote.consent')}{' '}
+            <Link href="/kvkk" className="underline underline-offset-4 hover:text-foreground">
+              {t('quote.consentLink')}
+            </Link>
+          </span>
+        </label>
+        {errors.consent && (
+          <p id="consent-error" role="alert" className="mt-2 text-sm text-danger">
+            {errors.consent.message}
+          </p>
+        )}
+      </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        <Button type="submit" size="lg" disabled={isSubmitting} className="w-full justify-center sm:w-auto">
+        <Button type="submit" size="lg" disabled={isSubmitting} aria-busy={isSubmitting} className="w-full justify-center sm:w-auto">
           {isSubmitting ? t('quote.submitting') : t('quote.submit')}
         </Button>
-        {result && (
-          <p className={result.ok ? 'text-sm text-green-700' : 'text-sm text-red-600'} role="status">
+        {result && !result.ok && (
+          <p className="text-sm text-danger" role="alert">
             {result.message}
           </p>
         )}
@@ -224,12 +298,35 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
   );
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({
+  id,
+  label,
+  error,
+  children,
+}: {
+  id?: string;
+  label: string;
+  error?: string;
+  children: ReactNode;
+}) {
+  const errorId = id ? `${id}-error` : undefined;
+  const child =
+    isValidElement(children) && error
+      ? cloneElement(children as ReactElement<Record<string, unknown>>, {
+          'aria-invalid': true,
+          'aria-describedby': errorId,
+        })
+      : children;
+
   return (
-    <label className="block">
+    <label className="block" htmlFor={id}>
       <span className="mb-2 block text-xs tracking-[0.14em] text-muted uppercase">{label}</span>
-      {children}
-      {error && <span className="mt-2 block text-sm text-red-600">{error}</span>}
+      {child}
+      {error && (
+        <span id={errorId} role="alert" className="mt-2 block text-sm text-danger">
+          {error}
+        </span>
+      )}
     </label>
   );
 }

@@ -48,6 +48,8 @@ export default async function EditProductPage({ params }: PageProps) {
             nameAr: product.nameAr ?? '',
             catEn: product.catEn ?? '',
             catAr: product.catAr ?? '',
+            seoTitle: product.seoTitle ?? '',
+            seoDescription: product.seoDescription ?? '',
           }}
         />
       </div>

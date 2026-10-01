@@ -57,7 +57,7 @@ export function LocaleSwitcher({ onDark = false, compact = false }: { onDark?: b
       {open && (
         <ul
           role="listbox"
-          className="absolute top-full right-0 z-[110] mt-2 w-44 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]"
+          className="absolute top-full end-0 z-[110] mt-2 w-44 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]"
         >
           {locales.map((l) => (
             <li key={l}>
@@ -66,7 +66,7 @@ export function LocaleSwitcher({ onDark = false, compact = false }: { onDark?: b
                 role="option"
                 aria-selected={l === locale}
                 onClick={() => pick(l)}
-                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-surface-2"
+                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-start text-sm transition-colors hover:bg-surface-2"
               >
                 <span>
                   <span className="block">{localeLabels[l].native}</span>

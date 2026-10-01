@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Share2, MessageCircle, Link2, Check, Smartphone } from 'lucide-react';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { useToast } from '@/components/ui/ToastProvider';
 import { cn } from '@/lib/utils';
 import { track } from '@/lib/analytics';
 
@@ -23,9 +24,15 @@ export function ShareButton({
 }) {
   const { dict } = useDictionary();
   const c = dict.common;
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [canNative, setCanNative] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCanNative(typeof navigator !== 'undefined' && !!navigator.share);
+  }, []);
 
   const text = dict.pages.whatsapp.productMessage
     .replace('{product}', name)
@@ -52,6 +59,7 @@ export function ShareButton({
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
+      toast(c.copied);
       track('share', { channel: 'copy', name });
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -83,7 +91,6 @@ export function ShareButton({
     }
   }
 
-  const canNative = typeof navigator !== 'undefined' && !!navigator.share;
   const item =
     'flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-surface-2';
 
@@ -98,10 +105,9 @@ export function ShareButton({
         }}
         aria-label={c.shareMenu}
         aria-expanded={open}
-        aria-haspopup="menu"
         title={c.shareMenu}
         className={cn(
-          'flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground',
+          'flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground',
           className,
         )}
       >
@@ -109,12 +115,8 @@ export function ShareButton({
       </button>
 
       {open && (
-        <div
-          role="menu"
-          className="absolute end-0 top-full z-[120] mt-2 w-60 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]"
-        >
+        <div className="absolute end-0 top-full z-[120] mt-2 w-60 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]">
           <a
-            role="menuitem"
             href={waHref}
             target="_blank"
             rel="noopener noreferrer"
@@ -128,12 +130,12 @@ export function ShareButton({
           </a>
 
           {canNative && (
-            <button type="button" role="menuitem" onClick={nativeShare} className={item}>
+            <button type="button" onClick={nativeShare} className={item}>
               <Smartphone className="h-4 w-4" /> {c.shareNative}
             </button>
           )}
 
-          <button type="button" role="menuitem" onClick={copyLink} className={item}>
+          <button type="button" onClick={copyLink} className={item}>
             {copied ? <Check className="h-4 w-4 text-green-600" /> : <Link2 className="h-4 w-4" />}
             {copied ? c.copied : c.copyLink}
           </button>

@@ -17,7 +17,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: dict.pages.cookies.metaTitle,
     description: dict.pages.cookies.metaDescription,
     path: '/cerez-politikasi',
-    noIndex: true,
     locale: lang,
   });
 }

@@ -21,7 +21,8 @@ export type AnalyticsEvent =
   | 'compare_add'
   | 'compare_remove'
   | 'share'
-  | 'whatsapp_click';
+  | 'whatsapp_click'
+  | 'phone_click';
 
 const CONSENT_KEY = 'bozkir:consent';
 

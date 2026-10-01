@@ -72,15 +72,20 @@ export function buildMetadata({
 
 /** Organization + WebSite + SearchAction şeması (site geneli). */
 export function organizationJsonLd() {
+  const [lat, lng] = siteConfig.warehouse.coords.split(',').map((v) => Number(v.trim()));
   return {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
+    '@type': ['Organization', 'Store'],
+    '@id': absoluteUrl('/#store'),
     name: siteConfig.legalName,
     url: siteConfig.url,
     logo: absoluteUrl('/icon-512.png'),
     image: absoluteUrl('/images/og-home.jpg'),
     telephone: siteConfig.phone,
     email: siteConfig.email,
+    priceRange: '$$',
+    currenciesAccepted: 'TRY',
+    paymentAccepted: 'Nakit, Kredi Kartı, Havale',
     sameAs: [siteConfig.social.instagram, siteConfig.social.facebook].filter(Boolean),
     contactPoint: [
       {
@@ -99,6 +104,26 @@ export function organizationJsonLd() {
       postalCode: siteConfig.address.postalCode,
       addressCountry: siteConfig.address.country,
     },
+    ...(Number.isFinite(lat) && Number.isFinite(lng)
+      ? {
+          geo: { '@type': 'GeoCoordinates', latitude: lat, longitude: lng },
+          hasMap: `https://www.google.com/maps?q=${encodeURIComponent(siteConfig.warehouse.coords)}`,
+        }
+      : {}),
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '08:00',
+        closes: '18:00',
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Saturday'],
+        opens: '08:00',
+        closes: '14:00',
+      },
+    ],
   };
 }
 

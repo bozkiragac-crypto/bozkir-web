@@ -1,16 +1,12 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Fraunces, Caveat } from 'next/font/google';
 import '../globals.css';
 import { getSession } from '@/lib/auth/session';
+import { fontVariables } from '@/lib/fonts';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { AdminTabGuard } from '@/components/admin/AdminTabGuard';
 import { themeScript } from '@/components/layout/DocumentAssets';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
-
-const inter = Inter({ subsets: ['latin', 'latin-ext'], variable: '--font-inter', display: 'swap' });
-const fraunces = Fraunces({ subsets: ['latin', 'latin-ext'], variable: '--font-fraunces', display: 'swap' });
-const caveat = Caveat({ subsets: ['latin', 'latin-ext'], variable: '--font-hand', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Yönetim Paneli | Bozkır Ağaç Ürünleri',
@@ -24,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await getSession();
 
   return (
-    <html lang="tr" dir="ltr" className={`${inter.variable} ${fraunces.variable} ${caveat.variable}`}>
+    <html lang="tr" dir="ltr" className={fontVariables}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

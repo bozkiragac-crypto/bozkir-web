@@ -120,7 +120,7 @@ export function FavoritesView() {
                     type="button"
                     onClick={() => removeFavorite(ref.slug)}
                     aria-label={t('favorites.remove')}
-                    className="absolute top-2 right-2 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground"
+                    className="absolute top-2 end-2 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -143,7 +143,7 @@ export function FavoritesView() {
                       aria-label={t('catalog.addCompare')}
                       aria-pressed={inCompare(ref.slug)}
                       className={cn(
-                        'flex h-9 w-9 flex-none items-center justify-center rounded-full border transition',
+                        'flex h-11 w-11 flex-none items-center justify-center rounded-full border transition',
                         inCompare(ref.slug)
                           ? 'border-transparent bg-foreground text-background'
                           : 'border-border hover:border-foreground',

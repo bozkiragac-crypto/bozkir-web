@@ -120,15 +120,15 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
           <figure className="relative h-[80vh] w-[92vw] max-w-5xl" onClick={(e) => e.stopPropagation()}>
             <Image src={current.url} alt={current.title || ''} fill sizes="92vw" className="object-contain" />
             <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-center text-sm text-white">
-              {current.tag && <span className="mr-2 text-white/70">{current.tag}</span>}
+              {current.tag && <span className="me-2 text-white/70">{current.tag}</span>}
               {current.title}
-              <span className="numerals ml-3 text-white/60">
+              <span className="numerals ms-3 text-white/60">
                 {lightbox! + 1} / {count}
               </span>
               <Link
                 href={current.href ?? `/urunler${current.tag ? `?q=${encodeURIComponent(current.tag)}` : ''}`}
                 onClick={() => setLightbox(null)}
-                className="ml-4 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-medium text-black hover:bg-white/90"
+                className="ms-4 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-medium text-black hover:bg-white/90"
               >
                 {t('common.viewProduct')} <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>

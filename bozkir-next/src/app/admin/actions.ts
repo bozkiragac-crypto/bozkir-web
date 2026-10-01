@@ -205,6 +205,8 @@ export interface ProductInput {
   nameAr?: string;
   catEn?: string;
   catAr?: string;
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; error?: string; id?: string }> {
@@ -224,6 +226,8 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
   const nameAr = input.nameAr?.trim() || null;
   const catEn = input.catEn?.trim() || null;
   const catAr = input.catAr?.trim() || null;
+  const seoTitle = input.seoTitle?.trim() || null;
+  const seoDescription = input.seoDescription?.trim() || null;
 
   if (input.id) {
     const prev = await db.select({ img: products.img }).from(products).where(eq(products.id, input.id)).limit(1);
@@ -245,6 +249,8 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
         nameAr,
         catEn,
         catAr,
+        seoTitle,
+        seoDescription,
       })
       .where(eq(products.id, input.id));
 
@@ -269,6 +275,8 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
       nameAr,
       catEn,
       catAr,
+      seoTitle,
+      seoDescription,
     })
     .returning({ id: products.id });
 

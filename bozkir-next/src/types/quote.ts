@@ -9,6 +9,8 @@ export interface QuoteRequest {
   quantity?: string;
   dimensions?: string;
   note?: string;
+  /** KVKK/gizlilik onayı — sunucuda da zorunlu. */
+  consent?: boolean;
   /** Yüklenen dosyanın meta bilgisi (gerçek yükleme backend'de yapılır). */
   attachment?: {
     name: string;
@@ -20,4 +22,6 @@ export interface QuoteRequest {
 export interface QuoteResponse {
   ok: boolean;
   message: string;
+  /** HTTP durum kodu (429/422 vb. ayrımı için). */
+  status?: number;
 }

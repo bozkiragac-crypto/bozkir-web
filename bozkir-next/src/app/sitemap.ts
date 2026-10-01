@@ -7,7 +7,7 @@ import { defaultLocale, locales } from '@/i18n/config';
 export const revalidate = 3600;
 
 /** Her yol için tüm dil varyantlarını `alternates.languages` olarak üretir. */
-function entry(path: string, lastModified: Date, changeFrequency: 'weekly' | 'monthly', priority: number) {
+function entry(path: string, changeFrequency: 'weekly' | 'monthly', priority: number) {
   const clean = path === '/' ? '' : path;
   const base = siteConfig.url.replace(/\/$/, '');
   const languages: Record<string, string> = {
@@ -18,7 +18,6 @@ function entry(path: string, lastModified: Date, changeFrequency: 'weekly' | 'mo
   };
   return {
     url: languages[defaultLocale]!,
-    lastModified,
     changeFrequency,
     priority,
     alternates: { languages },
@@ -26,9 +25,7 @@ function entry(path: string, lastModified: Date, changeFrequency: 'weekly' | 'mo
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-
-  const [categories, products] = await Promise.all([getCategories(), getAllProducts(1000)]);
+  const [categories, products] = await Promise.all([getCategories(), getAllProducts()]);
 
   const staticRoutes: { path: string; priority: number; freq: 'weekly' | 'monthly' }[] = [
     { path: '/', priority: 1, freq: 'weekly' },
@@ -40,12 +37,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/sss', priority: 0.5, freq: 'monthly' },
     { path: '/iletisim', priority: 0.6, freq: 'monthly' },
     { path: '/teklif-al', priority: 0.7, freq: 'monthly' },
+    { path: '/kvkk', priority: 0.3, freq: 'monthly' },
+    { path: '/gizlilik', priority: 0.3, freq: 'monthly' },
+    { path: '/cerez-politikasi', priority: 0.3, freq: 'monthly' },
   ];
 
   return [
-    ...staticRoutes.map((r) => entry(r.path, now, r.freq, r.priority)),
-    ...categories.map((c) => entry(`/kategoriler/${c.slug}`, now, 'weekly', 0.7)),
-    ...products.map((p) => entry(`/urunler/${p.slug}`, now, 'weekly', 0.65)),
+    ...staticRoutes.map((r) => entry(r.path, r.freq, r.priority)),
+    ...categories.map((c) => entry(`/kategoriler/${c.slug}`, 'weekly', 0.7)),
+    ...products.map((p) => entry(`/urunler/${p.slug}`, 'weekly', 0.65)),
   ];
 }
 

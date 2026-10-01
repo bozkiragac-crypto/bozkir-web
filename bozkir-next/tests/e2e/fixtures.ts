@@ -63,11 +63,23 @@ export async function gotoWithRetry(
   let last: unknown;
   for (let i = 0; i < attempts; i++) {
     try {
-      return await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20_000 });
+      const res = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20_000 });
+      await dismissConsent(page);
+      return res;
     } catch (err) {
       last = err;
       await page.waitForTimeout(800);
     }
   }
   throw last;
+}
+
+/** Çerez bandı açıksa kabul eder (tıklamaları örtmesini engeller). */
+export async function dismissConsent(page: Page): Promise<void> {
+  const accept = page.getByRole('button', { name: /Kabul Et|Accept/ }).first();
+  try {
+    if (await accept.isVisible({ timeout: 1000 })) await accept.click({ timeout: 2000 });
+  } catch {
+    // bant yok / tıklanamadı: yok say
+  }
 }

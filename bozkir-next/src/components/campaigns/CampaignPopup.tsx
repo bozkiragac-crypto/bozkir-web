@@ -88,7 +88,7 @@ export function CampaignPopup({ campaign, readMore }: { campaign: PopupCampaign;
               onClick={close}
               className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
             >
-              {campaign.linkLabel || readMore} <ArrowRight className="h-4 w-4" />
+              {campaign.linkLabel || readMore} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
             </Link>
           )}
         </div>

@@ -22,7 +22,7 @@ export async function SupplyLogistics({ locale }: { locale: Locale }) {
         action={
           <MagneticButton>
             <ButtonLink href="/teklif-al" variant="outline">
-              {h.cta} <ArrowRight className="h-4 w-4" />
+              {h.cta} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
             </ButtonLink>
           </MagneticButton>
         }
