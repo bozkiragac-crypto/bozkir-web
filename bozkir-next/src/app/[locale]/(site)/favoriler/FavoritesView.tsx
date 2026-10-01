@@ -9,6 +9,7 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ShareListButton, useImportFromUrl } from '@/components/products/ListImport';
+import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
 import type { Product } from '@/types/product';
 import { cn } from '@/lib/utils';
 
@@ -44,6 +45,7 @@ export function FavoritesView() {
   }, [favorites]);
 
   const items = favorites.map((f) => ({ ref: f, product: details[f.slug] }));
+  const quoteHref = `/teklif-al?urunler=${favorites.slice(0, 4).map((f) => encodeURIComponent(f.slug)).join(',')}`;
 
   return (
     <>
@@ -79,20 +81,26 @@ export function FavoritesView() {
               <p className="numerals text-sm text-muted-strong">
                 {items.length} · {compare.length}/4 {t('compare.counter')}
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href={quoteHref}
+                  className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background"
+                >
+                  {t('compare.quoteAll')}
+                </Link>
                 <ShareListButton slugs={favorites.map((f) => f.slug)} />
                 <button
                   type="button"
                   onClick={clearFavorites}
-                  className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm text-muted-strong transition hover:border-foreground hover:text-foreground"
+                  className="inline-flex h-11 items-center gap-2 rounded-full border border-border px-4 text-sm text-muted-strong transition hover:border-foreground hover:text-foreground"
                 >
                   <Trash2 className="h-4 w-4" /> {t('favorites.clear')}
                 </button>
                 <Link
                   href="/karsilastir"
                   className={cn(
-                    'inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-medium',
-                    compare.length >= 2 ? 'bg-foreground text-background' : 'pointer-events-none bg-surface-2 text-muted',
+                    'inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-medium',
+                    compare.length >= 2 ? 'border border-border' : 'pointer-events-none bg-surface-2 text-muted',
                   )}
                 >
                   <Scale className="h-4 w-4" /> {t('favorites.compare')}
@@ -113,7 +121,9 @@ export function FavoritesView() {
                           sizes="(max-width: 768px) 50vw, 25vw"
                           className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
                         />
-                      ) : null}
+                      ) : (
+                        <ImagePlaceholder iconClassName="h-5 w-5" />
+                      )}
                     </div>
                   </Link>
                   <button

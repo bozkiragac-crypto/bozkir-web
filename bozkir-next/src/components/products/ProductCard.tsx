@@ -4,6 +4,7 @@ import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { SmartImage } from '@/components/ui/SmartImage';
+import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
 import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
 import type { Product } from '@/types/product';
 import { cn } from '@/lib/utils';
@@ -13,6 +14,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   const [broken, setBroken] = useState(false);
   const { t } = useDictionary();
   const image = product.thumbnail ?? product.images[0];
+  const secondImage = product.images.find((u) => u !== image);
   const ref = {
     id: product.id,
     slug: product.slug,
@@ -27,23 +29,32 @@ export function ProductCard({ product, priority = false }: { product: Product; p
     <Link href={`/urunler/${product.slug}`} className="group block">
       <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-surface-2">
         {image && !broken ? (
-          <SmartImage
-            src={image}
-            alt={product.name}
-            fill
-            priority={priority}
-            sizes="(max-width: 768px) 50vw, 25vw"
-            onError={() => setBroken(true)}
-            className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
-          />
+          <>
+            <SmartImage
+              src={image}
+              alt={product.name}
+              fill
+              priority={priority}
+              sizes="(max-width: 768px) 50vw, 25vw"
+              onError={() => setBroken(true)}
+              className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
+            />
+            {secondImage ? (
+              <SmartImage
+                src={secondImage}
+                alt=""
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+                className="object-cover opacity-0 transition-opacity duration-700 ease-[var(--ease-out-expo)] group-hover:opacity-100"
+              />
+            ) : null}
+          </>
         ) : (
-          <div className="flex h-full items-center justify-center text-xs tracking-[0.14em] text-muted uppercase">
-            {t('catalog.imagePreparing')}
-          </div>
+          <ImagePlaceholder label={t('catalog.imagePreparing')} />
         )}
 
         {/* Favori / karşılaştırma — mobilde her zaman, masaüstünde hover'da */}
-        <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-100 transition-opacity duration-300 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
+        <div className="absolute end-2 top-2 flex flex-col gap-2 opacity-100 transition-opacity duration-300 md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
           <FavoriteButton product={ref} />
           <CompareButton product={ref} />
         </div>

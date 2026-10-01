@@ -22,7 +22,7 @@ export async function FaqAccordion({ block, locale }: { block: ContentBlock; loc
                 <span className="text-base font-medium tracking-tight md:text-lg">{item.title}</span>
                 <Plus className="h-5 w-5 flex-none text-muted transition-transform duration-300 group-open:rotate-45" />
               </summary>
-              <div className="pb-6 pr-10 text-sm leading-relaxed text-muted-strong">{item.description}</div>
+              <div className="pb-6 pe-10 text-sm leading-relaxed text-muted-strong">{item.description}</div>
             </details>
           ))}
         </div>

@@ -9,6 +9,8 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ShareListButton, useImportFromUrl } from '@/components/products/ListImport';
+import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
+import { cn } from '@/lib/utils';
 import type { Product } from '@/types/product';
 
 export function CompareView() {
@@ -43,6 +45,18 @@ export function CompareView() {
 
   const items = compare.map((c) => ({ ref: c, product: details[c.slug] }));
   const quoteHref = `/teklif-al?urunler=${compare.map((c) => encodeURIComponent(c.slug)).join(',')}`;
+
+  // Fark vurgusu için satır değerleri (aynı olanlar soluk, farklılar öne çıkar).
+  const rows: { label: string; values: string[]; numerals?: boolean }[] = [
+    { label: t('compare.code'), values: items.map(({ ref, product }) => product?.code ?? ref.code ?? '—'), numerals: true },
+    { label: t('compare.category'), values: items.map(({ ref, product }) => product?.category ?? ref.category ?? '—') },
+    { label: t('compare.surface'), values: items.map(({ ref, product }) => (product?.face ?? ref.face) || '—') },
+    {
+      label: t('compare.thickness'),
+      values: items.map(({ product }) => (product?.thicknesses?.length ? product.thicknesses.join(' · ') : '—')),
+      numerals: true,
+    },
+  ];
 
   return (
     <>
@@ -103,9 +117,9 @@ export function CompareView() {
               <table className="w-full min-w-[640px] border-collapse text-left text-sm">
                 <thead>
                   <tr>
-                    <th className="w-28 pb-4 align-bottom" />
+                    <th className="sticky start-0 z-10 w-28 bg-background pb-4 align-bottom" />
                     {items.map(({ ref, product }) => (
-                      <th key={ref.slug} className="pb-4 pr-4 align-bottom">
+                      <th key={ref.slug} className="bg-background pb-4 pe-4 align-bottom">
                         <button
                           type="button"
                           onClick={() => removeCompare(ref.slug)}
@@ -124,7 +138,9 @@ export function CompareView() {
                                 sizes="128px"
                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                               />
-                            ) : null}
+                            ) : (
+                              <ImagePlaceholder iconClassName="h-5 w-5" />
+                            )}
                           </div>
                           <p className="mt-3 max-w-[10rem] text-sm font-medium leading-snug">
                             {product?.name ?? ref.name}
@@ -135,52 +151,43 @@ export function CompareView() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
+                  {rows.map((row) => {
+                    const highlight = new Set(row.values).size > 1;
+                    return (
+                      <tr key={row.label}>
+                        <th className="sticky start-0 z-10 bg-background py-4 pe-4 text-xs font-normal tracking-[0.14em] text-muted uppercase">
+                          {row.label}
+                        </th>
+                        {row.values.map((value, i) => (
+                          <td key={items[i]?.ref.slug ?? i} className={cn('py-4 pe-4', row.numerals && 'numerals')}>
+                            <span
+                              className={cn(
+                                highlight ? 'rounded-md bg-surface-2 px-2 py-1 font-medium' : 'text-muted-strong',
+                              )}
+                            >
+                              {value}
+                            </span>
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
                   <tr>
-                    <th className="py-4 pr-4 text-xs font-normal tracking-[0.14em] text-muted uppercase">{t('compare.code')}</th>
-                    {items.map(({ ref, product }) => (
-                      <td key={ref.slug} className="py-4 pr-4 numerals">
-                        {product?.code ?? ref.code ?? '—'}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th className="py-4 pr-4 text-xs font-normal tracking-[0.14em] text-muted uppercase">{t('compare.category')}</th>
-                    {items.map(({ ref, product }) => (
-                      <td key={ref.slug} className="py-4 pr-4">
-                        {product?.category ?? ref.category}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th className="py-4 pr-4 text-xs font-normal tracking-[0.14em] text-muted uppercase">{t('compare.surface')}</th>
-                    {items.map(({ ref, product }) => (
-                      <td key={ref.slug} className="py-4 pr-4">
-                        {(product?.face ?? ref.face) || '—'}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th className="py-4 pr-4 text-xs font-normal tracking-[0.14em] text-muted uppercase">{t('compare.thickness')}</th>
-                    {items.map(({ ref, product }) => (
-                      <td key={ref.slug} className="py-4 pr-4 numerals">
-                        {product?.thicknesses?.length ? product.thicknesses.join(' · ') : '—'}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th className="py-4 pr-4 text-xs font-normal tracking-[0.14em] text-muted uppercase">{t('compare.actions')}</th>
+                    <th className="sticky start-0 z-10 bg-background py-4 pe-4 text-xs font-normal tracking-[0.14em] text-muted uppercase">
+                      {t('compare.actions')}
+                    </th>
                     {items.map(({ ref }) => (
-                      <td key={ref.slug} className="py-4 pr-4">
+                      <td key={ref.slug} className="py-4 pe-4">
                         <div className="flex flex-wrap gap-2">
                           <Link
                             href={`/urunler/${ref.slug}`}
-                            className="inline-flex h-9 items-center rounded-full border border-border px-3 text-xs transition hover:border-foreground"
+                            className="inline-flex h-11 items-center rounded-full border border-border px-4 text-xs transition hover:border-foreground"
                           >
                             {t('common.viewProduct')}
                           </Link>
                           <Link
                             href={`/teklif-al?urun=${encodeURIComponent(ref.slug)}`}
-                            className="inline-flex h-9 items-center rounded-full bg-foreground px-3 text-xs text-background"
+                            className="inline-flex h-11 items-center rounded-full bg-foreground px-4 text-xs text-background"
                           >
                             {t('common.getQuote')}
                           </Link>
@@ -205,7 +212,7 @@ export function CompareView() {
                           type="button"
                           onClick={() => toggleCompare(f)}
                           disabled={inList}
-                          className={`inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm transition ${
+                          className={`inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm transition ${
                             inList ? 'border-transparent bg-foreground text-background' : 'border-border hover:border-foreground'
                           }`}
                         >

@@ -110,6 +110,7 @@ export function Header({ categories }: HeaderProps) {
   return (
     <>
       <header
+        data-on-dark={onDark ? '' : undefined}
         className={cn(
           'fixed inset-x-0 top-0 z-[80] transition-[background-color,border-color,backdrop-filter] duration-300 ease-[var(--ease-out-expo)]',
           scrolled || megaOpen

@@ -55,7 +55,7 @@ export function Hero() {
   );
 
   return (
-    <section ref={root} className="relative isolate min-h-svh overflow-clip bg-[#111] text-white">
+    <section ref={root} data-on-dark className="relative isolate min-h-svh overflow-clip bg-[#111] text-white">
       <div data-hero-parallax className="absolute inset-0 -z-20 will-change-transform">
         <div data-hero-media className="absolute inset-0">
           <Image

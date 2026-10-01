@@ -13,7 +13,7 @@ export async function QuoteCTA({ locale }: { locale: Locale }) {
   const h = dict.home.quoteCta;
   return (
     <Container className="pb-24 md:pb-32">
-      <div className="relative overflow-hidden rounded-xl bg-foreground px-8 py-16 text-background md:px-16 md:py-24">
+      <div data-on-dark className="relative overflow-hidden rounded-xl bg-foreground px-8 py-16 text-background md:px-16 md:py-24">
         <div className="max-w-2xl">
           <h2 className="text-headline">{h.title}</h2>
           <p className="mt-5 max-w-lg text-background/70">{h.body}</p>

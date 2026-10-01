@@ -44,7 +44,7 @@ export async function ProductShowcase({ categories, locale }: { categories: Cate
                   alt={category.name}
                   fill
                   sizes="(max-width: 1024px) 74vw, 30vw"
-                  className="object-cover transition-transform duration-[900ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.06]"
+                  className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-xs tracking-[0.14em] text-muted uppercase">

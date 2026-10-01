@@ -1,5 +1,8 @@
 import { test, expect, gotoWithRetry } from './fixtures';
 
+// Lenis/GSAP kaynaklı scroll sürtünmesini elemek için hareket azaltma açık.
+test.use({ reducedMotion: 'reduce' });
+
 test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları', () => {
   test('ürünler: sıralama seçici URL günceller ve sonuç döner', async ({ page }) => {
     await gotoWithRetry(page, '/tr/urunler');
@@ -58,6 +61,30 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
     // Mobilde footer bölümleri katlanmış olabilir; DOM'da bulunması yeterli.
     if (isMobile) await expect(hours).toBeAttached();
     else await expect(hours).toBeVisible();
+  });
+
+  test('kategori sayfasında sıralama seçici çalışır', async ({ page }) => {
+    await gotoWithRetry(page, '/tr/kategoriler/mdflam');
+    const sort = page.locator('#sort-filter');
+    await expect(sort).toBeVisible();
+    await sort.selectOption('name-asc');
+    await expect(page).toHaveURL(/sirala=name-asc/);
+  });
+
+  test('ürün galerisinde büyütme lightbox açılıp Escape ile kapanır', async ({ page }) => {
+    await gotoWithRetry(page, '/tr/urunler');
+    const product = page.locator('main a[href*="/tr/urunler/"]').first();
+    await product.waitFor({ state: 'visible' });
+    const href = (await product.getAttribute('href')) ?? '';
+    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    const expand = page.getByRole('button', { name: 'Görseli büyüt' }).first();
+    await expect(expand).toBeAttached({ timeout: 10_000 });
+    // Scroll/animasyon sürtünmesini elemek için doğrudan DOM tıklaması.
+    await expand.evaluate((el) => (el as HTMLButtonElement).click());
+    const dialog = page.locator('[role="dialog"][data-lenis-prevent]');
+    await expect(dialog).toBeVisible({ timeout: 10_000 });
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
   });
 
   test('favoriye ekleyince toast görünür', async ({ page }) => {

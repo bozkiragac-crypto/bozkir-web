@@ -34,7 +34,7 @@ test.describe('Ürünler ve katalog', () => {
     const href = (await firstProduct.getAttribute('href')) ?? '';
     await page.goto(href, { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.locator('h1').first()).toBeVisible();
     await expect(page.locator('a[href*="teklif-al?urun="]').first()).toBeVisible();
   });
 

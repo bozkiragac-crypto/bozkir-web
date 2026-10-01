@@ -12,6 +12,7 @@ import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { ProductGallery } from '@/components/products/ProductGallery';
 import { ProductCard } from '@/components/products/ProductCard';
+import { SectionHeading } from '@/components/ui/SectionHeading';
 import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
 import { ShareButton } from '@/components/products/ShareButton';
 import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
@@ -173,13 +174,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
       {related.length > 0 && (
         <Container className="pb-40 md:pb-32">
-          <div className="border-t border-border pt-12">
-            <h2 className="text-headline text-2xl md:text-3xl">{dict.product.related}</h2>
-            <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
-              {related.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
+          <SectionHeading eyebrow={product.category} title={dict.product.related} />
+          <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         </Container>
       )}

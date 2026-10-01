@@ -10,7 +10,7 @@ export async function ProcessSteps({ block, locale }: { block: ContentBlock; loc
   const dict = dictFor(locale);
 
   return (
-    <section className="bg-foreground py-24 text-background md:py-32">
+    <section data-on-dark className="bg-foreground py-24 text-background md:py-32">
       <Container>
         <Reveal>
           <div className="max-w-2xl">

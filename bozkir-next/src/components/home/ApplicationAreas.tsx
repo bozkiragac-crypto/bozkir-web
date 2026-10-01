@@ -28,7 +28,7 @@ export async function ApplicationAreas({ block, locale }: { block: ContentBlock;
                     alt={item.title}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition-transform duration-[900ms] ease-[var(--ease-out-expo)] group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-xs tracking-[0.14em] text-muted uppercase">

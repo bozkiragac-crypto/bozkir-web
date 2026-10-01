@@ -18,10 +18,12 @@ import { ApplicationAreas } from '@/components/home/ApplicationAreas';
 import { Material3D } from '@/components/home/Material3D';
 import { ProcessSteps } from '@/components/home/ProcessSteps';
 import { BrandPartners } from '@/components/home/BrandPartners';
+import { StatsBand } from '@/components/home/StatsBand';
 import { FaqAccordion } from '@/components/home/FaqAccordion';
 import { SupplyLogistics } from '@/components/home/SupplyLogistics';
 import { CatalogSection } from '@/components/home/CatalogSection';
 import { QuoteCTA } from '@/components/home/QuoteCTA';
+import { Container } from '@/components/ui/Container';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -73,6 +75,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Material3D locale={lang} />
       {process && <ProcessSteps block={process} locale={lang} />}
       <BrandPartners brands={fallbackBrands} locale={lang} />
+      <Container className="pb-24 md:pb-32">
+        <StatsBand />
+      </Container>
       {faq && <FaqAccordion block={faq} locale={lang} />}
       <SupplyLogistics locale={lang} />
       <CatalogSection locale={lang} />

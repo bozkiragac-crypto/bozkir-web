@@ -1,16 +1,17 @@
 'use client';
 
-import { cloneElement, isValidElement, useState, type ReactElement, type ReactNode } from 'react';
+import { cloneElement, isValidElement, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, MessageCircle, Phone } from 'lucide-react';
+import { X, MessageCircle, Phone, Paperclip, CheckCircle2 } from 'lucide-react';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { track } from '@/lib/analytics';
 import { submitQuote } from '@/lib/api/quote';
 import { Button } from '@/components/ui/Button';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { siteConfig } from '@/config/site';
+import { cn } from '@/lib/utils';
 
 const MAX_FILE_MB = 10;
 const ALLOWED = ['application/pdf', 'image/jpeg', 'image/png', 'image/vnd.dwg', 'application/acad'];
@@ -42,6 +43,8 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
   const list = products && products.length > 0 ? products : [];
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [sent, setSent] = useState(false);
   const [excluded, setExcluded] = useState<string[]>([]);
@@ -87,7 +90,10 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
   }
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null;
+    handleFile(e.target.files?.[0] ?? null);
+  }
+
+  function handleFile(f: File | null) {
     setFileError(null);
     if (!f) return setFile(null);
     if (f.size > MAX_FILE_MB * 1024 * 1024) {
@@ -99,6 +105,11 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
       return setFile(null);
     }
     setFile(f);
+  }
+
+  function clearFile() {
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
   async function onSubmit(values: FormValues) {
@@ -140,7 +151,20 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
   if (sent) {
     return (
       <div role="status" aria-live="polite" className="rounded-xl border border-border bg-surface p-8">
-        <p className="text-lg font-medium text-success">{t('quote.success')}</p>
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-success">
+          <CheckCircle2 className="h-6 w-6" />
+        </span>
+        <p className="mt-4 text-lg font-medium text-success">{t('quote.success')}</p>
+        {active.length > 0 && (
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {active.map((p) => (
+              <li key={p.slug} className="rounded-full border border-border px-3 py-1 text-xs text-muted-strong">
+                {p.name}
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-4 text-sm text-muted-strong">{t('quote.description')}</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a
             href={waHref}
@@ -251,15 +275,61 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
         />
       </Field>
 
-      <Field id="attachment" label={`${t('quote.attachment')} (${t('quote.attachmentHint')})`} error={fileError ?? undefined}>
-        <input
-          id="attachment"
-          type="file"
-          accept=".pdf,.jpg,.jpeg,.png,.dwg"
-          onChange={onFileChange}
-          className="w-full rounded-md border border-dashed border-border bg-surface px-4 py-3 text-sm"
-        />
-      </Field>
+      <div>
+        <span className="mb-2 block text-xs tracking-[0.14em] text-muted uppercase">
+          {t('quote.attachment')}{' '}
+          <span className="normal-case tracking-normal">({t('quote.attachmentHint')})</span>
+        </span>
+        <label
+          htmlFor="attachment"
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            handleFile(e.dataTransfer.files?.[0] ?? null);
+          }}
+          className={cn(
+            'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 py-6 text-center text-sm transition-colors',
+            dragging ? 'border-foreground bg-surface-2' : 'border-border bg-surface hover:border-border-strong',
+          )}
+        >
+          <Paperclip className="h-4 w-4 text-muted" aria-hidden />
+          <span className="text-muted-strong">{t('quote.attachmentHint')}</span>
+          <input
+            ref={fileInputRef}
+            id="attachment"
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.dwg"
+            onChange={onFileChange}
+            aria-invalid={fileError ? true : undefined}
+            aria-describedby={fileError ? 'attachment-error' : undefined}
+            className="sr-only"
+          />
+        </label>
+        {file && (
+          <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs">
+            <Paperclip className="h-3.5 w-3.5 flex-none text-muted" aria-hidden />
+            <span className="truncate">{file.name}</span>
+            <button
+              type="button"
+              onClick={clearFile}
+              aria-label={t('catalog.clear')}
+              className="flex h-6 w-6 flex-none items-center justify-center rounded-full hover:bg-surface-2"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+        {fileError && (
+          <p id="attachment-error" role="alert" className="mt-2 text-sm text-danger">
+            {fileError}
+          </p>
+        )}
+      </div>
 
       <div>
         <label className="flex items-start gap-3 text-sm text-muted-strong">

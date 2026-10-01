@@ -28,6 +28,7 @@ COPY --from=build /app/public ./public
 COPY --from=build /app/.next ./.next
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/next.config.mjs ./next.config.mjs
 COPY --from=build /app/scripts ./scripts
 EXPOSE 3000
 CMD ["node_modules/next/dist/bin/next", "start", "-p", "3000"]

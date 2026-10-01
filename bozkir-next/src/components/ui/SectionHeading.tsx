@@ -52,7 +52,12 @@ export function SectionHeading({ eyebrow, title, body, className, action }: Sect
       className={cn('flex flex-wrap items-end justify-between gap-6 border-b border-border pb-8', className)}
     >
       <div className="max-w-3xl">
-        {eyebrow && <p className="text-eyebrow">{eyebrow}</p>}
+        {eyebrow && (
+          <p className="text-eyebrow flex items-center gap-2">
+            <span className="h-px w-6 bg-accent" aria-hidden />
+            {eyebrow}
+          </p>
+        )}
         <h2 className="text-headline mt-4" aria-label={title}>
           {words.map((word, i) => (
             <span

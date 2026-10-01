@@ -58,8 +58,16 @@ MAINTENANCE_MODE=1 docker compose up -d app
 # kapatmak için: MAINTENANCE_MODE=0 docker compose up -d app
 ```
 `/api`, `/media`, `/admin`, `/maintenance` ve statik dosyalar hariç tüm public
-trafik bakım sayfasına (HTTP 503) yönlenir. Yedek olarak nginx statik sayfası:
-`deploy/maintenance.html`.
+trafik bakım sayfasına (HTTP 503) yönlenir.
+
+**Uygulama çökerse (app container down/OOM):** nginx `error_page 502 504` ile
+statik `deploy/maintenance.html` sayfasını servis eder (telefon/WhatsApp/e-posta,
+30 sn otomatik yenileme, TR/EN/AR). 503 bilinçli olarak geçirilir; böylece planlı
+bakımda Next'in çok dilli bakım sayfası görünür. Test:
+```bash
+docker stop bozkir-next-app-1 && curl -i http://localhost/tr   # bakım sayfası
+docker start bozkir-next-app-1
+```
 
 ## Yedek / Geri Yükleme
 

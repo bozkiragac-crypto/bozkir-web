@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -9,9 +8,10 @@ import { getProducts } from '@/lib/api/products';
 import { buildMetadata, breadcrumbJsonLd, absoluteUrl } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
-import { ButtonLink } from '@/components/ui/Button';
 import { ProductCard } from '@/components/products/ProductCard';
 import { CategorySearch } from '@/components/products/CategorySearch';
+import { SortSelect } from '@/components/products/SortSelect';
+import { SmartImage } from '@/components/ui/SmartImage';
 import { Reveal } from '@/components/animations/Reveal';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
@@ -61,11 +61,16 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const dict = getDictionary(locale ?? 'tr');
   const q = str(sp.q);
   const page = Math.max(1, parseInt(str(sp.sayfa) ?? '1', 10) || 1);
+  const sortParam = str(sp.sirala);
+  const sort =
+    sortParam === 'name-asc' || sortParam === 'name-desc' || sortParam === 'code-asc'
+      ? sortParam
+      : undefined;
 
   const [category, all, result] = await Promise.all([
     getCategoryBySlug(slug, locale),
     getCategories(locale),
-    getProducts({ category: slug, query: q, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }, locale),
+    getProducts({ category: slug, query: q, sort, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }, locale),
   ]);
 
   if (!category) notFound();
@@ -77,6 +82,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const buildHref = (target: number) => {
     const p = new URLSearchParams();
     if (q) p.set('q', q);
+    if (sort) p.set('sirala', sort);
     if (target > 1) p.set('sayfa', String(target));
     const qs = p.toString();
     return `/kategoriler/${category.slug}${qs ? `?${qs}` : ''}`;
@@ -126,18 +132,21 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
           { label: category.name },
         ]}
       >
-        <div className="mt-10">
-          <Suspense fallback={<div className="h-12" />}>
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Suspense fallback={<div className="h-11" />}>
             <CategorySearch />
+          </Suspense>
+          <Suspense fallback={<div className="h-11" />}>
+            <SortSelect />
           </Suspense>
         </div>
       </PageHero>
 
       <Container className="pb-16">
         <Reveal>
-          <div className="relative aspect-[21/9] overflow-hidden rounded-lg bg-surface-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-surface-2 md:aspect-[21/9]">
             {category.heroImage ? (
-              <Image src={category.heroImage} alt={category.name} fill sizes="100vw" className="object-cover" priority />
+              <SmartImage src={category.heroImage} alt={category.name} fill sizes="100vw" priority className="object-cover" />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-muted">{dict.catalog.imagePreparing}</div>
             )}
@@ -153,8 +162,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               {totalPages > 1 ? ` · ${dict.common.page} ${page}/${totalPages}` : ''}
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
-              {items.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {items.map((product, i) => (
+                <ProductCard key={product.id} product={product} priority={i === 0} />
               ))}
             </div>
 
@@ -181,13 +190,26 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             )}
           </>
         ) : (
-          <div className="rounded-lg border border-border bg-surface p-10 text-center">
-            <p className="text-sm text-muted-strong">{dict.catalog.empty}</p>
-            <div className="mt-6 flex justify-center gap-4">
-              <ButtonLink href="/teklif-al" variant="outline">
+          <div className="rounded-lg border border-border bg-surface p-12 text-center">
+            <h2 className="text-xl font-medium tracking-tight">
+              {q ? dict.catalog.noResults : dict.common.notFound}
+            </h2>
+            <p className="mt-3 text-sm text-muted-strong">{dict.catalog.empty}</p>
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              {q && (
+                <Link
+                  href={`/kategoriler/${category.slug}`}
+                  className="inline-flex h-12 items-center rounded-full border border-border px-7 text-sm font-medium"
+                >
+                  {dict.catalog.clearFilters}
+                </Link>
+              )}
+              <Link
+                href="/teklif-al"
+                className="inline-flex h-12 items-center rounded-full bg-foreground px-7 text-sm font-medium text-background"
+              >
                 {dict.common.getQuote}
-              </ButtonLink>
-              <ButtonLink href="/iletisim">{dict.nav.contact}</ButtonLink>
+              </Link>
             </div>
           </div>
         )}

@@ -4,31 +4,119 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="refresh" content="30" />
     <title>Kısa bir bakım — Bozkır Ağaç Ürünleri</title>
     <style>
-      :root { color-scheme: light; }
+      :root {
+        color-scheme: light dark;
+        --bg: #f7f7f5;
+        --surface: #ffffff;
+        --fg: #111111;
+        --muted: #5c5c66;
+        --border: #e2e2e0;
+        --accent: #8d8474;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0e0e10;
+          --surface: #16161a;
+          --fg: #f2f2f0;
+          --muted: #b4b4bc;
+          --border: rgba(255, 255, 255, 0.14);
+          --accent: #b3a98f;
+        }
+      }
       * { box-sizing: border-box; }
       body {
         margin: 0; min-height: 100svh; display: grid; place-items: center;
         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        background: #f7f7f5; color: #111; padding: 2rem; text-align: center;
+        background: var(--bg); color: var(--fg); padding: 2rem; text-align: center;
       }
-      .eyebrow { letter-spacing: .16em; text-transform: uppercase; font-size: .75rem; color: #6b6b6b; margin: 0; }
-      h1 { font-size: clamp(1.8rem, 5vw, 3rem); margin: 1.25rem 0 0; font-weight: 500; }
-      p { max-width: 32rem; margin: 1.25rem auto 0; color: #555; line-height: 1.6; }
+      .box {
+        border: 1px solid var(--border); background: var(--surface);
+        padding: 3rem 2rem; border-radius: 1.25rem; max-width: 44rem; width: 100%;
+      }
+      .eyebrow {
+        letter-spacing: .18em; text-transform: uppercase; font-size: .72rem;
+        color: var(--accent); margin: 0; font-weight: 600;
+      }
+      h1 {
+        font-family: Georgia, "Times New Roman", serif; font-weight: 500;
+        font-size: clamp(1.8rem, 5vw, 3rem); margin: 1.25rem 0 0; line-height: 1.1;
+      }
+      p { max-width: 34rem; margin: 1.25rem auto 0; color: var(--muted); line-height: 1.65; }
+      .actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; margin-top: 2rem; }
       a.btn {
-        display: inline-flex; margin-top: 2rem; padding: .85rem 1.75rem; border-radius: 999px;
-        background: #111; color: #fff; text-decoration: none; font-size: .9rem; font-weight: 500;
+        display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+        padding: .85rem 1.6rem; border-radius: 999px; text-decoration: none;
+        font-size: .9rem; font-weight: 500; border: 1px solid transparent;
       }
-      .box { border: 1px solid #e2e2e0; background: #fff; padding: 3rem 2rem; border-radius: 1rem; max-width: 40rem; }
+      a.primary { background: var(--fg); color: var(--bg); }
+      a.ghost { border-color: var(--border); color: var(--fg); }
+      a.whatsapp { background: #25d366; color: #fff; }
+      .contact {
+        margin-top: 2.25rem; padding-top: 1.75rem; border-top: 1px solid var(--border);
+        display: grid; gap: .5rem; font-size: .85rem; color: var(--muted);
+      }
+      .contact a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+      .note { margin-top: 1.5rem; font-size: .75rem; color: var(--muted); }
     </style>
   </head>
   <body>
     <main class="box">
-      <p class="eyebrow">Bozkır Ağaç Ürünleri</p>
-      <h1>Kısa bir bakımdayız</h1>
-      <p>Siteyi sizin için güncelliyoruz. Kısa süre içinde yeniden hizmetinizde olacağız.</p>
-      <a class="btn" href="/">Yeniden deneyin</a>
+      <p class="eyebrow" data-i18n="brand">Bozkır Ağaç Ürünleri</p>
+      <h1 data-i18n="title">Kısa bir bakımdayız</h1>
+      <p data-i18n="body">Siteyi sizin için güncelliyoruz. Kısa süre içinde yeniden hizmetinizde olacağız.</p>
+      <div class="actions">
+        <a class="btn primary" href="/" data-i18n="retry">Yeniden deneyin</a>
+        <a class="btn whatsapp" href="https://wa.me/905355271612" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        <a class="btn ghost" href="tel:+905355271612">+90 535 527 16 12</a>
+      </div>
+      <div class="contact">
+        <span data-i18n="contact">Bize ulaşın:</span>
+        <span>
+          <a href="tel:+905355271612">+90 535 527 16 12</a> ·
+          <a href="mailto:info@bozkiragac.com">info@bozkiragac.com</a> ·
+          <a href="https://wa.me/905355271612" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        </span>
+      </div>
+      <p class="note" data-i18n="auto">Sayfa 30 saniyede bir otomatik yenilenir.</p>
     </main>
+    <script>
+      (function () {
+        var messages = {
+          tr: {
+            title: 'Kısa bir bakımdayız',
+            body: 'Siteyi sizin için güncelliyoruz. Kısa süre içinde yeniden hizmetinizde olacağız.',
+            retry: 'Yeniden deneyin',
+            contact: 'Bize ulaşın:',
+            auto: 'Sayfa 30 saniyede bir otomatik yenilenir.',
+          },
+          en: {
+            title: 'We are briefly under maintenance',
+            body: 'We are updating the site for you. We will be back in service shortly.',
+            retry: 'Try again',
+            contact: 'Reach us:',
+            auto: 'This page refreshes automatically every 30 seconds.',
+          },
+          ar: {
+            title: 'نحن في صيانة قصيرة',
+            body: 'نعمل على تحديث الموقع من أجلكم. سنعود للخدمة قريباً.',
+            retry: 'حاول مرة أخرى',
+            contact: 'تواصل معنا:',
+            auto: 'تُحدَّث هذه الصفحة تلقائياً كل 30 ثانية.',
+          },
+        };
+        var lang = (navigator.language || 'tr').slice(0, 2).toLowerCase();
+        if (!messages[lang]) lang = 'en';
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        var dict = messages[lang];
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+          var key = el.getAttribute('data-i18n');
+          if (dict[key]) el.textContent = dict[key];
+        });
+      })();
+    </script>
   </body>
 </html>

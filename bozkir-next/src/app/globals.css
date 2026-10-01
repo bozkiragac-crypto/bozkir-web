@@ -26,6 +26,7 @@
   --radius-md: 14px;
   --radius-lg: 22px;
   --radius-xl: 34px;
+  --radius-2xl: 26px;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -192,7 +193,11 @@ html[data-compare='1'] [data-product-cta] {
   :focus-visible {
     outline: 2px solid var(--fg);
     outline-offset: 3px;
-    border-radius: 2px;
+  }
+
+  /* Koyu zeminlerde odak halkası açık renge döner. */
+  [data-on-dark] :focus-visible {
+    outline-color: var(--bg);
   }
 
   /* İnce scrollbar */
