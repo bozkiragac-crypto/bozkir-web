@@ -116,7 +116,9 @@ export default async function ContactPage({ params }: PageProps) {
         <div className="mt-16 overflow-hidden rounded-lg border border-border">
           <iframe
             title={c.mapTitle}
-            src="https://www.google.com/maps?q=G%C3%BCzelbur%C3%A7%20Mah%20Yunus%20Emre%20Cad%20No:10%2FC%20Antakya%20Hatay&output=embed"
+            src={`https://www.google.com/maps?q=${encodeURIComponent(
+              depotCoords || 'Güzelburç Mah Yunus Emre Cad No:10/C Antakya Hatay',
+            )}&output=embed`}
             className="h-[320px] w-full sm:h-[420px]"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"

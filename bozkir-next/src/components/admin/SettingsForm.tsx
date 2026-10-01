@@ -112,7 +112,7 @@ export function SettingsForm({
               <input className={field} value={form.warehouse.address} onChange={(e) => setForm({ ...form, warehouse: { ...form.warehouse, address: e.target.value } })} />
             </Label>
             <Label t="Koordinatlar (enlem,boylam)" full>
-              <input className={field} value={form.warehouse.coords} onChange={(e) => setForm({ ...form, warehouse: { ...form.warehouse, coords: e.target.value } })} placeholder="36.250556,36.181472" />
+              <input className={field} value={form.warehouse.coords} onChange={(e) => setForm({ ...form, warehouse: { ...form.warehouse, coords: e.target.value } })} placeholder="36.238639,36.176806" />
             </Label>
           </div>
         </div>

@@ -55,6 +55,17 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
     expect(res.headers()['x-content-type-options']).toBe('nosniff');
   });
 
+  test('iletişim haritaları işletme koordinatını kullanır', async ({ page }) => {
+    await gotoWithRetry(page, '/tr/iletisim');
+    const coord = '36.238639%2C36.176806';
+    const maps = page.locator('iframe[src*="google.com/maps"]');
+    await expect(maps.first()).toBeVisible();
+    const sources = await maps.evaluateAll((els) => els.map((e) => (e as HTMLIFrameElement).src));
+    expect(sources.length).toBeGreaterThanOrEqual(2);
+    for (const src of sources) expect(src).toContain(coord);
+    await expect(page.getByText('36.238639,36.176806')).toBeVisible();
+  });
+
   test('footer çalışma saatlerini gösterir', async ({ page, isMobile }) => {
     await gotoWithRetry(page, '/tr');
     const hours = page.locator('footer').getByText(/Pazartesi.{0,6}Cuma/).first();

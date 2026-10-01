@@ -18,7 +18,7 @@ export const siteConfig = {
   },
   warehouse: {
     address: '',
-    coords: '36.250556,36.181472',
+    coords: '36.238639,36.176806',
   },
   hours: 'Pazartesi – Cuma: 08:00 – 18:00 · Cumartesi: 08:00 – 14:00',
   hoursEn: 'Monday – Friday: 08:00 – 18:00 · Saturday: 08:00 – 14:00',
