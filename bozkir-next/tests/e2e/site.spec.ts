@@ -32,11 +32,10 @@ test.describe('Genel site gezinme', () => {
     await expect(page.getByRole('link', { name: /Haritada aç/ })).toBeVisible();
   });
 
-  test('footerda dil seçici yok (yalnızca headerda)', async ({ page }) => {
+  test('footerda dil seçici yok', async ({ page }) => {
     await page.goto('/tr/iletisim');
     const footerSwitchers = page.locator('footer [aria-haspopup="listbox"]');
     await expect(footerSwitchers).toHaveCount(0);
-    await expect(page.locator('header [aria-haspopup="listbox"]').first()).toBeVisible();
   });
 
   test('bakım sayfası içerik ve iletişim gösterir', async ({ page }) => {

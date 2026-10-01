@@ -8,7 +8,15 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { cn } from '@/lib/utils';
 
 /** Header/footer dil seçici: mevcut adresi koruyarak dil değiştirir. */
-export function LocaleSwitcher({ onDark = false, compact = false }: { onDark?: boolean; compact?: boolean }) {
+export function LocaleSwitcher({
+  onDark = false,
+  compact = false,
+  className,
+}: {
+  onDark?: boolean;
+  compact?: boolean;
+  className?: string;
+}) {
   const { locale, t } = useDictionary();
   const pathname = usePathname();
   const router = useRouter();
@@ -38,7 +46,7 @@ export function LocaleSwitcher({ onDark = false, compact = false }: { onDark?: b
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className={cn('relative', className)}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

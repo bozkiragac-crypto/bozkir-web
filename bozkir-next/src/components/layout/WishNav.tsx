@@ -7,7 +7,7 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { cn } from '@/lib/utils';
 
 /** Header'daki favori ve karşılaştırma rozetleri. */
-export function WishNav({ onDark }: { onDark: boolean }) {
+export function WishNav({ onDark, className }: { onDark: boolean; className?: string }) {
   const { favorites, compare, ready } = useFavorites();
   const { navLabel } = useDictionary();
   const base = () =>
@@ -24,7 +24,7 @@ export function WishNav({ onDark }: { onDark: boolean }) {
     ) : null;
 
   return (
-    <>
+    <div className={cn('flex items-center', className)}>
       <Link href="/favoriler" className={base()} aria-label={`${navLabel('favorites')} (${favorites.length})`}>
         <Heart className="h-[18px] w-[18px]" />
         {badge(favorites.length)}
@@ -33,6 +33,6 @@ export function WishNav({ onDark }: { onDark: boolean }) {
         <Scale className="h-[18px] w-[18px]" />
         {badge(compare.length)}
       </Link>
-    </>
+    </div>
   );
 }

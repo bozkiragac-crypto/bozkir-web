@@ -8,6 +8,8 @@ import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { ThemeToggle } from './ThemeToggle';
+import { LocaleSwitcher } from './LocaleSwitcher';
 
 interface MobileMenuProps {
   open: boolean;
@@ -55,11 +57,22 @@ export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
       // Kapalıyken içeriği klavye/AT erişiminden tamamen çıkar.
       inert={!open}
     >
-      <div className="flex h-[var(--header-height)] items-center justify-between px-5">
-        <span className="text-sm font-semibold tracking-[0.18em] uppercase">{siteConfig.name}</span>
-        <button onClick={onClose} aria-label={t('nav.close')} className="inline-flex h-11 w-11 items-center justify-center">
+      <div className="flex h-[var(--header-height)] items-center justify-between gap-2 px-5">
+        <span className="min-w-0 truncate text-sm font-semibold tracking-[0.18em] uppercase">{siteConfig.name}</span>
+        <button
+          onClick={onClose}
+          aria-label={t('nav.close')}
+          className="inline-flex h-11 w-11 flex-none items-center justify-center"
+        >
           <X className="h-6 w-6" />
         </button>
+      </div>
+
+      {/* Tema + dil: header'dan buraya taşındı (dar ekranda marka adı kırpılmasın).
+          Üstte tutulur: çerez bandı menünün altını kapatıyor. */}
+      <div className="flex items-center gap-2 px-5 pt-2">
+        <ThemeToggle />
+        <LocaleSwitcher className="xl:hidden" />
       </div>
 
       <nav className="flex flex-col px-5 pt-6">

@@ -36,9 +36,15 @@ test.describe('Dil (i18n) ve yönlendirme', () => {
     await expect(page.locator('link[rel="alternate"][hreflang="ar"]')).toHaveAttribute('href', /\/ar\/urunler$/);
   });
 
-  test('dil seçici ile TR→EN geçişi adresi korur', async ({ page }) => {
+  test('dil seçici ile TR→EN geçişi adresi korur', async ({ page, isMobile }) => {
     await page.goto('/tr/iletisim');
-    await page.getByRole('button', { name: /Dil|Language/i }).first().click();
+    // Mobilde tema ve dil seçiciler mobil menünün içindedir.
+    const scope = isMobile ? page.locator('#mobile-menu') : page.locator('header');
+    if (isMobile) {
+      await page.getByRole('button', { name: 'Menüyü aç' }).click();
+      await expect(page.locator('#mobile-menu')).toHaveAttribute('aria-hidden', 'false');
+    }
+    await scope.getByRole('button', { name: /Dil|Language/i }).first().click();
     await page.getByRole('option', { name: /English/i }).click();
     await expect(page).toHaveURL(/\/en\/iletisim/);
   });

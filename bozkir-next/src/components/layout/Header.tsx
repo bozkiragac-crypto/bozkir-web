@@ -123,7 +123,7 @@ export function Header({ categories }: HeaderProps) {
         <div className="container-x flex h-full items-center justify-between gap-2 sm:gap-4 lg:gap-6">
           <Link
             href="/"
-            className="min-w-0 flex-1 truncate text-[0.7rem] font-semibold tracking-[0.06em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"
+            className="min-w-0 flex-1 truncate text-[0.66rem] font-semibold tracking-[0.01em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"
             aria-label={`${siteConfig.name} ana sayfa`}
           >
             <span className={cn('block truncate transition-colors', onDark ? 'text-white' : 'text-foreground')}>
@@ -169,10 +169,11 @@ export function Header({ categories }: HeaderProps) {
             })}
           </nav>
 
-          <div className="flex flex-none items-center gap-1.5 sm:gap-2">
-            <ThemeToggle onDark={onDark} />
+          <div className="flex flex-none items-center gap-0.5 sm:gap-2">
+            {/* Mobilde tema + dil seçici mobil menüye taşındı (marka adı kırpılmasın). */}
+            <ThemeToggle onDark={onDark} className="hidden xl:inline-flex" />
             <WishNav onDark={onDark} />
-            <LocaleSwitcher onDark={onDark} />
+            <LocaleSwitcher onDark={onDark} className="hidden xl:inline-flex" />
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
