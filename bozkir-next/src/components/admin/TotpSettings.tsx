@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ShieldCheck, ShieldOff, Copy } from 'lucide-react';
-import { startTotpSetup, enableTotp, disableTotp } from '@/app/admin/actions';
+import { startTotpSetup, enableTotp, disableTotp } from '@/lib/admin/safe-actions';
 
 /** Yönetici hesabı için iki adımlı doğrulama (TOTP) yönetimi. */
 export function TotpSettings({ enabled }: { enabled: boolean }) {

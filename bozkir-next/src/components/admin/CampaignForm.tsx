@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveCampaign } from '@/app/admin/actions';
+import { saveCampaign } from '@/lib/admin/safe-actions';
 import { ImageManager } from './ImageManager';
 
 interface CampaignFormProps {

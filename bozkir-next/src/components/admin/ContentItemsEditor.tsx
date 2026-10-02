@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2 } from 'lucide-react';
-import { saveContentItem, deleteContentItem, type ContentItemInput } from '@/app/admin/actions';
+import { saveContentItem, deleteContentItem, type ContentItemInput } from '@/lib/admin/safe-actions';
 import { ImageManager } from './ImageManager';
 
 export interface EditableItem {

@@ -1,7 +1,7 @@
 'use server';
 
 import bcrypt from 'bcryptjs';
-import { eq, inArray, or } from 'drizzle-orm';
+import { and, eq, inArray, ne, or } from 'drizzle-orm';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getDb } from '@/lib/db/client';
 import { adminUsers, brands, campaigns, catalogs, categories, contentBlocks, contentItems, products, quoteRequests } from '@/lib/db/schema';
@@ -226,6 +226,25 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
   const code = input.code.trim();
   const cat = input.cat.trim();
   if (!name || !code || !cat) return { ok: false, error: 'Ad, kod ve kategori zorunludur.' };
+
+  // Ürün kodu benzersiz olmalı: `products.code` üzerinde kısıt yoktu ve
+  // `saveProduct` çakışma kontrolü yapmıyordu, aynı kodla ikinci kayıt
+  // açılabiliyordu (arama sonuçları ve kategori sayaçları belirsizleşiyordu).
+  //
+  // Ürün *adı* kontrol edilmiyor: DB'de kaplama/renk adları (`beyaz`,
+  // `anadolu ceviz` vb.) meşru olarak tekrar ediyor.
+  const clash = await db
+    .select({ id: products.id, code: products.code, name: products.name })
+    .from(products)
+    .where(and(eq(products.code, code), input.id ? ne(products.id, input.id) : undefined))
+    .limit(1);
+  const hit = clash[0];
+  if (hit) {
+    return {
+      ok: false,
+      error: `Bu ürün kodu zaten kullanılıyor: "${hit.code}" — ${hit.name}. Ürün kodları benzersiz olmalı.`,
+    };
+  }
 
   const keys = input.images.map((u) => objectKeyFromUrl(u) ?? u.trim()).filter(Boolean);
   const img = serializeImageField(keys);

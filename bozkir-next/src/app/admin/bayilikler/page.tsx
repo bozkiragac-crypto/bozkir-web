@@ -28,8 +28,8 @@ export default async function AdminBrandsPage() {
         </Link>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-lg border border-border">
-        <table className="w-full text-left text-sm">
+      <div className="mt-8 overflow-x-auto rounded-lg border border-border">
+        <table className="w-full min-w-[700px] text-left text-sm">
           <thead className="bg-surface text-foreground">
             <tr>
               <th className="p-4 font-medium">Logo</th>

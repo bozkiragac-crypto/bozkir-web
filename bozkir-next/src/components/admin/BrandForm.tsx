@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveBrand } from '@/app/admin/actions';
+import { saveBrand } from '@/lib/admin/safe-actions';
 import { ImageManager } from './ImageManager';
 
 interface BrandFormProps {

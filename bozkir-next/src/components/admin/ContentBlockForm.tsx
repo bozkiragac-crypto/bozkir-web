@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveContentBlock } from '@/app/admin/actions';
+import { saveContentBlock } from '@/lib/admin/safe-actions';
 import { ContentItemsEditor, type EditableItem } from './ContentItemsEditor';
 
 interface ContentBlockFormProps {

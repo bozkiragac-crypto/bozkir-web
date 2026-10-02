@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Save, Languages } from 'lucide-react';
-import { saveTranslations, type TranslationKind, type TranslationUpdate } from '@/app/admin/actions';
+import { saveTranslations, type TranslationKind, type TranslationUpdate } from '@/lib/admin/safe-actions';
 
 export interface TranslationRow {
   id: string;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveCategory } from '@/app/admin/actions';
+import { saveCategory } from '@/lib/admin/safe-actions';
 import { ImageManager } from './ImageManager';
 
 interface CategoryFormProps {

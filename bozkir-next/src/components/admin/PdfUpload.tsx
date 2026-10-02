@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { FileText, Upload, X } from 'lucide-react';
-import { uploadMedia } from '@/app/admin/actions';
+import { uploadMedia } from '@/lib/admin/safe-actions';
 import { MAX_PDF_MB } from '@/lib/media';
 
 /** Katalog PDF'i yükler; yüklenen dosyanın genel URL'ini tutar. */

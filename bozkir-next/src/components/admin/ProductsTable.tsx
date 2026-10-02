@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Plus, Search, Download, Upload, Trash2, Eye, EyeOff } from 'lucide-react';
-import { bulkDeleteProducts, setProductActive, importProductsCsv } from '@/app/admin/actions';
+import { bulkDeleteProducts, setProductActive, importProductsCsv } from '@/lib/admin/safe-actions';
 import { cn } from '@/lib/utils';
 
 export interface ProductRow {

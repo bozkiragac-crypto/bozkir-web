@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveCatalog } from '@/app/admin/actions';
+import { saveCatalog } from '@/lib/admin/safe-actions';
 import { ImageManager } from './ImageManager';
 import { PdfUpload } from './PdfUpload';
 

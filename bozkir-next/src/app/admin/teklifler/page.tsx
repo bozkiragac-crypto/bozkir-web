@@ -1,4 +1,5 @@
-import { desc } from 'drizzle-orm';
+import { count, desc } from 'drizzle-orm';
+import Link from 'next/link';
 import { Mail, Phone, Building2, Package, Paperclip, Calendar } from 'lucide-react';
 import { getDb } from '@/lib/db/client';
 import { quoteRequests } from '@/lib/db/schema';
@@ -7,11 +8,25 @@ import { formatDateTime } from '@/lib/datetime';
 
 export const dynamic = 'force-dynamic';
 
+/** Tüm teklifler tek seferde render ediliyordu; talep sayısı arttıkça sayfa kilitleniyordu. */
+const PAGE_SIZE = 20;
+
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+function str(v: string | string[] | undefined, fallback = ''): string {
+  return typeof v === 'string' ? v : fallback;
+}
+
 function fmt(date: Date | null): string {
   return formatDateTime(date, 'medium');
 }
 
-export default async function QuoteRequestsPage() {
+export default async function QuoteRequestsPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const page = Math.max(1, parseInt(str(sp.sayfa, '1'), 10) || 1);
+
   const db = getDb();
   if (!db) {
     return (
@@ -24,13 +39,24 @@ export default async function QuoteRequestsPage() {
     );
   }
 
-  const rows = await db.select().from(quoteRequests).orderBy(desc(quoteRequests.createdAt));
+  const [rows, [totalRow]] = await Promise.all([
+    db
+      .select()
+      .from(quoteRequests)
+      .orderBy(desc(quoteRequests.createdAt))
+      .limit(PAGE_SIZE)
+      .offset((page - 1) * PAGE_SIZE),
+    db.select({ value: count() }).from(quoteRequests),
+  ]);
+
+  const total = totalRow?.value ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div>
       <h1 className="text-2xl font-medium tracking-tight">Teklifler</h1>
       <p className="mt-2 text-sm text-muted-strong">
-        {rows.length} adet teklif talebi. Site içi formdan gelen talepler burada listelenir.
+        {total} adet teklif talebi. Site içi formdan gelen talepler burada listelenir.
       </p>
 
       {rows.length === 0 ? (
@@ -141,6 +167,30 @@ export default async function QuoteRequestsPage() {
             </li>
           ))}
         </ul>
+      )}
+
+      {totalPages > 1 && (
+        <nav aria-label="Teklif sayfaları" className="mt-8 flex items-center justify-center gap-2">
+          {page > 1 && (
+            <Link
+              href={`/admin/teklifler?sayfa=${page - 1}`}
+              className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
+            >
+              Önceki
+            </Link>
+          )}
+          <span className="numerals px-2 text-xs text-muted-strong">
+            {page} / {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              href={`/admin/teklifler?sayfa=${page + 1}`}
+              className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
+            >
+              Sonraki
+            </Link>
+          )}
+        </nav>
       )}
     </div>
   );

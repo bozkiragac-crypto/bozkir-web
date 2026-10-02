@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveProduct } from '@/app/admin/actions';
+import { saveProduct } from '@/lib/admin/safe-actions';
 import { ImageManager } from './ImageManager';
 
 interface ProductFormProps {

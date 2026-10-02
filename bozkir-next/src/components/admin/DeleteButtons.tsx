@@ -10,7 +10,7 @@ import {
   deleteCatalog,
   deleteCategory,
   deleteBrand,
-} from '@/app/admin/actions';
+} from '@/lib/admin/safe-actions';
 
 function useDelete(action: (id: string) => Promise<{ ok: boolean; error?: string }>, message: string) {
   const router = useRouter();

@@ -109,7 +109,7 @@ export function AdminShell({
   return (
     <div className="min-h-svh bg-background">
       {/* Mobil üst bar */}
-      <div className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-3 backdrop-blur lg:hidden">
+      <div className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 pb-3 pt-[calc(var(--safe-top)+0.75rem)] backdrop-blur lg:hidden">
         <Link href="/admin" className="text-sm font-semibold tracking-[0.12em] uppercase">
           Bozkır Ağaç
         </Link>
@@ -130,7 +130,7 @@ export function AdminShell({
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-[82%] max-w-xs overflow-y-auto bg-background p-5">
+          <div className="absolute inset-y-0 left-0 w-[82%] max-w-xs overflow-y-auto bg-background px-5 pt-5 pb-[calc(var(--safe-bottom)+1.25rem)]">
             <div className="mb-6 flex items-center justify-between">
               <span className="text-sm font-semibold tracking-[0.12em] uppercase">Menü</span>
               <button
@@ -160,7 +160,7 @@ export function AdminShell({
           <UserBox username={username} role={role} />
         </aside>
 
-        <main className="min-w-0 pb-16">{children}</main>
+        <main className="min-w-0 pb-[calc(4rem+var(--safe-bottom))]">{children}</main>
       </div>
     </div>
   );

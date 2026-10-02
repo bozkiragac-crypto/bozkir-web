@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Save, KeyRound } from 'lucide-react';
-import { createUser, updateUser, deleteUser, type UserInput } from '@/app/admin/users-actions';
+import { createUser, updateUser, deleteUser, type UserInput } from '@/lib/admin/safe-actions';
 import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/lib/datetime';
 

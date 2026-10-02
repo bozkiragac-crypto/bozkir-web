@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, ImagePlus, Star, Trash2 } from 'lucide-react';
-import { uploadMedia } from '@/app/admin/actions';
+import { uploadMedia } from '@/lib/admin/safe-actions';
 import { cn } from '@/lib/utils';
 import { MAX_UPLOAD_MB } from '@/lib/media';
 
@@ -99,14 +99,17 @@ export function ImageManager({
                   <Star className="h-3 w-3" /> Kapak
                 </span>
               )}
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-black/60 p-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+              {/* Mobilde hover yok; kontroller gizli kalınca görsel
+                  düzenlenemiyordu. Sitedeki ProductCard/ProductGallery
+                  pattern'i: mobilde hep görünür, md üstü hover/focus ile açılır. */}
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-black/60 p-1.5 opacity-100 transition-opacity focus-within:opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                 <div className="flex gap-1">
                   <button
                     type="button"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
                     aria-label="Sola taşı"
-                    className="rounded p-1 text-white disabled:opacity-30"
+                    className="flex h-8 w-8 items-center justify-center rounded text-white disabled:opacity-30"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
                   </button>
@@ -115,7 +118,7 @@ export function ImageManager({
                     onClick={() => move(i, 1)}
                     disabled={i === images.length - 1}
                     aria-label="Sağa taşı"
-                    className="rounded p-1 text-white disabled:opacity-30"
+                    className="flex h-8 w-8 items-center justify-center rounded text-white disabled:opacity-30"
                   >
                     <ArrowRight className="h-3.5 w-3.5" />
                   </button>
@@ -124,7 +127,9 @@ export function ImageManager({
                   type="button"
                   onClick={() => onChange(images.filter((_, idx) => idx !== i))}
                   aria-label="Görseli kaldır"
-                  className={cn('rounded p-1 text-white transition-colors hover:text-red-400')}
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded text-white transition-colors hover:text-red-400',
+                  )}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>

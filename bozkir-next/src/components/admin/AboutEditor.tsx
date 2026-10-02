@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Save } from 'lucide-react';
-import { saveAboutContent, type AboutInput } from '@/app/admin/actions';
+import { saveAboutContent, type AboutInput } from '@/lib/admin/safe-actions';
 
 type Stat = { value: string; label: string; labelEn: string; labelAr: string };
 type Value = { title: string; text: string; titleEn: string; titleAr: string; textEn: string; textAr: string };

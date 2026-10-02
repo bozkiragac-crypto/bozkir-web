@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, ArrowUp, ArrowDown } from 'lucide-react';
-import { saveSiteSettings } from '@/app/admin/settings-actions';
+import { saveSiteSettings } from '@/lib/admin/safe-actions';
 import type { SiteSettings } from '@/lib/data/settings';
 
 const field = 'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-foreground';

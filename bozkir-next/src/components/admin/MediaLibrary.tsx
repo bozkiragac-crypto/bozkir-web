@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, Upload, Search, CheckCircle2 } from 'lucide-react';
-import { deleteMediaKey, uploadMedia } from '@/app/admin/actions';
+import { deleteMediaKey, uploadMedia } from '@/lib/admin/safe-actions';
 
 export interface MediaItem {
   key: string;
