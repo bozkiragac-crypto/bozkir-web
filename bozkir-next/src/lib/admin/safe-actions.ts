@@ -15,6 +15,7 @@
 import * as actions from '@/app/admin/actions';
 import * as usersActions from '@/app/admin/users-actions';
 import * as settingsActions from '@/app/admin/settings-actions';
+import * as activityActions from '@/app/admin/activity-actions';
 
 type ActionFn<R extends { ok: boolean; error?: string }> = (...args: never[]) => Promise<R>;
 
@@ -195,6 +196,12 @@ export async function resetUserTotp(...args: Parameters<typeof usersActions.rese
 
 export async function saveSiteSettings(...args: Parameters<typeof settingsActions.saveSiteSettings>) {
   return safe(settingsActions.saveSiteSettings, args);
+}
+
+/* ---------------- Aktivite ---------------- */
+
+export async function clearActivityLog(...args: Parameters<typeof activityActions.clearActivityLog>) {
+  return safe(activityActions.clearActivityLog, args);
 }
 
 export type { ActionFn };
