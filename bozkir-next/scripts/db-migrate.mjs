@@ -36,6 +36,9 @@ const statements = [
   `CREATE UNIQUE INDEX IF NOT EXISTS admin_users_username_key ON admin_users (username)`,
   `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS totp_secret TEXT`,
   `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN NOT NULL DEFAULT FALSE`,
+  // giriş güvenliği: başarısız deneme + hesap kilitleme
+  `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS failed_attempts INT NOT NULL DEFAULT 0`,
+  `ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMPTZ`,
 
   // site ayarları
   `CREATE TABLE IF NOT EXISTS site_settings (

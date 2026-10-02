@@ -98,3 +98,27 @@ export async function deleteUser(id: string): Promise<{ ok: boolean; error?: str
   revalidatePath('/admin/kullanicilar');
   return { ok: true };
 }
+
+/** Owner: kullanıcının 2FA'sını sıfırlar (kurulumu tekrar yaptırmak için). */
+export async function resetUserTotp(id: string): Promise<{ ok: boolean; error?: string }> {
+  const admin = await requireOwner();
+  const db = getDb();
+  if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+
+  const rows = await db
+    .select({ username: adminUsers.username, totpEnabled: adminUsers.totpEnabled })
+    .from(adminUsers)
+    .where(eq(adminUsers.id, id))
+    .limit(1);
+  const target = rows[0];
+  if (!target) return { ok: false, error: 'Kullanıcı bulunamadı.' };
+  if (!target.totpEnabled) return { ok: false, error: 'Bu kullanıcıda etkin 2FA yok.' };
+
+  await db
+    .update(adminUsers)
+    .set({ totpSecret: null, totpEnabled: false })
+    .where(eq(adminUsers.id, id));
+  await logActivity(admin, 'update', 'user', id, `2FA sıfırlandı: ${target.username ?? id}`);
+  revalidatePath('/admin/kullanicilar');
+  return { ok: true };
+}

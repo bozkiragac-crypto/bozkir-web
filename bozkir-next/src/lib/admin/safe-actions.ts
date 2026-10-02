@@ -155,6 +155,12 @@ export async function updateQuoteNote(...args: Parameters<typeof actions.updateQ
   return safe(actions.updateQuoteNote, args);
 }
 
+/* ---------------- Hesap (kendi şifresi) ---------------- */
+
+export async function changeOwnPassword(...args: Parameters<typeof actions.changeOwnPassword>) {
+  return safe(actions.changeOwnPassword, args);
+}
+
 /* ---------------- 2FA ---------------- */
 
 export async function startTotpSetup(...args: Parameters<typeof actions.startTotpSetup>) {
@@ -181,6 +187,10 @@ export async function updateUser(...args: Parameters<typeof usersActions.updateU
 
 export async function deleteUser(...args: Parameters<typeof usersActions.deleteUser>) {
   return safe(usersActions.deleteUser, args);
+}
+
+export async function resetUserTotp(...args: Parameters<typeof usersActions.resetUserTotp>) {
+  return safe(usersActions.resetUserTotp, args);
 }
 
 export async function saveSiteSettings(...args: Parameters<typeof settingsActions.saveSiteSettings>) {

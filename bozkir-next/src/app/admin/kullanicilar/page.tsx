@@ -36,6 +36,7 @@ export default async function AdminUsersPage() {
         name: u.name,
         role: u.role,
         isActive: u.isActive,
+        totpEnabled: u.totpEnabled,
         lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
       }))}
     />

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Save, KeyRound } from 'lucide-react';
-import { createUser, updateUser, deleteUser, type UserInput } from '@/lib/admin/safe-actions';
+import { Plus, Trash2, Save, KeyRound, ShieldOff } from 'lucide-react';
+import { createUser, updateUser, deleteUser, resetUserTotp, type UserInput } from '@/lib/admin/safe-actions';
 import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/lib/datetime';
 
@@ -14,6 +14,7 @@ export interface AdminUserRow {
   name: string | null;
   role: string;
   isActive: boolean;
+  totpEnabled: boolean;
   lastLoginAt: string | null;
 }
 
@@ -60,13 +61,14 @@ export function UsersManager({ users, currentId }: { users: AdminUserRow[]; curr
       {creating && <CreateForm busy={busy} onCancel={() => setCreating(false)} onSubmit={(input) => run(() => createUser(input)).then((ok) => ok && setCreating(false))} />}
 
       <div className="mt-6 overflow-x-auto rounded-lg border border-border">
-        <table className="w-full min-w-[720px] text-left text-sm">
+        <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="bg-surface text-foreground">
             <tr>
               <th className="p-4 font-medium">Kullanıcı adı</th>
               <th className="p-4 font-medium">Ad</th>
               <th className="p-4 font-medium">Rol</th>
               <th className="p-4 font-medium">Durum</th>
+              <th className="p-4 font-medium">2FA</th>
               <th className="p-4 font-medium">Son giriş</th>
               <th className="p-4" />
             </tr>
@@ -180,6 +182,7 @@ function UserRow({
             Aktif
           </label>
         </td>
+        <td className="p-4 text-muted-strong">{user.totpEnabled ? 'Açık' : '—'}</td>
         <td className="p-4">
           <input className={field} placeholder="Yeni şifre (ops.)" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </td>
@@ -219,6 +222,11 @@ function UserRow({
           {user.isActive ? 'Aktif' : 'Pasif'}
         </span>
       </td>
+      <td className="p-4">
+        <span className={cn('rounded-full px-2.5 py-1 text-xs', user.totpEnabled ? 'bg-green-100 text-green-800' : 'bg-surface-2 text-muted-strong')}>
+          {user.totpEnabled ? 'Açık' : 'Kapalı'}
+        </span>
+      </td>
       <td className="p-4 text-muted-strong">{fmt(user.lastLoginAt)}</td>
       <td className="p-4 text-right">
         <div className="flex justify-end gap-2">
@@ -229,6 +237,20 @@ function UserRow({
           >
             <KeyRound className="h-3.5 w-3.5" /> Düzenle
           </button>
+          {user.totpEnabled && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                if (confirm(`${user.username} için 2FA sıfırlansın mı? Kullanıcı bir sonraki girişte kurulum yapar.`)) {
+                  onRun(() => resetUserTotp(user.id));
+                }
+              }}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-strong hover:border-amber-300 hover:text-amber-700 disabled:opacity-50"
+            >
+              <ShieldOff className="h-3.5 w-3.5" /> 2FA sıfırla
+            </button>
+          )}
           {!isSelf && (
             <button
               type="button"

@@ -86,11 +86,16 @@ function UserBox({ username, role }: { username: string; role: string }) {
     <div className="mt-8 border-t border-border pt-5 text-xs text-muted">
       <p className="truncate">{username}</p>
       <p className="mt-1 text-[0.65rem] uppercase tracking-[0.14em] text-muted">{role}</p>
-      <form action={signOut} className="mt-3">
-        <button type="submit" className="text-sm font-medium text-muted-strong hover:text-foreground">
-          Çıkış Yap
-        </button>
-      </form>
+      <div className="mt-3 flex flex-col gap-2">
+        <Link href="/admin/hesap" className="text-sm font-medium text-muted-strong hover:text-foreground">
+          Hesabım
+        </Link>
+        <form action={signOut}>
+          <button type="submit" className="text-sm font-medium text-muted-strong hover:text-foreground">
+            Çıkış Yap
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

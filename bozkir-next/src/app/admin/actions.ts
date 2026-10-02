@@ -15,6 +15,7 @@ import { createTotpSecret, totpKeyUri, verifyTotp } from '@/lib/auth/totp';
 import { parseCsv } from '@/lib/csv';
 import { categorySlugOf } from '@/lib/data/category-key';
 import { isQuoteStatus, type QuoteStatus } from '@/lib/quotes/status';
+import { isRateLimited } from '@/lib/ratelimit';
 import { slugify } from '@/lib/slug';
 
 function extOf(name: string, type: string) {
@@ -47,12 +48,20 @@ export interface SignInResult {
   requiresTotp?: boolean;
 }
 
+const MAX_LOGIN_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS ?? 5);
+const LOGIN_LOCK_MINUTES = Number(process.env.LOGIN_LOCK_MINUTES ?? 15);
+
 export async function signIn(identifier: string, password: string, totp?: string): Promise<SignInResult> {
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
   const id = identifier.trim().toLowerCase();
   if (!id || !password) return { ok: false, error: 'Kullanıcı adı ve şifre gerekli.' };
+
+  // Hesap kilitlemeye ek olarak kaba kuvvet denemelerini IP/hesap bazında sınırla.
+  if (isRateLimited(`login:${id}`, 10)) {
+    return { ok: false, error: 'Çok fazla giriş denemesi. Lütfen birkaç dakika sonra tekrar deneyin.' };
+  }
 
   const rows = await db
     .select()
@@ -62,8 +71,31 @@ export async function signIn(identifier: string, password: string, totp?: string
   const user = rows[0];
   if (!user || !user.isActive) return { ok: false, error: 'Kullanıcı adı veya şifre hatalı.' };
 
+  // Kilitliyse kalan süreyi bildir.
+  if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
+    const mins = Math.max(1, Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60_000));
+    return { ok: false, error: `Hesap geçici olarak kilitli. ${mins} dakika sonra tekrar deneyin.` };
+  }
+
   const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) return { ok: false, error: 'Kullanıcı adı veya şifre hatalı.' };
+  if (!valid) {
+    const attempts = (user.failedAttempts ?? 0) + 1;
+    const shouldLock = attempts >= MAX_LOGIN_ATTEMPTS;
+    await db
+      .update(adminUsers)
+      .set({
+        failedAttempts: shouldLock ? 0 : attempts,
+        lockedUntil: shouldLock ? new Date(Date.now() + LOGIN_LOCK_MINUTES * 60_000) : null,
+      })
+      .where(eq(adminUsers.id, user.id));
+    await logActivity(user, 'login_failed', 'auth', user.id, `Başarısız giriş denemesi (${attempts})`);
+    return {
+      ok: false,
+      error: shouldLock
+        ? `Çok fazla hatalı deneme. Hesap ${LOGIN_LOCK_MINUTES} dakika kilitlendi.`
+        : 'Kullanıcı adı veya şifre hatalı.',
+    };
+  }
 
   // 2FA etkinse kod doğrulanmadan oturum açılmaz.
   if (user.totpEnabled && user.totpSecret) {
@@ -72,7 +104,10 @@ export async function signIn(identifier: string, password: string, totp?: string
     if (!codeOk) return { ok: false, requiresTotp: true, error: 'Doğrulama kodu hatalı.' };
   }
 
-  await db.update(adminUsers).set({ lastLoginAt: new Date() }).where(eq(adminUsers.id, user.id));
+  await db
+    .update(adminUsers)
+    .set({ lastLoginAt: new Date(), failedAttempts: 0, lockedUntil: null })
+    .where(eq(adminUsers.id, user.id));
   await createSession({
     sub: user.id,
     username: user.username ?? '',
@@ -82,6 +117,42 @@ export async function signIn(identifier: string, password: string, totp?: string
     admin: true,
   });
   await logActivity(user, 'login', 'auth', user.id, 'Giriş yapıldı');
+  return { ok: true };
+}
+
+/**
+ * Kullanıcının kendi şifresini değiştirmesi (her rol). Mevcut şifre
+ * doğrulanmadan değişmez; başarılı değişimde kilit/deneme sayacı sıfırlanır.
+ */
+export async function changeOwnPassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const admin = await requireAdminUser();
+  const db = getDb();
+  if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+
+  if (!currentPassword) return { ok: false, error: 'Mevcut şifre gerekli.' };
+  if (!newPassword || newPassword.length < 8) {
+    return { ok: false, error: 'Yeni şifre en az 8 karakter olmalı.' };
+  }
+  if (newPassword === currentPassword) {
+    return { ok: false, error: 'Yeni şifre mevcut şifreyle aynı olamaz.' };
+  }
+
+  const rows = await db.select().from(adminUsers).where(eq(adminUsers.id, admin.id)).limit(1);
+  const user = rows[0];
+  if (!user) return { ok: false, error: 'Kullanıcı bulunamadı.' };
+
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!valid) return { ok: false, error: 'Mevcut şifre hatalı.' };
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await db
+    .update(adminUsers)
+    .set({ passwordHash, failedAttempts: 0, lockedUntil: null })
+    .where(eq(adminUsers.id, admin.id));
+  await logActivity(admin, 'update', 'auth', admin.id, 'Şifre değiştirildi');
   return { ok: true };
 }
 
