@@ -178,7 +178,10 @@ export const quoteRequests = pgTable('quote_requests', {
   note: text('note'),
   attachmentName: text('attachment_name'),
   attachmentKey: text('attachment_key'),
+  status: text('status').notNull().default('new'),
+  internalNote: text('internal_note'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const siteSettings = pgTable('site_settings', {

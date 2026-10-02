@@ -14,6 +14,7 @@ import { logActivity, requireAdminUser, requireOwner } from '@/lib/admin/guard';
 import { createTotpSecret, totpKeyUri, verifyTotp } from '@/lib/auth/totp';
 import { parseCsv } from '@/lib/csv';
 import { categorySlugOf } from '@/lib/data/category-key';
+import { isQuoteStatus, type QuoteStatus } from '@/lib/quotes/status';
 import { slugify } from '@/lib/slug';
 
 function extOf(name: string, type: string) {
@@ -1130,6 +1131,41 @@ export async function deleteQuoteRequest(id: string): Promise<{ ok: boolean; err
 
   await db.delete(quoteRequests).where(eq(quoteRequests.id, id));
   await logActivity(admin, 'delete', 'quote', id, 'Teklif talebi silindi');
+  revalidatePath('/admin/teklifler');
+  return { ok: true };
+}
+
+export async function updateQuoteStatus(
+  id: string,
+  status: QuoteStatus,
+): Promise<{ ok: boolean; error?: string }> {
+  const admin = await requireAdminUser();
+  const db = getDb();
+  if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isQuoteStatus(status)) return { ok: false, error: 'Geçersiz durum.' };
+
+  await db
+    .update(quoteRequests)
+    .set({ status, updatedAt: new Date() })
+    .where(eq(quoteRequests.id, id));
+  await logActivity(admin, 'update', 'quote', id, `Teklif durumu: ${status}`);
+  revalidatePath('/admin/teklifler');
+  return { ok: true };
+}
+
+export async function updateQuoteNote(
+  id: string,
+  internalNote: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const admin = await requireAdminUser();
+  const db = getDb();
+  if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+
+  await db
+    .update(quoteRequests)
+    .set({ internalNote: internalNote.trim() || null, updatedAt: new Date() })
+    .where(eq(quoteRequests.id, id));
+  await logActivity(admin, 'update', 'quote', id, 'Teklif dahili notu güncellendi');
   revalidatePath('/admin/teklifler');
   return { ok: true };
 }

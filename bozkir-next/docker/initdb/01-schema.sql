@@ -190,7 +190,10 @@ CREATE TABLE IF NOT EXISTS quote_requests (
     note TEXT,
     attachment_name TEXT,
     attachment_key TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    status TEXT NOT NULL DEFAULT 'new',
+    internal_note TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Varsayılan içerik blokları

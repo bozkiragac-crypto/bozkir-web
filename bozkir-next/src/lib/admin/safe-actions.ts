@@ -147,6 +147,14 @@ export async function deleteQuoteRequest(...args: Parameters<typeof actions.dele
   return safe(actions.deleteQuoteRequest, args);
 }
 
+export async function updateQuoteStatus(...args: Parameters<typeof actions.updateQuoteStatus>) {
+  return safe(actions.updateQuoteStatus, args);
+}
+
+export async function updateQuoteNote(...args: Parameters<typeof actions.updateQuoteNote>) {
+  return safe(actions.updateQuoteNote, args);
+}
+
 /* ---------------- 2FA ---------------- */
 
 export async function startTotpSetup(...args: Parameters<typeof actions.startTotpSetup>) {

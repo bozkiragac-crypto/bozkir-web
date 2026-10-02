@@ -114,6 +114,13 @@ const statements = [
   // teklif eki gerçek yükleme (S3 anahtarı)
   `ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS attachment_key TEXT`,
 
+  // teklif yönetimi: durum + dahili not
+  `ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'new'`,
+  `ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS internal_note TEXT`,
+  `ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now()`,
+  `CREATE INDEX IF NOT EXISTS quote_requests_status_idx ON quote_requests (status)`,
+  `CREATE INDEX IF NOT EXISTS quote_requests_created_idx ON quote_requests (created_at DESC)`,
+
   // kategoriler (admin CRUD)
   `CREATE TABLE IF NOT EXISTS categories (
      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
