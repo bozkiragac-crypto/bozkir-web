@@ -2,25 +2,12 @@ import { ImageResponse } from 'next/og';
 import { getProductBySlug } from '@/lib/api/products';
 import { getDictionary } from '@/i18n/dictionaries';
 import { isLocale } from '@/i18n/config';
+import { remoteImageToJpegDataUrl } from '@/lib/og-image';
 
 export const runtime = 'nodejs';
 export const alt = 'Bozkır Ağaç Ürünleri';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-
-/** Uzak görseli data URL'e çevirir (ImageResponse güvenilirliği için). */
-async function toDataUrl(url: string): Promise<string | null> {
-  if (!url || url.startsWith('data:')) return url || null;
-  try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return null;
-    const type = res.headers.get('content-type') || 'image/jpeg';
-    const buf = Buffer.from(await res.arrayBuffer());
-    return `data:${type};base64,${buf.toString('base64')}`;
-  } catch {
-    return null;
-  }
-}
 
 export default async function Image({ params }: { params: Promise<{ slug: string; locale: string }> }) {
   const { slug, locale: localeParam } = await params;
@@ -28,7 +15,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const dict = getDictionary(locale);
   const product = await getProductBySlug(slug, locale);
 
-  const cover = product ? await toDataUrl(product.images[0] ?? product.thumbnail ?? '') : null;
+  const raw = product?.images[0] ?? product?.thumbnail ?? '';
+  const cover = await remoteImageToJpegDataUrl(raw, size.width, size.height);
   const name = product?.name ?? dict.meta.brand;
   const code = product?.code ?? '';
   const category = product?.category ?? '';

@@ -71,6 +71,9 @@ const nextConfig = {
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'Content-Security-Policy', value: csp },
+          // HTTPS arkasında (nginx) HSTS zaten eklenir; doğrudan Next erişiminde
+          // de tarayıcıya tutarlı sinyal verilir. HTTP üzerinden UA'lar yok sayar.
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
         ],
       },
     ];

@@ -27,6 +27,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ key
       },
     });
   } catch {
-    return new Response('bulunamadı', { status: 404 });
+    // nginx ile tutarlı: hata yanıtlarında da uzun cache + nosniff.
+    return new Response('bulunamadı', {
+      status: 404,
+      headers: {
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
   }
 }
