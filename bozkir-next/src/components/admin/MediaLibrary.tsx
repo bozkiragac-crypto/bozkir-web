@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Trash2, Upload, Search, CheckCircle2 } from 'lucide-react';
 import { deleteMediaKey, uploadMedia } from '@/lib/admin/safe-actions';
 
@@ -13,22 +14,43 @@ export interface MediaItem {
   inUse: boolean;
 }
 
+type MediaFolder = 'products' | 'campaigns' | 'content' | 'catalogs' | 'quotes';
+
 function kb(n: number) {
   return n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.round(n / 1024)} KB`;
 }
 
-export function MediaLibrary({ items }: { items: MediaItem[] }) {
+function buildUrl(folder: string, q: string, sayfa = 1): string {
+  const qs = new URLSearchParams();
+  if (folder && folder !== 'all') qs.set('klasor', folder);
+  if (q) qs.set('q', q);
+  if (sayfa > 1) qs.set('sayfa', String(sayfa));
+  const s = qs.toString();
+  return `/admin/medya${s ? `?${s}` : ''}`;
+}
+
+export function MediaLibrary({
+  items,
+  page,
+  totalPages,
+  total,
+  folder,
+  q,
+  folders,
+}: {
+  items: MediaItem[];
+  page: number;
+  totalPages: number;
+  total: number;
+  folder: string;
+  q: string;
+  folders: string[];
+}) {
   const router = useRouter();
-  const [q, setQ] = useState('');
-  const [folder, setFolder] = useState<'all' | 'products' | 'campaigns' | 'content'>('all');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploadFolder, setUploadFolder] = useState<'products' | 'campaigns' | 'content'>('content');
-
-  const filtered = useMemo(
-    () =>
-      items.filter((i) => (folder === 'all' || i.key.startsWith(`${folder}/`)) && (!q || i.key.toLowerCase().includes(q.toLowerCase()))),
-    [items, folder, q],
+  const [uploadFolder, setUploadFolder] = useState<MediaFolder>(
+    (folders.includes('content') ? 'content' : (folders[0] as MediaFolder)) as MediaFolder,
   );
 
   async function onUpload(files: FileList | null) {
@@ -58,51 +80,76 @@ export function MediaLibrary({ items }: { items: MediaItem[] }) {
 
   return (
     <div>
-      <h1 className="text-2xl font-medium tracking-tight">Medya kütüphanesi</h1>
-      <p className="mt-1 text-sm text-muted-strong">{items.length} görsel · depolama: SeaweedFS</p>
-
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-3 rounded-full border border-border px-4">
-          <Search className="h-4 w-4 text-muted" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Dosya ara..."
-            className="h-11 w-48 bg-transparent text-sm outline-none placeholder:text-muted sm:w-64"
-          />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-medium tracking-tight">Medya kütüphanesi</h1>
+          <p className="mt-1 text-sm text-muted-strong">{total} görsel · depolama: SeaweedFS</p>
         </div>
-        <select
-          value={folder}
-          onChange={(e) => setFolder(e.target.value as typeof folder)}
-          className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
-        >
-          <option value="all">Tüm klasörler</option>
-          <option value="products">products</option>
-          <option value="campaigns">campaigns</option>
-          <option value="content">content</option>
-        </select>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <select
             value={uploadFolder}
-            onChange={(e) => setUploadFolder(e.target.value as typeof uploadFolder)}
+            onChange={(e) => setUploadFolder(e.target.value as MediaFolder)}
+            aria-label="Yükleme klasörü"
             className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
           >
-            <option value="content">content</option>
-            <option value="products">products</option>
-            <option value="campaigns">campaigns</option>
+            {folders.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
           </select>
           <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90">
             <Upload className="h-4 w-4" />
             {busy ? 'Yükleniyor...' : 'Yükle'}
-            <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={(e) => onUpload(e.target.files)} />
+            <input
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              className="hidden"
+              onChange={(e) => onUpload(e.target.files)}
+            />
           </label>
         </div>
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <form action="/admin/medya" method="get" className="flex items-center gap-3 rounded-full border border-border px-4">
+          {folder !== 'all' && <input type="hidden" name="klasor" value={folder} />}
+          <Search className="h-4 w-4 text-muted" />
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Dosya ara..."
+            className="h-11 w-48 bg-transparent text-sm outline-none placeholder:text-muted sm:w-64"
+          />
+        </form>
+        <select
+          value={folder}
+          onChange={(e) => router.push(buildUrl(e.target.value, q))}
+          aria-label="Klasör filtresi"
+          className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
+        >
+          <option value="all">Tüm klasörler</option>
+          {folders.map((f) => (
+            <option key={f} value={f}>
+              {f}
+            </option>
+          ))}
+        </select>
+        {q && (
+          <Link
+            href={buildUrl(folder, '')}
+            className="text-xs text-muted-strong transition-colors hover:text-foreground"
+          >
+            Aramayı temizle
+          </Link>
+        )}
       </div>
 
       {error && <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {filtered.map((item) => (
+        {items.map((item) => (
           <div key={item.key} className="group overflow-hidden rounded-lg border border-border bg-surface">
             <div className="relative aspect-square bg-surface-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -132,12 +179,36 @@ export function MediaLibrary({ items }: { items: MediaItem[] }) {
             </div>
           </div>
         ))}
-        {filtered.length === 0 && (
+        {items.length === 0 && (
           <p className="col-span-full rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted">
             Görsel bulunamadı.
           </p>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <nav aria-label="Medya sayfaları" className="mt-8 flex items-center justify-center gap-2">
+          {page > 1 && (
+            <Link
+              href={buildUrl(folder, q, page - 1)}
+              className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
+            >
+              Önceki
+            </Link>
+          )}
+          <span className="numerals px-2 text-xs text-muted-strong">
+            {page} / {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              href={buildUrl(folder, q, page + 1)}
+              className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
+            >
+              Sonraki
+            </Link>
+          )}
+        </nav>
+      )}
     </div>
   );
 }
