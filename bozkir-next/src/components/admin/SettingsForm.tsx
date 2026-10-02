@@ -99,8 +99,17 @@ export function SettingsForm({
             <Label t="Instagram">
               <input className={field} value={form.social.instagram} onChange={(e) => setForm({ ...form, social: { ...form.social, instagram: e.target.value } })} />
             </Label>
-            <Label t="Facebook" full>
+            <Label t="Facebook">
               <input className={field} value={form.social.facebook} onChange={(e) => setForm({ ...form, social: { ...form.social, facebook: e.target.value } })} />
+            </Label>
+            <Label t="YouTube">
+              <input className={field} value={form.social.youtube} onChange={(e) => setForm({ ...form, social: { ...form.social, youtube: e.target.value } })} />
+            </Label>
+            <Label t="LinkedIn">
+              <input className={field} value={form.social.linkedin} onChange={(e) => setForm({ ...form, social: { ...form.social, linkedin: e.target.value } })} />
+            </Label>
+            <Label t="X (Twitter)" full>
+              <input className={field} value={form.social.x} onChange={(e) => setForm({ ...form, social: { ...form.social, x: e.target.value } })} />
             </Label>
           </div>
         </div>
@@ -158,6 +167,111 @@ export function SettingsForm({
                 value={form.webhookUrl}
                 onChange={(e) => setForm({ ...form, webhookUrl: e.target.value })}
                 placeholder="https://hooks.example.com/..."
+              />
+            </Label>
+          </div>
+        </div>
+
+        <div className={`${section} lg:col-span-2`}>
+          <p className="font-medium">SEO / Meta</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Boş bırakılırsa site varsayılanları kullanılır. OG görseli tam URL veya /yol olabilir.
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <Label t="Site başlığı (SEO title)" full>
+              <input className={field} value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} />
+            </Label>
+            <Label t="Site açıklaması (meta description)" full>
+              <textarea
+                className={`${field} h-20 py-2`}
+                value={form.seoDescription}
+                onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
+              />
+            </Label>
+            <Label t="OG görseli" full>
+              <input
+                className={field}
+                value={form.ogImage}
+                onChange={(e) => setForm({ ...form, ogImage: e.target.value })}
+                placeholder="/images/og-home.jpg"
+              />
+            </Label>
+          </div>
+        </div>
+
+        <div className={section}>
+          <p className="font-medium">Analitik</p>
+          <p className="mt-1 text-sm text-muted-strong">Yalnızca çerez onayı verildiğinde yüklenir.</p>
+          <div className="mt-5 grid gap-4">
+            <Label t="Google Analytics ölçüm kimliği">
+              <input className={field} value={form.gaMeasurementId} onChange={(e) => setForm({ ...form, gaMeasurementId: e.target.value })} placeholder="G-XXXXXXXXXX" />
+            </Label>
+            <Label t="Meta Pixel kimliği">
+              <input className={field} value={form.metaPixelId} onChange={(e) => setForm({ ...form, metaPixelId: e.target.value })} placeholder="1234567890" />
+            </Label>
+          </div>
+        </div>
+
+        <div className={section}>
+          <p className="font-medium">Bakım modu</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Açıkken public site bakım sayfasına yönlenir. Admin ve API etkilenmez.
+          </p>
+          <label className="mt-5 flex h-11 items-center gap-3 rounded-md border border-border bg-surface px-4">
+            <input
+              type="checkbox"
+              checked={form.maintenance}
+              onChange={(e) => setForm({ ...form, maintenance: e.target.checked })}
+            />
+            <span className="text-sm">Bakım modunu etkinleştir</span>
+          </label>
+        </div>
+
+        <div className={`${section} lg:col-span-2`}>
+          <p className="font-medium">SMTP / teklif bildirimi</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Yeni teklif geldiğinde bildirim e-postası gönderilir. Gönderim başarısız olsa da teklif kaydedilir.
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <Label t="SMTP sunucu">
+              <input className={field} value={form.smtp.host} onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, host: e.target.value } })} placeholder="smtp.example.com" />
+            </Label>
+            <Label t="Port">
+              <input className={field} value={form.smtp.port} onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, port: e.target.value } })} placeholder="587" />
+            </Label>
+            <Label t="Kullanıcı">
+              <input className={field} value={form.smtp.user} onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, user: e.target.value } })} />
+            </Label>
+            <Label t="Şifre">
+              <input
+                className={field}
+                type="password"
+                autoComplete="new-password"
+                value={form.smtp.pass}
+                onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, pass: e.target.value } })}
+              />
+            </Label>
+            <Label t="Gönderen adresi (From)">
+              <input className={field} value={form.smtp.from} onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, from: e.target.value } })} placeholder="Bozkır Ağaç <no-reply@...>" />
+            </Label>
+            <Label t="Bildirim alıcısı">
+              <input className={field} value={form.notifyEmail} onChange={(e) => setForm({ ...form, notifyEmail: e.target.value })} placeholder="info@bozkiragac.com" />
+            </Label>
+          </div>
+        </div>
+
+        <div className={`${section} lg:col-span-2`}>
+          <p className="font-medium">Çerez politikası metni</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Doldurulursa /cerez-politikasi sayfası bu metni gösterir (paragraflar boş satırla ayrılır).
+          </p>
+          <div className="mt-5">
+            <Label t="Metin" full>
+              <textarea
+                className={`${field} h-40 py-2`}
+                value={form.cookiePolicyText}
+                onChange={(e) => setForm({ ...form, cookiePolicyText: e.target.value })}
+                placeholder="Bu sitede ... çerezler kullanılmaktadır.&#10;&#10;..."
               />
             </Label>
           </div>

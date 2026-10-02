@@ -25,12 +25,34 @@ function detectLocale(request: NextRequest): Locale {
   return defaultLocale;
 }
 
+/**
+ * Bakım modu DB ayarından okunur. Middleware Edge'de çalıştığı ve DB'ye
+ * erişemediği için iç `/api/maintenance-status` ucu 60 sn cache ile çağrılır.
+ * Env `MAINTENANCE_MODE=1` her durumda önceliklidir; fetch başarısız olursa
+ * env değerine düşülür (istek asla bloklanmaz).
+ */
+async function isMaintenanceEnabled(): Promise<boolean> {
+  if (process.env.MAINTENANCE_MODE === '1') return true;
+  try {
+    const base = process.env.INTERNAL_APP_URL || 'http://127.0.0.1:3000';
+    const res = await fetch(new URL('/api/maintenance-status', base), {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { maintenance?: boolean };
+    return !!data.maintenance;
+  } catch {
+    return false;
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 0) Bakım modu: public trafik bakım sayfasına yönlendirilir.
   //    Sağlık ucu, medya, statik dosyalar ve admin hariç.
-  const maintenance = process.env.MAINTENANCE_MODE === '1';
+  const maintenance = await isMaintenanceEnabled();
   if (maintenance) {
     const excluded =
       pathname.startsWith('/api/') ||

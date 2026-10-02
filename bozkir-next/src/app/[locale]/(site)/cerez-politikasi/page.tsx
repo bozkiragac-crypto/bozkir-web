@@ -4,10 +4,13 @@ import { LegalPage, LegalSection } from '@/components/ui/LegalPage';
 import { siteConfig } from '@/config/site';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
+import { getSiteSettingsFresh } from '@/lib/data/settings';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
@@ -26,8 +29,27 @@ export default async function CookiePage({ params }: PageProps) {
   const lang = isLocale(locale) ? locale : 'tr';
   const dict = getDictionary(lang);
   const ck = dict.pages.cookies;
+  const settings = await getSiteSettingsFresh();
 
   const fill = (text: string) => text.replace('{email}', siteConfig.email);
+
+  // Admin panelinden özel metin girildiyse sözlük içeriği yerine onu göster.
+  const custom = settings.cookiePolicyText.trim();
+  if (custom) {
+    const paragraphs = custom
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    return (
+      <LegalPage title={ck.title} updated="2026" locale={lang}>
+        <LegalSection title={ck.title}>
+          {paragraphs.map((para, i) => (
+            <p key={i}>{fill(para)}</p>
+          ))}
+        </LegalSection>
+      </LegalPage>
+    );
+  }
 
   return (
     <LegalPage title={ck.title} updated="2026" locale={lang}>

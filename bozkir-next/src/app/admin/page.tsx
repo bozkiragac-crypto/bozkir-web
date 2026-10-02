@@ -11,10 +11,12 @@ import {
   History,
   ArrowUpRight,
   Plus,
+  HardDrive,
 } from 'lucide-react';
 import { getDb } from '@/lib/db/client';
 import { activityLog, adminUsers, campaigns, contentItems, products, quoteRequests } from '@/lib/db/schema';
 import { APP_TIME_ZONE, formatDateTime, formatDayKey, startOfLocalDay } from '@/lib/datetime';
+import { getBackupStatus } from '@/lib/backup-status';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +52,7 @@ export default async function AdminDashboardPage() {
 
   // Grafik 14 günlük; başlangıç uygulama saat diliminin gün başında olsun ki
   // "bugün" çubuğu UTC günüyle kaymasın.
+  const backup = getBackupStatus();
   const since = startOfLocalDay(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000));
 
   const [
@@ -217,6 +220,34 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      <div className="mt-6 rounded-xl border border-border bg-surface p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <HardDrive className="h-5 w-5 text-accent" />
+            <div>
+              <p className="font-medium">Yedekleme durumu</p>
+              <p className="mt-1 text-sm text-muted-strong">
+                {backup.available
+                  ? `Son yedek: ${backup.createdAt} · ${backup.fileCount} dosya · ${formatBytes(backup.totalBytes ?? 0)}`
+                  : 'Yedek bilgisi bulunamadı. Sunucuda scripts/backup.sh çalıştırın.'}
+              </p>
+            </div>
+          </div>
+          {backup.available && (
+            <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs text-green-800">Hazır</span>
+          )}
+        </div>
+        <p className="mt-3 text-xs text-muted">
+          Güvenlik gereği panelden yedek tetiklenmez; yalnızca son durum gösterilir.
+        </p>
+      </div>
     </div>
   );
+}
+
+function formatBytes(n: number): string {
+  if (n > 1024 * 1024 * 1024) return `${(n / 1024 / 1024 / 1024).toFixed(1)} GB`;
+  if (n > 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`;
+  return `${Math.round(n / 1024)} KB`;
 }

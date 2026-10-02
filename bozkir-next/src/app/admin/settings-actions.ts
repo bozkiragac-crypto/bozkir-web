@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db/client';
 import { siteSettings } from '@/lib/db/schema';
 import { requireOwner, logActivity } from '@/lib/admin/guard';
 import { SETTINGS_TAG, type SiteSettings } from '@/lib/data/settings';
+import { locales } from '@/i18n/config';
 
 export async function saveSiteSettings(input: SiteSettings): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireOwner();
@@ -33,11 +34,29 @@ export async function saveSiteSettings(input: SiteSettings): Promise<{ ok: boole
     social: {
       instagram: input.social.instagram.trim(),
       facebook: input.social.facebook.trim(),
+      youtube: (input.social.youtube ?? '').trim(),
+      linkedin: (input.social.linkedin ?? '').trim(),
+      x: (input.social.x ?? '').trim(),
     },
     popupEnabled: !!input.popupEnabled,
     popupCampaignId: (input.popupCampaignId ?? '').trim(),
     webhookUrl: (input.webhookUrl ?? '').trim(),
     featuredOrder: (input.featuredOrder ?? []).map((s) => s.trim()).filter(Boolean),
+    seoTitle: (input.seoTitle ?? '').trim(),
+    seoDescription: (input.seoDescription ?? '').trim(),
+    ogImage: (input.ogImage ?? '').trim(),
+    maintenance: !!input.maintenance,
+    gaMeasurementId: (input.gaMeasurementId ?? '').trim(),
+    metaPixelId: (input.metaPixelId ?? '').trim(),
+    notifyEmail: (input.notifyEmail ?? '').trim(),
+    smtp: {
+      host: (input.smtp?.host ?? '').trim(),
+      port: (input.smtp?.port ?? '587').trim() || '587',
+      user: (input.smtp?.user ?? '').trim(),
+      pass: input.smtp?.pass ?? '',
+      from: (input.smtp?.from ?? '').trim(),
+    },
+    cookiePolicyText: (input.cookiePolicyText ?? '').trim(),
   };
 
   await db
@@ -47,6 +66,12 @@ export async function saveSiteSettings(input: SiteSettings): Promise<{ ok: boole
 
   await logActivity(admin, 'update', 'settings', 'site', 'Site ayarları güncellendi');
   revalidateTag(SETTINGS_TAG);
-  revalidatePath('/', 'layout');
+  // Statik üretilen public sayfaların metadata/footer'ı yeni ayarlarla
+  // yeniden üretilsin diye dil köklerini hem sayfa hem layout olarak tazele.
+  for (const l of locales) {
+    revalidatePath(`/${l}`);
+    revalidatePath(`/${l}`, 'layout');
+  }
+  revalidatePath('/');
   return { ok: true };
 }

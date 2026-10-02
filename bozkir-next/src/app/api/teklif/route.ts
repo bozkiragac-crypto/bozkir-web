@@ -6,6 +6,7 @@ import { putObject, storageConfigured } from '@/lib/storage/s3';
 import { clientIp, isRateLimited } from '@/lib/ratelimit';
 import { isAllowedAttachment } from '@/lib/file-signature';
 import { sendWebhook } from '@/lib/webhooks';
+import { sendQuoteNotification } from '@/lib/mailer';
 
 export const runtime = 'nodejs';
 
@@ -153,6 +154,19 @@ export async function POST(request: Request) {
     email: d.email,
     product: d.product || '',
     productSlug: d.productSlug || '',
+    quantity: d.quantity || '',
+    dimensions: d.dimensions || '',
+    note: d.note || '',
+    hasAttachment: !!attachmentKey,
+  });
+
+  // E-posta bildirimi (SMTP tanımlıysa) — talebi engellemez.
+  void sendQuoteNotification({
+    fullName: d.fullName,
+    company: d.company || '',
+    phone: d.phone,
+    email: d.email,
+    product: d.product || '',
     quantity: d.quantity || '',
     dimensions: d.dimensions || '',
     note: d.note || '',

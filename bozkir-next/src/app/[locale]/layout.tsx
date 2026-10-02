@@ -5,7 +5,7 @@ import { isLocale, localeDir, localeHtmlLang, locales, type Locale } from '@/i18
 import { fontVariables } from '@/lib/fonts';
 import { getDictionary } from '@/i18n/dictionaries';
 import { getPrimaryCategories } from '@/lib/api/categories';
-import { getSiteSettings } from '@/lib/data/settings';
+import { getSiteSettingsFresh } from '@/lib/data/settings';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab';
@@ -21,7 +21,7 @@ import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import { AnalyticsScripts } from '@/components/consent/AnalyticsScripts';
 import { siteConfig } from '@/config/site';
-import { buildMetadata, organizationJsonLd, websiteJsonLd } from '@/lib/seo';
+import { organizationJsonLd, siteMetadata, websiteJsonLd } from '@/lib/seo';
 
 // Varsayılan açık tema; yalnızca kullanıcı koyu seçtiyse koyu uygulanır.
 const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t!=='dark')t='light';document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}catch(e){}})();`;
@@ -33,10 +33,15 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  ...buildMetadata({ title: `${siteConfig.name} | Malzemenin Yeni Formu`, path: '/' }),
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const typed = isLocale(locale) ? (locale as Locale) : undefined;
+  const meta = await siteMetadata(typed);
+  return {
+    metadataBase: new URL(siteConfig.url),
+    ...meta,
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -57,7 +62,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
 
   const typed = locale as Locale;
   const dict = getDictionary(typed);
-  const [categories, settings] = await Promise.all([getPrimaryCategories(typed), getSiteSettings()]);
+  const [categories, settings] = await Promise.all([getPrimaryCategories(typed), getSiteSettingsFresh()]);
 
   return (
     <html
@@ -101,8 +106,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                   <CompareBar />
                   <CampaignPopupServer locale={typed} />
                   <CookieBanner />
-                  {process.env.NEXT_PUBLIC_ANALYTICS_ID && (
-                    <AnalyticsScripts id={process.env.NEXT_PUBLIC_ANALYTICS_ID} />
+                  {(settings.gaMeasurementId || settings.metaPixelId || process.env.NEXT_PUBLIC_ANALYTICS_ID) && (
+                    <AnalyticsScripts
+                      id={settings.gaMeasurementId || process.env.NEXT_PUBLIC_ANALYTICS_ID || ''}
+                      metaPixelId={settings.metaPixelId || undefined}
+                    />
                   )}
                 </DeferredSmoothScroll>
               </FavoritesProvider>

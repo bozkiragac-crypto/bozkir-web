@@ -1,7 +1,7 @@
 'use client';
 
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
-import { Instagram, Facebook, MessageCircle, ChevronDown, Clock } from 'lucide-react';
+import { Instagram, Facebook, Youtube, Linkedin, Twitter, MessageCircle, ChevronDown, Clock } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import type { SiteSettings } from '@/lib/data/settings';
 import { telHref } from '@/lib/phone';
@@ -28,6 +28,21 @@ function Social({ s }: { s: SiteSettings }) {
       <a href={s.social.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className={item}>
         <Facebook className="h-5 w-5" />
       </a>
+      {s.social.youtube && (
+        <a href={s.social.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className={item}>
+          <Youtube className="h-5 w-5" />
+        </a>
+      )}
+      {s.social.linkedin && (
+        <a href={s.social.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className={item}>
+          <Linkedin className="h-5 w-5" />
+        </a>
+      )}
+      {s.social.x && (
+        <a href={s.social.x} target="_blank" rel="noopener noreferrer" aria-label="X" className={item}>
+          <Twitter className="h-5 w-5" />
+        </a>
+      )}
       <a
         href={s.whatsapp}
         target="_blank"

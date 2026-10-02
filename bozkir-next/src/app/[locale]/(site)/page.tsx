@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getPrimaryCategories } from '@/lib/api/categories';
 import { getActiveCampaigns } from '@/lib/api/campaigns';
 import { getContentBlock } from '@/lib/api/content';
-import { getSiteSettings } from '@/lib/data/settings';
+import { getSiteSettings, getSiteSettingsFresh } from '@/lib/data/settings';
 import { fallbackBrands } from '@/data/brands';
 import { buildMetadata } from '@/lib/seo';
 import { isLocale } from '@/i18n/config';
@@ -29,9 +29,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
   const dict = getDictionary(lang);
+  // Admin panelindeki SEO ayarları varsa site başlığı/açıklamasını onlar belirler.
+  const seo = await getSiteSettingsFresh();
   return buildMetadata({
-    title: dict.meta.home,
-    description: dict.meta.homeDescription,
+    title: seo.seoTitle || dict.meta.home,
+    description: seo.seoDescription || dict.meta.homeDescription,
+    image: seo.ogImage || '/images/og-home.jpg',
     path: '/',
     locale: lang,
   });

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { unstable_noStore } from 'next/cache';
 import { siteConfig } from '@/config/site';
 import { defaultLocale, locales, switchLocaleInPath, type Locale } from '@/i18n/config';
+import { getSiteSettingsFresh } from '@/lib/data/settings';
 
 interface BuildMetadataInput {
   title: string;
@@ -17,6 +19,34 @@ interface BuildMetadataInput {
 
 export function absoluteUrl(path = '/') {
   return new URL(path, siteConfig.url).toString();
+}
+
+/**
+ * Site geneli metadata: admin panelindeki SEO ayarlarını okur,
+ * boş alanlarda `siteConfig` varsayılanlarına düşer.
+ */
+export async function siteMetadata(locale?: Locale): Promise<Metadata> {
+  // SEO ayarları panelden değiştirilebilir; statik HTML'e gömülüp
+  // güncellenmemesini önlemek için metadata istek başına okunur.
+  unstable_noStore();
+  let seoTitle = '';
+  let seoDescription = '';
+  let ogImage = '';
+  try {
+    const s = await getSiteSettingsFresh();
+    seoTitle = s.seoTitle;
+    seoDescription = s.seoDescription;
+    ogImage = s.ogImage;
+  } catch {
+    // DB yoksa varsayılanlar
+  }
+  return buildMetadata({
+    title: seoTitle || `${siteConfig.name} | Malzemenin Yeni Formu`,
+    description: seoDescription || siteConfig.description,
+    image: ogImage || '/images/og-home.jpg',
+    path: '/',
+    locale,
+  });
 }
 
 /** Dil önekli mutlak URL (JSON-LD ve paylaşım bağlantıları için). */

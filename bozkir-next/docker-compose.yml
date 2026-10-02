@@ -97,9 +97,14 @@ services:
       S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-/media}
       APP_VERSION: ${APP_TAG:-dev}
       MAINTENANCE_MODE: ${MAINTENANCE_MODE:-0}
+      # Middleware'in bakım durumunu içeriden okuyabilmesi için.
+      INTERNAL_APP_URL: http://127.0.0.1:3000
       TZ: ${APP_TIME_ZONE:-Europe/Istanbul}
       APP_TIME_ZONE: ${APP_TIME_ZONE:-Europe/Istanbul}
       TRUSTED_PROXY: ${TRUSTED_PROXY:-1}
+    volumes:
+      # Yedek durumu kartı son yedeği buradan okur (salt-okunur).
+      - ./backups:/app/backups:ro
     depends_on:
       db:
         condition: service_healthy
