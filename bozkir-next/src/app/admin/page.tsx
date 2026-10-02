@@ -14,12 +14,12 @@ import {
 } from 'lucide-react';
 import { getDb } from '@/lib/db/client';
 import { activityLog, adminUsers, campaigns, contentItems, products, quoteRequests } from '@/lib/db/schema';
+import { APP_TIME_ZONE, formatDateTime, formatDayKey, startOfLocalDay } from '@/lib/datetime';
 
 export const dynamic = 'force-dynamic';
 
 function fmt(date: Date | null): string {
-  if (!date) return '';
-  return new Intl.DateTimeFormat('tr-TR', { dateStyle: 'short', timeStyle: 'short' }).format(date);
+  return formatDateTime(date);
 }
 
 function Sparkline({ data }: { data: number[] }) {
@@ -48,8 +48,9 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  const since = new Date(Date.now() - 13 * 24 * 60 * 60 * 1000);
-  since.setHours(0, 0, 0, 0);
+  // Grafik 14 günlük; başlangıç uygulama saat diliminin gün başında olsun ki
+  // "bugün" çubuğu UTC günüyle kaymasın.
+  const since = startOfLocalDay(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000));
 
   const [
     [productRow],
@@ -73,17 +74,16 @@ export default async function AdminDashboardPage() {
     db.select({ id: quoteRequests.id, fullName: quoteRequests.fullName, phone: quoteRequests.phone, createdAt: quoteRequests.createdAt }).from(quoteRequests).orderBy(desc(quoteRequests.createdAt)).limit(5),
     db.select().from(activityLog).orderBy(desc(activityLog.createdAt)).limit(6),
     db
-      .select({ day: sql<string>`to_char(created_at, 'YYYY-MM-DD')`, n: count() })
+      .select({ day: sql<string>`to_char(created_at AT TIME ZONE ${sql.raw(`'${APP_TIME_ZONE}'`)}, 'YYYY-MM-DD')`, n: count() })
       .from(quoteRequests)
       .where(gte(quoteRequests.createdAt, since))
-      .groupBy(sql`to_char(created_at, 'YYYY-MM-DD')`),
+      .groupBy(sql`to_char(created_at AT TIME ZONE ${sql.raw(`'${APP_TIME_ZONE}'`)}, 'YYYY-MM-DD')`),
   ]);
 
   const byDay = new Map(daily.map((d) => [d.day, Number(d.n)]));
   const series: number[] = [];
   for (let i = 13; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 864e5);
-    const key = d.toISOString().slice(0, 10);
+    const key = formatDayKey(new Date(Date.now() - i * 864e5));
     series.push(byDay.get(key) ?? 0);
   }
   const weekTotal = series.slice(-7).reduce((a, b) => a + b, 0);

@@ -1,3 +1,5 @@
+import { sniffKind } from './file-signature';
+
 export const MAX_UPLOAD_MB = 5;
 export const MAX_PDF_MB = 20;
 export const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
@@ -37,5 +39,18 @@ export function serializeImageField(urls: string[]): string | null {
 export function validateUpload(file: { size: number; type: string }): string | null {
   if (file.size > MAX_UPLOAD_MB * 1024 * 1024) return `Dosya en fazla ${MAX_UPLOAD_MB} MB olabilir.`;
   if (!ALLOWED_MIME.includes(file.type)) return 'Yalnızca JPG, PNG, WebP veya AVIF yükleyebilirsiniz.';
+  return null;
+}
+
+/** MIME türü ile gerçek içerik uyuşmuyor mu? (uzantısı değiştirilmiş dosyalar) */
+export function validateImageSignature(head: Uint8Array): string | null {
+  const kind = sniffKind(head);
+  // AVIF (ISO-BMFF "ftypavif") sniffKind'ta yok; kabul et.
+  if (kind === 'unknown') {
+    const box = String.fromCharCode(...head.slice(4, 12));
+    if (box.startsWith('ftyp')) return null;
+    return 'Dosya içeriği bir görsel değil görünüyor.';
+  }
+  if (kind === 'pdf' || kind === 'dwg') return 'Bu bir görsel dosyası değil.';
   return null;
 }

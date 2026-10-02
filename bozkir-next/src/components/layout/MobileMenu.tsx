@@ -72,7 +72,7 @@ export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
           Üstte tutulur: çerez bandı menünün altını kapatıyor. */}
       <div className="flex items-center gap-2 px-5 pt-2">
         <ThemeToggle />
-        <LocaleSwitcher className="xl:hidden" />
+        <LocaleSwitcher align="start" className="xl:hidden" />
       </div>
 
       <nav className="flex flex-col px-5 pt-6">

@@ -12,10 +12,17 @@ export function LocaleSwitcher({
   onDark = false,
   compact = false,
   className,
+  align = 'end',
 }: {
   onDark?: boolean;
   compact?: boolean;
   className?: string;
+  /**
+   * Açılır listenin hizası. `end` masaüstü header içindir (sağa yaslı).
+   * Dar kaplarda (mobil menü) `end` liste ekranın soluna taşıp kırpar;
+   * bu yüzden `start` kullanılır.
+   */
+  align?: 'start' | 'end';
 }) {
   const { locale, t } = useDictionary();
   const pathname = usePathname();
@@ -65,7 +72,12 @@ export function LocaleSwitcher({
       {open && (
         <ul
           role="listbox"
-          className="absolute top-full end-0 z-[110] mt-2 w-44 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]"
+          className={cn(
+            'absolute top-full z-[110] mt-2 w-44 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]',
+            // Hiçbir ekran genişliğinde taşmasın.
+            'max-w-[calc(100vw-2rem)]',
+            align === 'start' ? 'start-0' : 'end-0',
+          )}
         >
           {locales.map((l) => (
             <li key={l}>

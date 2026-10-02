@@ -6,7 +6,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { getDb } from '@/lib/db/client';
 import { adminUsers, brands, campaigns, catalogs, categories, contentBlocks, contentItems, products, quoteRequests } from '@/lib/db/schema';
 import { createSession, destroySession } from '@/lib/auth/session';
-import { parseImageField, serializeImageField, validateUpload, MAX_PDF_MB, ALLOWED_PDF_MIME } from '@/lib/media';
+import { parseImageField, serializeImageField, validateUpload, validateImageSignature, MAX_PDF_MB, ALLOWED_PDF_MIME } from '@/lib/media';
 import { optimizeImage } from '@/lib/image-optimize';
 import { DATA_TAGS } from '@/lib/data/tags';
 import { deleteObject, objectKeyFromUrl, putObject, publicUrl, toObjectKey } from '@/lib/storage/s3';
@@ -148,11 +148,18 @@ export async function uploadMedia(
   if (!MEDIA_FOLDERS.includes(folder)) return { error: 'Geçersiz klasör.' };
 
   const original = Buffer.from(await file.arrayBuffer());
+
+  // Uzantısı değiştirilmiş dosyalar sharp'e girmeden reddedilir.
+  if (!isPdf) {
+    const bad = validateImageSignature(original.subarray(0, 16));
+    if (bad) return { error: bad };
+  }
+
   let body: Buffer = original;
   let contentType = file.type || 'image/jpeg';
   let ext = extOf(file.name, file.type);
 
-  // Görselleri optimize et (boyut küçültme + WebP). PDF'e dokunma.
+  // Görselleri optimize et (boyut küçültme + WebP'ye çevirme). PDF'e dokunma.
   if (!isPdf) {
     const optimized = await optimizeImage(original, contentType);
     body = optimized.buffer as Buffer;

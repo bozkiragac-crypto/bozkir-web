@@ -4,9 +4,10 @@ import { Plus } from 'lucide-react';
 import { getDb } from '@/lib/db/client';
 import { campaigns } from '@/lib/db/schema';
 import { DeleteCampaignButton } from '@/components/admin/DeleteButtons';
+import { formatDate } from '@/lib/datetime';
 
 function fmt(d: Date | null) {
-  return d ? d.toLocaleDateString('tr-TR') : '—';
+  return d ? formatDate(d) : '—';
 }
 
 export default async function AdminCampaignsPage() {

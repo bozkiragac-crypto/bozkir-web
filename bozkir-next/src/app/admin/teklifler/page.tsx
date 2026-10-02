@@ -3,12 +3,12 @@ import { Mail, Phone, Building2, Package, Paperclip, Calendar } from 'lucide-rea
 import { getDb } from '@/lib/db/client';
 import { quoteRequests } from '@/lib/db/schema';
 import { DeleteQuoteButton } from '@/components/admin/DeleteButtons';
+import { formatDateTime } from '@/lib/datetime';
 
 export const dynamic = 'force-dynamic';
 
 function fmt(date: Date | null): string {
-  if (!date) return '';
-  return new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+  return formatDateTime(date, 'medium');
 }
 
 export default async function QuoteRequestsPage() {

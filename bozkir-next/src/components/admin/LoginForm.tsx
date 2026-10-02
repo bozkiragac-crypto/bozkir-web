@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from '@/app/admin/actions';
+import { ADMIN_SEEN_KEY, ADMIN_TAB_KEY } from '@/lib/admin/session-keys';
 
 export function LoginForm() {
   const [identifier, setIdentifier] = useState('');
@@ -29,9 +30,10 @@ export function LoginForm() {
       return;
     }
     try {
-      sessionStorage.setItem('bozkir_admin_tab', '1');
+      sessionStorage.setItem(ADMIN_TAB_KEY, '1');
+      localStorage.setItem(ADMIN_SEEN_KEY, String(Date.now()));
     } catch {
-      // yok say
+      // Depolama erişilemezse geç (gizli sekme vb.).
     }
     router.replace('/admin');
     router.refresh();

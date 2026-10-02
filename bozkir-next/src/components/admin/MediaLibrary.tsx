@@ -94,7 +94,7 @@ export function MediaLibrary({ items }: { items: MediaItem[] }) {
           <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90">
             <Upload className="h-4 w-4" />
             {busy ? 'Yükleniyor...' : 'Yükle'}
-            <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => onUpload(e.target.files)} />
+            <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={(e) => onUpload(e.target.files)} />
           </label>
         </div>
       </div>

@@ -31,9 +31,29 @@ async function checkStorage(): Promise<'ok' | 'down' | 'unconfigured'> {
 }
 
 /**
+ * sharp gerçekten çalışıyor mu?
+ *
+ * sharp, mimariye bağlı önceden derlenmiş ikili getirir; uyumsuz mimaride
+ * `npm ci` sessizce atlar ve dönüşüm hataları `optimizeImage` içinde yutulur.
+ * Sonuç: yüklemeler JPEG olarak kalır ama panel hiçbir hata göstermez.
+ * Bu probla sessiz arızanın görünür olmasını sağlar.
+ */
+async function checkImage(): Promise<'ok' | 'down'> {
+  try {
+    const sharp = (await import('sharp')).default;
+    await sharp({ create: { width: 2, height: 2, channels: 3, background: '#000' } })
+      .webp()
+      .toBuffer();
+    return 'ok';
+  } catch {
+    return 'down';
+  }
+}
+
+/**
  * Sağlık ucu.
  * - Varsayılan (hafif): süreç ayakta mı → uptime izleme/healthcheck için.
- * - `?deep=1`: DB ve nesne depolamayı da gerçekten yoklar; biri düşükse 503.
+ * - `?deep=1`: DB, nesne depolama ve sharp'ı da gerçekten yoklar; biri düşükse 503.
  */
 export async function GET(request: Request) {
   const deep = new URL(request.url).searchParams.get('deep') === '1';
@@ -53,11 +73,11 @@ export async function GET(request: Request) {
     return NextResponse.json(base, { headers: { 'Cache-Control': 'no-store' } });
   }
 
-  const [db, storage] = await Promise.all([checkDb(), checkStorage()]);
-  const ok = db !== 'down' && storage !== 'down';
+  const [db, storage, image] = await Promise.all([checkDb(), checkStorage(), checkImage()]);
+  const ok = db !== 'down' && storage !== 'down' && image !== 'down';
 
   return NextResponse.json(
-    { ...base, ok, db, storage },
+    { ...base, ok, db, storage, image },
     { status: ok ? 200 : 503, headers: { 'Cache-Control': 'no-store' } },
   );
 }

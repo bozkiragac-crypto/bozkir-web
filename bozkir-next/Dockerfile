@@ -21,9 +21,12 @@ RUN npm prune --omit=dev
 # ---- Çalışma ----
 FROM node:22-alpine AS runner
 WORKDIR /app
+# Alpine'da tzdata yok; TZ'nin işe yaraması için gerekli.
+RUN apk add --no-cache tzdata
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV TZ=Europe/Istanbul
 COPY --from=build /app/public ./public
 COPY --from=build /app/.next ./.next
 COPY --from=prod-deps /app/node_modules ./node_modules

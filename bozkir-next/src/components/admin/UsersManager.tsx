@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Save, KeyRound } from 'lucide-react';
 import { createUser, updateUser, deleteUser, type UserInput } from '@/app/admin/users-actions';
 import { cn } from '@/lib/utils';
+import { formatDateTime } from '@/lib/datetime';
 
 export interface AdminUserRow {
   id: string;
@@ -19,8 +20,7 @@ export interface AdminUserRow {
 const field = 'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-foreground';
 
 function fmt(d: string | null) {
-  if (!d) return '—';
-  return new Intl.DateTimeFormat('tr-TR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(d));
+  return formatDateTime(d);
 }
 
 export function UsersManager({ users, currentId }: { users: AdminUserRow[]; currentId: string }) {

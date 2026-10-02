@@ -1,6 +1,7 @@
 import { desc, ilike, or } from 'drizzle-orm';
 import { getDb } from '@/lib/db/client';
 import { activityLog } from '@/lib/db/schema';
+import { formatDateTime } from '@/lib/datetime';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,7 @@ const ACTION_LABEL: Record<string, string> = {
 };
 
 function fmt(d: Date) {
-  return new Intl.DateTimeFormat('tr-TR', { dateStyle: 'short', timeStyle: 'short' }).format(d);
+  return formatDateTime(d);
 }
 
 interface PageProps {

@@ -20,6 +20,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-bozkir}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bozkir}
       POSTGRES_DB: ${POSTGRES_DB:-bozkir}
+      # to_char(created_at, ...) gün gruplaması uygulama saat dilimiyle eşleşsin.
+      TZ: ${APP_TIME_ZONE:-Europe/Istanbul}
+      PGTZ: ${APP_TIME_ZONE:-Europe/Istanbul}
     volumes:
       - db-data:/var/lib/postgresql/data
       - wal-archive:/wal-archive
@@ -94,6 +97,8 @@ services:
       S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-/media}
       APP_VERSION: ${APP_TAG:-dev}
       MAINTENANCE_MODE: ${MAINTENANCE_MODE:-0}
+      TZ: ${APP_TIME_ZONE:-Europe/Istanbul}
+      APP_TIME_ZONE: ${APP_TIME_ZONE:-Europe/Istanbul}
       TRUSTED_PROXY: ${TRUSTED_PROXY:-1}
     depends_on:
       db:
