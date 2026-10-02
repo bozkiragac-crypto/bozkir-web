@@ -13,6 +13,7 @@ import { deleteObject, objectKeyFromUrl, putObject, publicUrl, toObjectKey } fro
 import { logActivity, requireAdminUser, requireOwner } from '@/lib/admin/guard';
 import { createTotpSecret, totpKeyUri, verifyTotp } from '@/lib/auth/totp';
 import { parseCsv } from '@/lib/csv';
+import { categorySlugOf } from '@/lib/data/category-key';
 import { slugify } from '@/lib/slug';
 
 function extOf(name: string, type: string) {
@@ -636,25 +637,133 @@ export async function saveCategory(input: CategoryInput): Promise<{ ok: boolean;
   return { ok: true, id: inserted[0]?.id };
 }
 
-export async function deleteCategory(id: string): Promise<{ ok: boolean; error?: string }> {
+export type DeleteCategoryMode = 'block' | 'cascade' | 'deactivate';
+
+export interface DeleteCategoryResult {
+  ok: boolean;
+  error?: string;
+  /** Engellendiğinde/uyarıda bağlı ürün sayısı. */
+  productCount?: number;
+  /** Kullanıcıya gösterilecek örnek ürün adları. */
+  samples?: string[];
+}
+
+interface CategoryProductRow {
+  id: string;
+  name: string | null;
+  code: string | null;
+  cat: string | null;
+  img: string | null;
+}
+
+/**
+ * Bir kategoriye bağlı ürünleri aynı normalizasyonla bulur.
+ *
+ * `products.cat` düz metin ve aynı kategoriyi farklı yazımlarla tutuyor
+ * ("PVC KENAR", "MDF LAM"/"MDFLAM"). `fetchCategories()` ile aynı
+ * `categorySlugOf()` kullanılır; aksi halde burada 0 bulunan kategori
+ * vitrinden kaybolmaz.
+ */
+async function findProductsInCategory(slug: string): Promise<CategoryProductRow[]> {
+  const db = getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({ id: products.id, name: products.name, code: products.code, cat: products.cat, img: products.img })
+    .from(products);
+  return rows
+    .filter((p) => categorySlugOf(p.cat ?? '') === slug)
+    .map((p) => ({ id: String(p.id), name: p.name, code: p.code, cat: p.cat, img: p.img }));
+}
+
+/**
+ * Kategori siler.
+ *
+ * - `block`: bağlı ürün varsa silmez, sayı ve örnekleri döndürür (varsayılan).
+ * - `cascade`: önce bağlı ürünleri (ve görsellerini) siler, sonra kategoriyi.
+ * - `deactivate`: ürünlere dokunmaz, kategoriyi pasifleştirir; vitrinden
+ *   çıkar ama veri ve geçmiş teklifler korunur.
+ *
+ * Önceden kategori satırı silinip ürünler `cat` metniyle başıboş bırakılıyordu;
+ * `fetchCategories()` listeyi ürünlerden türettiği için kategori "silinince"
+ * geri doğuyordu.
+ */
+export async function deleteCategory(
+  id: string,
+  mode: DeleteCategoryMode = 'block',
+): Promise<DeleteCategoryResult> {
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
   const prev = await db
-    .select({ thumbnail: categories.thumbnail, heroImage: categories.heroImage, name: categories.name })
+    .select({
+      thumbnail: categories.thumbnail,
+      heroImage: categories.heroImage,
+      name: categories.name,
+      slug: categories.slug,
+    })
     .from(categories)
     .where(eq(categories.id, id))
     .limit(1);
+
+  const row = prev[0];
+  if (!row) return { ok: false, error: 'Kategori bulunamadı.' };
+
+  const name = row.name ?? '';
+  const slug = row.slug || categorySlugOf(name);
+  const linked = await findProductsInCategory(slug);
+  const count = linked.length;
+  const samples = linked.slice(0, 3).map((p) => `${p.name ?? '—'}${p.code ? ` (${p.code})` : ''}`);
+
+  if (mode === 'block' && count > 0) {
+    return {
+      ok: false,
+      error: `"${name}" kategorisinde ${count} ürün var. Kategoriyi silmek için ürünleri silin veya kategoriyi pasifleştirin.`,
+      productCount: count,
+      samples,
+    };
+  }
+
+  if (mode === 'cascade' && count > 0) {
+    const ids = linked.map((p) => p.id);
+    await db.delete(products).where(inArray(products.id, ids));
+    for (const p of linked) {
+      const key = p.img ? toObjectKey(p.img) : null;
+      if (key) await deleteObject(key);
+    }
+    await logActivity(
+      admin,
+      'delete',
+      'category',
+      id,
+      `${count} ürün silindi, kategori silindi: ${name}`,
+    );
+  }
+
+  if (mode === 'deactivate') {
+    await db.update(categories).set({ isActive: false }).where(eq(categories.id, id));
+    await logActivity(
+      admin,
+      'update',
+      'category',
+      id,
+      `Kategori pasifleştirildi (${count} ürün korundu): ${name}`,
+    );
+    await flushSiteCaches();
+    return { ok: true, productCount: count, samples };
+  }
+
   await db.delete(categories).where(eq(categories.id, id));
 
-  for (const url of [prev[0]?.thumbnail, prev[0]?.heroImage]) {
+  for (const url of [row.thumbnail, row.heroImage]) {
     const key = url ? toObjectKey(url) : null;
     if (key) await deleteObject(key);
   }
-  await logActivity(admin, 'delete', 'category', id, `Kategori silindi: ${prev[0]?.name ?? id}`);
+  if (mode !== 'cascade') {
+    await logActivity(admin, 'delete', 'category', id, `Kategori silindi: ${name}`);
+  }
   await flushSiteCaches();
-  return { ok: true };
+  return { ok: true, productCount: count };
 }
 
 /* ---------------- Markalar / Bayilikler ---------------- */

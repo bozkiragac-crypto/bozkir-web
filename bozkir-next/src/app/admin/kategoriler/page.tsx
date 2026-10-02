@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { asc } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import { Plus } from 'lucide-react';
 import { getDb } from '@/lib/db/client';
-import { categories } from '@/lib/db/schema';
+import { categories, products } from '@/lib/db/schema';
+import { categorySlugOf } from '@/lib/data/category-key';
 import { DeleteCategoryButton } from '@/components/admin/DeleteButtons';
 
 export default async function AdminCategoriesPage() {
@@ -12,6 +13,20 @@ export default async function AdminCategoriesPage() {
   }
 
   const rows = await db.select().from(categories).orderBy(asc(categories.sortOrder));
+
+  // `products.cat` düz metin olduğu için sayaç `fetchCategories()` ile aynı
+  // normalizasyonu kullanmalı; aksi halde panelde 0 görünen kategoriyi
+  // silmek vitrinde kaybolmaz.
+  const allProducts = await db
+    .select({ cat: products.cat })
+    .from(products)
+    .where(eq(products.isActive, true));
+  const countsBySlug = new Map<string, number>();
+  for (const p of allProducts) {
+    const slug = categorySlugOf(p.cat ?? '');
+    if (!slug) continue;
+    countsBySlug.set(slug, (countsBySlug.get(slug) ?? 0) + 1);
+  }
 
   return (
     <div>
@@ -37,6 +52,7 @@ export default async function AdminCategoriesPage() {
               <th className="p-4 font-medium">Slug</th>
               <th className="p-4 font-medium">Vitrin</th>
               <th className="p-4 font-medium">Durum</th>
+              <th className="p-4 font-medium">Ürün</th>
               <th className="p-4 font-medium">Sıra</th>
               <th className="p-4" />
             </tr>
@@ -64,20 +80,23 @@ export default async function AdminCategoriesPage() {
                     {c.isActive ? 'Aktif' : 'Pasif'}
                   </span>
                 </td>
+                <td className="numerals p-4 text-muted-strong">
+                  {countsBySlug.get(c.slug) ?? 0}
+                </td>
                 <td className="numerals p-4 text-muted-strong">{c.sortOrder}</td>
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-2">
                     <Link href={`/admin/kategoriler/${c.id}`} className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2">
                       Düzenle
                     </Link>
-                    <DeleteCategoryButton id={c.id} />
+                    <DeleteCategoryButton id={c.id} name={c.name} />
                   </div>
                 </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="p-10 text-center text-muted-strong">
+                <td colSpan={8} className="p-10 text-center text-muted-strong">
                   Henüz kategori yok. &quot;Yeni Kategori&quot; ile ekleyin.
                 </td>
               </tr>

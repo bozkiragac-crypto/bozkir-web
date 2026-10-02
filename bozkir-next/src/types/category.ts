@@ -15,6 +15,8 @@ export interface Category {
   thumbnail?: string;
   featured?: boolean;
   sortOrder?: number;
+  /** Panelden pasifleştirilen kategori vitrinde listelenmez. */
+  isActive?: boolean;
   /** API'den gelen ürün sayısı (varsa). */
   productCount?: number;
   seoTitle?: string;

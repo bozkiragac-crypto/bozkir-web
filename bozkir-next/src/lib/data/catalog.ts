@@ -10,44 +10,7 @@ import { products as productsTable } from '@/lib/db/schema';
 import { publicUrl } from '@/lib/storage/s3';
 import { pickLocaleText } from '@/lib/locale-text';
 
-const CATEGORY_SLUGS: Record<string, string> = {
-  KAPLAMALIMDF: 'kaplamali-mdf',
-  MDF: 'mdf',
-  MDFLAM: 'mdflam',
-  SUNTA: 'sunta',
-  SUNTALAM: 'suntalam',
-  LAKPANEL: 'lak-panel',
-  MASIFPANEL: 'masif-panel',
-  PVCKENAR: 'pvc-kenar-bant',
-  PERVAZ: 'pervaz',
-  TUTKAL: 'tutkal',
-  KAPIPANEL: 'kapi-panel',
-  OSB: 'osb',
-  DUVARPROFILI: 'duvar-profili',
-};
-
-function toAscii(value: string): string {
-  return value
-    .replace(/İ/g, 'I').replace(/ı/g, 'i')
-    .replace(/Ş/g, 'S').replace(/ş/g, 's')
-    .replace(/Ğ/g, 'G').replace(/ğ/g, 'g')
-    .replace(/Ü/g, 'U').replace(/ü/g, 'u')
-    .replace(/Ö/g, 'O').replace(/ö/g, 'o')
-    .replace(/Ç/g, 'C').replace(/ç/g, 'c');
-}
-
-function catKey(value: string): string {
-  return toAscii(value).toUpperCase().replace(/[^A-Z0-9]+/g, '');
-}
-
-function slugify(value: string): string {
-  return toAscii(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-}
-
-function categorySlug(cat: string): string {
-  const key = catKey(cat);
-  return CATEGORY_SLUGS[key] ?? slugify(cat);
-}
+import { categoryKeyOf, categorySlugOf, slugify, toAscii } from '@/lib/data/category-key';
 
 /** Fallback kategori adını locale'e göre seçer. */
 export function localizedCategoryName(category: Category, locale?: Locale): string {
@@ -121,7 +84,7 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
     // Yalnızca code + name + kategori aynıysa (gerçek placeholder) atla.
     // code kategoriyle aynı olsa da farklı isimli ürünler (örn. "Duvar Profili")
     // geçerli ürünlerdir; elenmemeli.
-    if (code && catKey(code) === catKey(cat) && catKey(name) === catKey(cat)) continue;
+    if (code && categoryKeyOf(code) === categoryKeyOf(cat) && categoryKeyOf(name) === categoryKeyOf(cat)) continue;
 
     // Slug yalnızca Türkçe isimden üretilir; çeviriler URL'yi değiştirmez.
     let slug = slugify(code ? `${name}-${code}` : name);
@@ -136,7 +99,7 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       name,
       code,
       category: cat,
-      categorySlug: categorySlug(cat),
+      categorySlug: categorySlugOf(cat),
       face: String(row.face ?? '').trim(),
       createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : '',
       images: parseImageList(row.img),
@@ -265,20 +228,25 @@ export async function fetchRelatedProducts(slug: string, locale?: Locale, limit 
 
 export async function fetchCategories(locale?: Locale): Promise<Category[]> {
   const items = await getProductsIndex();
-  // DB kategori meta verisi (varsa) fallback'in önüne geçer.
-  const { fetchCategoryMeta } = await import('@/lib/data/categories');
-  const dbMeta = await fetchCategoryMeta(locale);
+  // Tüm meta satırları okunur (pasifler dahil): aksi halde pasifleştirilen
+  // kategori meta satırı görünmez ve `items`'dan yeniden üretilir.
+  const { fetchAllCategoryMeta } = await import('@/lib/data/categories');
+  const allMeta = await fetchAllCategoryMeta(locale);
+  const hiddenSlugs = new Set(allMeta.filter((c) => c.isActive === false).map((c) => c.slug));
+  const dbMeta = allMeta.filter((c) => c.isActive !== false);
   const metaBySlug = new Map(dbMeta.map((c) => [c.slug, c]));
 
   const counts = new Map<string, { name: string; count: number }>();
   for (const it of items) {
     if (!it.categorySlug) continue;
+    // Panelden gizlenen kategori ürünü olsa bile vitrinde görünmez.
+    if (hiddenSlugs.has(it.categorySlug)) continue;
     const localized = pickLocaleText(it.category, locale, it.catEn, it.catAr);
     const cur = counts.get(it.categorySlug);
     if (cur) cur.count += 1;
     else counts.set(it.categorySlug, { name: localized, count: 1 });
   }
-  if (counts.size === 0) return dbMeta.length ? dbMeta : localizeFallbackCategories(locale);
+  if (counts.size === 0 && dbMeta.length === 0) return localizeFallbackCategories(locale);
 
   const merged: Category[] = [];
   counts.forEach((value, slug) => {
