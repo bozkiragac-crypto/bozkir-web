@@ -76,7 +76,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
         ]}
       />
       <Container className="grid gap-10 pb-24 md:pb-32 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
-        <QuoteForm products={products} />
+        <QuoteForm products={products} turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ''} />
         <aside className="space-y-6">
           <div className="rounded-lg border border-border bg-surface p-6">
             <p className="text-eyebrow">{dict.quote.contactTitle}</p>

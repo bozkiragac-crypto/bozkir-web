@@ -52,13 +52,47 @@ export function isRateLimited(key: string, max = MAX_HITS): boolean {
   return false;
 }
 
+/**
+ * İstemci IP'sini güvenilir proxy ayarına göre çözer.
+ *
+ * Güvenlik notu: `X-Forwarded-For` istemci tarafından gönderilebilir. Bu yüzden
+ * soldan SAĞA değil, sağdan sola (bize en yakın güvenilir at) doğru okunur ve
+ * değer geçerli bir IP değilse atlanır. nginx `X-Forwarded-For`'u
+ * `$remote_addr` ile üzerine yazdığı için production'da tek değer gelir.
+ */
+const IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+const IPV6_RE = /^[0-9a-fA-F:]+$/;
+
+function isValidIp(value: string): boolean {
+  if (IPV4_RE.test(value)) {
+    return value.split('.').every((p) => Number(p) <= 255);
+  }
+  // IPv6: en az bir ':' içermeli ve yalnızca hex/kolon karakterleri olmalı.
+  return value.includes(':') && value.length <= 45 && IPV6_RE.test(value);
+}
+
+/** Saf çözümleyici; testler doğrudan çağırabilir. */
+export function pickClientIp(headers: Headers, trustedProxy = process.env.TRUSTED_PROXY !== '0'): string {
+  if (trustedProxy) {
+    const real = headers.get('x-real-ip')?.trim();
+    if (real && isValidIp(real)) return real;
+
+    const xff = headers.get('x-forwarded-for');
+    if (xff) {
+      const parts = xff
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      // Sağdan sola: en yakın proxy'nin eklediği gerçek IP.
+      for (let i = parts.length - 1; i >= 0; i--) {
+        if (isValidIp(parts[i]!)) return parts[i]!;
+      }
+    }
+  }
+  return 'unknown';
+}
+
 /** İstemci IP'sini güvenilir proxy ayarına göre çözer. */
 export function clientIp(request: Request): string {
-  const trusted = process.env.TRUSTED_PROXY !== '0';
-  const xff = request.headers.get('x-forwarded-for');
-  if (trusted && xff) {
-    const first = xff.split(',')[0]?.trim();
-    if (first) return first;
-  }
-  return request.headers.get('x-real-ip') ?? 'unknown';
+  return pickClientIp(request.headers);
 }

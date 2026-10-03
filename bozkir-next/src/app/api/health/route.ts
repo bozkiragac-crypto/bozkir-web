@@ -8,6 +8,11 @@ export const dynamic = 'force-dynamic';
 
 const startedAt = Date.now();
 
+// Deep prob pahalıdır (DB + bucket + sharp) ve healthcheck 15 sn'de bir çağırır.
+// Public uçta kaynak tüketimini önlemek için sonuç kısa süre cache'lenir.
+const DEEP_TTL_MS = 30_000;
+let deepCache: { at: number; status: number; body: Record<string, unknown> } | null = null;
+
 async function checkDb(): Promise<'ok' | 'down' | 'unconfigured'> {
   if (!hasDb()) return 'unconfigured';
   const db = getDb();
@@ -73,11 +78,21 @@ export async function GET(request: Request) {
     return NextResponse.json(base, { headers: { 'Cache-Control': 'no-store' } });
   }
 
+  const now = Date.now();
+  if (deepCache && now - deepCache.at < DEEP_TTL_MS) {
+    return NextResponse.json(deepCache.body, {
+      status: deepCache.status,
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+
   const [db, storage, image] = await Promise.all([checkDb(), checkStorage(), checkImage()]);
   const ok = db !== 'down' && storage !== 'down' && image !== 'down';
+  const body = { ...base, ok, db, storage, image };
+  deepCache = { at: now, status: ok ? 200 : 503, body };
 
-  return NextResponse.json(
-    { ...base, ok, db, storage, image },
-    { status: ok ? 200 : 503, headers: { 'Cache-Control': 'no-store' } },
-  );
+  return NextResponse.json(body, {
+    status: ok ? 200 : 503,
+    headers: { 'Cache-Control': 'no-store' },
+  });
 }

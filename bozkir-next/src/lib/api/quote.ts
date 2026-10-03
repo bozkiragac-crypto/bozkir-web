@@ -17,6 +17,7 @@ export async function submitQuote(payload: QuoteRequest, file?: File | null): Pr
   form.set('dimensions', payload.dimensions ?? '');
   form.set('note', payload.note ?? '');
   form.set('consent', payload.consent ? 'true' : 'false');
+  form.set('turnstileToken', payload.turnstileToken ?? '');
   form.set('website', ''); // honeypot
   if (file) form.set('attachment', file);
 

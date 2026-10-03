@@ -6,25 +6,45 @@ import { putObject, storageConfigured } from '@/lib/storage/s3';
 import { clientIp, isRateLimited } from '@/lib/ratelimit';
 import { isAllowedAttachment } from '@/lib/file-signature';
 import { sendWebhook } from '@/lib/webhooks';
-import { sendQuoteNotification } from '@/lib/mailer';
+import { sendQuoteNotification, sendAdminAlert } from '@/lib/mailer';
+import { checkQuoteGuard, attachmentQuotaReached } from '@/lib/quote-guard';
+import { verifyTurnstile } from '@/lib/turnstile';
 
 export const runtime = 'nodejs';
 
 const MAX_FILE_MB = 10;
 const ALLOWED_EXT = /\.(pdf|jpe?g|png|dwg)$/i;
 
+const CONTROL = /[\r\n\u0000-\u001f\u007f]/;
+const singleLine = (max: number) =>
+  z
+    .string()
+    .max(max)
+    .refine((v) => !CONTROL.test(v), { message: 'Geçersiz karakter.' });
+
 const schema = z.object({
-  fullName: z.string().min(2).max(120),
-  company: z.string().max(160).optional().default(''),
-  phone: z.string().min(10).max(30),
+  fullName: singleLine(120).pipe(z.string().min(2)),
+  company: singleLine(160).optional().default(''),
+  phone: z
+    .string()
+    .min(10)
+    .max(30)
+    .regex(/^[0-9+()\s.\-]+$/, { message: 'Geçersiz telefon.' }),
   email: z.string().email().max(160),
-  product: z.string().max(160).optional().default(''),
-  productId: z.string().max(80).optional().default(''),
-  productSlug: z.string().max(160).optional().default(''),
-  quantity: z.string().max(60).optional().default(''),
-  dimensions: z.string().max(120).optional().default(''),
-  note: z.string().max(2000).optional().default(''),
+  product: singleLine(160).optional().default(''),
+  productId: singleLine(80).optional().default(''),
+  productSlug: singleLine(160).optional().default(''),
+  quantity: singleLine(60).optional().default(''),
+  dimensions: singleLine(120).optional().default(''),
+  // Not çok satırlı olabilir; yalnızca zararlı kontrol karakterleri atılır.
+  note: z
+    .string()
+    .max(2000)
+    .optional()
+    .default('')
+    .transform((v) => v.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]+/g, '')),
   consent: z.literal('true', { message: 'KVKK onayı gerekli.' }),
+  turnstileToken: z.string().max(4096).optional().default(''),
   website: z.string().max(0).optional().default(''), // honeypot
 });
 
@@ -58,6 +78,7 @@ export async function POST(request: Request) {
     dimensions: String(form.get('dimensions') ?? '').trim(),
     note: String(form.get('note') ?? '').trim(),
     consent: String(form.get('consent') ?? '').trim(),
+    turnstileToken: String(form.get('turnstileToken') ?? '').trim(),
     website: String(form.get('website') ?? '').trim(),
   });
 
@@ -71,6 +92,44 @@ export async function POST(request: Request) {
   if (parsed.data.website) {
     // Bot: sessizce başarılı gibi davran.
     return NextResponse.json({ ok: true, message: 'Talebiniz alındı.' });
+  }
+
+  // Cloudflare Turnstile (anahtar tanımlıysa zorunlu).
+  const turnstileOk = await verifyTurnstile(parsed.data.turnstileToken, ip);
+  if (!turnstileOk) {
+    return NextResponse.json(
+      { ok: false, message: 'Bot doğrulaması başarısız. Lütfen sayfayı yenileyip tekrar deneyin.' },
+      { status: 422 },
+    );
+  }
+
+  const d = parsed.data;
+
+  // Kişi/global limitler ve tekrar gönderim kontrolü (DB destekli, XFF'ten bağımsız).
+  const guard = await checkQuoteGuard({ email: d.email, phone: d.phone, note: d.note });
+  if (guard.action === 'duplicate') {
+    // Aynı talep kısa süre içinde tekrar geldi: insert yok, sessiz başarı.
+    return NextResponse.json({ ok: true, message: 'Talebiniz alındı. En kısa sürede dönüş yapacağız.' });
+  }
+  if (guard.action === 'limit') {
+    if (guard.reason !== 'contact') {
+      // Global devre kesici: yöneticiye uyarı gönder (fire-and-forget).
+      void sendWebhook('quote.limit_exceeded', { reason: guard.reason, count: guard.count, ip });
+      void sendAdminAlert(
+        'Teklif limiti aşıldı',
+        `Teklif formu global limiti aşıldı.\n\nSebep: ${guard.reason}\nSayaç: ${guard.count}\nIP: ${ip}\nZaman: ${new Date().toISOString()}`,
+      );
+    }
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          guard.reason === 'contact'
+            ? 'Bu bilgilerle kısa süre içinde çok fazla talep gönderildi. Lütfen biraz sonra tekrar deneyin veya bizi arayın.'
+            : 'Teklif sistemi şu anda yoğun. Lütfen birkaç dakika sonra tekrar deneyin veya telefon/WhatsApp ile ulaşın.',
+      },
+      { status: 429 },
+    );
   }
 
   const file = form.get('attachment');
@@ -103,7 +162,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const d = parsed.data;
+  // Günlük ek kotası dolduysa dosya depoya yazılmaz; talep yine kaydedilir.
+  const attachQuotaFull = hasFile ? await attachmentQuotaReached() : false;
 
   // Eki depoya yükle (varsa). Yükleme başarısız olsa da talep kaydedilir.
   let attachmentName: string | null = null;
@@ -113,7 +173,7 @@ export async function POST(request: Request) {
     const safeName = f.name.replace(/[^\w.\-]+/g, '_').slice(-80);
     const key = `quotes/${crypto.randomUUID()}/${safeName}`;
     try {
-      if (storageConfigured()) {
+      if (storageConfigured() && !attachQuotaFull) {
         await putObject(key, fileBuffer, f.type || 'application/octet-stream');
         attachmentKey = key;
       }

@@ -9,6 +9,7 @@ import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { track } from '@/lib/analytics';
 import { submitQuote } from '@/lib/api/quote';
 import { Button } from '@/components/ui/Button';
+import { TurnstileWidget } from '@/components/forms/TurnstileWidget';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
@@ -39,7 +40,13 @@ interface FormValues {
 const fieldClass =
   'h-12 w-full rounded-md border border-border bg-surface px-4 text-sm outline-none transition-colors focus:border-foreground';
 
-export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
+export function QuoteForm({
+  products,
+  turnstileSiteKey = '',
+}: {
+  products?: QuoteProduct[];
+  turnstileSiteKey?: string;
+}) {
   const list = products && products.length > 0 ? products : [];
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -48,6 +55,8 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [sent, setSent] = useState(false);
   const [excluded, setExcluded] = useState<string[]>([]);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileReset, setTurnstileReset] = useState(0);
   const { t } = useDictionary();
 
   const schema = z.object({
@@ -114,6 +123,10 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
 
   async function onSubmit(values: FormValues) {
     setResult(null);
+    if (turnstileSiteKey && !turnstileToken) {
+      setResult({ ok: false, message: t('quote.errorValidation') });
+      return;
+    }
     const slugs = active.map((p) => p.slug).join(',');
     track('quote_submit', { product: values.product, product_slug: slugs });
     const res = await submitQuote(
@@ -129,6 +142,7 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
         dimensions: values.dimensions,
         note: values.note,
         consent: values.consent,
+        turnstileToken,
       },
       file,
     );
@@ -136,6 +150,11 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
       setSent(true);
       reset({ product: productLabel });
       return;
+    }
+    // Token tek kullanımlık: başarısız gönderimden sonra yenile.
+    if (turnstileSiteKey) {
+      setTurnstileToken('');
+      setTurnstileReset((n) => n + 1);
     }
     const message =
       res.status === 429
@@ -353,6 +372,16 @@ export function QuoteForm({ products }: { products?: QuoteProduct[] }) {
           </p>
         )}
       </div>
+
+      {turnstileSiteKey && (
+        <div className="flex justify-start">
+          <TurnstileWidget
+            siteKey={turnstileSiteKey}
+            onToken={setTurnstileToken}
+            resetSignal={turnstileReset}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Button type="submit" size="lg" disabled={isSubmitting} aria-busy={isSubmitting} className="w-full justify-center sm:w-auto">

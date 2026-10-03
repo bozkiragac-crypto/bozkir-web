@@ -197,6 +197,8 @@ CREATE TABLE IF NOT EXISTS quote_requests (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS quote_requests_email_idx ON quote_requests (lower(email));
+CREATE INDEX IF NOT EXISTS quote_requests_phone_idx ON quote_requests (phone);
 
 -- Varsayılan içerik blokları
 INSERT INTO content_blocks (key, title, subtitle, is_active, sort_order) VALUES

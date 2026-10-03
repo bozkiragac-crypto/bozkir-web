@@ -123,6 +123,9 @@ const statements = [
   `ALTER TABLE quote_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now()`,
   `CREATE INDEX IF NOT EXISTS quote_requests_status_idx ON quote_requests (status)`,
   `CREATE INDEX IF NOT EXISTS quote_requests_created_idx ON quote_requests (created_at DESC)`,
+  // spam koruması: kişi bazlı (email/telefon) sorgular için index
+  `CREATE INDEX IF NOT EXISTS quote_requests_email_idx ON quote_requests (lower(email))`,
+  `CREATE INDEX IF NOT EXISTS quote_requests_phone_idx ON quote_requests (phone)`,
 
   // kategoriler (admin CRUD)
   `CREATE TABLE IF NOT EXISTS categories (

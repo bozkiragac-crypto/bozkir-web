@@ -11,6 +11,8 @@ export interface QuoteRequest {
   note?: string;
   /** KVKK/gizlilik onayı — sunucuda da zorunlu. */
   consent?: boolean;
+  /** Cloudflare Turnstile widget token'ı (sunucuda doğrulanır). */
+  turnstileToken?: string;
   /** Yüklenen dosyanın meta bilgisi (gerçek yükleme backend'de yapılır). */
   attachment?: {
     name: string;
