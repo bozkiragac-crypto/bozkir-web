@@ -34,6 +34,8 @@ describe('resolveSecure', () => {
     expect(resolveSecure(null, 'localhost:3000')).toBe(false);
     expect(resolveSecure(null, '127.0.0.1')).toBe(false);
     expect(resolveSecure(null, '[::1]')).toBe(false);
+    expect(resolveSecure(null, '[::1]:3000')).toBe(false);
+    expect(resolveSecure(null, '[::1]:8333')).toBe(false);
   });
 
   it('başlık yoksa diğer hostlar production varsayımına düşer', () => {
@@ -45,6 +47,9 @@ describe('resolveSecure', () => {
     setNodeEnv('production');
     expect(resolveSecure(null, '192.168.1.125')).toBe(true);
     expect(resolveSecure(null, 'bozkiragac.com')).toBe(true);
+    // IPv6 localhost production'da da HTTP'ye izin vermeli.
+    expect(resolveSecure(null, '[::1]')).toBe(false);
+    expect(resolveSecure(null, '[::1]:3000')).toBe(false);
 
     setNodeEnv('development');
     expect(resolveSecure(null, 'bozkiragac.com')).toBe(false);

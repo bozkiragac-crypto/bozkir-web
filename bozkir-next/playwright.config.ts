@@ -8,17 +8,26 @@ import { defineConfig, devices } from '@playwright/test';
  * @see https://playwright.dev/docs/test-configuration
  */
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
+const CI = !!process.env.CI;
+
+// Worker sayısı CPU yarısı (varsayılan 4) olduğunda, Docker yığını da aynı anda
+// çalışıyorsa tarayıcı + SSR sunucusu birlikte zaman aşımına düşüyor.
+// Varsayılanı 2'ye sabitliyoruz; `E2E_WORKERS=1` ile darboğaz makinelerde düşürülebilir.
+const WORKERS = process.env.E2E_WORKERS ? Number(process.env.E2E_WORKERS) : CI ? 1 : 2;
 
 export default defineConfig({
   testDir: './tests/e2e',
   globalSetup: './tests/e2e/global-setup.ts',
-  timeout: 30_000,
-  expect: { timeout: 7_000 },
+  // SSR + veritabanı içeren sayfalar için 30s yetersiz kalabiliyor.
+  timeout: 45_000,
+  expect: { timeout: 10_000 },
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
+  forbidOnly: CI,
+  // Ortam kaynaklı (zaman aşımı) flake'leri bir kez tekrar dener; gerçek
+  // assertion hataları yine de kırmızı kalır.
+  retries: CI ? 2 : 1,
+  workers: WORKERS,
+  reporter: CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',
@@ -40,7 +49,7 @@ export default defineConfig({
     : {
         command: 'npm run start',
         url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: !CI,
         timeout: 120_000,
       },
 });

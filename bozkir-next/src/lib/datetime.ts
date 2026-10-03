@@ -91,7 +91,7 @@ export function startOfLocalDay(value: DateInput = new Date()): Date {
   return new Date(guess - offsetMs);
 }
 
-/** Verilen tarih dilimine göre UTC farkı (ms). */
+/** Verilen tarih dilimine göre UTC farkı (ms): yerel saat - UTC. */
 function localOffsetMs(date: Date): number {
   const dtf = new Intl.DateTimeFormat('en-US', {
     timeZone: APP_TIME_ZONE,
@@ -106,5 +106,6 @@ function localOffsetMs(date: Date): number {
   const parts = dtf.formatToParts(date);
   const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? '0');
   const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute'), get('second'));
-  return date.getTime() - asUtc;
+  // İstanbul için +3 saat → asUtc (yerel duvar saati) - date (UTC) = +3h.
+  return asUtc - date.getTime();
 }

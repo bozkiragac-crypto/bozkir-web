@@ -25,7 +25,10 @@ export function resolveSecure(forwardedProto: string | null, hostname: string): 
 
   // Başlık yok: localhost güvenli kaynak sayıldığı için HTTP'de çalışır,
   // diğer hostlarda production HTTPS varsayılır.
-  const host = hostname.toLowerCase().replace(/:\d+$/, '');
+  // IPv6 köşeli yazımı (`[::1]`, `[::1]:3000`) normalleştirilir.
+  const raw = hostname.toLowerCase();
+  const bracketed = raw.match(/^\[([^\]]+)\](?::\d+)?$/);
+  const host = bracketed ? (bracketed[1] ?? '') : raw.replace(/:\d+$/, '');
   if (host === 'localhost' || host === '127.0.0.1' || host === '::1') return false;
   return process.env.NODE_ENV === 'production';
 }

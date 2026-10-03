@@ -1,5 +1,10 @@
 # Deployment (VPS / Node)
 
+> **Önerilen yol (Docker + nginx + Let's Encrypt):** adım adım kurulum için
+> **[PRODUCTION.md](./PRODUCTION.md)** dosyasına bakın. Bu dosya o yolun
+> (Docker, TLS, yedekleme, Cloudflare, rollback) referansıdır; aşağıdaki bölüm
+> Docker'sız, doğrudan Node + host nginx kurulumu içindir.
+
 Hedef: Next uygulamasını Node runtime ile çalıştırmak (nginx arkasında). PHP artık yok.
 
 ## 1. Sunucu gereksinimleri

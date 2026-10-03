@@ -35,10 +35,12 @@ describe('datetime', () => {
     expect(formatDayKey(new Date('2026-10-02T10:07:00Z'))).toBe('2026-10-02');
   });
 
-  it('gün başlangıcı yerel gün 00:00 UTC değeri verir', () => {
-    const start = startOfLocalDay(new Date('2026-10-02T15:00:00Z'));
-    expect(formatDayKey(start)).toBe('2026-10-02');
-    expect(start.getTime()).toBeLessThan(new Date('2026-10-02T15:00:00Z').getTime());
+  it('gün başlangıcı yerel gece yarısının doğru UTC anına çevrilir', () => {
+    // TR 02.10 00:00 = 01.10 21:00Z (İstanbul UTC+3).
+    expect(startOfLocalDay(new Date('2026-10-02T15:00:00Z')).toISOString()).toBe('2026-10-01T21:00:00.000Z');
+    // UTC 01.10 00:30 -> TR 01.10 03:30 -> yerel gün başı 30.09 21:00Z.
+    expect(startOfLocalDay(new Date('2026-10-01T00:30:00Z')).toISOString()).toBe('2026-09-30T21:00:00.000Z');
+    expect(formatDayKey(startOfLocalDay(new Date('2026-10-02T15:00:00Z')))).toBe('2026-10-02');
   });
 
   it('göreli zaman', () => {

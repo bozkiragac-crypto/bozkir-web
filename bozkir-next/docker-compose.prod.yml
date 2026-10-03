@@ -1,0 +1,21 @@
+# PRODUCTION override — TLS (443) + Let's Encrypt sertifika bağlama.
+#
+# Kullanım (VPS üzerinde):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Bu dosya temel docker-compose.yml'yi DEĞİŞTİRMEZ; sadece nginx servisine
+# 443 portu, TLS konfigürasyonu ve sertifika/webroot bağlamaları ekler.
+# Geliştirme için yine sadece `docker compose up -d` (HTTP 80) kullanılır.
+
+services:
+  nginx:
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      # TLS konfigürasyonu HTTP olan conf'in yerini alır.
+      - ./deploy/nginx.docker.tls.conf:/etc/nginx/conf.d/default.conf:ro
+      # Let's Encrypt sertifikaları (host'ta certbot ile üretilir).
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      # ACME doğrulama webroot'u (certbot --webroot buraya yazar).
+      - ./deploy/certbot-webroot:/var/www/certbot:ro
