@@ -11,6 +11,12 @@ test.describe('Admin: kampanya ekleme ve hakkımızda', () => {
     await adminPage.getByRole('button', { name: 'Kaydet' }).click();
     await expect(adminPage).toHaveURL(/\/admin\/kampanyalar$/, { timeout: 15_000 });
     await expect(adminPage.getByText(title)).toBeVisible();
+
+    // Temizlik: testin oluşturduğu kampanyayı sil; her koşuda birikmesin.
+    adminPage.on('dialog', (d) => d.accept());
+    const row = adminPage.locator('tr', { hasText: title });
+    await row.getByRole('button', { name: 'Sil' }).click();
+    await expect(adminPage.getByText(title)).toHaveCount(0, { timeout: 15_000 });
   });
 
   test('hakkımızda editörü alanları ve kaydetme', async ({ adminPage }) => {

@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/',
     name: 'Bozkır Ağaç Ürünleri',
-    short_name: 'Bozkır Ağaç',
+    short_name: 'Bozkır Ağaç Ürünleri',
     description:
       'MDF lam, lake panel, suntalam, sunta ve tamamlayıcı panel çözümleri. Antakya / Hatay.',
     start_url: '/tr',

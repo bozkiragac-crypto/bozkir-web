@@ -26,6 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { signOut } from '@/app/admin/actions';
+import { siteConfig } from '@/config/site';
 
 const items = [
   { href: '/admin', label: 'Panel', icon: LayoutDashboard, exact: true },
@@ -115,8 +116,8 @@ export function AdminShell({
     <div className="min-h-svh bg-background">
       {/* Mobil üst bar */}
       <div className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 pb-3 pt-[calc(var(--safe-top)+0.75rem)] backdrop-blur lg:hidden">
-        <Link href="/admin" className="text-sm font-semibold tracking-[0.12em] uppercase">
-          Bozkır Ağaç
+        <Link href="/admin" className="text-[0.8rem] font-semibold tracking-[0.1em] uppercase">
+          {siteConfig.legalName}
         </Link>
         <div className="flex items-center gap-1">
           <ThemeToggle />
@@ -156,8 +157,8 @@ export function AdminShell({
       <div className="mx-auto grid max-w-[1400px] gap-8 px-5 py-6 lg:grid-cols-[250px_minmax(0,1fr)]">
         <aside className="hidden lg:sticky lg:top-6 lg:block lg:self-start">
           <div className="mb-6 flex items-center justify-between gap-3">
-            <Link href="/admin" className="text-sm font-semibold tracking-[0.12em] uppercase">
-              Bozkır Ağaç
+            <Link href="/admin" className="text-[0.8rem] font-semibold tracking-[0.1em] uppercase leading-tight">
+              {siteConfig.legalName}
             </Link>
             <ThemeToggle />
           </div>

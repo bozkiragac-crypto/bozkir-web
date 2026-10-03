@@ -21,9 +21,12 @@ export async function CampaignPopupServer({ locale }: { locale: Locale }) {
   if (campaigns.length === 0) return null;
   const chosen = campaigns.find((c) => c.id === campaignId) ?? campaigns[0]!;
 
+  const dict = dictFor(locale);
   return (
     <CampaignPopup
-      readMore={dictFor(locale).home.campaign.readMore}
+      readMore={dict.home.campaign.readMore}
+      eyebrow={dict.home.campaign.popupEyebrow}
+      closeLabel={dict.home.campaign.close}
       campaign={{
         id: chosen.id,
         title: chosen.title,

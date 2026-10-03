@@ -18,12 +18,18 @@ export default async function MaintenancePage() {
   }
 
   const hours = s ? pickLocaleText(s.hours, locale, s.hoursEn, s.hoursAr) : '';
+  // Saat metnini '·' ayracından satırlara böl: tamamı görünsün, kesilmesin.
+  const hoursLines = hours
+    .split('·')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join('\n');
   const contacts = s
     ? [
-        { icon: Phone, label: m.phone, value: s.phone, href: telHref(s.phone) },
-        { icon: MessageCircle, label: m.whatsapp, value: m.whatsapp, href: s.whatsapp },
-        { icon: Mail, label: m.email, value: s.email, href: `mailto:${s.email}` },
-        ...(hours ? [{ icon: Clock, label: m.hours, value: hours, href: undefined }] : []),
+        { icon: Phone, label: m.phone, value: s.phone, href: telHref(s.phone), wide: false },
+        { icon: MessageCircle, label: m.whatsapp, value: m.whatsapp, href: s.whatsapp, wide: false },
+        { icon: Mail, label: m.email, value: s.email, href: `mailto:${s.email}`, wide: false },
+        ...(hours ? [{ icon: Clock, label: m.hours, value: hoursLines, href: undefined, wide: true }] : []),
       ]
     : [];
 
@@ -45,12 +51,20 @@ export default async function MaintenancePage() {
                     <Icon className="h-4 w-4 flex-none text-muted-strong" />
                     <span className="min-w-0">
                       <span className="block text-[0.65rem] tracking-[0.14em] text-muted uppercase">{c.label}</span>
-                      <span className="block truncate text-sm font-medium">{c.value}</span>
+                      <span
+                        className={
+                          c.wide
+                            ? 'block whitespace-pre-line text-sm font-medium'
+                            : 'block truncate text-sm font-medium'
+                        }
+                      >
+                        {c.value}
+                      </span>
                     </span>
                   </>
                 );
                 return (
-                  <li key={c.label}>
+                  <li key={c.label} className={c.wide ? 'sm:col-span-2' : undefined}>
                     {c.href ? (
                       <a
                         href={c.href}
@@ -61,7 +75,9 @@ export default async function MaintenancePage() {
                         {inner}
                       </a>
                     ) : (
-                      <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">{inner}</div>
+                      <div className={`flex gap-3 rounded-lg border border-border bg-background p-4 ${c.wide ? 'items-start' : 'items-center'}`}>
+                        {inner}
+                      </div>
                     )}
                   </li>
                 );

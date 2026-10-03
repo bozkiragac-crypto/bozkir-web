@@ -21,10 +21,11 @@ export function Hero() {
         return;
       }
 
-      // Giriş: yalnızca İÇ katmanda scale/opacity (scroll parallax'ıyla çakışmaz).
+      // Giriş: görsel opacity ile gizlenmez (LCP gecikmesin); yalnızca çok
+      // hafif scale. Metinler ayrı katmanda animasyonlu.
       const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.9 } });
-      tl.from('[data-hero-media]', { scale: 1.12, opacity: 0, duration: 1.2 })
-        .from('[data-hero-item]', { y: 28, opacity: 0, stagger: 0.08 }, 0.15);
+      tl.from('[data-hero-media]', { scale: 1.05, duration: 0.5 })
+        .from('[data-hero-item]', { y: 28, opacity: 0, stagger: 0.08 }, 0.1);
 
       // Scroll: yalnızca DIŞ katmanda hafif dikey parallax (zoom yok).
       gsap.to('[data-hero-parallax]', {
@@ -58,11 +59,15 @@ export function Hero() {
     <section ref={root} data-on-dark className="relative isolate min-h-svh overflow-clip bg-[#111] text-white">
       <div data-hero-parallax className="absolute inset-0 -z-20 will-change-transform">
         <div data-hero-media className="absolute inset-0">
+          {/* Not: Daha yüksek çözünürlüklü bir fotoğraf hazır olduğunda
+              public/images/hero-showroom.jpeg dosyasını ~2560px genişlikle
+              değiştirmek yeterli; kod değişikliği gerekmez. */}
           <Image
             src="/images/hero-showroom.jpeg"
             alt=""
             fill
             priority
+            quality={80}
             sizes="100vw"
             className="object-cover object-[50%_45%]"
           />
