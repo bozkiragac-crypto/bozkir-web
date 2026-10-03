@@ -62,6 +62,7 @@ export default async function AdminDashboardPage() {
     [contentRow],
     [quoteRow],
     [weekQuoteRow],
+    [newQuoteRow],
     [userRow],
     recentQuotes,
     recentActivity,
@@ -73,6 +74,7 @@ export default async function AdminDashboardPage() {
     db.select({ value: count() }).from(contentItems),
     db.select({ value: count() }).from(quoteRequests),
     db.select({ value: count() }).from(quoteRequests).where(gte(quoteRequests.createdAt, new Date(Date.now() - 7 * 864e5))),
+    db.select({ value: count() }).from(quoteRequests).where(eq(quoteRequests.status, 'new')),
     db.select({ value: count() }).from(adminUsers),
     db.select({ id: quoteRequests.id, fullName: quoteRequests.fullName, phone: quoteRequests.phone, createdAt: quoteRequests.createdAt }).from(quoteRequests).orderBy(desc(quoteRequests.createdAt)).limit(5),
     db.select().from(activityLog).orderBy(desc(activityLog.createdAt)).limit(6),
@@ -91,11 +93,18 @@ export default async function AdminDashboardPage() {
   }
   const weekTotal = series.slice(-7).reduce((a, b) => a + b, 0);
 
-  const cards = [
+  const cards: {
+    href: string;
+    icon: typeof Package;
+    label: string;
+    value: number;
+    hint: string;
+    badge?: number;
+  }[] = [
     { href: '/admin/urunler', icon: Package, label: 'Ürünler', value: productRow?.value ?? 0, hint: `${activeProductRow?.value ?? 0} aktif` },
     { href: '/admin/kampanyalar', icon: Megaphone, label: 'Kampanyalar', value: campaignRow?.value ?? 0, hint: 'Vitrin kampanyaları' },
     { href: '/admin/icerik', icon: FileText, label: 'İçerik öğeleri', value: contentRow?.value ?? 0, hint: 'Galeri, rehber, SSS' },
-    { href: '/admin/teklifler', icon: Inbox, label: 'Teklifler', value: quoteRow?.value ?? 0, hint: `Son 7 gün: ${weekQuoteRow?.value ?? 0}` },
+    { href: '/admin/teklifler', icon: Inbox, label: 'Teklifler', value: quoteRow?.value ?? 0, hint: `Son 7 gün: ${weekQuoteRow?.value ?? 0}`, badge: newQuoteRow?.value ?? 0 },
   ];
 
   return (
@@ -120,7 +129,14 @@ export default async function AdminDashboardPage() {
             <Link key={card.href} href={card.href} className="group rounded-xl border border-border bg-surface p-6 transition-colors hover:bg-surface-2">
               <div className="flex items-center justify-between">
                 <Icon className="h-5 w-5 text-accent" />
-                <ArrowUpRight className="h-4 w-4 text-muted transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <span className="flex items-center gap-2">
+                  {card.badge ? (
+                    <span className="rounded-full bg-accent px-2 py-0.5 text-[0.65rem] font-medium text-background">
+                      {card.badge} yeni
+                    </span>
+                  ) : null}
+                  <ArrowUpRight className="h-4 w-4 text-muted transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </span>
               </div>
               <p className="numerals mt-6 text-4xl font-medium tracking-tight">{card.value}</p>
               <p className="mt-2 font-medium">{card.label}</p>
