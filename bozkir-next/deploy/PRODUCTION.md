@@ -51,7 +51,7 @@ admin panelinden yönetilir; bu rehber sunucu tarafını kapsar.
 
 ```bash
 ssh root@VPS_IP
-apt-get update && apt-get apt full-upgrade -y
+apt-get update && apt-get full-upgrade -y
 apt-get install -y git curl ca-certificates gnupg openssl ufw
 ```
 
@@ -468,7 +468,9 @@ Yayına almadan önce hepsini işaretleyin:
 - [ ] `crontab -l` yedek satırlarını içeriyor; `verify-backup.sh` başarılı
 - [ ] Off-site yedeği yapılandırıldı ve bir kez çalıştı
 - [ ] Uptime Kuma alarmı test edildi
-- [ ] Ürün kodu tekrarları temizlendi (varsa unique index migration'ı)
+- [ ] `npm run media:audit` çalıştırıldı: 0 eksik referans, 0 kullanılmayan dosya
+- [ ] Ürün kodu **seri kodu** olarak doğrulandı (tekil olması beklenmez, örn. `PVC KENAR` → `PVC`); tekillik yerine `(kategori + kod + ad)` üçlüsü kontrol ediliyor
+- [ ] Aynı `(kategori + kod + ad)` üçlüsünü tekrar eden kazara çift kayıt yok
 - [ ] Eski PHP host yedek olarak duruyor (rollback için birkaç gün)
 
 ---
