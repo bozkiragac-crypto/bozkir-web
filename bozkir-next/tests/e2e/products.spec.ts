@@ -58,3 +58,52 @@ test.describe('Ürünler ve katalog', () => {
     expect(res.status()).toBe(400);
   });
 });
+
+/**
+ * `products.code` bir seri/malzeme kodu olduğu için tekil değildir
+ * (örn. `PVC KENAR` kategorisindeki 105 ürünün kodu `PVC`).
+ *
+ * Bu testler iki davranışı güvenceye alır:
+ *  1) Seri kodlu mevcut ürün admin'den düzenlenebilir (regresyon: önceden
+ *     "bu ürün kodu zaten kullanılıyor" hatasıyla kaydedilemiyordu).
+ *  2) Aynı kategori + kod + ad ile ikinci kayıt açılamaz (kazara çift kayıt).
+ */
+test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  test('seri kodu paylaşan mevcut ürün düzenlenebilir', async ({ adminPage }) => {
+    // "PVC" kodlu ürünlere git (liste araması hem ad hem kod alanında arar).
+    await adminPage.goto('/admin/urunler?q=PVC', { waitUntil: 'domcontentloaded' });
+    await adminPage.getByRole('link', { name: 'Düzenle' }).first().click();
+
+    await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({ timeout: 15_000 });
+    await expect(adminPage.getByLabel('Ürün Kodu *')).toHaveValue('PVC');
+
+    // Hiçbir alanı değiştirmeden kaydet: seri kodu çakışması hatası vermemeli.
+    await adminPage.getByRole('button', { name: 'Kaydet' }).click();
+
+    await expect(adminPage.getByText('Bu ürün kodu zaten kullanılıyor')).toHaveCount(0, { timeout: 15_000 });
+    await expect(adminPage).toHaveURL(/\/admin\/urunler$/, { timeout: 15_000 });
+  });
+
+  test('aynı kategori + kod + ad ile ikinci kayıt açılamaz', async ({ adminPage }) => {
+    // Var olan bir ürünün kategori/kod/ad üçlüsünü oku.
+    await adminPage.goto('/admin/urunler?q=PVC', { waitUntil: 'domcontentloaded' });
+    await adminPage.getByRole('link', { name: 'Düzenle' }).first().click();
+    await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({ timeout: 15_000 });
+
+    const code = await adminPage.getByLabel('Ürün Kodu *').inputValue();
+    const name = await adminPage.getByLabel('Ürün Adı *').inputValue();
+    const cat = await adminPage.getByLabel('Kategori *').inputValue();
+
+    // Aynı üçlüyle yeni kayıt açmayı dene → reddedilmeli (veri oluşmaz).
+    await adminPage.goto('/admin/urunler/yeni', { waitUntil: 'domcontentloaded' });
+    await adminPage.getByLabel('Ürün Adı *').fill(name);
+    await adminPage.getByLabel('Ürün Kodu *').fill(code);
+    await adminPage.getByLabel('Kategori *').fill(cat);
+    await adminPage.getByRole('button', { name: 'Kaydet' }).click();
+
+    await expect(adminPage.getByText('aynı kod ve adla bir ürün zaten var')).toBeVisible({ timeout: 15_000 });
+    await expect(adminPage).toHaveURL(/\/admin\/urunler\/yeni$/, { timeout: 15_000 });
+  });
+});

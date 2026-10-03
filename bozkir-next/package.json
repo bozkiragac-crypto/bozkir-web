@@ -24,6 +24,7 @@
     "admin:reset": "node scripts/reset-admin.mjs",
     "storage:init": "node scripts/init-storage.mjs",
     "media:normalize": "node scripts/normalize-media-urls.mjs",
+    "media:audit": "node scripts/audit-media.mjs",
     "import:missing-images": "node scripts/import-missing-images.mjs"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 'use server';
 
 import bcrypt from 'bcryptjs';
-import { and, eq, inArray, ne, or } from 'drizzle-orm';
+import { and, eq, inArray, or } from 'drizzle-orm';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getDb } from '@/lib/db/client';
 import { adminUsers, brands, campaigns, catalogs, categories, contentBlocks, contentItems, products, quoteRequests } from '@/lib/db/schema';
@@ -299,23 +299,26 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
   const cat = input.cat.trim();
   if (!name || !code || !cat) return { ok: false, error: 'Ad, kod ve kategori zorunludur.' };
 
-  // Ürün kodu benzersiz olmalı: `products.code` üzerinde kısıt yoktu ve
-  // `saveProduct` çakışma kontrolü yapmıyordu, aynı kodla ikinci kayıt
-  // açılabiliyordu (arama sonuçları ve kategori sayaçları belirsizleşiyordu).
+  // `products.code` bir seri/malzeme kodu olduğu için **tekil değildir**:
+  // örn. `PVC KENAR` kategorisindeki 105 ürünün kodu `PVC`, `MDF` kategorisindeki
+  // 11 ürünün kodu `MDF`'dir. Bu nedenle kod benzersizliği zorlanmaz; aksi halde
+  // mevcut ürünlerin büyük kısmı admin'den düzenlenemez hale gelir.
   //
-  // Ürün *adı* kontrol edilmiyor: DB'de kaplama/renk adları (`beyaz`,
-  // `anadolu ceviz` vb.) meşru olarak tekrar ediyor.
-  const clash = await db
-    .select({ id: products.id, code: products.code, name: products.name })
-    .from(products)
-    .where(and(eq(products.code, code), input.id ? ne(products.id, input.id) : undefined))
-    .limit(1);
-  const hit = clash[0];
-  if (hit) {
-    return {
-      ok: false,
-      error: `Bu ürün kodu zaten kullanılıyor: "${hit.code}" — ${hit.name}. Ürün kodları benzersiz olmalı.`,
-    };
+  // Korunan tek kural: aynı kategori + kod + ad ile **ikinci bir kayıt
+  // açılamaz** (41 saniye arayla oluşan kazara çift kayıtları engeller).
+  // Düzenleme bu kontrolde kendi kaydı hariç tutulur.
+  if (!input.id) {
+    const dupe = await db
+      .select({ id: products.id, name: products.name })
+      .from(products)
+      .where(and(eq(products.code, code), eq(products.cat, cat), eq(products.name, name)))
+      .limit(1);
+    if (dupe[0]) {
+      return {
+        ok: false,
+        error: `Bu kategoride aynı kod ve adla bir ürün zaten var: "${cat} / ${code} / ${name}". Ürün kodları seri kodu olduğu için farklı ürünler aynı kodu kullanabilir, ancak aynı üçlü tekrar edemez.`,
+      };
+    }
   }
 
   const keys = input.images.map((u) => objectKeyFromUrl(u) ?? u.trim()).filter(Boolean);
@@ -480,7 +483,13 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
     const catEn = iCatEn >= 0 ? (r[iCatEn] ?? '').trim() || null : null;
     const catAr = iCatAr >= 0 ? (r[iCatAr] ?? '').trim() || null : null;
 
-    const existing = await db.select({ id: products.id }).from(products).where(eq(products.code, code)).limit(1);
+    // Eşleştirme `code` ile yapılırsa seri kodlu ürünler çakışır (105 ürünün
+    // kodu `PVC`); bu satırın adını ve kategorisini de eşleştirmeye katıyoruz.
+    const existing = await db
+      .select({ id: products.id })
+      .from(products)
+      .where(and(eq(products.code, code), eq(products.cat, cat), eq(products.name, name)))
+      .limit(1);
     if (existing[0]) {
       updated++;
       if (!dryRun) {
