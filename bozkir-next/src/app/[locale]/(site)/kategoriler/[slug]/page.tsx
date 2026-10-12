@@ -70,7 +70,10 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const [category, all, result] = await Promise.all([
     getCategoryBySlug(slug, locale),
     getCategories(locale),
-    getProducts({ category: slug, query: q, sort, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }, locale),
+    getProducts(
+      { category: slug, query: q, sort, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE },
+      locale,
+    ),
   ]);
 
   if (!category) notFound();
@@ -146,9 +149,18 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         <Reveal>
           <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-surface-2 md:aspect-[21/9]">
             {category.heroImage ? (
-              <SmartImage src={category.heroImage} alt={category.name} fill sizes="100vw" priority className="object-cover" />
+              <SmartImage
+                src={category.heroImage}
+                alt={category.name}
+                fill
+                sizes="100vw"
+                priority
+                className="object-cover"
+              />
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-muted">{dict.catalog.imagePreparing}</div>
+              <div className="flex h-full items-center justify-center text-sm text-muted">
+                {dict.catalog.imagePreparing}
+              </div>
             )}
           </div>
         </Reveal>
@@ -163,14 +175,23 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
               {items.map((product, i) => (
-                <ProductCard key={product.id} product={product} priority={i === 0} />
+                <Reveal key={product.id} delay={(i % 4) * 0.05}>
+                  <ProductCard product={product} priority={i === 0} />
+                </Reveal>
               ))}
             </div>
 
             {totalPages > 1 && (
-              <nav className="mt-16 flex items-center justify-between border-t border-border pt-8" aria-label={dict.common.page}>
+              <nav
+                className="mt-16 flex items-center justify-between border-t border-border pt-8"
+                aria-label={dict.common.page}
+              >
                 {page > 1 ? (
-                  <Link href={buildHref(page - 1)} scroll={false} className="inline-flex items-center gap-2 text-sm font-medium">
+                  <Link
+                    href={buildHref(page - 1)}
+                    scroll={false}
+                    className="inline-flex items-center gap-2 text-sm font-medium"
+                  >
                     <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" /> {dict.common.prev}
                   </Link>
                 ) : (
@@ -180,7 +201,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                   {page} / {totalPages}
                 </span>
                 {page < totalPages ? (
-                  <Link href={buildHref(page + 1)} scroll={false} className="inline-flex items-center gap-2 text-sm font-medium">
+                  <Link
+                    href={buildHref(page + 1)}
+                    scroll={false}
+                    className="inline-flex items-center gap-2 text-sm font-medium"
+                  >
                     {dict.common.next} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
                   </Link>
                 ) : (

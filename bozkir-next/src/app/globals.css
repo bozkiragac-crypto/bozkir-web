@@ -52,6 +52,9 @@
   --accent: #8d8474;
   --accent-soft: #b3a98f;
 
+  /* Kart hover yükseltisi (tema-duyarlı). */
+  --card-shadow: 0 30px 60px -32px rgba(0, 0, 0, 0.4);
+
   --grain-opacity: 0.035;
   --scrollbar-thumb: #d0d0cb;
 
@@ -93,6 +96,8 @@ html[data-compare='1'] [data-product-cta] {
   --border-strong: rgba(255, 255, 255, 0.22);
   --accent: #b3a98f;
   --accent-soft: #cfc3a6;
+
+  --card-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.65);
 
   --grain-opacity: 0.06;
   --scrollbar-thumb: #3a3a42;
@@ -343,6 +348,49 @@ html[data-compare='1'] [data-product-cta] {
   }
   .link-underline:hover {
     background-size: 100% 1px;
+  }
+
+  /* Kart başlıkları: alt çizgi, `.group` hover/focus ile tetiklenir. */
+  .link-underline-group {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 0.45s var(--ease-out-expo);
+  }
+  .group:hover .link-underline-group,
+  .group:focus-within .link-underline-group {
+    background-size: 100% 1px;
+  }
+
+  /* Kart görseli: hover'da başlayan çok hafif tek-geçişli ışık süpürmesi.
+     Pseudo-element ile çizilir; tıklamayı engellemez. */
+  .sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 42%,
+      rgba(255, 255, 255, 0.14) 50%,
+      transparent 58%
+    );
+    transform: translateX(-120%);
+  }
+  .group:hover .sheen::after,
+  .group:focus-within .sheen::after {
+    opacity: 1;
+    animation: sheen-sweep 0.9s var(--ease-out-expo);
+  }
+  @keyframes sheen-sweep {
+    from {
+      transform: translateX(-120%);
+    }
+    to {
+      transform: translateX(120%);
+    }
   }
 
   /* Yumuşak yükselti */

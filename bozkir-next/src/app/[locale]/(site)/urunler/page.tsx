@@ -9,6 +9,7 @@ import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ProductFilter } from '@/components/products/ProductFilter';
 import { ProductCard } from '@/components/products/ProductCard';
+import { Reveal } from '@/components/animations/Reveal';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
@@ -53,7 +54,10 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
 
   const [categories, result] = await Promise.all([
     getCategories(locale),
-    getProducts({ category: kategori, query: q, sort, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }, locale),
+    getProducts(
+      { category: kategori, query: q, sort, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE },
+      locale,
+    ),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
@@ -98,10 +102,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
         eyebrow={dict.catalog.title}
         title={dict.nav.products}
         description={dict.productsPage.metaDescription}
-        crumbs={[
-          { label: dict.common.home, href: '/' },
-          { label: dict.nav.products },
-        ]}
+        crumbs={[{ label: dict.common.home, href: '/' }, { label: dict.nav.products }]}
       >
         <div className="mt-10">
           <Suspense fallback={<div className="h-20" />}>
@@ -115,20 +116,26 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
           <>
             <p className="numerals mb-8 text-sm text-muted">
               {result.total} {dict.catalog.title.toLocaleLowerCase(locale ?? 'tr')}
-              {totalPages > 1
-                ? ` · ${dict.common.page} ${page}/${totalPages}`
-                : ''}
+              {totalPages > 1 ? ` · ${dict.common.page} ${page}/${totalPages}` : ''}
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
               {result.items.map((product, i) => (
-                <ProductCard key={product.id} product={product} priority={i === 0} />
+                <Reveal key={product.id} delay={(i % 4) * 0.05}>
+                  <ProductCard product={product} priority={i === 0} />
+                </Reveal>
               ))}
             </div>
 
             {totalPages > 1 && (
-              <nav className="mt-16 flex items-center justify-between border-t border-border pt-8" aria-label={dict.common.page}>
+              <nav
+                className="mt-16 flex items-center justify-between border-t border-border pt-8"
+                aria-label={dict.common.page}
+              >
                 {page > 1 ? (
-                  <Link href={buildHref(page - 1)} className="inline-flex items-center gap-2 text-sm font-medium">
+                  <Link
+                    href={buildHref(page - 1)}
+                    className="inline-flex items-center gap-2 text-sm font-medium"
+                  >
                     <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" /> {dict.common.prev}
                   </Link>
                 ) : (
@@ -138,7 +145,10 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
                   {page} / {totalPages}
                 </span>
                 {page < totalPages ? (
-                  <Link href={buildHref(page + 1)} className="inline-flex items-center gap-2 text-sm font-medium">
+                  <Link
+                    href={buildHref(page + 1)}
+                    className="inline-flex items-center gap-2 text-sm font-medium"
+                  >
                     {dict.common.next} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
                   </Link>
                 ) : (

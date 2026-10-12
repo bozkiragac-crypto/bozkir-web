@@ -46,7 +46,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
       <ul className="mt-12 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-3 md:gap-x-4 md:gap-y-10 lg:grid-cols-4">
         {items.map((item, i) => (
           <li key={item.id} className="group relative">
-            <Link href={hrefOf(item)} className="block">
+            <Link href={hrefOf(item)} className="block" data-cursor-label={t('catalog.inspect')}>
               <div className="relative aspect-square overflow-hidden rounded-md bg-surface-2">
                 <Image
                   src={item.url}
@@ -57,9 +57,13 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
                 />
                 <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 pt-12">
                   {item.tag && (
-                    <span className="text-[0.62rem] tracking-[0.14em] text-white/70 uppercase">{item.tag}</span>
+                    <span className="text-[0.62rem] tracking-[0.14em] text-white/70 uppercase">
+                      {item.tag}
+                    </span>
                   )}
-                  <span className="mt-1 block truncate text-sm font-medium text-white md:text-base">{item.title}</span>
+                  <span className="mt-1 block truncate text-sm font-medium text-white md:text-base">
+                    {item.title}
+                  </span>
                 </span>
               </div>
             </Link>

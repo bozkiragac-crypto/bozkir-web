@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Expand } from 'lucide-react';
 import { SmartImage } from '@/components/ui/SmartImage';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
@@ -16,6 +16,37 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
   const current = images[active];
   const showPlaceholder = !current || broken[active];
 
+  // Masaüstünde imleci takip eden büyüteç (hover + reduced-motion guard'lı).
+  const stageRef = useRef<HTMLDivElement>(null);
+  const canZoom = useRef(false);
+  useEffect(() => {
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    canZoom.current = fine && !reduced;
+  }, []);
+  const stageImg = () => stageRef.current?.querySelector('img') ?? null;
+  const zoomEnter = () => {
+    const img = stageImg();
+    if (!canZoom.current || !img) return;
+    img.style.transition = 'transform 0.35s var(--ease-out-expo)';
+    img.style.transform = 'scale(1.8)';
+  };
+  const zoomMove = (e: React.MouseEvent) => {
+    const img = stageImg();
+    if (!canZoom.current || !img || !stageRef.current) return;
+    const r = stageRef.current.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100));
+    const y = Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100));
+    img.style.transformOrigin = `${x}% ${y}%`;
+  };
+  const zoomLeave = () => {
+    const img = stageImg();
+    if (!img) return;
+    img.style.transition = 'transform 0.35s var(--ease-out-expo)';
+    img.style.transform = '';
+    img.style.transformOrigin = '';
+  };
+
   if (!images.length) {
     return (
       <div className="aspect-square overflow-hidden rounded-lg">
@@ -28,7 +59,13 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
 
   return (
     <div>
-      <div className="group relative aspect-square overflow-hidden rounded-lg bg-surface-2">
+      <div
+        ref={stageRef}
+        className="group relative aspect-square overflow-hidden rounded-lg bg-surface-2"
+        onMouseEnter={zoomEnter}
+        onMouseMove={zoomMove}
+        onMouseLeave={zoomLeave}
+      >
         {!showPlaceholder ? (
           <>
             <SmartImage
@@ -65,8 +102,10 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                 aria-label={`${i + 1} / ${images.length}`}
                 aria-current={i === active}
                 className={cn(
-                  'relative block h-20 w-20 overflow-hidden rounded-md border bg-surface-2 transition-colors',
-                  i === active ? 'border-foreground' : 'border-border hover:border-border-strong',
+                  'relative block h-20 w-20 overflow-hidden rounded-md border bg-surface-2 transition-[border-color,transform] duration-300 ease-[var(--ease-out-expo)]',
+                  i === active
+                    ? 'border-foreground'
+                    : 'border-border hover:-translate-y-0.5 hover:border-border-strong',
                 )}
               >
                 {!broken[i] ? (

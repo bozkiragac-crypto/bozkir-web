@@ -24,11 +24,17 @@ export function PageHero({ eyebrow, title, description, crumbs, children }: Page
     <section className="pt-[calc(var(--header-height)+clamp(40px,7vw,96px))] pb-12 md:pb-16">
       <Container>
         {crumbs && crumbs.length > 0 && (
-          <nav aria-label={dict.common.breadcrumb} className="mb-8 flex flex-wrap items-center gap-2 text-xs tracking-[0.08em] text-muted uppercase">
+          <nav
+            aria-label={dict.common.breadcrumb}
+            className="mb-8 flex flex-wrap items-center gap-2 text-xs tracking-[0.08em] text-muted uppercase"
+          >
             {crumbs.map((c, i) => (
               <span key={`${c.label}-${i}`} className="flex items-center gap-2">
                 {c.href ? (
-                  <Link href={c.href} className="transition-colors hover:text-foreground">
+                  <Link
+                    href={c.href}
+                    className="link-underline transition-colors hover:text-foreground"
+                  >
                     {c.label}
                   </Link>
                 ) : (
@@ -41,7 +47,9 @@ export function PageHero({ eyebrow, title, description, crumbs, children }: Page
         )}
         {eyebrow && <p className="text-eyebrow">{eyebrow}</p>}
         <h1 className="text-headline mt-5 max-w-4xl break-words">{title}</h1>
-        {description && <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-strong">{description}</p>}
+        {description && (
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-strong">{description}</p>
+        )}
         {children}
       </Container>
     </section>

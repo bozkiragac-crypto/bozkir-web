@@ -13,6 +13,7 @@ import { MagneticButton } from '@/components/ui/MagneticButton';
 import { ProductGallery } from '@/components/products/ProductGallery';
 import { ProductCard } from '@/components/products/ProductCard';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Reveal } from '@/components/animations/Reveal';
 import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
 import { ShareButton } from '@/components/products/ShareButton';
 import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
@@ -58,9 +59,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
   const dict = getDictionary(locale ?? 'tr');
-  const [product] = await Promise.all([
-    getProductBySlug(slug, locale),
-  ]);
+  const [product] = await Promise.all([getProductBySlug(slug, locale)]);
   if (!product) notFound();
 
   const settings = siteConfig;
@@ -82,14 +81,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    description: product.shortDescription ?? `${product.name}${product.code ? ` (${product.code})` : ''} · ${product.category}`,
+    description:
+      product.shortDescription ??
+      `${product.name}${product.code ? ` (${product.code})` : ''} · ${product.category}`,
     sku: product.code || undefined,
     category: product.category,
     image: image ? [absoluteUrl(image)] : undefined,
     brand: { '@type': 'Brand', name: dict.meta.brand },
     url: localeUrl(locale, `/urunler/${product.slug}`),
     ...(product.face
-      ? { additionalProperty: [{ '@type': 'PropertyValue', name: dict.compare.surface, value: product.face }] }
+      ? {
+          additionalProperty: [
+            { '@type': 'PropertyValue', name: dict.compare.surface, value: product.face },
+          ],
+        }
       : {}),
   };
 
@@ -101,7 +106,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
   return (
     <>
       <ProductViewTracker slug={product.slug} name={product.name} category={product.category} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -132,10 +140,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
           <ProductGallery images={product.images} alt={product.name} />
 
-          <div>
+          <div className="lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:self-start">
             <dl className="border-t border-border">
               {specs.map((spec) => (
-                <div key={spec.label} className="flex justify-between gap-4 border-b border-border py-4 text-sm">
+                <div
+                  key={spec.label}
+                  className="-mx-3 flex justify-between gap-4 rounded-md border-b border-border px-3 py-4 text-sm transition-colors hover:bg-surface-2"
+                >
                   <dt className="flex-none text-muted-strong">{spec.label}</dt>
                   <dd className="min-w-0 break-words text-end">{spec.value}</dd>
                 </div>
@@ -149,7 +160,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 </ButtonLink>
               </MagneticButton>
               <MagneticButton>
-                <ButtonLink href={`/kategoriler/${product.categorySlug}`} size="lg" variant="outline">
+                <ButtonLink
+                  href={`/kategoriler/${product.categorySlug}`}
+                  size="lg"
+                  variant="outline"
+                >
                   {dict.common.seeCollection}
                 </ButtonLink>
               </MagneticButton>
@@ -165,7 +180,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            <Link href="/urunler" className="mt-8 inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
+            <Link
+              href="/urunler"
+              className="mt-8 inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground"
+            >
               <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" /> {dict.common.allProducts}
             </Link>
           </div>
@@ -176,8 +194,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <Container className="pb-40 md:pb-32">
           <SectionHeading eyebrow={product.category} title={dict.product.related} />
           <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
-            {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
+            {related.map((p, i) => (
+              <Reveal key={p.id} delay={(i % 4) * 0.05}>
+                <ProductCard product={p} />
+              </Reveal>
             ))}
           </div>
         </Container>
