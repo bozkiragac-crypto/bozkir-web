@@ -69,7 +69,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
   if (items.length === 0) return null;
 
   return (
-    <section ref={root} className="relative bg-background">
+    <section ref={root} id="malzeme" className="relative bg-background">
       <Container className="pt-24 md:pt-32">
         <p className="text-eyebrow">{t('home.story.eyebrow')}</p>
         <h2 className="text-headline mt-4 max-w-3xl">{t('home.story.title')}</h2>

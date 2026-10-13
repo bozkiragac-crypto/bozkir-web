@@ -115,7 +115,14 @@ export function ShareButton({
       </button>
 
       {open && (
-        <div className="absolute end-0 top-full z-[120] mt-2 w-60 overflow-hidden rounded-xl border border-border bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]">
+        <div
+          className={cn(
+            'z-[200] overflow-hidden rounded-xl border border-border bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]',
+            // Mobil: alt-sayfa (taşmayı önler). sm+ : açılır menü.
+            'fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]',
+            'sm:absolute sm:inset-x-auto sm:bottom-auto sm:end-0 sm:top-full sm:mt-2 sm:w-60',
+          )}
+        >
           <a
             href={waHref}
             target="_blank"

@@ -33,9 +33,12 @@ COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/next.config.mjs ./next.config.mjs
 COPY --from=build /app/scripts ./scripts
+COPY --from=build /app/docker/entrypoint.sh ./docker/entrypoint.sh
+# Windows checkout'unda oluşabilecek CR'leri temizle (shebang/gövde bozulmasın).
+RUN sed -i 's/\r$//' ./docker/entrypoint.sh && chmod +x ./docker/entrypoint.sh
 # Next.js çalışma anında .next/cache altına yazar (image optimizer, fetch cache).
 # Root olarak çalıştırmıyoruz: node kullanıcısı (alpine'de hazır, uid 1000).
 RUN chown -R node:node /app/.next
 USER node
 EXPOSE 3000
-CMD ["node_modules/next/dist/bin/next", "start", "-p", "3000"]
+ENTRYPOINT ["sh", "/app/docker/entrypoint.sh"]

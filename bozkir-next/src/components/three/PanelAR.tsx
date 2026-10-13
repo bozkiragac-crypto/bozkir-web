@@ -8,9 +8,10 @@ import { Scan, X } from 'lucide-react';
 import * as THREE from 'three';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
-const store = createXRStore();
+// `hitTest` oturum özelliği mutlaka istenmeli; aksi halde yüzeye oturtma çalışmaz.
+const store = createXRStore({ hitTest: true });
 
-/** Yüzeye oturtulan katmanlı panel (hit-test ile konumlanır, zemine yatık). */
+/** Yüzeye oturtulan panel (hit-test ile konumlanır, zemine yatık). */
 function PlacedPanel({ color }: { color: string }) {
   const ref = useRef<THREE.Group>(null);
   const matrix = useMemo(() => new THREE.Matrix4(), []);
@@ -44,18 +45,16 @@ function PlacedPanel({ color }: { color: string }) {
   );
 }
 
-function ARSession({ color }: { color: string }) {
+function ARSession({
+  color,
+  error,
+  onStart,
+}: {
+  color: string;
+  error: string | null;
+  onStart: () => void;
+}) {
   const { t } = useDictionary();
-  const [started, setStarted] = useState(false);
-
-  // Kullanıcı jesti korunursa otomatik başlat; aksi halde buton görünür kalır.
-  useEffect(() => {
-    store
-      .enterAR()
-      .then(() => setStarted(true))
-      .catch(() => {});
-  }, []);
-
   return (
     <div className="relative h-full w-full">
       <Canvas gl={{ alpha: true, antialias: true }} frameloop="always" dpr={[1, 1.5]}>
@@ -67,31 +66,26 @@ function ARSession({ color }: { color: string }) {
           <PlacedPanel color={color} />
         </XR>
       </Canvas>
-      {!started && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              store
-                .enterAR()
-                .then(() => setStarted(true))
-                .catch(() => {});
-            }}
-            className="pointer-events-auto inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-medium text-black"
-          >
-            <Scan className="h-4 w-4" /> {t('product.arStart')}
-          </button>
-        </div>
-      )}
+      <div className="pointer-events-none absolute inset-x-0 bottom-10 flex flex-col items-center gap-3 px-6">
+        <button
+          type="button"
+          onClick={onStart}
+          className="pointer-events-auto inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-medium text-black"
+        >
+          <Scan className="h-4 w-4" /> {t('product.arStart')}
+        </button>
+        {error && <p className="max-w-xs text-center text-xs text-white/80">{error}</p>}
+      </div>
     </div>
   );
 }
 
-/** Destekleyen cihazlarda "AR'da gör" — hit-test ile malzeme panelini yüzeye oturtur. */
+/** Destekleyen (HTTPS + AR) cihazlarda "AR'da gör" — paneli yüzeye oturtur. */
 export function PanelAR({ color = '#d9cdb4' }: { color?: string }) {
   const { t } = useDictionary();
   const [supported, setSupported] = useState(false);
   const [active, setActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const xr = (
@@ -102,13 +96,27 @@ export function PanelAR({ color = '#d9cdb4' }: { color?: string }) {
       .catch(() => {});
   }, []);
 
+  const startAR = async () => {
+    setError(null);
+    try {
+      // Yalnızca kullanıcı jestiyle çağrılır (tarayıcı şartı).
+      const session = await store.enterAR();
+      if (!session) setError(t('product.arError'));
+    } catch {
+      setError(t('product.arError'));
+    }
+  };
+
   if (!supported) return null;
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setActive(true)}
+        onClick={() => {
+          setActive(true);
+          void startAR();
+        }}
         className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-surface-2"
       >
         <Scan className="h-3.5 w-3.5" aria-hidden /> {t('product.viewAR')}
@@ -124,7 +132,7 @@ export function PanelAR({ color = '#d9cdb4' }: { color?: string }) {
           >
             <X className="h-5 w-5" />
           </button>
-          <ARSession color={color} />
+          <ARSession color={color} error={error} onStart={startAR} />
         </div>
       )}
     </>

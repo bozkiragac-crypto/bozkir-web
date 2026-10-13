@@ -10,13 +10,13 @@ export function ProductViewTracker({
   slug,
   name,
   category,
-  ref,
+  product,
 }: {
   slug: string;
   name: string;
   category: string;
   /** Verilirse son görüntülenen listesine eklenir. */
-  ref?: ProductRef;
+  product?: ProductRef;
 }) {
   const { push } = useRecentlyViewed();
 
@@ -25,10 +25,10 @@ export function ProductViewTracker({
   }, [slug, name, category]);
 
   useEffect(() => {
-    if (ref) push(ref);
+    if (product) push(product);
     // Yalnızca ürün değiştiğinde ekle (nesne kimliği değil, slug).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref?.slug, push]);
+  }, [product?.slug, push]);
 
   return null;
 }

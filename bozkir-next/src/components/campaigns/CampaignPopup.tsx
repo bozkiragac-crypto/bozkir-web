@@ -79,7 +79,7 @@ export function CampaignPopup({
 
   return (
     <div
-      className="fixed inset-0 z-[150] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+      className="no-print fixed inset-0 z-[150] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="campaign-popup-title"
@@ -129,7 +129,9 @@ export function CampaignPopup({
               <span className="flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur">
                 <Megaphone className="h-7 w-7" />
               </span>
-              <span className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-white/70">{eyebrow}</span>
+              <span className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-white/70">
+                {eyebrow}
+              </span>
             </div>
           </div>
         )}
@@ -139,7 +141,10 @@ export function CampaignPopup({
             {campaign.title}
           </h3>
           {campaign.description && (
-            <p id="campaign-popup-desc" className="mt-3 text-sm leading-relaxed text-muted-strong md:text-base">
+            <p
+              id="campaign-popup-desc"
+              className="mt-3 text-sm leading-relaxed text-muted-strong md:text-base"
+            >
               {campaign.description}
             </p>
           )}

@@ -11,6 +11,7 @@ interface HorizontalScrollProps {
   /** Bölüm başlığı — pin'lenen alanın İÇİNDE kalır (sabit görünür). */
   header?: ReactNode;
   className?: string;
+  id?: string;
   'aria-label'?: string;
 }
 
@@ -21,7 +22,13 @@ interface HorizontalScrollProps {
  *
  * Not: Pin'lenen eleman overflow-hidden OLMAMALI; kırpma içeride yapılır.
  */
-export function HorizontalScroll({ children, header, className, ...rest }: HorizontalScrollProps) {
+export function HorizontalScroll({
+  children,
+  header,
+  className,
+  id,
+  ...rest
+}: HorizontalScrollProps) {
   const section = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const bar = useRef<HTMLDivElement>(null);
@@ -62,7 +69,12 @@ export function HorizontalScroll({ children, header, className, ...rest }: Horiz
   );
 
   return (
-    <section ref={section} className={cn('relative', className)} aria-label={rest['aria-label']}>
+    <section
+      ref={section}
+      id={id}
+      className={cn('relative', className)}
+      aria-label={rest['aria-label']}
+    >
       <div className="overflow-hidden">
         {header && <Container className="pt-16 md:pt-20">{header}</Container>}
 

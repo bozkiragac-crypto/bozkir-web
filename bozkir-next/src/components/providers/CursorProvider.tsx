@@ -83,7 +83,9 @@ export function CursorProvider() {
       const target = (e.target as HTMLElement)?.closest?.(
         'a, button, [role="button"], [data-cursor-label], [data-cursor]',
       ) as HTMLElement | null;
-      const textField = (e.target as HTMLElement)?.closest?.('input, textarea, select') as HTMLElement | null;
+      const textField = (e.target as HTMLElement)?.closest?.(
+        'input, textarea, select',
+      ) as HTMLElement | null;
 
       const nextHover = !!target && !textField;
       const nextLabel = target?.getAttribute('data-cursor-label') ?? '';
@@ -154,19 +156,19 @@ export function CursorProvider() {
       <div
         ref={ringRef}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[188] h-6 w-6 rounded-full border border-black/50 shadow-[0_0_0_1px_rgba(255,255,255,0.8)]"
+        className="no-print pointer-events-none fixed left-0 top-0 z-[400] h-6 w-6 rounded-full border border-black/50 shadow-[0_0_0_1px_rgba(255,255,255,0.8)]"
         style={{ willChange: 'transform' }}
       />
       <div
         ref={dotRef}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[190] h-1.5 w-1.5 rounded-full bg-black shadow-[0_0_0_1px_rgba(255,255,255,0.9)]"
+        className="no-print pointer-events-none fixed left-0 top-0 z-[402] h-1.5 w-1.5 rounded-full bg-black shadow-[0_0_0_1px_rgba(255,255,255,0.9)]"
         style={{ willChange: 'transform' }}
       />
       <div
         ref={labelRef}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[189] whitespace-nowrap rounded-full bg-black px-3 py-1.5 text-[0.55rem] font-medium tracking-[0.14em] text-white uppercase opacity-0"
+        className="no-print pointer-events-none fixed left-0 top-0 z-[401] whitespace-nowrap rounded-full bg-black px-3 py-1.5 text-[0.55rem] font-medium tracking-[0.14em] text-white uppercase opacity-0"
         style={{ willChange: 'transform, opacity' }}
       />
     </>

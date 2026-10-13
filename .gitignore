@@ -8,6 +8,7 @@ bozkir-next/node_modules/
 bozkir-next/.next/
 bozkir-next/out/
 bozkir-next/build/
+bozkir-next/.lighthouseci/
 bozkir-next/next-env.d.ts
 bozkir-next/tsconfig.tsbuildinfo
 

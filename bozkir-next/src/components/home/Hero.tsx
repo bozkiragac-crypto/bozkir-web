@@ -54,6 +54,18 @@ export function Hero() {
           invalidateOnRefresh: true,
         },
       });
+      // Katmanlı derinlik: accent ışığı ters yönde daha hızlı kayar.
+      gsap.to('[data-hero-glow]', {
+        yPercent: 22,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: root.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
+          invalidateOnRefresh: true,
+        },
+      });
     },
     { scope: root },
   );
@@ -84,10 +96,11 @@ export function Hero() {
         className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(10,10,12,.66)_0%,rgba(10,10,12,.38)_42%,rgba(10,10,12,.8)_100%),linear-gradient(90deg,rgba(10,10,12,.6)_0%,rgba(10,10,12,.1)_60%,rgba(10,10,12,0)_100%)]"
         aria-hidden
       />
-      {/* Sinematik derinlik: sıcak accent ışığı. */}
+      {/* Sinematik derinlik: sıcak accent ışığı (parallax katmanı). */}
       <div
+        data-hero-glow
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 [background:radial-gradient(120%_90%_at_14%_8%,rgba(179,169,143,0.18),transparent_55%)]"
+        className="pointer-events-none absolute inset-0 -z-10 will-change-transform [background:radial-gradient(120%_90%_at_14%_8%,rgba(179,169,143,0.18),transparent_55%)]"
       />
 
       <div className="container-x relative flex min-h-svh flex-col justify-end pb-20 pt-[var(--header-height)] md:pb-32">

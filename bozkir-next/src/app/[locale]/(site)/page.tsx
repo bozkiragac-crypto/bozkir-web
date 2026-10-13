@@ -26,6 +26,7 @@ import { Testimonials } from '@/components/home/Testimonials';
 import { RecentlyViewed } from '@/components/products/RecentlyViewed';
 import { QuoteCTA } from '@/components/home/QuoteCTA';
 import { Container } from '@/components/ui/Container';
+import { ScrollSpyRail } from '@/components/layout/ScrollSpyRail';
 
 export async function generateMetadata({
   params,
@@ -86,6 +87,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   // Gerçek (uydurma olmayan) referanslar varsa Organization Review şeması eklenir.
   const reviews = (testimonials?.items ?? []).filter((i) => i.description && i.title);
 
+  // Sağdaki bölüm göstergesi (yalnızca render edilen bölümler).
+  const railItems = [
+    { id: 'malzeme', label: dict.home.story.eyebrow },
+    { id: 'koleksiyon', label: dict.home.showcase.eyebrow },
+    ...(gallery ? [{ id: 'vitrin', label: dict.home.block.showcase }] : []),
+    ...(guide ? [{ id: 'rehber', label: dict.home.block.guide }] : []),
+    ...(process ? [{ id: 'surec', label: dict.home.block.process }] : []),
+    ...(faq ? [{ id: 'sss', label: dict.home.block.faq }] : []),
+  ];
+
   return (
     <>
       {reviews.length > 0 && (
@@ -125,6 +136,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {testimonials && <Testimonials block={testimonials} locale={lang} />}
       <RecentlyViewed />
       <QuoteCTA locale={lang} />
+      <ScrollSpyRail items={railItems} ariaLabel={dict.common.sections} />
     </>
   );
 }

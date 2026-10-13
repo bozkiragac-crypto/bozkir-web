@@ -14,7 +14,7 @@ export async function MaterialGuide({ block, locale }: { block: ContentBlock; lo
   const h = dict.home.block;
 
   return (
-    <Container className="py-24 md:py-32">
+    <Container id="rehber" className="py-24 md:py-32">
       <SectionHeading eyebrow={block.subtitle || h.guide} title={block.title} body={block.body} />
 
       <Reveal className="mt-12">

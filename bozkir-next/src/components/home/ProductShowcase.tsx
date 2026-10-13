@@ -8,7 +8,13 @@ import { dictFor } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Öne çıkan kategori vitrini — görsel ağırlıklı, yatay kaydırılabilir. */
-export async function ProductShowcase({ categories, locale }: { categories: Category[]; locale: Locale }) {
+export async function ProductShowcase({
+  categories,
+  locale,
+}: {
+  categories: Category[];
+  locale: Locale;
+}) {
   const dict = dictFor(locale);
   const h = dict.home.showcase;
   const items = categories.filter((c) => c.featured).slice(0, 9);
@@ -16,13 +22,17 @@ export async function ProductShowcase({ categories, locale }: { categories: Cate
 
   return (
     <HorizontalScroll
+      id="koleksiyon"
       aria-label={h.ariaLabel}
       header={
         <SectionHeading
           eyebrow={h.eyebrow}
           title={h.title}
           action={
-            <Link href="/urunler" className="group inline-flex items-center gap-2 text-sm font-medium">
+            <Link
+              href="/urunler"
+              className="group inline-flex items-center gap-2 text-sm font-medium"
+            >
               {h.catalogCta}
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
@@ -65,9 +75,13 @@ export async function ProductShowcase({ categories, locale }: { categories: Cate
 
               <div className="absolute inset-x-0 bottom-0 p-6">
                 {category.shortDescription && (
-                  <p className="text-[0.68rem] tracking-[0.16em] text-white/70 uppercase">{category.shortDescription}</p>
+                  <p className="text-[0.68rem] tracking-[0.16em] text-white/70 uppercase">
+                    {category.shortDescription}
+                  </p>
                 )}
-                <h3 className="mt-2 text-2xl font-medium tracking-tight text-white md:text-3xl">{category.name}</h3>
+                <h3 className="mt-2 text-2xl font-medium tracking-tight text-white md:text-3xl">
+                  {category.name}
+                </h3>
                 <span className="mt-4 inline-flex items-center gap-2 text-sm text-white/85">
                   {h.collectionCta}
                   <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

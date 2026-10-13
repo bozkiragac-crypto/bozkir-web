@@ -111,7 +111,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         slug={product.slug}
         name={product.name}
         category={product.category}
-        ref={ref}
+        product={ref}
       />
       <script
         type="application/ld+json"

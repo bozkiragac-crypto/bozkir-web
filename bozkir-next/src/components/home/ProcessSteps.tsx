@@ -12,6 +12,7 @@ export async function ProcessSteps({ block, locale }: { block: ContentBlock; loc
 
   return (
     <section
+      id="surec"
       data-on-dark
       className="relative isolate overflow-hidden bg-foreground py-24 text-background md:py-32"
     >

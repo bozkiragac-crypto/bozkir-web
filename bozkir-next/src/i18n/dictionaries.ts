@@ -67,6 +67,7 @@ export const dictionaries = {
       phone: 'Telefon',
       scroll: 'Kaydır',
       breadcrumb: 'Menü yolu',
+      sections: 'Bölümler',
       share: 'WhatsApp ile paylaş',
       shareMenu: 'Paylaş',
       shareWhatsapp: 'WhatsApp ile paylaş',
@@ -121,6 +122,7 @@ export const dictionaries = {
       viewAR: "AR'da gör",
       arStart: "AR'ı başlat",
       print: 'Yazdır',
+      arError: 'AR başlatılamadı. Cihazınızın AR desteklediğinden ve HTTPS kullandığınızdan emin olun.',
       notFound: 'Ürün bulunamadı | Bozkır Ağaç Ürünleri',
     },
     categories: {
@@ -669,6 +671,7 @@ export const dictionaries = {
       phone: 'Call Us',
       scroll: 'Scroll',
       breadcrumb: 'Breadcrumb',
+      sections: 'Sections',
       share: 'Share on WhatsApp',
       shareMenu: 'Share',
       shareWhatsapp: 'Share on WhatsApp',
@@ -723,6 +726,7 @@ export const dictionaries = {
       viewAR: 'View in AR',
       arStart: 'Start AR',
       print: 'Print',
+      arError: 'Could not start AR. Make sure your device supports AR and you are on a secure (HTTPS) connection.',
       notFound: 'Product not found | Bozkır Wood Products',
     },
     categories: {
@@ -1270,6 +1274,7 @@ export const dictionaries = {
       phone: 'اتصل بنا',
       scroll: 'مرّر',
       breadcrumb: 'مسار التنقل',
+      sections: 'الأقسام',
       share: 'شارك على واتساب',
       shareMenu: 'مشاركة',
       shareWhatsapp: 'شارك على واتساب',
@@ -1324,6 +1329,7 @@ export const dictionaries = {
       viewAR: 'اعرض بالواقع المعزز',
       arStart: 'ابدأ الواقع المعزز',
       print: 'طباعة',
+      arError: 'تعذّر بدء الواقع المعزز. تأكد من دعم جهازك واستخدامك لاتصال HTTPS.',
       notFound: 'المنتج غير موجود | منتجات بوزكير الخشبية',
     },
     categories: {

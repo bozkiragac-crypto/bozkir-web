@@ -38,6 +38,8 @@ const nextConfig = {
   outputFileTracingRoot: __dirname,
   images: {
     formats: ['image/avif', 'image/webp'],
+    // İzinli kalite değerleri (varsayılan 75 dahil; hero için 80 kullanılır).
+    qualities: [75, 80],
     // Gerçek grid/hero genişliklerine göre daraltıldı (gereksiz varyant üretimini azaltır).
     deviceSizes: [640, 828, 1080, 1280, 1600, 1920, 2560],
     // Same-origin API görselleri (örn. /api/image?id=...) sorgu dizesiyle izinli.

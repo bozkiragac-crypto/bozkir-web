@@ -10,6 +10,7 @@ export const fraunces = Fraunces({
   subsets: ['latin', 'latin-ext'],
   variable: '--font-fraunces',
   display: 'swap',
+  axes: ['opsz'],
 });
 // Caveat yalnızca hero'daki el yazısı vurguda kullanılır; ilk boyama preload'una gerek yok.
 export const caveat = Caveat({

@@ -2,64 +2,76 @@ import { SmartImage as Image } from '@/components/ui/SmartImage';
 import type { Brand } from '@/types/brand';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
-import { Panel, PanelGrid, panelSurface } from '@/components/ui/Panel';
 import { cn } from '@/lib/utils';
 import { dictFor } from '@/i18n/server';
+import type { CSSProperties } from 'react';
 import type { Locale } from '@/i18n/config';
+
+const cell =
+  'flex w-52 flex-none flex-col items-center justify-center gap-4 border-s border-border px-8 py-6 text-center transition-colors hover:bg-surface-2';
 
 export async function BrandPartners({ brands, locale }: { brands: Brand[]; locale: Locale }) {
   const dict = dictFor(locale);
+  if (brands.length === 0) return null;
+
+  const categoryOf = (brand: Brand) =>
+    locale === 'en'
+      ? (brand.categoryEn ?? brand.category)
+      : locale === 'ar'
+        ? (brand.categoryAr ?? brand.category)
+        : brand.category;
+
+  const content = (brand: Brand) => (
+    <>
+      <Image
+        src={brand.logo}
+        alt={brand.name}
+        width={brand.width ?? 140}
+        height={brand.height ?? 56}
+        className="h-12 w-auto object-contain opacity-60 grayscale transition-all duration-500 group-hover:opacity-100 group-hover:grayscale-0"
+      />
+      <div>
+        <p className="text-sm font-medium">{brand.name}</p>
+        {brand.category && <p className="mt-1 text-xs text-muted">{categoryOf(brand)}</p>}
+      </div>
+    </>
+  );
+
+  const copy = (hidden: boolean) => (
+    <ul className="flex" aria-hidden={hidden || undefined}>
+      {brands.map((brand) => (
+        <li key={brand.id}>
+          {brand.url ? (
+            <a
+              href={brand.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn('group', cell)}
+            >
+              {content(brand)}
+            </a>
+          ) : (
+            <div className={cn('group', cell)}>{content(brand)}</div>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <Container className="py-24 md:py-32">
       <SectionHeading eyebrow={dict.home.brands.eyebrow} title={dict.home.brands.title} />
 
-      <PanelGrid className="mt-14 grid-cols-2 rounded-md md:grid-cols-3 lg:grid-cols-5">
-        {brands.map((brand) => {
-          const content = (
-            <>
-              <Image
-                src={brand.logo}
-                alt={brand.name}
-                width={brand.width ?? 140}
-                height={brand.height ?? 56}
-                className="h-12 w-auto object-contain opacity-60 grayscale transition-all duration-500 group-hover:opacity-100 group-hover:grayscale-0"
-              />
-              <div>
-                <p className="text-sm font-medium">{brand.name}</p>
-                {brand.category && (
-                  <p className="mt-1 text-xs text-muted">
-                    {locale === 'en'
-                      ? (brand.categoryEn ?? brand.category)
-                      : locale === 'ar'
-                        ? (brand.categoryAr ?? brand.category)
-                        : brand.category}
-                  </p>
-                )}
-              </div>
-            </>
-          );
-
-          const cellClass =
-            'group min-h-[180px] items-center justify-center gap-5 p-8 text-center transition-colors hover:bg-surface-2';
-
-          // URL yoksa bağlantı değil, düz kart olarak göster.
-          return brand.url ? (
-            <a
-              key={brand.id}
-              href={brand.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(panelSurface, cellClass)}
-            >
-              {content}
-            </a>
-          ) : (
-            <Panel key={brand.id} className={cellClass}>
-              {content}
-            </Panel>
-          );
-        })}
-      </PanelGrid>
+      {/* Sonsuz kayan marka şeridi (hover'da durur). */}
+      <div
+        className="marquee mt-14 overflow-hidden"
+        style={{ '--marquee-duration': `${Math.max(24, brands.length * 5)}s` } as CSSProperties}
+      >
+        <div className="marquee-track flex w-max will-change-transform">
+          {copy(false)}
+          {copy(true)}
+        </div>
+      </div>
     </Container>
   );
 }

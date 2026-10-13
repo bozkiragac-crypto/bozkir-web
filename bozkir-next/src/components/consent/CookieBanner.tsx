@@ -17,13 +17,16 @@ export function CookieBanner() {
       role="dialog"
       aria-live="polite"
       aria-label={c.consentPolicy}
-      className="fixed inset-x-0 bottom-0 z-[140] border-t border-border bg-background/95 px-4 py-4 backdrop-blur md:px-6"
+      className="no-print fixed inset-x-0 bottom-0 z-[140] border-t border-border bg-background/95 px-4 py-4 backdrop-blur md:px-6"
       style={{ paddingBottom: 'max(1rem, calc(env(safe-area-inset-bottom,0px) + 1rem))' }}
     >
       <div className="container-x flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6">
         <p className="max-w-3xl text-sm leading-relaxed text-muted-strong">
           {c.consentText}{' '}
-          <Link href="/cerez-politikasi" className="underline underline-offset-4 hover:text-foreground">
+          <Link
+            href="/cerez-politikasi"
+            className="underline underline-offset-4 hover:text-foreground"
+          >
             {c.consentPolicy}
           </Link>
         </p>

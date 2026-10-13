@@ -21,6 +21,7 @@ import { ToastProvider } from '@/components/ui/ToastProvider';
 import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import { AnalyticsScripts } from '@/components/consent/AnalyticsScripts';
+import { WebVitals } from '@/components/layout/WebVitals';
 import { siteConfig } from '@/config/site';
 import { organizationJsonLd, siteMetadata, websiteJsonLd } from '@/lib/seo';
 
@@ -117,6 +118,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     <CompareBar />
                     <CampaignPopupServer locale={typed} />
                     <CookieBanner />
+                    <WebVitals />
                     {(settings.gaMeasurementId ||
                       settings.metaPixelId ||
                       process.env.NEXT_PUBLIC_ANALYTICS_ID) && (

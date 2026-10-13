@@ -65,18 +65,18 @@ export function MegaMenu({ categories, open, onClose, onPointerEnter, onPointerL
           </Link>
         </div>
 
-        <div className="relative overflow-hidden rounded-lg bg-surface-2">
+        <div className="relative h-full min-h-[320px] overflow-hidden rounded-lg bg-surface-2">
           {activeCategory?.heroImage ? (
             <Image
               key={activeCategory.id}
               src={activeCategory.heroImage}
               alt={activeCategory.name}
-              width={760}
-              height={520}
-              className="h-[320px] w-full object-cover"
+              fill
+              sizes="(max-width: 1280px) 50vw, 40vw"
+              className="object-cover"
             />
           ) : (
-            <div className="flex h-[320px] w-full items-center justify-center bg-surface-2 text-sm text-muted">
+            <div className="flex h-full min-h-[320px] w-full items-center justify-center bg-surface-2 text-sm text-muted">
               {t('catalog.imagePreparing')}
             </div>
           )}

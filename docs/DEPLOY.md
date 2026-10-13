@@ -24,6 +24,12 @@ Gerekli ortam değişkenleri (`.env.local` + compose `.env`):
 - Opsiyonel: `NEXT_PUBLIC_ANALYTICS_ID`, `QUOTE_RATE_LIMIT_MAX`
 - Off-site: `/etc/bozkir-backup.env` → `RESTIC_REPOSITORY`, `RESTIC_PASSWORD`, `ALERT_WEBHOOK_URL`
 
+**İlk kurulum otomatiktir.** `app` konteyneri `docker/entrypoint.sh` ile başlar:
+idempotent şema migrasyonu (`db-migrate.mjs`) → depolama bucket'ı (`init-storage.mjs`)
+→ (yalnızca `ADMIN_SEED_PASSWORD` verilmişse) admin kullanıcısı (`seed-admin.mjs`)
+→ Next sunucusu. İlk açılışta admin oluşturmak için `.env`'e bir kez
+`ADMIN_SEED_PASSWORD=<güçlü-parola>` ekleyin ve açılıştan sonra kaldırın.
+
 ## 3. Otomatik dağıtım (GitHub Actions)
 1. `main`'e push → **CI** (lint, typecheck, unit, build, E2E).
 2. CI yeşilse **Deploy (VPS)** çalışır: migrasyon öncesi yedek → sürümlü imaj (`bozkir-app:<sha>`) → migrate + seed → derin healthcheck.

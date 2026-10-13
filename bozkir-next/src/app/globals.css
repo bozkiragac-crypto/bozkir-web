@@ -444,8 +444,35 @@ li {
   }
 }
 
+/* Marka şeridi: sonsuz kayan marquee (hover'da durur, reduced-motion'da kapalı). */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee var(--marquee-duration, 40s) linear infinite;
+}
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
 /* Yazdırma: gezinme/kabuk gizlenir, içerik sadeleşir (B2B spec çıktısı). */
 @media print {
+  /* Kabuk boşluklarını sıfırla (üstte büyük boşluk kalmasın). */
+  :root {
+    --header-height: 0px;
+    --safe-top: 0px;
+    --safe-bottom: 0px;
+    --compare-h: 0px;
+  }
+
   header,
   footer,
   [data-compare-bar],
@@ -460,13 +487,18 @@ li {
   body::after {
     display: none !important;
   }
-  a[href]::after {
-    content: ' (' attr(href) ')';
-    font-size: 0.72em;
-    color: #666;
-  }
   .page-fade {
     animation: none !important;
+  }
+  /* Sticky konumlandırma yazdırmada statik olsun. */
+  [class*='lg:sticky'] {
+    position: static !important;
+  }
+  /* Görseller/kartlar sayfa ortasında bölünmesin. */
+  main img,
+  main article,
+  main li {
+    break-inside: avoid;
   }
 }
 

@@ -30,7 +30,12 @@ function keyOf(value: string): string {
 }
 
 function baseName(url: string): string {
-  return url.split('/').pop()?.replace(/\.[a-z0-9]+$/i, '') ?? '';
+  return (
+    url
+      .split('/')
+      .pop()
+      ?.replace(/\.[a-z0-9]+$/i, '') ?? ''
+  );
 }
 
 /** Kategori başına 2 ürün alarak çeşitli, gerçek bir vitrin sırası kurar. */
@@ -97,8 +102,11 @@ export async function MaterialGallery({ block, locale }: { block: ContentBlock; 
       id: i.id,
       url: i.imageUrl!,
       title: i.title || product?.name || h.surfaceSample,
-      tag: i.tag || (product ? displayCategory(product.categorySlug, product.category, locale) : ''),
-      href: product ? `/urunler/${product.slug}` : `/urunler${i.tag ? `?q=${encodeURIComponent(i.tag)}` : ''}`,
+      tag:
+        i.tag || (product ? displayCategory(product.categorySlug, product.category, locale) : ''),
+      href: product
+        ? `/urunler/${product.slug}`
+        : `/urunler${i.tag ? `?q=${encodeURIComponent(i.tag)}` : ''}`,
     };
   });
 
@@ -107,9 +115,13 @@ export async function MaterialGallery({ block, locale }: { block: ContentBlock; 
   if (items.length === 0) return null;
 
   return (
-    <section className="py-24 md:py-32" aria-label={h.galleryAria}>
+    <section id="vitrin" className="py-24 md:py-32" aria-label={h.galleryAria}>
       <Container>
-        <SectionHeading eyebrow={block.subtitle || h.showcase} title={block.title} body={block.body} />
+        <SectionHeading
+          eyebrow={block.subtitle || h.showcase}
+          title={block.title}
+          body={block.body}
+        />
       </Container>
 
       <GalleryShowcase items={items} />
