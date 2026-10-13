@@ -13,6 +13,7 @@ import { DeferredSmoothScroll } from '@/components/providers/DeferredSmoothScrol
 import { ScrollToTop } from '@/components/providers/ScrollToTop';
 import { CursorProvider } from '@/components/providers/CursorProvider';
 import { FavoritesProvider } from '@/components/providers/FavoritesProvider';
+import { RecentlyViewedProvider } from '@/components/providers/RecentlyViewedProvider';
 import { CompareBar } from '@/components/products/CompareBar';
 import { CampaignPopupServer } from '@/components/campaigns/CampaignPopupServer';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
@@ -99,31 +100,33 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           <ToastProvider>
             <ConsentProvider>
               <FavoritesProvider>
-                <DeferredSmoothScroll>
-                  <ScrollToTop />
-                  <CursorProvider />
-                  <a
-                    href="#main"
-                    className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-foreground focus:px-5 focus:py-3 focus:text-background"
-                  >
-                    {dict.nav.skipToContent}
-                  </a>
-                  <Header categories={categories} />
-                  <main id="main">{children}</main>
-                  <Footer s={settings} categories={categories} />
-                  <WhatsAppFab locale={typed} />
-                  <CompareBar />
-                  <CampaignPopupServer locale={typed} />
-                  <CookieBanner />
-                  {(settings.gaMeasurementId ||
-                    settings.metaPixelId ||
-                    process.env.NEXT_PUBLIC_ANALYTICS_ID) && (
-                    <AnalyticsScripts
-                      id={settings.gaMeasurementId || process.env.NEXT_PUBLIC_ANALYTICS_ID || ''}
-                      metaPixelId={settings.metaPixelId || undefined}
-                    />
-                  )}
-                </DeferredSmoothScroll>
+                <RecentlyViewedProvider>
+                  <DeferredSmoothScroll>
+                    <ScrollToTop />
+                    <CursorProvider />
+                    <a
+                      href="#main"
+                      className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-foreground focus:px-5 focus:py-3 focus:text-background"
+                    >
+                      {dict.nav.skipToContent}
+                    </a>
+                    <Header categories={categories} />
+                    <main id="main">{children}</main>
+                    <Footer s={settings} categories={categories} />
+                    <WhatsAppFab locale={typed} />
+                    <CompareBar />
+                    <CampaignPopupServer locale={typed} />
+                    <CookieBanner />
+                    {(settings.gaMeasurementId ||
+                      settings.metaPixelId ||
+                      process.env.NEXT_PUBLIC_ANALYTICS_ID) && (
+                      <AnalyticsScripts
+                        id={settings.gaMeasurementId || process.env.NEXT_PUBLIC_ANALYTICS_ID || ''}
+                        metaPixelId={settings.metaPixelId || undefined}
+                      />
+                    )}
+                  </DeferredSmoothScroll>
+                </RecentlyViewedProvider>
               </FavoritesProvider>
             </ConsentProvider>
           </ToastProvider>

@@ -169,8 +169,8 @@ export function QuoteForm({
 
   if (sent) {
     return (
-      <div role="status" aria-live="polite" className="rounded-xl border border-border bg-surface p-8">
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-success">
+      <div role="status" aria-live="polite" className="page-fade rounded-xl border border-border bg-surface p-8">
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-success shadow-[0_0_0_6px_color-mix(in_srgb,currentColor_12%,transparent)]">
           <CheckCircle2 className="h-6 w-6" />
         </span>
         <p className="mt-4 text-lg font-medium text-success">{t('quote.success')}</p>
@@ -228,13 +228,15 @@ export function QuoteForm({
               <li key={p.slug} className="flex items-center gap-4">
                 {p.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image} alt="" className="h-14 w-14 flex-none rounded object-cover" />
+                  <img src={p.image} alt="" className="h-16 w-16 flex-none rounded-lg object-cover" />
                 ) : null}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">
-                    {p.name}
-                    {p.code && <span className="numerals ms-2 text-sm text-muted-strong">{p.code}</span>}
-                  </p>
+                  <p className="truncate font-medium">{p.name}</p>
+                  {p.code && (
+                    <span className="numerals mt-1 inline-block rounded-full border border-border px-2 py-0.5 text-xs text-muted-strong">
+                      {p.code}
+                    </span>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -393,6 +395,8 @@ export function QuoteForm({
           </p>
         )}
       </div>
+
+      <p className="text-xs leading-relaxed text-muted">{t('quote.privacyNote')}</p>
     </form>
   );
 }

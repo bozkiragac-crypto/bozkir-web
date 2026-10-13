@@ -16,7 +16,9 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal } from '@/components/animations/Reveal';
 import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
 import { ShareButton } from '@/components/products/ShareButton';
+import { PrintButton } from '@/components/products/PrintButton';
 import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
+import { RecentlyViewed } from '@/components/products/RecentlyViewed';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
@@ -105,7 +107,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   return (
     <>
-      <ProductViewTracker slug={product.slug} name={product.name} category={product.category} />
+      <ProductViewTracker
+        slug={product.slug}
+        name={product.name}
+        category={product.category}
+        ref={ref}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
@@ -177,6 +184,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   imageUrl={image}
                   className="h-11 w-11"
                 />
+                <PrintButton className="no-print" />
               </div>
             </div>
 
@@ -202,6 +210,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
         </Container>
       )}
+
+      <RecentlyViewed excludeSlug={product.slug} />
 
       {/* Mobil sabit CTA çubuğu */}
       <div

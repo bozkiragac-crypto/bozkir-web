@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRef } from 'react';
-import { ArrowRight, ArrowDown } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
@@ -24,8 +24,11 @@ export function Hero() {
       // Giriş: görsel opacity ile gizlenmez (LCP gecikmesin); yalnızca çok
       // hafif scale. Metinler ayrı katmanda animasyonlu.
       const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.9 } });
-      tl.from('[data-hero-media]', { scale: 1.05, duration: 0.5 })
-        .from('[data-hero-item]', { y: 28, opacity: 0, stagger: 0.08 }, 0.1);
+      tl.from('[data-hero-media]', { scale: 1.05, duration: 0.5 }).from(
+        '[data-hero-item]',
+        { y: 28, opacity: 0, stagger: 0.08 },
+        0.1,
+      );
 
       // Scroll: yalnızca DIŞ katmanda hafif dikey parallax (zoom yok).
       gsap.to('[data-hero-parallax]', {
@@ -56,7 +59,11 @@ export function Hero() {
   );
 
   return (
-    <section ref={root} data-on-dark className="relative isolate min-h-svh overflow-clip bg-[#111] text-white">
+    <section
+      ref={root}
+      data-on-dark
+      className="relative isolate min-h-svh overflow-clip bg-[#111] text-white"
+    >
       <div data-hero-parallax className="absolute inset-0 -z-20 will-change-transform">
         <div data-hero-media className="absolute inset-0">
           {/* Not: Daha yüksek çözünürlüklü bir fotoğraf hazır olduğunda
@@ -76,6 +83,11 @@ export function Hero() {
       <div
         className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(10,10,12,.66)_0%,rgba(10,10,12,.38)_42%,rgba(10,10,12,.8)_100%),linear-gradient(90deg,rgba(10,10,12,.6)_0%,rgba(10,10,12,.1)_60%,rgba(10,10,12,0)_100%)]"
         aria-hidden
+      />
+      {/* Sinematik derinlik: sıcak accent ışığı. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 [background:radial-gradient(120%_90%_at_14%_8%,rgba(179,169,143,0.18),transparent_55%)]"
       />
 
       <div className="container-x relative flex min-h-svh flex-col justify-end pb-20 pt-[var(--header-height)] md:pb-32">
@@ -106,10 +118,18 @@ export function Hero() {
           <p data-hero-item className="mt-8 max-w-xl text-lg leading-relaxed text-white/80">
             {t('home.hero.intro')}
           </p>
-          <div data-hero-item className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+          <div
+            data-hero-item
+            className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center"
+          >
             <MagneticButton className="[&>a]:w-full sm:[&>a]:w-auto">
-              <ButtonLink href="/urunler" size="lg" className="w-full justify-center bg-white text-[#111] hover:bg-white/90 sm:w-auto">
-                {t('home.hero.ctaProducts')} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
+              <ButtonLink
+                href="/urunler"
+                size="lg"
+                className="w-full justify-center bg-white text-[#111] hover:bg-white/90 sm:w-auto"
+              >
+                {t('home.hero.ctaProducts')}{' '}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
               </ButtonLink>
             </MagneticButton>
             <ButtonLink
@@ -123,8 +143,11 @@ export function Hero() {
           </div>
         </div>
 
-        <div data-hero-item className="mt-16 flex items-center gap-3 text-xs tracking-[0.24em] text-white/60 uppercase">
-          <ArrowDown className="h-4 w-4 animate-bounce" />
+        <div
+          data-hero-item
+          className="mt-16 flex items-center gap-3 text-xs tracking-[0.24em] text-white/60 uppercase"
+        >
+          <span className="h-px w-10 bg-white/40" aria-hidden />
           {t('home.hero.scroll')}
         </div>
       </div>

@@ -33,6 +33,7 @@
     "@hookform/resolvers": "^3.9.0",
     "@react-three/drei": "^10.0.0",
     "@react-three/fiber": "^9.0.0",
+    "@react-three/xr": "^6.6.31",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.3",

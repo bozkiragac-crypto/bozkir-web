@@ -57,6 +57,7 @@ export function CompareView() {
       numerals: true,
     },
   ];
+  const differing = new Set(rows.filter((r) => new Set(r.values).size > 1).map((r) => r.label));
 
   return (
     <>
@@ -112,8 +113,78 @@ export function CompareView() {
               </div>
             </div>
 
-            {/* Karşılaştırma tablosu */}
-            <div className="mt-8 overflow-x-auto pb-4">
+            {/* Mobil: kart yığını */}
+            <div className="mt-8 grid gap-5 md:hidden">
+              {items.map(({ ref, product }) => {
+                const src = product?.thumbnail ?? product?.images?.[0] ?? ref.image;
+                return (
+                  <div key={ref.slug} className="rounded-xl border border-border bg-surface p-5">
+                    <div className="flex items-start gap-4">
+                      <Link
+                        href={`/urunler/${ref.slug}`}
+                        className="relative block h-24 w-24 flex-none overflow-hidden rounded-lg bg-surface-2"
+                      >
+                        {src ? (
+                          <Image src={src} alt={product?.name ?? ref.name} fill sizes="96px" className="object-cover" />
+                        ) : (
+                          <ImagePlaceholder iconClassName="h-5 w-5" />
+                        )}
+                      </Link>
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/urunler/${ref.slug}`} className="text-base font-medium leading-snug">
+                          {product?.name ?? ref.name}
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => removeCompare(ref.slug)}
+                          aria-label={t('quote.removeProduct')}
+                          className="mt-3 inline-flex h-9 items-center gap-1.5 rounded-full border border-border px-3 text-xs text-muted-strong transition hover:border-foreground hover:text-foreground"
+                        >
+                          <X className="h-3.5 w-3.5" /> {t('quote.removeProduct')}
+                        </button>
+                      </div>
+                    </div>
+                    <dl className="mt-4 divide-y divide-border border-t border-border">
+                      {rows.map((row, i) => {
+                        const value = row.values[i] ?? '—';
+                        const hi = differing.has(row.label);
+                        return (
+                          <div key={row.label} className="flex items-center justify-between gap-4 py-2.5 text-sm">
+                            <dt className="text-xs tracking-[0.14em] text-muted uppercase">{row.label}</dt>
+                            <dd
+                              className={cn(
+                                'text-end',
+                                row.numerals && 'numerals',
+                                hi ? 'font-medium' : 'text-muted-strong',
+                              )}
+                            >
+                              {value}
+                            </dd>
+                          </div>
+                        );
+                      })}
+                    </dl>
+                    <div className="mt-4 flex gap-2">
+                      <Link
+                        href={`/urunler/${ref.slug}`}
+                        className="inline-flex h-11 flex-1 items-center justify-center rounded-full border border-border text-xs transition hover:border-foreground"
+                      >
+                        {t('common.viewProduct')}
+                      </Link>
+                      <Link
+                        href={`/teklif-al?urun=${encodeURIComponent(ref.slug)}`}
+                        className="inline-flex h-11 flex-1 items-center justify-center rounded-full bg-foreground text-xs text-background"
+                      >
+                        {t('common.getQuote')}
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Karşılaştırma tablosu (masaüstü) */}
+            <div className="mt-8 hidden overflow-x-auto pb-4 md:block">
               <table className="w-full min-w-[640px] border-collapse text-left text-sm">
                 <thead>
                   <tr>
@@ -129,13 +200,13 @@ export function CompareView() {
                           <X className="h-4 w-4" />
                         </button>
                         <Link href={`/urunler/${ref.slug}`} className="group block">
-                          <div className="relative aspect-square w-32 overflow-hidden rounded-md bg-surface-2">
+                          <div className="relative aspect-square w-40 overflow-hidden rounded-md bg-surface-2">
                             {(product?.thumbnail ?? product?.images?.[0] ?? ref.image) ? (
                               <Image
                                 src={(product?.thumbnail ?? product?.images?.[0] ?? ref.image) as string}
                                 alt={product?.name ?? ref.name}
                                 fill
-                                sizes="128px"
+                                sizes="160px"
                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                               />
                             ) : (

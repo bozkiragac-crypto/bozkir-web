@@ -9,10 +9,12 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 
 interface ProductFilterProps {
   categories: Category[];
+  /** Mevcut yüzey değerleri (facet). Boşsa yüzey filtresi gösterilmez. */
+  surfaces?: string[];
 }
 
 /** Filtreler URL ile senkron: paylaşılabilir ve SEO dostu. */
-export function ProductFilter({ categories }: ProductFilterProps) {
+export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps) {
   const router = useRouter();
   const params = useSearchParams();
   const routeParams = useParams();
@@ -20,6 +22,7 @@ export function ProductFilter({ categories }: ProductFilterProps) {
   const locale = typeof routeParams?.locale === 'string' ? routeParams.locale : 'tr';
   const [query, setQuery] = useState(params.get('q') ?? '');
   const activeCategory = params.get('kategori') ?? '';
+  const activeSurface = params.get('yuzey') ?? '';
   const activeSort = params.get('sirala') ?? '';
 
   useEffect(() => {
@@ -40,6 +43,11 @@ export function ProductFilter({ categories }: ProductFilterProps) {
   function onCategoryChange(value: string) {
     track('filter_used', { filter: 'category', value });
     update({ kategori: value || null });
+  }
+
+  function onSurfaceChange(value: string) {
+    track('filter_used', { filter: 'surface', value });
+    update({ yuzey: value || null });
   }
 
   function onSortChange(value: string) {
@@ -98,6 +106,29 @@ export function ProductFilter({ categories }: ProductFilterProps) {
             </option>
           ))}
         </select>
+
+        {surfaces.length > 0 && (
+          <>
+            <label className="sr-only" htmlFor="surface-filter">
+              {t('product.surface')}
+            </label>
+            <select
+              id="surface-filter"
+              value={activeSurface}
+              onChange={(e) => onSurfaceChange(e.target.value)}
+              className="h-11 w-full rounded-full border border-border bg-transparent px-4 text-sm outline-none focus-visible:outline-foreground sm:w-auto"
+            >
+              <option value="">
+                {t('product.surface')}: {t('catalog.all')}
+              </option>
+              {surfaces.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
 
         <label className="sr-only" htmlFor="sort-filter">
           {t('catalog.sort')}

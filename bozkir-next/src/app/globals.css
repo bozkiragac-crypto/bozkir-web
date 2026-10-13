@@ -417,6 +417,63 @@ html[data-compare='1'] [data-product-cta] {
   }
 }
 
+/* --- RTL (Arapça) tipografi: arayüz + başlıklar Arapça fonta geçer.
+   Unlayered yazıldı: utilities katmanındaki font-family'yi geçersiz kılar. --- */
+[dir='rtl'] body,
+[dir='rtl'] .font-display,
+[dir='rtl'] .text-display,
+[dir='rtl'] .text-headline,
+[dir='rtl'] .text-editorial,
+[dir='rtl'] .text-hand {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+}
+
+/* Tipografi incelikleri: paragraflar/öğeler dengeli sarılsın. */
+p,
+li {
+  text-wrap: pretty;
+}
+
+/* Yükleme çubuğu animasyonu. */
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* Yazdırma: gezinme/kabuk gizlenir, içerik sadeleşir (B2B spec çıktısı). */
+@media print {
+  header,
+  footer,
+  [data-compare-bar],
+  [data-product-cta],
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  body::after {
+    display: none !important;
+  }
+  a[href]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.72em;
+    color: #666;
+  }
+  .page-fade {
+    animation: none !important;
+  }
+}
+
+@page {
+  margin: 1.4cm;
+}
+
 /* Reveal başlangıç durumu GSAP tarafından (boyamadan önce) uygulanır. */
 
 @media (prefers-reduced-motion: reduce) {

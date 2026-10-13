@@ -3,7 +3,7 @@ import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { Suspense } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getCategories } from '@/lib/api/categories';
-import { getProducts } from '@/lib/api/products';
+import { getProductFacets, getProducts } from '@/lib/api/products';
 import { buildMetadata, absoluteUrl } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
@@ -44,6 +44,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
   const dict = getDictionary(locale ?? 'tr');
   const kategori = str(sp.kategori);
+  const yuzey = str(sp.yuzey);
   const q = str(sp.q);
   const page = Math.max(1, parseInt(str(sp.sayfa) ?? '1', 10) || 1);
   const sortParam = str(sp.sirala);
@@ -52,20 +53,29 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
       ? sortParam
       : undefined;
 
-  const [categories, result] = await Promise.all([
+  const [categories, facets, result] = await Promise.all([
     getCategories(locale),
+    getProductFacets(),
     getProducts(
-      { category: kategori, query: q, sort, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE },
+      {
+        category: kategori,
+        surface: yuzey,
+        query: q,
+        sort,
+        limit: PAGE_SIZE,
+        offset: (page - 1) * PAGE_SIZE,
+      },
       locale,
     ),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
-  const hasFilters = Boolean(q || kategori);
+  const hasFilters = Boolean(q || kategori || yuzey);
   const buildHref = (target: number) => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (kategori) params.set('kategori', kategori);
+    if (yuzey) params.set('yuzey', yuzey);
     if (sort) params.set('sirala', sort);
     if (target > 1) params.set('sayfa', String(target));
     const qs = params.toString();
@@ -106,7 +116,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
       >
         <div className="mt-10">
           <Suspense fallback={<div className="h-20" />}>
-            <ProductFilter categories={categories} />
+            <ProductFilter categories={categories} surfaces={facets.surfaces} />
           </Suspense>
         </div>
       </PageHero>

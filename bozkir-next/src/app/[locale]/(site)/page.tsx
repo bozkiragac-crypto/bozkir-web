@@ -23,6 +23,7 @@ import { FaqAccordion } from '@/components/home/FaqAccordion';
 import { SupplyLogistics } from '@/components/home/SupplyLogistics';
 import { CatalogSection } from '@/components/home/CatalogSection';
 import { Testimonials } from '@/components/home/Testimonials';
+import { RecentlyViewed } from '@/components/products/RecentlyViewed';
 import { QuoteCTA } from '@/components/home/QuoteCTA';
 import { Container } from '@/components/ui/Container';
 
@@ -48,6 +49,7 @@ export async function generateMetadata({
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
+  const dict = getDictionary(lang);
   const [
     allCategories,
     campaigns,
@@ -81,8 +83,28 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         })
       : allCategories;
 
+  // Gerçek (uydurma olmayan) referanslar varsa Organization Review şeması eklenir.
+  const reviews = (testimonials?.items ?? []).filter((i) => i.description && i.title);
+
   return (
     <>
+      {reviews.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: dict.meta.brand,
+              review: reviews.map((r) => ({
+                '@type': 'Review',
+                reviewBody: r.description,
+                author: { '@type': 'Person', name: r.title },
+              })),
+            }),
+          }}
+        />
+      )}
       <Hero />
       <CampaignSlider campaigns={campaigns} />
       <MaterialStory categories={categories} />
@@ -101,6 +123,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <SupplyLogistics locale={lang} />
       <CatalogSection locale={lang} />
       {testimonials && <Testimonials block={testimonials} locale={lang} />}
+      <RecentlyViewed />
       <QuoteCTA locale={lang} />
     </>
   );

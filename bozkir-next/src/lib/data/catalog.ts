@@ -34,7 +34,10 @@ export function parseImageList(raw: unknown): string[] {
     }
   }
   if (value.startsWith('data:')) return [value];
-  return value.split(',').map((s) => s.trim()).filter(Boolean);
+  return value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 interface IndexItem {
@@ -84,7 +87,12 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
     // Yalnızca code + name + kategori aynıysa (gerçek placeholder) atla.
     // code kategoriyle aynı olsa da farklı isimli ürünler (örn. "Duvar Profili")
     // geçerli ürünlerdir; elenmemeli.
-    if (code && categoryKeyOf(code) === categoryKeyOf(cat) && categoryKeyOf(name) === categoryKeyOf(cat)) continue;
+    if (
+      code &&
+      categoryKeyOf(code) === categoryKeyOf(cat) &&
+      categoryKeyOf(name) === categoryKeyOf(cat)
+    )
+      continue;
 
     // Slug yalnızca Türkçe isimden üretilir; çeviriler URL'yi değiştirmez.
     let slug = slugify(code ? `${name}-${code}` : name);
@@ -161,7 +169,9 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
 
 /** Arama için sadeleştirme: aksan düşür, boşluk/noktalama ayıkl. */
 function normSearch(value: string): string {
-  return toAscii(value).toLowerCase().replace(/[^a-z0-9]+/g, '');
+  return toAscii(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '');
 }
 
 export async function fetchProducts(
@@ -171,13 +181,19 @@ export async function fetchProducts(
   let items = await getProductsIndex();
 
   if (filters.category) items = items.filter((i) => i.categorySlug === filters.category);
+  if (filters.surface) {
+    const needle = normSearch(filters.surface);
+    items = items.filter((i) => normSearch(i.face) === needle);
+  }
   if (filters.query) {
     const raw = toAscii(filters.query).toLowerCase().trim();
     // Çoklu kelime: tüm parçalar eşleşmeli ("lak panel bej").
     const tokens = raw.split(/[^a-z0-9]+/).filter(Boolean);
     // Arama hem Türkçe hem çeviri metinlerinde çalışır.
     const hayOf = (i: IndexItem) =>
-      toAscii(`${i.name} ${i.code} ${i.category} ${i.nameEn} ${i.nameAr} ${i.catEn} ${i.catAr}`).toLowerCase();
+      toAscii(
+        `${i.name} ${i.code} ${i.category} ${i.nameEn} ${i.nameAr} ${i.catEn} ${i.catAr}`,
+      ).toLowerCase();
     if (tokens.length > 1) {
       items = items.filter((i) => {
         const hay = hayOf(i);
@@ -216,7 +232,11 @@ export async function fetchProductBySlug(slug: string, locale?: Locale): Promise
 }
 
 /** Aynı kategoriden ilgili ürünler (mevcut ürün hariç, en fazla `limit`). */
-export async function fetchRelatedProducts(slug: string, locale?: Locale, limit = 4): Promise<Product[]> {
+export async function fetchRelatedProducts(
+  slug: string,
+  locale?: Locale,
+  limit = 4,
+): Promise<Product[]> {
   const items = await getProductsIndex();
   const current = items.find((i) => i.slug === slug);
   if (!current) return [];
@@ -273,7 +293,9 @@ export async function fetchCategories(locale?: Locale): Promise<Category[]> {
     if (!counts.has(meta.slug)) merged.push({ ...meta, productCount: 0 });
   }
 
-  return merged.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99) || a.name.localeCompare(b.name, 'tr'));
+  return merged.sort(
+    (a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99) || a.name.localeCompare(b.name, 'tr'),
+  );
 }
 
 export async function fetchPrimaryCategories(): Promise<Category[]> {
@@ -298,4 +320,15 @@ export async function fetchProductImageRaw(id: string): Promise<string> {
   } catch {
     return '';
   }
+}
+
+/** Filtre paneli için mevcut yüzey (face) değerleri. */
+export async function fetchProductFacets(): Promise<{ surfaces: string[] }> {
+  const items = await getProductsIndex();
+  const byNorm = new Map<string, string>();
+  for (const i of items) {
+    const face = i.face.trim();
+    if (face) byNorm.set(normSearch(face), face);
+  }
+  return { surfaces: [...byNorm.values()].sort((a, b) => a.localeCompare(b, 'tr')) };
 }

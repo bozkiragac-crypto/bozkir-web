@@ -10,7 +10,17 @@ export default function LocaleNotFound() {
   const nf = dict.pages.notFound;
 
   return (
-    <Container className="flex min-h-[70svh] flex-col justify-center py-24">
+    <Container className="relative flex min-h-[70svh] flex-col justify-center py-24">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 [background:radial-gradient(80%_60%_at_18%_8%,rgba(141,132,116,0.10),transparent_60%)]"
+      />
+      <span
+        aria-hidden
+        className="font-display pointer-events-none absolute -top-4 end-2 select-none text-[clamp(7rem,24vw,18rem)] leading-none text-foreground/[0.04] md:end-8"
+      >
+        404
+      </span>
       <p className="text-eyebrow">{nf.eyebrow}</p>
       <h1 className="text-display mt-8 max-w-3xl">
         {nf.titleLead} <em className="text-editorial">{nf.titleEm}</em>

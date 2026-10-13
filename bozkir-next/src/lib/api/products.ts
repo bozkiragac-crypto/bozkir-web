@@ -1,11 +1,17 @@
 import type { Locale } from '@/i18n/config';
 import type { Product, ProductFilters, ProductQueryResult } from '@/types/product';
-import { fetchProductBySlug, fetchProducts, fetchRelatedProducts } from '@/lib/data/catalog';
+import {
+  fetchProductBySlug,
+  fetchProductFacets,
+  fetchProducts,
+  fetchRelatedProducts,
+} from '@/lib/data/catalog';
 import { apiGet, hasRemoteApi } from './client';
 
 function toQuery(filters: ProductFilters = {}, locale?: Locale) {
   const params = new URLSearchParams();
   if (filters.category) params.set('category', filters.category);
+  if (filters.surface) params.set('surface', filters.surface);
   if (filters.query) params.set('q', filters.query);
   if (filters.sort) params.set('sort', filters.sort);
   params.set('limit', String(filters.limit ?? 24));
@@ -42,15 +48,23 @@ export async function getFeaturedProducts(limit = 8, locale?: Locale): Promise<P
   return items;
 }
 
+/** Filtre paneli facet'leri (yüzey). */
+export async function getProductFacets(): Promise<{ surfaces: string[] }> {
+  return fetchProductFacets();
+}
+
 export async function getProductBySlug(slug: string, locale?: Locale): Promise<Product | null> {
   if (!hasRemoteApi()) {
     return fetchProductBySlug(slug, locale);
   }
   try {
     const localeQuery = locale ? `&locale=${locale}` : '';
-    const product = await apiGet<Product>(`/product?slug=${encodeURIComponent(slug)}${localeQuery}`, {
-      revalidate: 300,
-    });
+    const product = await apiGet<Product>(
+      `/product?slug=${encodeURIComponent(slug)}${localeQuery}`,
+      {
+        revalidate: 300,
+      },
+    );
     return product ?? fetchProductBySlug(slug, locale);
   } catch {
     // Uzak API düşerse yerel katmana düş.
@@ -59,7 +73,11 @@ export async function getProductBySlug(slug: string, locale?: Locale): Promise<P
 }
 
 /** Aynı kategoriden ilgili ürünler. */
-export async function getRelatedProducts(slug: string, locale?: Locale, limit = 4): Promise<Product[]> {
+export async function getRelatedProducts(
+  slug: string,
+  locale?: Locale,
+  limit = 4,
+): Promise<Product[]> {
   if (!hasRemoteApi()) {
     return fetchRelatedProducts(slug, locale, limit);
   }
