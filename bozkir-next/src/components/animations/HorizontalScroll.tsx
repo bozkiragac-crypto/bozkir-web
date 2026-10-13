@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from 'react';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { cn } from '@/lib/utils';
+import { Container } from '@/components/ui/Container';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 interface HorizontalScrollProps {
@@ -63,24 +64,28 @@ export function HorizontalScroll({ children, header, className, ...rest }: Horiz
   return (
     <section ref={section} className={cn('relative', className)} aria-label={rest['aria-label']}>
       <div className="overflow-hidden">
-        {header && <div className="container-x pt-16 md:pt-20">{header}</div>}
+        {header && <Container className="pt-16 md:pt-20">{header}</Container>}
 
         {/* Mobilde snap-proximity: son kartın hizalanamayıp yarım kalmasını önler. */}
         <div className="mt-8 overflow-x-auto pb-2 lg:overflow-visible">
           <div
             ref={track}
             data-cursor-label={dict.common.scroll}
-            className="flex w-max snap-x snap-proximity gap-6 px-5 lg:px-[max(20px,4.2vw)] lg:will-change-transform"
+            className="flex w-max snap-x snap-proximity gap-6 px-[var(--gutter)] lg:will-change-transform"
           >
             {children}
           </div>
         </div>
 
-        <div className="container-x mt-6 hidden lg:block">
+        <Container className="mt-6 hidden lg:block">
           <div className="h-px w-full overflow-hidden bg-border">
-            <div ref={bar} className="h-px w-full origin-left bg-foreground" style={{ transform: 'scaleX(0)' }} />
+            <div
+              ref={bar}
+              className="h-px w-full origin-left bg-foreground"
+              style={{ transform: 'scaleX(0)' }}
+            />
           </div>
-        </div>
+        </Container>
       </div>
     </section>
   );

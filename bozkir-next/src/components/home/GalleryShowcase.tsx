@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { Expand } from 'lucide-react';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { ImageLightbox, type LightboxItem } from '@/components/ui/ImageLightbox';
+import { Reveal } from '@/components/animations/Reveal';
+import { STAGGER } from '@/lib/motion';
 
 export interface ShowcaseItem {
   id: string;
@@ -45,7 +47,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
     <>
       <ul className="mt-12 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-3 md:gap-x-4 md:gap-y-10 lg:grid-cols-4">
         {items.map((item, i) => (
-          <li key={item.id} className="group relative">
+          <Reveal as="li" key={item.id} delay={(i % 4) * STAGGER.list} className="group relative">
             <Link href={hrefOf(item)} className="block" data-cursor-label={t('catalog.inspect')}>
               <div className="relative aspect-square overflow-hidden rounded-md bg-surface-2">
                 <Image
@@ -76,7 +78,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
             >
               <Expand className="h-4 w-4" />
             </button>
-          </li>
+          </Reveal>
         ))}
       </ul>
 

@@ -31,4 +31,12 @@ export interface ContentBlock {
   bodyAr?: string;
 }
 
-export type ContentBlockKey = 'gallery' | 'guide' | 'applications' | 'process' | 'faq';
+export type ContentBlockKey =
+  | 'gallery'
+  | 'guide'
+  | 'applications'
+  | 'process'
+  | 'faq'
+  | 'testimonials'
+  | 'certifications'
+  | 'facilities';

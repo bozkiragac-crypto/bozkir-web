@@ -13,6 +13,7 @@ export type AnalyticsEvent =
   | 'quote_submit'
   | 'contact_submit'
   | 'search'
+  | 'search_select'
   | 'filter_used'
   | 'project_view'
   | 'cta_click'

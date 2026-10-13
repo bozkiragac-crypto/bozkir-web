@@ -4,11 +4,14 @@ import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { StatsBand } from '@/components/home/StatsBand';
 import { AboutTimeline } from '@/components/home/AboutTimeline';
+import { Certifications } from '@/components/about/Certifications';
+import { Facilities } from '@/components/about/Facilities';
 import { QuoteCTA } from '@/components/home/QuoteCTA';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
 import { fetchAboutContent } from '@/lib/data/content';
+import { getContentBlock } from '@/lib/api/content';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -34,18 +37,25 @@ export default async function AboutPage({ params }: PageProps) {
   const a = dict.pages.about;
   const about = await fetchAboutContent(lang);
   const values = about.values.length ? about.values : a.values;
+  const [certifications, facilities] = await Promise.all([
+    getContentBlock('certifications', lang),
+    getContentBlock('facilities', lang),
+  ]);
 
   return (
     <>
-      <BreadcrumbScript locale={lang} items={[{ name: a.crumbHome, path: '/' }, { name: a.crumb, path: '/hakkimizda' }]} />
+      <BreadcrumbScript
+        locale={lang}
+        items={[
+          { name: a.crumbHome, path: '/' },
+          { name: a.crumb, path: '/hakkimizda' },
+        ]}
+      />
       <PageHero
         eyebrow={a.heroEyebrow}
         title={a.heroTitle}
         description={a.heroDescription}
-        crumbs={[
-          { label: a.crumbHome, href: '/' },
-          { label: a.crumb },
-        ]}
+        crumbs={[{ label: a.crumbHome, href: '/' }, { label: a.crumb }]}
       />
 
       <Container className="pb-8">
@@ -64,6 +74,10 @@ export default async function AboutPage({ params }: PageProps) {
           ))}
         </div>
       </Container>
+
+      {facilities && <Facilities block={facilities} locale={lang} />}
+
+      {certifications && <Certifications block={certifications} locale={lang} />}
 
       <QuoteCTA locale={lang} />
     </>

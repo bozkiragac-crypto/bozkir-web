@@ -35,7 +35,7 @@ export async function getContentBlock(key: string, locale?: Locale): Promise<Con
 
 /** Anasayfa için tüm bloklar. */
 export async function getHomeContent(locale?: Locale): Promise<ContentBlock[]> {
-  const keys: string[] = ['gallery', 'guide', 'applications', 'process', 'faq'];
+  const keys: string[] = ['gallery', 'guide', 'applications', 'process', 'faq', 'testimonials'];
   const blocks = await Promise.all(keys.map((k) => getContentBlock(k, locale)));
   return blocks.filter((b): b is ContentBlock => b !== null);
 }

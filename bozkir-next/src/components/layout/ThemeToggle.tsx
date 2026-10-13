@@ -7,14 +7,25 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 
 type Theme = 'light' | 'dark';
 
-function currentTheme(): Theme {
-  if (typeof document === 'undefined') return 'light';
-  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+function storedPref(): Theme | null {
+  try {
+    const v = localStorage.getItem('theme');
+    return v === 'dark' || v === 'light' ? v : null;
+  } catch {
+    return null;
+  }
 }
 
-/** Tarayıcı adres çubuğu rengini aktif temayla eşitler. */
-function syncThemeColor(theme: Theme) {
-  if (typeof document === 'undefined') return;
+function systemTheme(): Theme {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+/** Kararlı temayı DOM'a ve adres çubuğu rengine uygular. */
+function applyTheme(theme: Theme, source: 'user' | 'system') {
+  const root = document.documentElement;
+  root.setAttribute('data-theme', theme);
+  root.style.colorScheme = theme;
+  root.dataset.themeSource = source;
   let meta = document.querySelector('meta[name="theme-color"]');
   if (!meta) {
     meta = document.createElement('meta');
@@ -24,26 +35,48 @@ function syncThemeColor(theme: Theme) {
   meta.setAttribute('content', theme === 'dark' ? '#0e0e10' : '#f7f7f5');
 }
 
-export function ThemeToggle({ className, onDark = false }: { className?: string; onDark?: boolean }) {
+/** Tema düğmesi: kayıtlı tercih yoksa işletim sistemi temasını canlı takip eder. */
+export function ThemeToggle({
+  className,
+  onDark = false,
+}: {
+  className?: string;
+  onDark?: boolean;
+}) {
   const [theme, setTheme] = useState<Theme>('light');
+  // Kayıtlı tercih yokken sistem teması değişimini izle.
+  const [followSystem, setFollowSystem] = useState(false);
   const { t } = useDictionary();
 
   useEffect(() => {
-    const initial = currentTheme();
+    const pref = storedPref();
+    const initial = pref ?? systemTheme();
     setTheme(initial);
-    syncThemeColor(initial);
+    setFollowSystem(pref === null);
+    applyTheme(initial, pref === null ? 'system' : 'user');
   }, []);
+
+  useEffect(() => {
+    if (!followSystem) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      const next: Theme = mq.matches ? 'dark' : 'light';
+      applyTheme(next, 'system');
+      setTheme(next);
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [followSystem]);
 
   function toggle() {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    document.documentElement.style.colorScheme = next;
     try {
       localStorage.setItem('theme', next);
     } catch {
       // yok say
     }
-    syncThemeColor(next);
+    setFollowSystem(false);
+    applyTheme(next, 'user');
     setTheme(next);
   }
 
@@ -59,7 +92,11 @@ export function ThemeToggle({ className, onDark = false }: { className?: string;
         className,
       )}
     >
-      {theme === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
+      {theme === 'dark' ? (
+        <Sun className="h-[18px] w-[18px]" />
+      ) : (
+        <Moon className="h-[18px] w-[18px]" />
+      )}
     </button>
   );
 }

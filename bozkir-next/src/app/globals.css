@@ -29,6 +29,11 @@
   --radius-2xl: 26px;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Hareket ölçeği (JS karşılığı: src/lib/motion.ts). */
+  --dur-fast: 200ms;
+  --dur-base: 350ms;
+  --dur-slow: 700ms;
 }
 
 :root {
@@ -39,6 +44,8 @@
   --compare-h: 0px;
   --header-height: calc(68px + var(--safe-top));
   --container-max: 1440px;
+  /* Tek yatay kenar boşluğu kaynağı: Container, container-x ve yatay track'ler. */
+  --gutter: clamp(20px, 4.2vw, 56px);
 
   /* Açık tema */
   --bg: #f7f7f5;
@@ -122,14 +129,16 @@ html[data-compare='1'] [data-product-cta] {
 /* Sayfa geçişi fade'i (GSAP yerine CSS; ilk yük JS'ini küçültür). */
 @media (prefers-reduced-motion: no-preference) {
   .page-fade {
-    animation: page-fade-in 0.4s ease-out;
+    animation: page-fade-in 0.45s var(--ease-out-expo);
   }
   @keyframes page-fade-in {
     from {
       opacity: 0;
+      transform: translateY(8px);
     }
     to {
       opacity: 1;
+      transform: translateY(0);
     }
   }
 }
@@ -164,7 +173,9 @@ html[data-compare='1'] [data-product-cta] {
     -moz-osx-font-smoothing: grayscale;
     /* `hidden` yerine `clip`: scroll container OLUŞTURMAZ, sticky/pin bozulmaz. */
     overflow-x: clip;
-    transition: background-color 0.4s var(--ease-out-expo), color 0.4s var(--ease-out-expo);
+    transition:
+      background-color 0.4s var(--ease-out-expo),
+      color 0.4s var(--ease-out-expo);
   }
 
   /* İnce film greni — düz yüzeylere dokunsal premium his.
@@ -230,7 +241,7 @@ html[data-compare='1'] [data-product-cta] {
     width: 100%;
     max-width: var(--container-max);
     margin-inline: auto;
-    padding-inline: clamp(20px, 4.2vw, 56px);
+    padding-inline: var(--gutter);
   }
 
   .font-display {
@@ -313,7 +324,12 @@ html[data-compare='1'] [data-product-cta] {
 
   /* İskelet (yükleme) */
   .skeleton {
-    background: linear-gradient(100deg, var(--surface-2) 30%, var(--surface) 50%, var(--surface-2) 70%);
+    background: linear-gradient(
+      100deg,
+      var(--surface-2) 30%,
+      var(--surface) 50%,
+      var(--surface-2) 70%
+    );
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.4s linear infinite;
     border-radius: var(--radius-sm);

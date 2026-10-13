@@ -23,8 +23,8 @@ import { AnalyticsScripts } from '@/components/consent/AnalyticsScripts';
 import { siteConfig } from '@/config/site';
 import { organizationJsonLd, siteMetadata, websiteJsonLd } from '@/lib/seo';
 
-// Varsayılan açık tema; yalnızca kullanıcı koyu seçtiyse koyu uygulanır.
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t!=='dark')t='light';document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}catch(e){}})();`;
+// Kayıtlı tercih varsa ona uy; yoksa işletim sistemi temasına düş (FOUC yok).
+const themeScript = `(function(){try{var s=localStorage.getItem('theme');var user=s==='dark'||s==='light';var t=user?s:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t;r.dataset.themeSource=user?'user':'system';var m=document.querySelector('meta[name="theme-color"]');if(!m){m=document.createElement('meta');m.setAttribute('name','theme-color');document.head.appendChild(m);}m.setAttribute('content',t==='dark'?'#0e0e10':'#f7f7f5');}catch(e){}})();`;
 
 // Dinamik davranışı sayfalara bırakıyoruz; statik/ISR mümkün olduğunca korunur.
 // (Metadata ve organizer JSON-LD statik üretilebilir.)
@@ -33,7 +33,11 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
   const { locale } = await params;
   const typed = isLocale(locale) ? (locale as Locale) : undefined;
   const meta = await siteMetadata(typed);
@@ -62,7 +66,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
 
   const typed = locale as Locale;
   const dict = getDictionary(typed);
-  const [categories, settings] = await Promise.all([getPrimaryCategories(typed), getSiteSettingsFresh()]);
+  const [categories, settings] = await Promise.all([
+    getPrimaryCategories(typed),
+    getSiteSettingsFresh(),
+  ]);
 
   return (
     <html
@@ -75,7 +82,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         {/* Tema, ilk boyamadan önce uygulanır (FOUC yok). */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* JS varsa reveal başlangıç durumu uygulanır. */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        <script
+          dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
@@ -106,7 +115,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                   <CompareBar />
                   <CampaignPopupServer locale={typed} />
                   <CookieBanner />
-                  {(settings.gaMeasurementId || settings.metaPixelId || process.env.NEXT_PUBLIC_ANALYTICS_ID) && (
+                  {(settings.gaMeasurementId ||
+                    settings.metaPixelId ||
+                    process.env.NEXT_PUBLIC_ANALYTICS_ID) && (
                     <AnalyticsScripts
                       id={settings.gaMeasurementId || process.env.NEXT_PUBLIC_ANALYTICS_ID || ''}
                       metaPixelId={settings.metaPixelId || undefined}

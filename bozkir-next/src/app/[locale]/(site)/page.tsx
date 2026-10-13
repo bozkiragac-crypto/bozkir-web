@@ -22,10 +22,15 @@ import { StatsBand } from '@/components/home/StatsBand';
 import { FaqAccordion } from '@/components/home/FaqAccordion';
 import { SupplyLogistics } from '@/components/home/SupplyLogistics';
 import { CatalogSection } from '@/components/home/CatalogSection';
+import { Testimonials } from '@/components/home/Testimonials';
 import { QuoteCTA } from '@/components/home/QuoteCTA';
 import { Container } from '@/components/ui/Container';
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
   const dict = getDictionary(lang);
@@ -43,7 +48,17 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const [allCategories, campaigns, gallery, guide, applications, process, faq, settings] = await Promise.all([
+  const [
+    allCategories,
+    campaigns,
+    gallery,
+    guide,
+    applications,
+    process,
+    faq,
+    testimonials,
+    settings,
+  ] = await Promise.all([
     getPrimaryCategories(lang),
     getActiveCampaigns(lang),
     getContentBlock('gallery', lang),
@@ -51,6 +66,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getContentBlock('applications', lang),
     getContentBlock('process', lang),
     getContentBlock('faq', lang),
+    getContentBlock('testimonials', lang),
     getSiteSettings(),
   ]);
 
@@ -84,6 +100,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {faq && <FaqAccordion block={faq} locale={lang} />}
       <SupplyLogistics locale={lang} />
       <CatalogSection locale={lang} />
+      {testimonials && <Testimonials block={testimonials} locale={lang} />}
       <QuoteCTA locale={lang} />
     </>
   );

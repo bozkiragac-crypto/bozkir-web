@@ -65,7 +65,7 @@ export function Panel3D() {
         {reduced || !seeded ? (
           <PanelFallback alt={h.imageAlt} />
         ) : (
-          <PanelViewer finish={finish} active={inView} dprMax={isMobile ? 1.25 : 1.75} />
+          <PanelViewer finish={finish} active={inView} dprMax={isMobile ? 1.25 : 1.5} />
         )}
         <span className="pointer-events-none absolute bottom-4 left-5 flex items-center gap-2 text-[0.65rem] tracking-[0.14em] text-muted uppercase">
           <RotateCcw className="h-3.5 w-3.5" /> {h.hint}

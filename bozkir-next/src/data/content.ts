@@ -81,13 +81,15 @@ function buildFallback(): Record<string, ContentBlock> {
       item('guide', {
         title: 'Suntalam',
         tag: 'Ekonomik',
-        description: 'Yonga levha üzerine dekor kaplı panel. Gövde, raf ve kapak üretiminde ekonomik çözümdür.',
+        description:
+          'Yonga levha üzerine dekor kaplı panel. Gövde, raf ve kapak üretiminde ekonomik çözümdür.',
         linkUrl: '/kategoriler/suntalam',
       }),
       item('guide', {
         title: 'Sunta',
         tag: 'Gövde',
-        description: 'Mobilya gövdesi ve yapısal parçalarda kullanılan temel yonga levhadır; farklı kalınlıklarda tedarik edilir.',
+        description:
+          'Mobilya gövdesi ve yapısal parçalarda kullanılan temel yonga levhadır; farklı kalınlıklarda tedarik edilir.',
         linkUrl: '/kategoriler/sunta',
       }),
       item('guide', {
@@ -99,7 +101,8 @@ function buildFallback(): Record<string, ContentBlock> {
       item('guide', {
         title: 'PVC Kenar Bant',
         tag: 'Tamamlayıcı',
-        description: 'Panel kenarlarının tamamlayıcısıdır; dekor ve renk uyumuyla bütünlüklü bir görünüm oluşturur.',
+        description:
+          'Panel kenarlarının tamamlayıcısıdır; dekor ve renk uyumuyla bütünlüklü bir görünüm oluşturur.',
         linkUrl: '/kategoriler/pvc-kenar-bant',
       }),
     ],
@@ -111,12 +114,36 @@ function buildFallback(): Record<string, ContentBlock> {
     subtitle: 'Panelin işe dönüştüğü yerler',
     body: '',
     items: [
-      item('applications', { title: 'Mutfak', imageUrl: '/images/gallery/SGL_849.webp', description: 'Dolap gövdesi ve kapaklarda dekor ve dayanım dengesi.' }),
-      item('applications', { title: 'İç Mekân Kapı', imageUrl: '/images/gallery/milano.webp', description: 'Kapı panelleri ve pervaz uygulamaları.' }),
-      item('applications', { title: 'Dolap & Depolama', imageUrl: '/images/gallery/SGL_859.webp', description: 'Gövde ve raflarda geniş ürün seçenekleri.' }),
-      item('applications', { title: 'Banyo & Islak Alan', imageUrl: '/images/gallery/VT_509.webp', description: 'Uygun panel seçimiyle nemli alanlara yönelik çözümler.' }),
-      item('applications', { title: 'Ofis & Ticari', imageUrl: '/images/gallery/YT_10H.webp', description: 'Yoğun kullanıma uygun, sürdürülebilir malzemeler.' }),
-      item('applications', { title: 'Duvar & Dekor', imageUrl: '/images/gallery/SGL_770.webp', description: 'Duvar profili ve dekoratif yüzey uygulamaları.' }),
+      item('applications', {
+        title: 'Mutfak',
+        imageUrl: '/images/gallery/SGL_849.webp',
+        description: 'Dolap gövdesi ve kapaklarda dekor ve dayanım dengesi.',
+      }),
+      item('applications', {
+        title: 'İç Mekân Kapı',
+        imageUrl: '/images/gallery/milano.webp',
+        description: 'Kapı panelleri ve pervaz uygulamaları.',
+      }),
+      item('applications', {
+        title: 'Dolap & Depolama',
+        imageUrl: '/images/gallery/SGL_859.webp',
+        description: 'Gövde ve raflarda geniş ürün seçenekleri.',
+      }),
+      item('applications', {
+        title: 'Banyo & Islak Alan',
+        imageUrl: '/images/gallery/VT_509.webp',
+        description: 'Uygun panel seçimiyle nemli alanlara yönelik çözümler.',
+      }),
+      item('applications', {
+        title: 'Ofis & Ticari',
+        imageUrl: '/images/gallery/YT_10H.webp',
+        description: 'Yoğun kullanıma uygun, sürdürülebilir malzemeler.',
+      }),
+      item('applications', {
+        title: 'Duvar & Dekor',
+        imageUrl: '/images/gallery/SGL_770.webp',
+        description: 'Duvar profili ve dekoratif yüzey uygulamaları.',
+      }),
     ],
   };
 
@@ -126,10 +153,23 @@ function buildFallback(): Record<string, ContentBlock> {
     subtitle: 'Talepten teslimata',
     body: '',
     items: [
-      item('process', { title: 'Talep', description: 'İhtiyacınızı, ürün kodlarını ve ölçüleri telefon, WhatsApp veya form üzerinden iletin.' }),
-      item('process', { title: 'Teklif', description: 'Ekibimiz stok durumu ve fiyat bilgisiyle geri döner.' }),
-      item('process', { title: 'Hazırlık', description: 'Ürün stoktan hazırlanır; kesim ve sevkiyat planlanır.' }),
-      item('process', { title: 'Sevkiyat', description: 'Belirlenen adrese teslim edilir; süreç boyunca bilgilendirilirsiniz.' }),
+      item('process', {
+        title: 'Talep',
+        description:
+          'İhtiyacınızı, ürün kodlarını ve ölçüleri telefon, WhatsApp veya form üzerinden iletin.',
+      }),
+      item('process', {
+        title: 'Teklif',
+        description: 'Ekibimiz stok durumu ve fiyat bilgisiyle geri döner.',
+      }),
+      item('process', {
+        title: 'Hazırlık',
+        description: 'Ürün stoktan hazırlanır; kesim ve sevkiyat planlanır.',
+      }),
+      item('process', {
+        title: 'Sevkiyat',
+        description: 'Belirlenen adrese teslim edilir; süreç boyunca bilgilendirilirsiniz.',
+      }),
     ],
   };
 
@@ -139,16 +179,65 @@ function buildFallback(): Record<string, ContentBlock> {
     subtitle: '',
     body: '',
     items: [
-      item('faq', { title: 'Kalınlık seçimini nasıl yapmalıyım?', description: 'Kalınlık; kullanım yerine ve taşıyacağı yüke göre belirlenir. Gövde ve raflarda daha kalın, kapak ve dekoratif yüzeylerde daha ince paneller tercih edilir. İhtiyacınıza uygun seçim için bize danışabilirsiniz.' }),
-      item('faq', { title: 'Numune temin ediyor musunuz?', description: 'Renk ve dokuyu yerinde görmeniz için numune talebinizi bize iletebilirsiniz; ekibimiz uygun seçenekleri paylaşır.' }),
-      item('faq', { title: 'Minimum sipariş adedi var mı?', description: 'Sipariş koşulları ürün grubuna göre değişebilir. Talebinize özel bilgi için bizimle iletişime geçin.' }),
-      item('faq', { title: 'Teslimat süresi ne kadar?', description: 'Teslim süresi; ürünün stok durumuna, adede ve teslimat adresine göre değişir. Sipariş sırasında net süre paylaşılır.' }),
-      item('faq', { title: 'Hangi bölgelere sevkiyat yapıyorsunuz?', description: 'Antakya merkezli olarak Hatay ve çevre bölgelere sevkiyat yapıyoruz. Farklı bölgeler için bize ulaşabilirsiniz.' }),
-      item('faq', { title: 'Ödeme seçenekleri neler?', description: 'Nakit, kredi kartı ve çek ile ödeme imkânı sunuyoruz.' }),
+      item('faq', {
+        title: 'Kalınlık seçimini nasıl yapmalıyım?',
+        description:
+          'Kalınlık; kullanım yerine ve taşıyacağı yüke göre belirlenir. Gövde ve raflarda daha kalın, kapak ve dekoratif yüzeylerde daha ince paneller tercih edilir. İhtiyacınıza uygun seçim için bize danışabilirsiniz.',
+      }),
+      item('faq', {
+        title: 'Numune temin ediyor musunuz?',
+        description:
+          'Renk ve dokuyu yerinde görmeniz için numune talebinizi bize iletebilirsiniz; ekibimiz uygun seçenekleri paylaşır.',
+      }),
+      item('faq', {
+        title: 'Minimum sipariş adedi var mı?',
+        description:
+          'Sipariş koşulları ürün grubuna göre değişebilir. Talebinize özel bilgi için bizimle iletişime geçin.',
+      }),
+      item('faq', {
+        title: 'Teslimat süresi ne kadar?',
+        description:
+          'Teslim süresi; ürünün stok durumuna, adede ve teslimat adresine göre değişir. Sipariş sırasında net süre paylaşılır.',
+      }),
+      item('faq', {
+        title: 'Hangi bölgelere sevkiyat yapıyorsunuz?',
+        description:
+          'Antakya merkezli olarak Hatay ve çevre bölgelere sevkiyat yapıyoruz. Farklı bölgeler için bize ulaşabilirsiniz.',
+      }),
+      item('faq', {
+        title: 'Ödeme seçenekleri neler?',
+        description: 'Nakit, kredi kartı ve çek ile ödeme imkânı sunuyoruz.',
+      }),
     ],
   };
 
-  return { gallery, guide, applications, process, faq };
+  // Güven blokları: uydurma referans/belge yok. Admin panelden doldurulur;
+  // öğe eklenene kadar ilgili bölüm sitede görünmez.
+  const testimonials: ContentBlock = {
+    key: 'testimonials',
+    title: 'Referanslar',
+    subtitle: 'Bizimle çalışanlar',
+    body: '',
+    items: [],
+  };
+
+  const certifications: ContentBlock = {
+    key: 'certifications',
+    title: 'Belgeler & Sertifikalar',
+    subtitle: 'Kalite ve uygunluk',
+    body: '',
+    items: [],
+  };
+
+  const facilities: ContentBlock = {
+    key: 'facilities',
+    title: 'Tesisimiz',
+    subtitle: 'Depo ve operasyon',
+    body: '',
+    items: [],
+  };
+
+  return { gallery, guide, applications, process, faq, testimonials, certifications, facilities };
 }
 
 export const fallbackContent: Record<string, ContentBlock> = buildFallback();

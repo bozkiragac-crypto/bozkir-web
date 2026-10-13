@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { cn } from '@/lib/utils';
+import { DUR, STAGGER } from '@/lib/motion';
 
 interface SectionHeadingProps {
   eyebrow?: string;
@@ -36,9 +37,9 @@ export function SectionHeading({ eyebrow, title, body, className, action }: Sect
         {
           yPercent: 0,
           opacity: 1,
-          duration: 0.9,
+          duration: DUR.reveal,
           ease: 'power4.out',
-          stagger: 0.045,
+          stagger: STAGGER.compact,
           scrollTrigger: { trigger: el, start: 'top 85%' },
         },
       );
@@ -49,7 +50,10 @@ export function SectionHeading({ eyebrow, title, body, className, action }: Sect
   return (
     <div
       ref={ref}
-      className={cn('flex flex-wrap items-end justify-between gap-6 border-b border-border pb-8', className)}
+      className={cn(
+        'flex flex-wrap items-end justify-between gap-6 border-b border-border pb-8',
+        className,
+      )}
     >
       <div className="max-w-3xl">
         {eyebrow && (

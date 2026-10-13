@@ -3,6 +3,7 @@
 import { createElement, useRef, type ElementType, type ReactNode } from 'react';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { cn } from '@/lib/utils';
+import { DUR } from '@/lib/motion';
 
 interface RevealProps {
   children: ReactNode;
@@ -17,7 +18,14 @@ interface RevealProps {
 /**
  * Scroll ile yumuşak reveal. `prefers-reduced-motion` durumunda animasyon yok.
  */
-export function Reveal({ children, className, as = 'div', delay = 0, y = 40, once = true }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  as = 'div',
+  delay = 0,
+  y = 40,
+  once = true,
+}: RevealProps) {
   const ref = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -34,7 +42,7 @@ export function Reveal({ children, className, as = 'div', delay = 0, y = 40, onc
         {
           opacity: 1,
           y: 0,
-          duration: 0.9,
+          duration: DUR.reveal,
           delay,
           ease: 'power3.out',
           // Animasyon bitince transform'u bırak: kalıcı `transform`, altındaki

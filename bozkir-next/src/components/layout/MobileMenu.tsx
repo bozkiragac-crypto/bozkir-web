@@ -58,7 +58,9 @@ export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
       inert={!open}
     >
       <div className="flex h-[var(--header-height)] items-center justify-between gap-2 px-5">
-        <span className="min-w-0 truncate text-sm font-semibold tracking-[0.18em] uppercase">{siteConfig.name}</span>
+        <span className="min-w-0 truncate text-sm font-semibold tracking-[0.18em] uppercase">
+          {siteConfig.name}
+        </span>
         <button
           onClick={onClose}
           aria-label={t('nav.close')}
@@ -76,12 +78,16 @@ export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
       </div>
 
       <nav className="flex flex-col px-5 pt-6">
-        {siteConfig.nav.map((item) => (
+        {siteConfig.nav.map((item, i) => (
           <Link
             key={item.key}
             href={item.href}
             onClick={onClose}
-            className="border-b border-border py-4 text-2xl font-medium tracking-tight"
+            style={{ transitionDelay: open ? `${i * 40}ms` : '0ms' }}
+            className={cn(
+              'border-b border-border py-4 text-2xl font-medium tracking-tight transition-[opacity,transform] duration-500 ease-[var(--ease-out-expo)]',
+              open ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
+            )}
           >
             {navLabel(item.key)}
           </Link>

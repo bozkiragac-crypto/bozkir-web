@@ -11,12 +11,19 @@ const BLOCKS: { key: string; label: string; hint: string }[] = [
   { key: 'applications', label: 'Uygulama Alanları', hint: 'Mutfak, kapı, dolap…' },
   { key: 'process', label: 'Süreç', hint: 'Talepten teslimata adımlar' },
   { key: 'faq', label: 'SSS', hint: 'Sıkça sorulan sorular' },
+  { key: 'testimonials', label: 'Referanslar', hint: 'Müşteri yorumları' },
+  { key: 'certifications', label: 'Belgeler', hint: 'Sertifika ve belgeler' },
+  { key: 'facilities', label: 'Tesis', hint: 'Depo / tesis görselleri' },
 ];
 
 export default async function AdminContentPage() {
   const db = getDb();
   if (!db) {
-    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">Veritabanı bağlantısı yok.</p>;
+    return (
+      <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+        Veritabanı bağlantısı yok.
+      </p>
+    );
   }
 
   const [blocks, items] = await Promise.all([

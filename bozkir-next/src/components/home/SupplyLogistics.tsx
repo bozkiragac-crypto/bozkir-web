@@ -2,6 +2,7 @@ import { Boxes, Truck, Warehouse, CreditCard, ArrowRight } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal } from '@/components/animations/Reveal';
+import { Panel, PanelGrid } from '@/components/ui/Panel';
 import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { siteConfig } from '@/config/site';
@@ -28,18 +29,20 @@ export async function SupplyLogistics({ locale }: { locale: Locale }) {
         }
       />
 
-      <div className="mt-14 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-        {h.items.map((item, i) => {
-          const Icon = icons[i] ?? Boxes;
-          return (
-            <div key={item.title} className="bg-surface p-7 md:p-8">
-              <Icon className="h-5 w-5 text-accent" />
-              <h3 className="mt-6 text-lg font-medium tracking-tight">{item.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-strong">{item.text}</p>
-            </div>
-          );
-        })}
-      </div>
+      <Reveal className="mt-14">
+        <PanelGrid className="sm:grid-cols-2 lg:grid-cols-4">
+          {h.items.map((item, i) => {
+            const Icon = icons[i] ?? Boxes;
+            return (
+              <Panel key={item.title} className="p-7 md:p-8">
+                <Icon className="h-5 w-5 text-accent" />
+                <h3 className="mt-6 text-lg font-medium tracking-tight">{item.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-strong">{item.text}</p>
+              </Panel>
+            );
+          })}
+        </PanelGrid>
+      </Reveal>
 
       <Reveal>
         <p className="mt-8 text-sm text-muted">

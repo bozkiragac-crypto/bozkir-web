@@ -2,11 +2,13 @@
 
 import Image from 'next/image';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
+import { Container } from '@/components/ui/Container';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { Category } from '@/types/category';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { cn } from '@/lib/utils';
+import { STORY_STEP_VH } from '@/lib/motion';
 import { track } from '@/lib/analytics';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
@@ -26,7 +28,8 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
   const { t } = useDictionary();
 
   useEffect(() => {
-    if (items[active]) track('product_view', { category: items[active]!.slug, source: 'material_story' });
+    if (items[active])
+      track('product_view', { category: items[active]!.slug, source: 'material_story' });
   }, [active, items]);
 
   useGSAP(
@@ -42,7 +45,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
         scrollTrigger: {
           trigger: el,
           start: 'top top',
-          end: `+=${count * 90}%`,
+          end: `+=${count * STORY_STEP_VH}%`,
           scrub: 0.6,
           onUpdate: (self) => {
             const idx = Math.min(count - 1, Math.floor(self.progress * count));
@@ -67,15 +70,15 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
 
   return (
     <section ref={root} className="relative bg-background">
-      <div className="container-x pt-24 md:pt-32">
+      <Container className="pt-24 md:pt-32">
         <p className="text-eyebrow">{t('home.story.eyebrow')}</p>
         <h2 className="text-headline mt-4 max-w-3xl">{t('home.story.title')}</h2>
-      </div>
+      </Container>
 
       {/* Sticky alan: yüksekliği kategori sayısı belirler */}
-      <div className="relative" style={{ height: `${items.length * 90}vh` }}>
+      <div className="relative" style={{ height: `${items.length * STORY_STEP_VH}vh` }}>
         <div className="sticky top-0 flex min-h-svh items-center overflow-clip py-12 lg:h-svh lg:py-0">
-          <div className="container-x grid w-full grid-cols-1 items-center gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+          <Container className="grid w-full grid-cols-1 items-center gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div className="order-2 lg:order-1">
               <div className="flex gap-2">
                 {items.map((c, i) => (
@@ -112,11 +115,15 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
 
               <dl className="mt-8 hidden max-w-md grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-6 text-sm lg:grid">
                 <div>
-                  <dt className="text-xs tracking-[0.14em] text-muted uppercase">{t('home.story.categoryLabel')}</dt>
+                  <dt className="text-xs tracking-[0.14em] text-muted uppercase">
+                    {t('home.story.categoryLabel')}
+                  </dt>
                   <dd className="mt-1">{current?.name}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs tracking-[0.14em] text-muted uppercase">{t('home.story.applicationLabel')}</dt>
+                  <dt className="text-xs tracking-[0.14em] text-muted uppercase">
+                    {t('home.story.applicationLabel')}
+                  </dt>
                   <dd className="mt-1">{t('home.story.applicationValue')}</dd>
                 </div>
               </dl>
@@ -145,7 +152,9 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
                         className="object-cover"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-muted">{t('home.story.imageSoon')}</div>
+                      <div className="flex h-full items-center justify-center text-sm text-muted">
+                        {t('home.story.imageSoon')}
+                      </div>
                     )}
                   </div>
                 ))}
@@ -155,7 +164,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
                 </span>
               </div>
             </div>
-          </div>
+          </Container>
         </div>
       </div>
     </section>

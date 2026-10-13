@@ -13,14 +13,26 @@ export async function QuoteCTA({ locale }: { locale: Locale }) {
   const h = dict.home.quoteCta;
   return (
     <Container className="pb-24 md:pb-32">
-      <div data-on-dark className="relative overflow-hidden rounded-xl bg-foreground px-8 py-16 text-background md:px-16 md:py-24">
-        <div className="max-w-2xl">
+      <div
+        data-on-dark
+        className="relative overflow-hidden rounded-xl bg-foreground px-8 py-16 text-background md:px-16 md:py-24"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_100%_0%,rgba(179,169,143,0.18),transparent_55%)]"
+        />
+        <div className="relative max-w-2xl">
           <h2 className="text-headline">{h.title}</h2>
           <p className="mt-5 max-w-lg text-background/70">{h.body}</p>
           <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:flex-wrap sm:items-center">
             <MagneticButton className="[&>a]:w-full sm:[&>a]:w-auto">
-              <ButtonLink href="/teklif-al" size="lg" className="w-full justify-center bg-background text-foreground hover:bg-white sm:w-auto">
-                {h.cta} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
+              <ButtonLink
+                href="/teklif-al"
+                size="lg"
+                className="w-full justify-center bg-background text-foreground hover:bg-white sm:w-auto"
+              >
+                {h.cta}{' '}
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
               </ButtonLink>
             </MagneticButton>
             <TrackedLink

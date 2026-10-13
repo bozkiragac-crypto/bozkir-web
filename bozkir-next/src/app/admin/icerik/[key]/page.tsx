@@ -11,7 +11,16 @@ import type { EditableItem } from '@/components/admin/ContentItemsEditor';
 
 export const dynamic = 'force-dynamic';
 
-const VALID_KEYS = ['gallery', 'guide', 'applications', 'process', 'faq'];
+const VALID_KEYS = [
+  'gallery',
+  'guide',
+  'applications',
+  'process',
+  'faq',
+  'testimonials',
+  'certifications',
+  'facilities',
+];
 
 interface PageProps {
   params: Promise<{ key: string }>;
@@ -26,7 +35,11 @@ export default async function EditContentBlockPage({ params }: PageProps) {
 
   const [blockRows, itemRows] = await Promise.all([
     db.select().from(contentBlocks).where(eq(contentBlocks.key, key)).limit(1),
-    db.select().from(contentItems).where(eq(contentItems.blockKey, key)).orderBy(asc(contentItems.sortOrder)),
+    db
+      .select()
+      .from(contentItems)
+      .where(eq(contentItems.blockKey, key))
+      .orderBy(asc(contentItems.sortOrder)),
   ]);
 
   const fallback = fallbackContent[key];
@@ -82,7 +95,10 @@ export default async function EditContentBlockPage({ params }: PageProps) {
 
   return (
     <div>
-      <Link href="/admin/icerik" className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
+      <Link
+        href="/admin/icerik"
+        className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> İçerik
       </Link>
       <h1 className="mt-6 text-2xl font-medium tracking-tight">{initial.title || key}</h1>

@@ -181,6 +181,7 @@ export function PanelViewer({ finish, active = true, dprMax = 1.75 }: PanelViewe
         dpr={[1, dprMax]}
         frameloop={active ? 'always' : 'never'}
         camera={{ position: CAMERA_POS, fov: 32 }}
+        performance={{ min: 0.6 }}
         gl={{
           antialias: true,
           alpha: true,
@@ -196,10 +197,10 @@ export function PanelViewer({ finish, active = true, dprMax = 1.75 }: PanelViewe
 
         <PanelModel finish={finish} />
 
-        <ContactShadows position={[0, -1.35, 0]} opacity={0.4} scale={8} blur={2.6} far={3.5} color="#000000" />
+        <ContactShadows position={[0, -1.35, 0]} opacity={0.4} scale={8} blur={2.6} far={3.5} resolution={256} color="#000000" />
 
         {/* Dosyasız studyo ortamı: lake yüzeylerde gerçekçi yansıma verir. */}
-        <Environment resolution={128}>
+        <Environment resolution={64}>
           <Lightformer form="rect" intensity={2.4} position={[0, 3.2, 2.4]} scale={[7, 3, 1]} />
           <Lightformer form="rect" intensity={1.1} position={[-3.4, 0.8, -2.2]} scale={[4, 4, 1]} color="#ffe9d2" />
           <Lightformer form="rect" intensity={0.8} position={[3.4, -1, 1.6]} scale={[4, 3, 1]} color="#dfe8ff" />
