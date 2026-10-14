@@ -211,7 +211,7 @@ export function Header({ categories }: HeaderProps) {
                 className={cn(
                   'inline-flex h-11 items-center rounded-full px-5 text-sm font-medium transition-colors',
                   onDark
-                    ? 'bg-white text-foreground hover:bg-white/90'
+                    ? 'bg-white text-[#111] hover:bg-white/90'
                     : 'bg-foreground text-background hover:opacity-90',
                 )}
               >

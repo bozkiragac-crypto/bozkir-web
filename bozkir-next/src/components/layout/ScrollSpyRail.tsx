@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-/** Ana sayfa bölüm göstergesi: sağ kenarda scroll-spy noktaları (xl+). */
+/**
+ * Ana sayfa bölüm göstergesi: sağ kenarda scroll-spy noktaları (xl+).
+ * Aktif bölüm, kaydırma konumuna göre hesaplanır (referans çizgisinin üstündeki
+ * en yakın bölüm) → sayfa alt/üst uçlarında "takılı kalma" olmaz.
+ */
 export function ScrollSpyRail({
   items,
   ariaLabel,
@@ -19,17 +23,33 @@ export function ScrollSpyRail({
       .filter((e): e is HTMLElement => e !== null);
     if (els.length === 0) return;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: '-45% 0px -50% 0px', threshold: 0 },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    setActive(els[0]!.id);
+
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const line = window.innerHeight * 0.4;
+      // Referans çizgisinin üstündeki son bölüm aktif; hiçbiri yoksa ilk bölüm.
+      let current = els[0]!.id;
+      for (const el of els) {
+        if (el.getBoundingClientRect().top <= line) current = el.id;
+      }
+      setActive((prev) => (prev === current ? prev : current));
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, [items]);
 
   return (
