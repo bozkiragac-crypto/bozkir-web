@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from '@/app/admin/actions';
 import { ADMIN_SEEN_KEY, ADMIN_TAB_KEY } from '@/lib/admin/session-keys';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
 export function LoginForm() {
   const [identifier, setIdentifier] = useState('');
@@ -44,6 +45,9 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4">
+      <div className="mb-2 flex justify-center">
+        <BrandLogo className="h-12" />
+      </div>
       <label className="grid gap-2">
         <span className="text-xs tracking-[0.14em] text-muted uppercase">Kullanıcı adı</span>
         <input
@@ -70,7 +74,9 @@ export function LoginForm() {
       </label>
       {needsTotp && (
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Doğrulama kodu (2FA)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">
+            Doğrulama kodu (2FA)
+          </span>
           <input
             type="text"
             value={totp}

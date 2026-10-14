@@ -100,9 +100,12 @@ export function Header({ categories }: HeaderProps) {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  useEffect(() => () => {
-    if (closeTimer.current) window.clearTimeout(closeTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    },
+    [],
+  );
 
   // Ana sayfada hero koyu; üstte beyaz yazı, scroll sonrası koyu.
   const onDark = isHome && !scrolled && !megaOpen;
@@ -126,18 +129,28 @@ export function Header({ categories }: HeaderProps) {
             className="min-w-0 flex-1 truncate text-[0.66rem] font-semibold tracking-[0.01em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"
             aria-label={`${siteConfig.name} ana sayfa`}
           >
-            <span className={cn('block truncate transition-colors', onDark ? 'text-white' : 'text-foreground')}>
+            <span
+              className={cn(
+                'block truncate transition-colors',
+                onDark ? 'text-white' : 'text-foreground',
+              )}
+            >
               {siteConfig.name}
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-6 xl:flex xl:gap-8" aria-label={t('nav.products')}>
+          <nav
+            className="hidden items-center gap-6 xl:flex xl:gap-8"
+            aria-label={t('nav.products')}
+          >
             {siteConfig.nav.map((item) => {
               const isProducts = item.key === 'products';
               const active = path.startsWith(item.href);
               const linkClass = cn(
                 'link-underline text-sm font-medium tracking-tight transition-colors',
-                onDark ? 'text-white/90 hover:text-white' : 'text-muted-strong hover:text-foreground',
+                onDark
+                  ? 'text-white/90 hover:text-white'
+                  : 'text-muted-strong hover:text-foreground',
                 active && (onDark ? 'text-white' : 'text-foreground'),
               );
 
@@ -155,10 +168,16 @@ export function Header({ categories }: HeaderProps) {
                     aria-expanded={megaOpen}
                     aria-controls="mega-menu"
                     aria-haspopup="true"
-                    className={cn(linkClass, 'flex items-center gap-1', megaOpen && (onDark ? 'text-white' : 'text-foreground'))}
+                    className={cn(
+                      linkClass,
+                      'flex items-center gap-1',
+                      megaOpen && (onDark ? 'text-white' : 'text-foreground'),
+                    )}
                   >
                     {navLabel(item.key)}
-                    <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', megaOpen && 'rotate-180')} />
+                    <ChevronDown
+                      className={cn('h-3.5 w-3.5 transition-transform', megaOpen && 'rotate-180')}
+                    />
                   </Link>
                 </div>
               ) : (
@@ -190,7 +209,9 @@ export function Header({ categories }: HeaderProps) {
                 href="/teklif-al"
                 className={cn(
                   'inline-flex h-11 items-center rounded-full px-5 text-sm font-medium transition-colors',
-                  onDark ? 'bg-white text-foreground hover:bg-white/90' : 'bg-foreground text-background hover:opacity-90',
+                  onDark
+                    ? 'bg-white text-foreground hover:bg-white/90'
+                    : 'bg-foreground text-background hover:opacity-90',
                 )}
               >
                 {t('nav.quote')}

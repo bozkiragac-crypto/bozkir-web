@@ -22,6 +22,7 @@ export function WhatsAppFabLink({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={ariaLabel}
+      data-whatsapp-fab
       data-cursor-label={cursor}
       onClick={() => track('whatsapp_click', { source: 'fab' })}
       className={className}

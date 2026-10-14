@@ -1,5 +1,6 @@
 'use client';
 
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export default function Loading() {
@@ -10,13 +11,16 @@ export default function Loading() {
         <div className="h-full w-1/3 animate-[loading-bar_1.1s_var(--ease-out-expo)_infinite] bg-foreground" />
       </div>
       <div className="flex min-h-svh items-center justify-center pt-[var(--header-height)]">
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex items-center gap-3 text-sm text-muted"
-        >
-          <span className="h-2 w-2 animate-pulse rounded-full bg-foreground" />
-          {dict.pages.loading}
+        <div className="flex flex-col items-center gap-6">
+          <BrandLogo className="h-16" />
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-center gap-3 text-sm text-muted"
+          >
+            <span className="h-2 w-2 animate-pulse rounded-full bg-foreground" />
+            {dict.pages.loading}
+          </div>
         </div>
       </div>
     </>

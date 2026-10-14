@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import type { Category } from '@/types/category';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { HorizontalScroll } from '@/components/animations/HorizontalScroll';
+import { cn } from '@/lib/utils';
 import { dictFor } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
@@ -41,7 +42,14 @@ export async function ProductShowcase({
       }
     >
       {items.map((category, i) => (
-        <article key={category.id} className="w-[74vw] flex-none snap-start sm:w-[44vw] lg:w-auto">
+        <article
+          key={category.id}
+          className={cn(
+            'w-[74vw] flex-none snap-start sm:w-[44vw] lg:w-auto',
+            // Çift ritim: tek indeksli kartlar dikeyde kaydırılır.
+            i % 2 === 1 && 'lg:mt-20',
+          )}
+        >
           <Link
             href={`/kategoriler/${category.slug}`}
             data-cursor-label={h.cursorOpen}
@@ -82,7 +90,7 @@ export async function ProductShowcase({
                 <h3 className="mt-2 text-2xl font-medium tracking-tight text-white md:text-3xl">
                   {category.name}
                 </h3>
-                <span className="mt-4 inline-flex items-center gap-2 text-sm text-white/85">
+                <span className="mt-4 inline-flex items-center gap-2 text-sm text-white/85 transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-1">
                   {h.collectionCta}
                   <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </span>

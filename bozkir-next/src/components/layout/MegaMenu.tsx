@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { Category } from '@/types/category';
 import { cn } from '@/lib/utils';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 interface MegaMenuProps {
@@ -16,7 +17,13 @@ interface MegaMenuProps {
   onPointerLeave?: () => void;
 }
 
-export function MegaMenu({ categories, open, onClose, onPointerEnter, onPointerLeave }: MegaMenuProps) {
+export function MegaMenu({
+  categories,
+  open,
+  onClose,
+  onPointerEnter,
+  onPointerLeave,
+}: MegaMenuProps) {
   const { t } = useDictionary();
   const items = categories.filter((c) => c.featured);
   const [active, setActive] = useState(0);
@@ -31,7 +38,9 @@ export function MegaMenu({ categories, open, onClose, onPointerEnter, onPointerL
       onMouseLeave={onPointerLeave}
       className={cn(
         'absolute inset-x-0 top-full hidden border-t border-border bg-background/95 backdrop-blur-xl transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] xl:block',
-        open ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0',
+        open
+          ? 'pointer-events-auto translate-y-0 opacity-100'
+          : 'pointer-events-none -translate-y-2 opacity-0',
       )}
     >
       <div className="container-x grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-16 py-12">
@@ -66,6 +75,7 @@ export function MegaMenu({ categories, open, onClose, onPointerEnter, onPointerL
         </div>
 
         <div className="relative h-full min-h-[320px] overflow-hidden rounded-lg bg-surface-2">
+          <BrandLogo className="absolute left-4 top-4 z-10 h-9" onDark />
           {activeCategory?.heroImage ? (
             <Image
               key={activeCategory.id}

@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, ArrowUpRight } from 'lucide-react';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { SmartImage } from '@/components/ui/SmartImage';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
 import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
+import { ShareButton } from '@/components/products/ShareButton';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { cn, cssColor } from '@/lib/utils';
@@ -25,8 +26,13 @@ export function ProductQuickView({
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { t } = useDictionary();
+  const { t, locale } = useDictionary();
+  const [origin, setOrigin] = useState('');
   useFocusTrap(open, ref);
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -157,6 +163,12 @@ export function ProductQuickView({
             <div className="flex items-center gap-2">
               <FavoriteButton product={pRef} className="h-11 w-11" />
               <CompareButton product={pRef} className="h-11 w-11" />
+              <ShareButton
+                name={product.name}
+                url={`${origin}/${locale}/urunler/${product.slug}`}
+                imageUrl={image}
+                className="h-11 w-11"
+              />
             </div>
           </div>
         </div>

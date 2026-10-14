@@ -10,7 +10,20 @@ import { track } from '@/lib/analytics';
 const base =
   'flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground';
 
-export function FavoriteButton({ product, className }: { product: ProductRef; className?: string }) {
+/** Kısa dokunsal geri bildirim (destekleyen cihazlarda; hatasız). */
+function haptic() {
+  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+    navigator.vibrate(8);
+  }
+}
+
+export function FavoriteButton({
+  product,
+  className,
+}: {
+  product: ProductRef;
+  className?: string;
+}) {
   const { isFavorite, toggleFavorite, ready } = useFavorites();
   const { t } = useDictionary();
   const toast = useToast();
@@ -25,6 +38,7 @@ export function FavoriteButton({ product, className }: { product: ProductRef; cl
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        haptic();
         track(active ? 'favorite_remove' : 'favorite_add', { slug: product.slug });
         toast(active ? t('favorites.removed') : t('favorites.added'));
         toggleFavorite(product);
@@ -57,11 +71,17 @@ export function CompareButton({ product, className }: { product: ProductRef; cla
           toast(t('catalog.compareFull'));
           return;
         }
+        haptic();
         track(active ? 'compare_remove' : 'compare_add', { slug: product.slug });
         toast(active ? t('compare.removed') : t('compare.added'));
         toggleCompare(product);
       }}
-      className={cn(base, active && 'border-transparent bg-foreground text-background', full && 'opacity-40', className)}
+      className={cn(
+        base,
+        active && 'border-transparent bg-foreground text-background',
+        full && 'opacity-40',
+        className,
+      )}
     >
       {active ? <Check className="h-4 w-4" /> : <Scale className="h-4 w-4" />}
     </button>

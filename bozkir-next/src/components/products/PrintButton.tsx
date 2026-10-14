@@ -11,12 +11,14 @@ export function PrintButton({ className }: { className?: string }) {
     <button
       type="button"
       onClick={() => window.print()}
+      aria-label={t('product.print')}
       className={cn(
-        'inline-flex h-11 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium transition-colors hover:bg-surface-2',
+        'inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition-colors hover:border-foreground sm:w-auto sm:gap-2 sm:px-4',
         className,
       )}
     >
-      <Printer className="h-4 w-4" /> {t('product.print')}
+      <Printer className="h-4 w-4" />
+      <span className="hidden text-sm font-medium sm:inline">{t('product.print')}</span>
     </button>
   );
 }

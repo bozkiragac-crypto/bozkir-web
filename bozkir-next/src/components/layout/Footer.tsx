@@ -1,11 +1,21 @@
 'use client';
 
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
-import { Instagram, Facebook, Youtube, Linkedin, Twitter, MessageCircle, ChevronDown, Clock } from 'lucide-react';
+import {
+  Instagram,
+  Facebook,
+  Youtube,
+  Linkedin,
+  Twitter,
+  MessageCircle,
+  ChevronDown,
+  Clock,
+} from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import type { SiteSettings } from '@/lib/data/settings';
 import { telHref } from '@/lib/phone';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { track } from '@/lib/analytics';
 import type { Category } from '@/types/category';
 
@@ -19,27 +29,58 @@ const corporateLinkKeys = [
 ];
 
 function Social({ s }: { s: SiteSettings }) {
-  const item = 'inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-strong transition-colors hover:bg-surface-2 hover:text-foreground';
+  const item =
+    'inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-strong transition-colors hover:bg-surface-2 hover:text-foreground';
   return (
     <div className="flex items-center gap-1">
-      <a href={s.social.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className={item}>
+      <a
+        href={s.social.instagram}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Instagram"
+        className={item}
+      >
         <Instagram className="h-5 w-5" />
       </a>
-      <a href={s.social.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className={item}>
+      <a
+        href={s.social.facebook}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Facebook"
+        className={item}
+      >
         <Facebook className="h-5 w-5" />
       </a>
       {s.social.youtube && (
-        <a href={s.social.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className={item}>
+        <a
+          href={s.social.youtube}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="YouTube"
+          className={item}
+        >
           <Youtube className="h-5 w-5" />
         </a>
       )}
       {s.social.linkedin && (
-        <a href={s.social.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className={item}>
+        <a
+          href={s.social.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn"
+          className={item}
+        >
           <Linkedin className="h-5 w-5" />
         </a>
       )}
       {s.social.x && (
-        <a href={s.social.x} target="_blank" rel="noopener noreferrer" aria-label="X" className={item}>
+        <a
+          href={s.social.x}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="X"
+          className={item}
+        >
           <Twitter className="h-5 w-5" />
         </a>
       )}
@@ -61,8 +102,11 @@ function Brand({ s }: { s: SiteSettings }) {
   const { t } = useDictionary();
   return (
     <div>
-      <p className="text-sm font-semibold tracking-[0.16em] uppercase">{t('footer.madeIn')}</p>
-      <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-strong">{t('footer.tagline')}</p>
+      <BrandLogo className="h-16" />
+      <p className="mt-5 text-sm font-semibold tracking-[0.16em] uppercase">{t('footer.madeIn')}</p>
+      <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-strong">
+        {t('footer.tagline')}
+      </p>
       <Social s={s} />
     </div>
   );
@@ -83,7 +127,10 @@ function Contact({ s }: { s: SiteSettings }) {
         </a>
       </li>
       <li>
-        <a href={`mailto:${s.email}`} className="link-underline transition-colors hover:text-foreground">
+        <a
+          href={`mailto:${s.email}`}
+          className="link-underline transition-colors hover:text-foreground"
+        >
           {s.email}
         </a>
       </li>
@@ -123,7 +170,10 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
 
   const columns = [
     { title: t('footer.productsColumn'), links: productLinks },
-    { title: t('footer.corporateColumn'), links: corporateLinkKeys.map((l) => ({ label: t(l.key), href: l.href })) },
+    {
+      title: t('footer.corporateColumn'),
+      links: corporateLinkKeys.map((l) => ({ label: t(l.key), href: l.href })),
+    },
   ];
 
   return (
@@ -145,7 +195,10 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
               <ul className="mt-5 space-y-3">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="link-underline text-sm text-muted-strong transition-colors hover:text-foreground">
+                    <Link
+                      href={link.href}
+                      className="link-underline text-sm text-muted-strong transition-colors hover:text-foreground"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -192,10 +245,16 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
             <Link href="/kvkk" className="link-underline transition-colors hover:text-foreground">
               {t('footer.kvkk')}
             </Link>
-            <Link href="/gizlilik" className="link-underline transition-colors hover:text-foreground">
+            <Link
+              href="/gizlilik"
+              className="link-underline transition-colors hover:text-foreground"
+            >
               {t('footer.privacy')}
             </Link>
-            <Link href="/cerez-politikasi" className="link-underline transition-colors hover:text-foreground">
+            <Link
+              href="/cerez-politikasi"
+              className="link-underline transition-colors hover:text-foreground"
+            >
               {t('footer.cookies')}
             </Link>
           </div>

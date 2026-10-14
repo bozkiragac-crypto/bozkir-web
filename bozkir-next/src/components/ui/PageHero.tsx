@@ -15,10 +15,19 @@ interface PageHeroProps {
   title: ReactNode;
   description?: string;
   crumbs?: Crumb[];
+  /** Başlıktan önce gösterilecek ek öğe (ör. logo). */
+  leading?: ReactNode;
   children?: ReactNode;
 }
 
-export function PageHero({ eyebrow, title, description, crumbs, children }: PageHeroProps) {
+export function PageHero({
+  eyebrow,
+  title,
+  description,
+  crumbs,
+  leading,
+  children,
+}: PageHeroProps) {
   const { dict } = useDictionary();
   return (
     <section className="pt-[calc(var(--header-height)+clamp(40px,7vw,96px))] pb-12 md:pb-16">
@@ -26,7 +35,7 @@ export function PageHero({ eyebrow, title, description, crumbs, children }: Page
         {crumbs && crumbs.length > 0 && (
           <nav
             aria-label={dict.common.breadcrumb}
-            className="mb-8 flex flex-wrap items-center gap-2 text-xs tracking-[0.08em] text-muted uppercase"
+            className="no-print mb-8 flex flex-wrap items-center gap-2 text-xs tracking-[0.08em] text-muted uppercase"
           >
             {crumbs.map((c, i) => (
               <span key={`${c.label}-${i}`} className="flex items-center gap-2">
@@ -45,6 +54,7 @@ export function PageHero({ eyebrow, title, description, crumbs, children }: Page
             ))}
           </nav>
         )}
+        {leading}
         {eyebrow && <p className="text-eyebrow">{eyebrow}</p>}
         <h1 className="text-headline mt-5 max-w-4xl break-words">{title}</h1>
         {description && (

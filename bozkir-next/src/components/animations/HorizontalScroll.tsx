@@ -83,7 +83,7 @@ export function HorizontalScroll({
           <div
             ref={track}
             data-cursor-label={dict.common.scroll}
-            className="flex w-max snap-x snap-proximity gap-6 px-[var(--gutter)] lg:will-change-transform"
+            className="flex w-max snap-x snap-proximity items-start gap-6 px-[var(--gutter)] lg:will-change-transform"
           >
             {children}
           </div>

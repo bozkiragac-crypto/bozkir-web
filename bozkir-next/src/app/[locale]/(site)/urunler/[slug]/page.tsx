@@ -19,6 +19,7 @@ import { ShareButton } from '@/components/products/ShareButton';
 import { PrintButton } from '@/components/products/PrintButton';
 import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
 import { RecentlyViewed } from '@/components/products/RecentlyViewed';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
@@ -106,7 +107,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   if (product.face) specs.push({ label: dict.compare.surface, value: product.face });
 
   return (
-    <>
+    <div data-print-page>
       <ProductViewTracker
         slug={product.slug}
         name={product.name}
@@ -133,70 +134,76 @@ export default async function ProductDetailPage({ params }: PageProps) {
         }}
       />
 
-      <PageHero
-        eyebrow={product.category}
-        title={product.name}
-        crumbs={[
-          { label: dict.common.home, href: '/' },
-          { label: dict.nav.products, href: '/urunler' },
-          { label: product.name },
-        ]}
-      />
+      <div data-print-area>
+        <PageHero
+          eyebrow={product.category}
+          title={product.name}
+          leading={<BrandLogo className="mb-6 h-14" priority />}
+          crumbs={[
+            { label: dict.common.home, href: '/' },
+            { label: dict.nav.products, href: '/urunler' },
+            { label: product.name },
+          ]}
+        />
 
-      <Container className="pb-40 md:pb-32">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
-          <ProductGallery images={product.images} alt={product.name} />
+        <Container className="pb-40 md:pb-32">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
+            <ProductGallery images={product.images} alt={product.name} />
 
-          <div className="lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:self-start">
-            <dl className="border-t border-border">
-              {specs.map((spec) => (
-                <div
-                  key={spec.label}
-                  className="-mx-3 flex justify-between gap-4 rounded-md border-b border-border px-3 py-4 text-sm transition-colors hover:bg-surface-2"
-                >
-                  <dt className="flex-none text-muted-strong">{spec.label}</dt>
-                  <dd className="min-w-0 break-words text-end">{spec.value}</dd>
+            <div className="lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:self-start">
+              <dl className="border-t border-border">
+                {specs.map((spec) => (
+                  <div
+                    key={spec.label}
+                    className="-mx-3 flex justify-between gap-4 rounded-md border-b border-border px-3 py-4 text-sm transition-colors hover:bg-surface-2"
+                  >
+                    <dt className="flex-none text-muted-strong">{spec.label}</dt>
+                    <dd className="min-w-0 break-words text-end">{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="no-print mt-10 flex flex-wrap items-center gap-4">
+                <MagneticButton>
+                  <ButtonLink
+                    href={`/teklif-al?urun=${encodeURIComponent(product.slug)}`}
+                    size="lg"
+                  >
+                    {dict.common.getQuote}
+                  </ButtonLink>
+                </MagneticButton>
+                <MagneticButton>
+                  <ButtonLink
+                    href={`/kategoriler/${product.categorySlug}`}
+                    size="lg"
+                    variant="outline"
+                  >
+                    {dict.common.seeCollection}
+                  </ButtonLink>
+                </MagneticButton>
+                <div className="flex items-center gap-2">
+                  <FavoriteButton product={ref} className="h-11 w-11" />
+                  <CompareButton product={ref} className="h-11 w-11" />
+                  <ShareButton
+                    name={product.name}
+                    url={localeUrl(locale, `/urunler/${product.slug}`)}
+                    imageUrl={image}
+                    className="h-11 w-11"
+                  />
+                  <PrintButton className="no-print" />
                 </div>
-              ))}
-            </dl>
-
-            <div className="mt-10 flex flex-wrap items-center gap-4">
-              <MagneticButton>
-                <ButtonLink href={`/teklif-al?urun=${encodeURIComponent(product.slug)}`} size="lg">
-                  {dict.common.getQuote}
-                </ButtonLink>
-              </MagneticButton>
-              <MagneticButton>
-                <ButtonLink
-                  href={`/kategoriler/${product.categorySlug}`}
-                  size="lg"
-                  variant="outline"
-                >
-                  {dict.common.seeCollection}
-                </ButtonLink>
-              </MagneticButton>
-              <div className="flex items-center gap-2">
-                <FavoriteButton product={ref} className="h-11 w-11" />
-                <CompareButton product={ref} className="h-11 w-11" />
-                <ShareButton
-                  name={product.name}
-                  url={localeUrl(locale, `/urunler/${product.slug}`)}
-                  imageUrl={image}
-                  className="h-11 w-11"
-                />
-                <PrintButton className="no-print" />
               </div>
-            </div>
 
-            <Link
-              href="/urunler"
-              className="mt-8 inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" /> {dict.common.allProducts}
-            </Link>
+              <Link
+                href="/urunler"
+                className="no-print mt-8 inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" /> {dict.common.allProducts}
+              </Link>
+            </div>
           </div>
-        </div>
-      </Container>
+        </Container>
+      </div>
 
       {related.length > 0 && (
         <Container className="pb-40 md:pb-32">
@@ -231,6 +238,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           {dict.common.getQuote}
         </Link>
       </div>
-    </>
+    </div>
   );
 }

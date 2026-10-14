@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { Container } from '@/components/ui/Container';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 /** Sayfa düzeyinde hata sınırı: site kabuğu korunur, kullanıcıya yeniden deneme sunulur. */
@@ -33,6 +34,9 @@ export default function LocaleError({
       >
         !
       </span>
+      <div className="relative mb-10">
+        <BrandLogo className="h-16" />
+      </div>
       <p className="text-eyebrow">{e.eyebrow}</p>
       <h1 className="text-display mt-8 max-w-3xl">
         {e.titleLead} <em className="text-editorial">{e.titleEm}</em>

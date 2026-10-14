@@ -37,7 +37,7 @@ export function ProductCard({
     <>
       <Link
         href={`/urunler/${product.slug}`}
-        className="group block"
+        className="group block [-webkit-tap-highlight-color:transparent] active:scale-[0.99] transition-transform"
         data-cursor-label={t('catalog.inspect')}
       >
         <div className="sheen relative aspect-[4/5] overflow-hidden rounded-md bg-surface-2 ring-1 ring-transparent transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-1 group-hover:shadow-[var(--card-shadow)] group-hover:ring-border-strong">

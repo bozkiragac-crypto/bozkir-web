@@ -80,28 +80,55 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
         <div className="sticky top-0 flex min-h-svh items-center overflow-clip py-12 lg:h-svh lg:py-0">
           <Container className="grid w-full grid-cols-1 items-center gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div className="order-2 lg:order-1">
-              <div className="flex gap-2">
-                {items.map((c, i) => (
-                  <span
-                    key={c.id}
-                    className={cn(
-                      'h-1 flex-1 rounded-full transition-colors duration-500',
-                      i <= active ? 'bg-foreground' : 'bg-border',
-                    )}
-                  />
-                ))}
-              </div>
-
-              <p className="numerals mt-4 text-xs tracking-[0.2em] text-muted lg:mt-6">
+              {/* Mobil: kompakt aktif başlık */}
+              <p className="numerals text-xs tracking-[0.2em] text-muted lg:hidden">
                 {String(active + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
               </p>
               <h3
                 key={current?.id}
-                className="mt-2 text-2xl font-medium tracking-tight sm:text-3xl lg:mt-3 lg:text-[clamp(1.9rem,3.2vw,3.1rem)] lg:leading-[1.05]"
+                className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl lg:hidden"
               >
                 {current?.name}
               </h3>
-              <p className="mt-3 line-clamp-3 max-w-md text-sm leading-relaxed text-muted-strong lg:mt-5 lg:text-base">
+
+              {/* Editoryal indeks (lg+) — aktif satır vurgulanır */}
+              <ul className="hidden flex-col lg:flex">
+                {items.map((c, i) => {
+                  const on = i === active;
+                  return (
+                    <li key={c.id} aria-current={on ? 'true' : undefined}>
+                      <div className="flex items-baseline gap-4 border-b border-border py-3">
+                        <span
+                          className={cn(
+                            'numerals text-xs tracking-[0.2em] transition-colors duration-500',
+                            on ? 'text-foreground' : 'text-muted',
+                          )}
+                        >
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span
+                          className={cn(
+                            'font-display tracking-tight transition-all duration-500 ease-[var(--ease-out-expo)]',
+                            on
+                              ? 'text-[clamp(1.6rem,2.6vw,2.4rem)] leading-[1.05] text-foreground'
+                              : 'text-lg text-muted-strong',
+                          )}
+                        >
+                          {c.name}
+                        </span>
+                        <ArrowRight
+                          className={cn(
+                            'ms-auto h-4 w-4 flex-none text-foreground transition-all duration-500 ease-[var(--ease-out-expo)]',
+                            on ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0',
+                          )}
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <p className="mt-5 line-clamp-3 max-w-md text-sm leading-relaxed text-muted-strong lg:mt-6 lg:text-base">
                 {current?.description}
               </p>
 

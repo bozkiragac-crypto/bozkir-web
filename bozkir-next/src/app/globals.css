@@ -480,9 +480,13 @@ li {
   .no-print {
     display: none !important;
   }
+  /* Yalnızca ürün özeti yazdırılır; diğer sayfa içerikleri tamamen kaldırılır. */
   body {
     background: #fff !important;
     color: #000 !important;
+  }
+  [data-print-page] > :not([data-print-area]) {
+    display: none !important;
   }
   body::after {
     display: none !important;
@@ -504,6 +508,13 @@ li {
 
 @page {
   margin: 1.4cm;
+}
+
+/* Ürün detayda mobil sabit CTA çubuğu varken WhatsApp FAB onun üstüne kaysın. */
+@media (max-width: 767px) {
+  body:has([data-product-cta]) [data-whatsapp-fab] {
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Reveal başlangıç durumu GSAP tarafından (boyamadan önce) uygulanır. */

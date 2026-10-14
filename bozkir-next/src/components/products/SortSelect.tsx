@@ -2,6 +2,7 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { Select } from '@/components/ui/Select';
 import { track } from '@/lib/analytics';
 
 /** URL ile senkron sıralama seçici (`sirala`); sayfalamayı sıfırlar. */
@@ -29,17 +30,17 @@ export function SortSelect() {
       <label className="sr-only" htmlFor="sort-filter">
         {t('catalog.sort')}
       </label>
-      <select
+      <Select
         id="sort-filter"
         value={active}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none focus-visible:outline-foreground"
+        aria-label={t('catalog.sort')}
       >
         <option value="">{t('catalog.sortNewest')}</option>
         <option value="name-asc">{t('catalog.sortNameAsc')}</option>
         <option value="name-desc">{t('catalog.sortNameDesc')}</option>
         <option value="code-asc">{t('catalog.sortCode')}</option>
-      </select>
+      </Select>
     </>
   );
 }

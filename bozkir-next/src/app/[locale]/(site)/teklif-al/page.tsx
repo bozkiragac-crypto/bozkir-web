@@ -3,6 +3,7 @@ import { buildMetadata } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { QuoteForm, type QuoteProduct } from '@/components/forms/QuoteForm';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { getProductBySlug } from '@/lib/api/products';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
 import { pickLocaleText } from '@/lib/data/catalog';
@@ -42,13 +43,15 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
   const found = slugs.length
     ? await Promise.all(slugs.map((s) => getProductBySlug(s, locale).catch(() => null)))
     : [];
-  const products: QuoteProduct[] = found.filter((p): p is NonNullable<typeof p> => !!p).map((product) => ({
-    id: product.id,
-    slug: product.slug,
-    name: product.name,
-    code: product.code || undefined,
-    image: product.thumbnail ?? product.images[0],
-  }));
+  const products: QuoteProduct[] = found
+    .filter((p): p is NonNullable<typeof p> => !!p)
+    .map((product) => ({
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      code: product.code || undefined,
+      image: product.thumbnail ?? product.images[0],
+    }));
 
   const first = products[0];
 
@@ -76,11 +79,17 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
         ]}
       />
       <Container className="grid gap-10 pb-24 md:pb-32 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
-        <QuoteForm products={products} turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ''} />
+        <div>
+          <BrandLogo className="mb-6 h-12" />
+          <QuoteForm products={products} turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ''} />
+        </div>
         <aside className="space-y-6">
           <div className="rounded-lg border border-border bg-surface p-6">
             <p className="text-eyebrow">{dict.quote.contactTitle}</p>
-            <a href={telHref(settings.phone)} className="mt-4 flex items-center gap-3 text-lg font-medium">
+            <a
+              href={telHref(settings.phone)}
+              className="mt-4 flex items-center gap-3 text-lg font-medium"
+            >
               <Phone className="h-5 w-5" /> {settings.phone}
             </a>
             <a

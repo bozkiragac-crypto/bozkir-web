@@ -2,6 +2,7 @@
 
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { Container } from '@/components/ui/Container';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 /** Dil önekli bilinmeyen adresler için site kabuğu içinde 404. */
@@ -21,6 +22,9 @@ export default function LocaleNotFound() {
       >
         404
       </span>
+      <div className="relative mb-10">
+        <BrandLogo className="h-16" />
+      </div>
       <p className="text-eyebrow">{nf.eyebrow}</p>
       <h1 className="text-display mt-8 max-w-3xl">
         {nf.titleLead} <em className="text-editorial">{nf.titleEm}</em>
