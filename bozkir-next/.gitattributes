@@ -1,0 +1,5 @@
+# Satır sonları: repoda LF; shell script'leri VPS'te CRLF ile bozulmasın.
+* text=auto
+*.sh text eol=lf
+Dockerfile text eol=lf
+docker/entrypoint.sh text eol=lf

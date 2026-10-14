@@ -203,13 +203,30 @@ AUTH_SECRET=<4.1'de ürettiğiniz AUTH_SECRET>
 # SeaweedFS S3 erişimi (ağ yalnızca localhost; anahtarlar yine de gizli tutulur)
 S3_ACCESS_KEY=<S3 anahtarı>
 S3_SECRET_KEY=<S3 gizli anahtarı>
+S3_PUBLIC_BASE_URL=/media
+
+# İlk admin hesabı — taze DB'de admin YOKTUR. Doldurunca entrypoint otomatik oluşturur.
+ADMIN_SEED_USERNAME=bozkir
+ADMIN_SEED_PASSWORD=<güçlü bir parola; sonra panelden değiştirin + 2FA>
 
 # Bot koruması (Cloudflare Turnstile) — §6'da alacaksınız, sonra ekleyin:
 # TURNSTILE_SITE_KEY=
 # TURNSTILE_SECRET_KEY=
+# TURNSTILE_FAIL_CLOSED=0
+
+# (Opsiyonel) webhook imzası + zaman aşımları
+# WEBHOOK_SECRET=
+# DB_STATEMENT_TIMEOUT_MS=8000
+# DB_QUERY_TIMEOUT_MS=10000
+# S3_REQUEST_TIMEOUT_MS=8000
 EOF
 chmod 600 .env.local
 ```
+
+> **Admin hesabı:** Taze kurulumda varsayılan bir kullanıcı **yoktur**.
+> `ADMIN_SEED_PASSWORD` boş bırakılırsa admin oluşmaz; o durumda elle:
+> `docker compose exec app node scripts/seed-admin.mjs bozkir "GucluParola!"`.
+> İlk girişten hemen sonra §10.1'i uygulayın (parola değişimi + 2FA).
 
 > **Turnstile anahtarlarını `.env.local`'e ekleyip uygulamayı yeniden başlatmadan
 > önce** §6'yı tamamlayın.
@@ -321,7 +338,7 @@ curl -fsS https://bozkiragac.com/api/health?deep=1  # db/storage/image ok
 
 Tarayıcıda kontrol edin:
 - `https://bozkiragac.com` — kilit simgesi, HSTS
-- `/urunler`, `/teklif`, `/admin/login` — 200
+- `/urunler`, `/teklif-al`, `/admin/login` — 200
 - Ürün görselleri (`/media/...`) — 200
 - Admin'e **HTTP** ile girmek istemiyorsanız çerez `Secure` olmalı; adres çubuğunda
   site bilgisi → çerezlerde `bozkir_session` "Güvenli" işaretli olmalı.
@@ -330,20 +347,19 @@ Tarayıcıda kontrol edin:
 
 ## 10. İlk kurulum sonrası uygulama ayarları
 
-`https://bozkiragac.com/admin/login` → varsayılan bilgilerle giriş:
+`https://bozkiragac.com/admin/login` → **§4.3'te `.env.local`'e yazdığınız**
+`ADMIN_SEED_USERNAME` / `ADMIN_SEED_PASSWORD` ile giriş yapın.
 
-| Alan | Değer |
-|---|---|
-| Kullanıcı | `bozkir` |
-| Parola | `Bozkir.1905` |
+> Taze kurulumda varsayılan hesap yoktur; admin, entrypoint tarafından
+> `ADMIN_SEED_PASSWORD` verildiğinde oluşturulur (§4.3).
 
 ### 10.1 ZORUNLU — Admin parolasını değiştirin
 
-`/admin/hesap` → **Parolayı değiştir**. Varsayılan parola internette bilinen bir
-değerdir; değiştirilmeden siteyi yayına almayın.
+`/admin/hesap` → **Parolayı değiştir**. Seed parolası `.env.local`'de düz metin
+durur; değiştirmeden siteyi yayına almayın. Ardından aynı sayfadan **2FA (TOTP)**'yı açın.
 
-> Not: E2E testleri bu varsayılan parolayla giriş yapar. Parolayı değiştirdiyseniz
-> testlerde `E2E_ADMIN_PASS=<yeni parola>` verin.
+> Not: E2E testleri varsayılan `bozkir` / `Bozkir.1905` ile giriş yapar. Farklı bir
+> parola kullandıysanız testlerde `E2E_ADMIN_PASS=<yeni parola>` verin.
 
 ### 10.2 Site ayarları (`/admin/ayarlar`)
 
@@ -361,8 +377,24 @@ değerdir; değiştirilmeden siteyi yayına almayın.
 
 Varsayılanlar `.env.local` ile değiştirilebilir (değişiklikten sonra
 `docker compose ... up -d app` gerekir):
-`QUOTE_RATE_PER_HOUR`, `QUOTE_RATE_GLOBAL_PER_HOUR`, `QUOTE_RATE_GLOBAL_PER_DAY`,
-`QUOTE_ATTACH_DAILY_COUNT`.
+`QUOTE_PER_CONTACT_PER_HOUR`, `QUOTE_GLOBAL_PER_HOUR`, `QUOTE_GLOBAL_PER_DAY`,
+`QUOTE_DEDUPE_MINUTES`, `QUOTE_ATTACH_DAILY_COUNT`, `QUOTE_RATE_LIMIT_MAX`.
+
+### 10.4 SMTP ve Turnstile KAPALI başlangıç
+
+SMTP ve Turnstile anahtarları **opsiyoneldir**; ikisi de yoksa site sorunsuz
+yayına alınır:
+
+- **Turnstile kapalı:** `verifyTurnstile` secret yoksa isteği geçirir; teklif formu
+  bot koruması olmadan çalışır. nginx `limit_req` + DB destekli `quote-guard`
+  (kişi/global saatlik/günlük limit + dedupe) yine devrededir.
+- **SMTP kapalı:** teklif kaydedilir, e-posta gönderilmez; `/admin/teklifler`'den
+  takip edilir. Webhook ayarlarsanız (`site_settings.webhookUrl`) bildirim gider.
+
+Sonradan etkinleştirme: anahtarları `.env.local`'e ekleyip
+`docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d app`
+(veya `/admin/ayarlar`'dan SMTP). Turnstile'da `TURNSTILE_FAIL_CLOSED=1` yalnızca
+Cloudflare kesintisinde formu reddetmek istiyorsanız kullanılır.
 
 ---
 
