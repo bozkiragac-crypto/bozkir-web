@@ -45,7 +45,7 @@ export function CategorySearch() {
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t('catalog.searchPlaceholder')}
         aria-label={t('catalog.search')}
-        className="h-11 flex-1 bg-transparent text-sm outline-none placeholder:text-muted"
+        className="h-11 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
       />
       {query && (
         <button

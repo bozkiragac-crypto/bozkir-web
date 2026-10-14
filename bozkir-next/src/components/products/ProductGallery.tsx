@@ -105,7 +105,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
           ))}
         </div>
         {images.length > 1 && (
-          <div className="mt-3 flex justify-center gap-1.5">
+          <div className="mt-1 flex justify-center gap-0.5">
             {images.map((_, i) => (
               <button
                 key={i}
@@ -113,11 +113,15 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                 onClick={() => scrollToSlide(i)}
                 aria-label={`${i + 1} / ${images.length}`}
                 aria-current={i === active}
-                className={cn(
-                  'h-1.5 rounded-full transition-all duration-300',
-                  i === active ? 'w-6 bg-foreground' : 'w-1.5 bg-border-strong',
-                )}
-              />
+                className="flex h-11 items-center justify-center px-1.5"
+              >
+                <span
+                  className={cn(
+                    'h-1.5 rounded-full transition-all duration-300',
+                    i === active ? 'w-6 bg-foreground' : 'w-1.5 bg-border-strong',
+                  )}
+                />
+              </button>
             ))}
           </div>
         )}

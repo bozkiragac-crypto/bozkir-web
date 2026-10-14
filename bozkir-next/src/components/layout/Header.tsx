@@ -123,7 +123,7 @@ export function Header({ categories }: HeaderProps) {
         style={{ height: 'var(--header-height)' }}
         onMouseLeave={scheduleCloseMega}
       >
-        <div className="container-x flex h-full items-center justify-between gap-2 sm:gap-4 lg:gap-6">
+        <div className="container-x flex h-full items-center justify-between gap-2 pt-[var(--safe-top)] sm:gap-4 lg:gap-6">
           <Link
             href="/"
             className="min-w-0 flex-1 truncate text-[0.66rem] font-semibold tracking-[0.01em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"

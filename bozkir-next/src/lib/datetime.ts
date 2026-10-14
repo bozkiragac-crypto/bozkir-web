@@ -17,24 +17,27 @@ function toDate(value: DateInput): Date | null {
 }
 
 /** `2.10.2026 13:07` */
-export function formatDateTime(value: DateInput, dateStyle: 'short' | 'medium' | 'long' = 'short'): string {
+export function formatDateTime(
+  value: DateInput,
+  dateStyle: 'short' | 'medium' | 'long' = 'short',
+): string {
   const date = toDate(value);
   if (!date) return '—';
-  return new Intl.DateTimeFormat('tr-TR', { dateStyle, timeStyle: 'short', timeZone: APP_TIME_ZONE }).format(date);
+  return new Intl.DateTimeFormat('tr-TR', {
+    dateStyle,
+    timeStyle: 'short',
+    timeZone: APP_TIME_ZONE,
+  }).format(date);
 }
 
 /** `2.10.2026` */
-export function formatDate(value: DateInput, dateStyle: 'short' | 'medium' | 'long' = 'short'): string {
+export function formatDate(
+  value: DateInput,
+  dateStyle: 'short' | 'medium' | 'long' = 'short',
+): string {
   const date = toDate(value);
   if (!date) return '—';
   return new Intl.DateTimeFormat('tr-TR', { dateStyle, timeZone: APP_TIME_ZONE }).format(date);
-}
-
-/** Yalnızca saat: `13:07` */
-export function formatTime(value: DateInput): string {
-  const date = toDate(value);
-  if (!date) return '—';
-  return new Intl.DateTimeFormat('tr-TR', { timeStyle: 'short', timeZone: APP_TIME_ZONE }).format(date);
 }
 
 /** `1 dk önce`, `3 sa önce`, `2 gün önce` — aktivite listeleri için. */
@@ -105,7 +108,14 @@ function localOffsetMs(date: Date): number {
   });
   const parts = dtf.formatToParts(date);
   const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? '0');
-  const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute'), get('second'));
+  const asUtc = Date.UTC(
+    get('year'),
+    get('month') - 1,
+    get('day'),
+    get('hour') % 24,
+    get('minute'),
+    get('second'),
+  );
   // İstanbul için +3 saat → asUtc (yerel duvar saati) - date (UTC) = +3h.
   return asUtc - date.getTime();
 }

@@ -69,8 +69,8 @@ export function MediaLibrary({
 
   async function onDelete(key: string, inUse: boolean) {
     if (inUse) {
-      if (!confirm('Bu görsel bir içerikte kullanılıyor. Yine de silinsin mi?')) return;
-    } else if (!confirm('Bu görsel silinsin mi?')) return;
+      if (!confirm('Bu gÃƒÂ¶rsel bir iÃƒÂ§erikte kullanÃ„Â±lÃ„Â±yor. Yine de silinsin mi?')) return;
+    } else if (!confirm('Bu gÃƒÂ¶rsel silinsin mi?')) return;
     setBusy(true);
     const res = await deleteMediaKey(key);
     setBusy(false);
@@ -82,14 +82,16 @@ export function MediaLibrary({
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">Medya kütüphanesi</h1>
-          <p className="mt-1 text-sm text-muted-strong">{total} görsel · depolama: SeaweedFS</p>
+          <h1 className="text-2xl font-medium tracking-tight">Medya kÃƒÂ¼tÃƒÂ¼phanesi</h1>
+          <p className="mt-1 text-sm text-muted-strong">
+            {total} gÃƒÂ¶rsel Ã‚Â· depolama: SeaweedFS
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <select
             value={uploadFolder}
             onChange={(e) => setUploadFolder(e.target.value as MediaFolder)}
-            aria-label="Yükleme klasörü"
+            aria-label="YÃƒÂ¼kleme klasÃƒÂ¶rÃƒÂ¼"
             className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
           >
             {folders.map((f) => (
@@ -100,7 +102,7 @@ export function MediaLibrary({
           </select>
           <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90">
             <Upload className="h-4 w-4" />
-            {busy ? 'Yükleniyor...' : 'Yükle'}
+            {busy ? 'YÃƒÂ¼kleniyor...' : 'YÃƒÂ¼kle'}
             <input
               type="file"
               multiple
@@ -113,23 +115,29 @@ export function MediaLibrary({
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <form action="/admin/medya" method="get" className="flex items-center gap-3 rounded-full border border-border px-4">
+        <form
+          action="/admin/medya"
+          method="get"
+          className="flex items-center gap-3 rounded-full border border-border px-4"
+        >
           {folder !== 'all' && <input type="hidden" name="klasor" value={folder} />}
           <Search className="h-4 w-4 text-muted" />
           <input
+            type="search"
+            aria-label="Dosya ara"
             name="q"
             defaultValue={q}
             placeholder="Dosya ara..."
-            className="h-11 w-48 bg-transparent text-sm outline-none placeholder:text-muted sm:w-64"
+            className="h-11 w-48 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm sm:w-64"
           />
         </form>
         <select
           value={folder}
           onChange={(e) => router.push(buildUrl(e.target.value, q))}
-          aria-label="Klasör filtresi"
+          aria-label="KlasÃƒÂ¶r filtresi"
           className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
         >
-          <option value="all">Tüm klasörler</option>
+          <option value="all">TÃƒÂ¼m klasÃƒÂ¶rler</option>
           {folders.map((f) => (
             <option key={f} value={f}>
               {f}
@@ -141,22 +149,29 @@ export function MediaLibrary({
             href={buildUrl(folder, '')}
             className="text-xs text-muted-strong transition-colors hover:text-foreground"
           >
-            Aramayı temizle
+            AramayÃ„Â± temizle
           </Link>
         )}
       </div>
 
-      {error && <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && (
+        <p className="mt-4 rounded-md border border-red-200 bg-surface-2 p-3 text-sm text-danger">
+          {error}
+        </p>
+      )}
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {items.map((item) => (
-          <div key={item.key} className="group overflow-hidden rounded-lg border border-border bg-surface">
+          <div
+            key={item.key}
+            className="group overflow-hidden rounded-lg border border-border bg-surface"
+          >
             <div className="relative aspect-square bg-surface-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.url} alt="" loading="lazy" className="h-full w-full object-cover" />
               {item.inUse && (
                 <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-green-600/90 px-2 py-1 text-[0.6rem] font-medium text-white">
-                  <CheckCircle2 className="h-3 w-3" /> Kullanımda
+                  <CheckCircle2 className="h-3 w-3" /> KullanÃ„Â±mda
                 </span>
               )}
             </div>
@@ -172,7 +187,7 @@ export function MediaLibrary({
                 onClick={() => onDelete(item.key, item.inUse)}
                 disabled={busy}
                 aria-label="Sil"
-                className="rounded-md border border-border p-1.5 text-muted-strong hover:border-red-300 hover:text-red-600 disabled:opacity-50"
+                className="rounded-md border border-border p-1.5 text-muted-strong hover:border-red-300 hover:text-danger disabled:opacity-50"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -181,19 +196,22 @@ export function MediaLibrary({
         ))}
         {items.length === 0 && (
           <p className="col-span-full rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted">
-            Görsel bulunamadı.
+            GÃƒÂ¶rsel bulunamadÃ„Â±.
           </p>
         )}
       </div>
 
       {totalPages > 1 && (
-        <nav aria-label="Medya sayfaları" className="mt-8 flex items-center justify-center gap-2">
+        <nav
+          aria-label="Medya sayfalarÃ„Â±"
+          className="mt-8 flex items-center justify-center gap-2"
+        >
           {page > 1 && (
             <Link
               href={buildUrl(folder, q, page - 1)}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >
-              Önceki
+              Ãƒâ€“nceki
             </Link>
           )}
           <span className="numerals px-2 text-xs text-muted-strong">

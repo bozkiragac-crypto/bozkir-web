@@ -21,7 +21,7 @@ export function ImageManager({
   folder,
   ownerId,
   multiple = true,
-  label = 'Görseller',
+  label = 'GÃ¶rseller',
 }: ImageManagerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -72,7 +72,7 @@ export function ImageManager({
           className="inline-flex items-center gap-2 rounded-md border border-dashed border-border-strong px-3 py-1.5 text-xs font-medium transition-colors hover:bg-surface-2 disabled:opacity-50"
         >
           <ImagePlus className="h-3.5 w-3.5" />
-          {busy ? 'Yükleniyor...' : 'Görsel Yükle'}
+          {busy ? 'YÃ¼kleniyor...' : 'GÃ¶rsel YÃ¼kle'}
         </button>
         <input
           ref={inputRef}
@@ -85,7 +85,7 @@ export function ImageManager({
       </div>
 
       <p className="mt-2 text-xs text-muted">
-        JPG, PNG, WebP veya AVIF · en fazla {MAX_UPLOAD_MB} MB. İlk görsel kapak olarak kullanılır.
+        JPG, PNG, WebP veya AVIF Â· en fazla {MAX_UPLOAD_MB} MB. Ä°lk gÃ¶rsel kapak olarak kullanÄ±lÄ±r.
       </p>
 
       {images.length > 0 ? (
@@ -99,16 +99,16 @@ export function ImageManager({
                   <Star className="h-3 w-3" /> Kapak
                 </span>
               )}
-              {/* Mobilde hover yok; kontroller gizli kalınca görsel
-                  düzenlenemiyordu. Sitedeki ProductCard/ProductGallery
-                  pattern'i: mobilde hep görünür, md üstü hover/focus ile açılır. */}
+              {/* Mobilde hover yok; kontroller gizli kalÄ±nca gÃ¶rsel
+                  dÃ¼zenlenemiyordu. Sitedeki ProductCard/ProductGallery
+                  pattern'i: mobilde hep gÃ¶rÃ¼nÃ¼r, md Ã¼stÃ¼ hover/focus ile aÃ§Ä±lÄ±r. */}
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-black/60 p-1.5 opacity-100 transition-opacity focus-within:opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                 <div className="flex gap-1">
                   <button
                     type="button"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
-                    aria-label="Sola taşı"
+                    aria-label="Sola taÅŸÄ±"
                     className="flex h-8 w-8 items-center justify-center rounded text-white disabled:opacity-30"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
@@ -117,7 +117,7 @@ export function ImageManager({
                     type="button"
                     onClick={() => move(i, 1)}
                     disabled={i === images.length - 1}
-                    aria-label="Sağa taşı"
+                    aria-label="SaÄŸa taÅŸÄ±"
                     className="flex h-8 w-8 items-center justify-center rounded text-white disabled:opacity-30"
                   >
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -126,7 +126,7 @@ export function ImageManager({
                 <button
                   type="button"
                   onClick={() => onChange(images.filter((_, idx) => idx !== i))}
-                  aria-label="Görseli kaldır"
+                  aria-label="GÃ¶rseli kaldÄ±r"
                   className={cn(
                     'flex h-8 w-8 items-center justify-center rounded text-white transition-colors hover:text-red-400',
                   )}
@@ -139,11 +139,11 @@ export function ImageManager({
         </ul>
       ) : (
         <p className="mt-4 rounded-md border border-dashed border-border p-6 text-center text-sm text-muted">
-          Henüz görsel yok.
+          HenÃ¼z gÃ¶rsel yok.
         </p>
       )}
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-3 text-sm text-danger">{error}</p>}
     </div>
   );
 }

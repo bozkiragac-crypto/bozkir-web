@@ -54,7 +54,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
 
   const chipClass = (active: boolean) =>
     cn(
-      'rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors',
+      'rounded-full border px-4 py-2.5 text-xs font-medium transition-colors',
       active
         ? 'border-transparent bg-foreground text-background'
         : 'border-border text-muted-strong hover:border-foreground hover:text-foreground',

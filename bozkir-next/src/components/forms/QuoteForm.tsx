@@ -1,6 +1,13 @@
 'use client';
 
-import { cloneElement, isValidElement, useRef, useState, type ReactElement, type ReactNode } from 'react';
+import {
+  cloneElement,
+  isValidElement,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -38,7 +45,7 @@ interface FormValues {
 }
 
 const fieldClass =
-  'h-12 w-full rounded-md border border-border bg-surface px-4 text-sm outline-none transition-colors focus:border-foreground';
+  'h-12 w-full rounded-md border border-border bg-surface px-4 text-base outline-none transition-colors focus:border-foreground sm:text-sm';
 
 export function QuoteForm({
   products,
@@ -92,7 +99,10 @@ export function QuoteForm({
   function removeProduct(slug: string) {
     setExcluded((prev) => {
       const next = [...prev, slug];
-      const remaining = list.filter((p) => !next.includes(p.slug)).map(label).join(', ');
+      const remaining = list
+        .filter((p) => !next.includes(p.slug))
+        .map(label)
+        .join(', ');
       setValue('product', remaining);
       return next;
     });
@@ -169,7 +179,11 @@ export function QuoteForm({
 
   if (sent) {
     return (
-      <div role="status" aria-live="polite" className="page-fade rounded-xl border border-border bg-surface p-8">
+      <div
+        role="status"
+        aria-live="polite"
+        className="page-fade rounded-xl border border-border bg-surface p-8"
+      >
         <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-success shadow-[0_0_0_6px_color-mix(in_srgb,currentColor_12%,transparent)]">
           <CheckCircle2 className="h-6 w-6" />
         </span>
@@ -177,7 +191,10 @@ export function QuoteForm({
         {active.length > 0 && (
           <ul className="mt-4 flex flex-wrap gap-2">
             {active.map((p) => (
-              <li key={p.slug} className="rounded-full border border-border px-3 py-1 text-xs text-muted-strong">
+              <li
+                key={p.slug}
+                className="rounded-full border border-border px-3 py-1 text-xs text-muted-strong"
+              >
                 {p.name}
               </li>
             ))}
@@ -214,9 +231,21 @@ export function QuoteForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} onFocus={() => track('quote_start')} noValidate className="grid gap-5">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      onFocus={() => track('quote_start')}
+      noValidate
+      className="grid gap-5"
+    >
       {/* Bot tuzağı: gerçek kullanıcı görmez/görmezden gelir. */}
-      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden
+        className="hidden"
+      />
 
       {active.length > 0 && (
         <div className="rounded-lg border border-border bg-surface p-4">
@@ -228,7 +257,11 @@ export function QuoteForm({
               <li key={p.slug} className="flex items-center gap-4">
                 {p.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image} alt="" className="h-16 w-16 flex-none rounded-lg object-cover" />
+                  <img
+                    src={p.image}
+                    alt=""
+                    className="h-16 w-16 flex-none rounded-lg object-cover"
+                  />
                 ) : null}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{p.name}</p>
@@ -254,16 +287,38 @@ export function QuoteForm({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field id="fullName" label={`${t('quote.fullName')} *`} error={errors.fullName?.message}>
-          <input id="fullName" className={fieldClass} {...register('fullName')} autoComplete="name" />
+          <input
+            id="fullName"
+            className={fieldClass}
+            {...register('fullName')}
+            autoComplete="name"
+          />
         </Field>
         <Field id="company" label={t('quote.company')} error={errors.company?.message}>
-          <input id="company" className={fieldClass} {...register('company')} autoComplete="organization" />
+          <input
+            id="company"
+            className={fieldClass}
+            {...register('company')}
+            autoComplete="organization"
+          />
         </Field>
         <Field id="phone" label={`${t('quote.phone')} *`} error={errors.phone?.message}>
-          <input id="phone" className={fieldClass} {...register('phone')} inputMode="tel" autoComplete="tel" />
+          <input
+            id="phone"
+            className={fieldClass}
+            {...register('phone')}
+            inputMode="tel"
+            autoComplete="tel"
+          />
         </Field>
         <Field id="email" label={`${t('quote.email')} *`} error={errors.email?.message}>
-          <input id="email" className={fieldClass} {...register('email')} inputMode="email" autoComplete="email" />
+          <input
+            id="email"
+            className={fieldClass}
+            {...register('email')}
+            inputMode="email"
+            autoComplete="email"
+          />
         </Field>
         <Field id="product" label={t('quote.productField')} error={errors.product?.message}>
           <input
@@ -275,7 +330,12 @@ export function QuoteForm({
           />
         </Field>
         <Field id="quantity" label={t('quote.quantity')} error={errors.quantity?.message}>
-          <input id="quantity" className={fieldClass} {...register('quantity')} inputMode="numeric" />
+          <input
+            id="quantity"
+            className={fieldClass}
+            {...register('quantity')}
+            inputMode="numeric"
+          />
         </Field>
       </div>
 
@@ -291,7 +351,7 @@ export function QuoteForm({
       <Field id="note" label={t('quote.note')} error={errors.note?.message}>
         <textarea
           id="note"
-          className="min-h-28 w-full rounded-md border border-border bg-surface px-4 py-3 text-sm outline-none transition-colors focus:border-foreground"
+          className="min-h-28 w-full rounded-md border border-border bg-surface px-4 py-3 text-base outline-none transition-colors focus:border-foreground sm:text-sm"
           {...register('note')}
         />
       </Field>
@@ -315,7 +375,9 @@ export function QuoteForm({
           }}
           className={cn(
             'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 py-6 text-center text-sm transition-colors',
-            dragging ? 'border-foreground bg-surface-2' : 'border-border bg-surface hover:border-border-strong',
+            dragging
+              ? 'border-foreground bg-surface-2'
+              : 'border-border bg-surface hover:border-border-strong',
           )}
         >
           <Paperclip className="h-4 w-4 text-muted" aria-hidden />
@@ -386,7 +448,13 @@ export function QuoteForm({
       )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        <Button type="submit" size="lg" disabled={isSubmitting} aria-busy={isSubmitting} className="w-full justify-center sm:w-auto">
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSubmitting}
+          aria-busy={isSubmitting}
+          className="w-full justify-center sm:w-auto"
+        >
           {isSubmitting ? t('quote.submitting') : t('quote.submit')}
         </Button>
         {result && !result.ok && (

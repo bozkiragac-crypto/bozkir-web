@@ -183,7 +183,7 @@ export function CompareView() {
                             </dt>
                             <dd
                               className={cn(
-                                'text-end',
+                                'min-w-0 break-words text-end',
                                 row.numerals && 'numerals',
                                 hi ? 'font-medium' : 'text-muted-strong',
                               )}
@@ -216,11 +216,19 @@ export function CompareView() {
             {/* Karşılaştırma tablosu (masaüstü) */}
             <div className="mt-8 hidden overflow-x-auto pb-4 md:block">
               <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+                <caption className="sr-only">{t('compare.title')}</caption>
                 <thead>
                   <tr>
-                    <th className="sticky start-0 z-10 w-28 bg-background pb-4 align-bottom" />
+                    <th
+                      scope="col"
+                      className="sticky start-0 z-10 w-28 bg-background pb-4 align-bottom"
+                    />
                     {items.map(({ ref, product }) => (
-                      <th key={ref.slug} className="bg-background pb-4 pe-4 align-bottom">
+                      <th
+                        key={ref.slug}
+                        scope="col"
+                        className="bg-background pb-4 pe-4 align-bottom"
+                      >
                         <button
                           type="button"
                           onClick={() => removeCompare(ref.slug)}

@@ -60,7 +60,6 @@
     "@next/bundle-analyzer": "^15.1.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.0.0",
-    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.10.0",
     "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",

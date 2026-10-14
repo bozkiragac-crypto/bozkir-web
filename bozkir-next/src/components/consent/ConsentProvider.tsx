@@ -55,13 +55,3 @@ export function useConsent(): ConsentCtx {
   if (!ctx) throw new Error('useConsent, ConsentProvider içinde kullanılmalı.');
   return ctx;
 }
-
-/** Analytics çerezlerine izin verildi mi? (client) */
-export function analyticsAllowed(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    return localStorage.getItem(KEY) === 'granted';
-  } catch {
-    return false;
-  }
-}

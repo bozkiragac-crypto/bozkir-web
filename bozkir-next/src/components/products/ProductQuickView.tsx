@@ -73,7 +73,7 @@ export function ProductQuickView({
       onClick={onClose}
     >
       <div
-        className="relative grid w-full max-w-4xl overflow-hidden rounded-lg border border-border bg-background shadow-2xl md:grid-cols-2"
+        className="relative grid max-h-[90dvh] w-full max-w-4xl overflow-y-auto overscroll-contain rounded-lg border border-border bg-background shadow-2xl md:grid-cols-2"
         onClick={(e) => e.stopPropagation()}
       >
         <button

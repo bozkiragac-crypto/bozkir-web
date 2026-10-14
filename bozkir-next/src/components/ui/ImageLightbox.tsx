@@ -84,7 +84,10 @@ export function ImageLightbox({
         </button>
       )}
 
-      <figure className="relative h-[80vh] w-[92vw] max-w-5xl" onClick={(e) => e.stopPropagation()}>
+      <figure
+        className="relative h-[80dvh] w-[92vw] max-w-5xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Image src={current.url} alt={current.alt} fill sizes="92vw" className="object-contain" />
         {(current.title || current.href) && (
           <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-center text-sm text-white">

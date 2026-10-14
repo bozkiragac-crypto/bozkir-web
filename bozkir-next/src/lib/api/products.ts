@@ -43,11 +43,6 @@ export async function getProducts(
   }
 }
 
-export async function getFeaturedProducts(limit = 8, locale?: Locale): Promise<Product[]> {
-  const { items } = await getProducts({ limit }, locale);
-  return items;
-}
-
 /** Filtre paneli facet'leri (yüzey). */
 export async function getProductFacets(): Promise<{ surfaces: string[] }> {
   return fetchProductFacets();

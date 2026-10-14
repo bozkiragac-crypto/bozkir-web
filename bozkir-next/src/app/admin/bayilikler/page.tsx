@@ -8,7 +8,7 @@ import { DeleteBrandButton } from '@/components/admin/DeleteButtons';
 export default async function AdminBrandsPage() {
   const db = getDb();
   if (!db) {
-    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">Veritabanı bağlantısı yok.</p>;
+    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">VeritabanÄ± baÄŸlantÄ±sÄ± yok.</p>;
   }
 
   const rows = await db.select().from(brands).orderBy(asc(brands.sortOrder));
@@ -18,7 +18,7 @@ export default async function AdminBrandsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">Bayilikler / Markalar</h1>
-          <p className="mt-1 text-sm text-muted-strong">Bayilikler sayfasında gösterilen markalar.</p>
+          <p className="mt-1 text-sm text-muted-strong">Bayilikler sayfasÄ±nda gÃ¶sterilen markalar.</p>
         </div>
         <Link
           href="/admin/bayilikler/yeni"
@@ -36,7 +36,7 @@ export default async function AdminBrandsPage() {
               <th className="p-4 font-medium">Ad</th>
               <th className="p-4 font-medium">Kategori</th>
               <th className="p-4 font-medium">Durum</th>
-              <th className="p-4 font-medium">Sıra</th>
+              <th className="p-4 font-medium">SÄ±ra</th>
               <th className="p-4" />
             </tr>
           </thead>
@@ -56,9 +56,9 @@ export default async function AdminBrandsPage() {
                     {b.name}
                   </Link>
                 </td>
-                <td className="p-4 text-muted-strong">{b.category ?? '—'}</td>
+                <td className="p-4 text-muted-strong">{b.category ?? 'â€”'}</td>
                 <td className="p-4">
-                  <span className={b.isActive ? 'rounded-full bg-green-100 px-2.5 py-1 text-xs text-green-800' : 'rounded-full bg-surface-2 px-2.5 py-1 text-xs text-muted-strong'}>
+                  <span className={b.isActive ? 'rounded-full bg-surface-2 px-2.5 py-1 text-xs text-success' : 'rounded-full bg-surface-2 px-2.5 py-1 text-xs text-muted-strong'}>
                     {b.isActive ? 'Aktif' : 'Pasif'}
                   </span>
                 </td>
@@ -66,7 +66,7 @@ export default async function AdminBrandsPage() {
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-2">
                     <Link href={`/admin/bayilikler/${b.id}`} className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2">
-                      Düzenle
+                      DÃ¼zenle
                     </Link>
                     <DeleteBrandButton id={b.id} />
                   </div>
@@ -76,7 +76,7 @@ export default async function AdminBrandsPage() {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-10 text-center text-muted-strong">
-                  Henüz marka yok. &quot;Yeni Marka&quot; ile ekleyin.
+                  HenÃ¼z marka yok. &quot;Yeni Marka&quot; ile ekleyin.
                 </td>
               </tr>
             )}

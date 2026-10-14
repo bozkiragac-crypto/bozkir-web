@@ -99,14 +99,6 @@ html[data-compare='1'] [data-product-cta] {
 /* --- RTL (Arapça) -----------------------------------------------------------
    Tailwind'in mantıksal özellikleri (ms-*, me-*, ps-*, pe-*, start/end) zaten
    yön değiştirir. Burada yön değiştirmeyen fiziksel yardımcılar ters çevrilir. */
-[dir='rtl'] .rtl-flip {
-  transform: scaleX(-1);
-}
-
-[dir='rtl'] .rtl-text-start {
-  text-align: right;
-}
-
 [dir='rtl'] .container-x {
   direction: rtl;
 }
@@ -230,6 +222,14 @@ html[data-compare='1'] [data-product-cta] {
     outline-offset: 3px;
   }
 
+  /* Form alanlarında `outline-none` utility'sini ezerek tutarlı klavye halkası ver. */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--fg) !important;
+    outline-offset: 2px;
+  }
+
   /* Koyu zeminlerde odak halkası açık renge döner. */
   [data-on-dark] :focus-visible {
     outline-color: var(--bg);
@@ -312,19 +312,9 @@ html[data-compare='1'] [data-product-cta] {
     letter-spacing: -0.01em;
   }
 
-  .rule {
-    height: 1px;
-    background: var(--border);
-    border: 0;
-  }
-
   .numerals {
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1;
-  }
-
-  .pt-header {
-    padding-top: var(--header-height);
   }
 
   /* İskelet (yükleme) */
@@ -416,13 +406,6 @@ html[data-compare='1'] [data-product-cta] {
     to {
       transform: translateX(120%);
     }
-  }
-
-  /* Yumuşak yükselti */
-  .elevate {
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 24px 60px -30px rgba(0, 0, 0, 0.25);
   }
 }
 
@@ -538,6 +521,16 @@ li {
 @media (max-width: 767px) {
   body:has([data-product-cta]) [data-whatsapp-fab] {
     bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Çerez bandı, mobilde alt sabit çubukların üstüne oturur (çakışma yok). */
+@media (max-width: 767px) {
+  body:has([data-product-cta]) [data-cookie-banner] {
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+  body:has([data-compare-bar]) [data-cookie-banner] {
+    bottom: calc(var(--compare-h, 0px) + env(safe-area-inset-bottom, 0px));
   }
 }
 

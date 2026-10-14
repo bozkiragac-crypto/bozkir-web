@@ -8,10 +8,6 @@
  * gerçek müşteri talebi kaybolmasın. Cloudflare'in döndürdüğü `success:false`
  * ise kesin reddedilir.
  */
-export function turnstileConfigured(): boolean {
-  return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim());
-}
-
 export async function verifyTurnstile(token: string, ip?: string): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
   if (!secret) return true;

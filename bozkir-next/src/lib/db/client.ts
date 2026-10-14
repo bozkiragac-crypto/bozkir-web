@@ -29,18 +29,4 @@ export function getDb(): NodePgDatabase<typeof schema> | null {
   return db;
 }
 
-/** Bekleyen istekleri bekleyip havuzu kapatır (graceful shutdown). */
-export async function closeDb(): Promise<void> {
-  if (!pool) return;
-  const p = pool;
-  pool = null;
-  db = null;
-  delete (globalThis as Record<string, unknown>).__bozkirDbPool;
-  try {
-    await p.end();
-  } catch {
-    // yok say
-  }
-}
-
 export { schema };

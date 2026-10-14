@@ -47,5 +47,3 @@ export async function verifySessionToken(token?: string | null): Promise<Session
     return null;
   }
 }
-
-export const SESSION_MAX_AGE = MAX_AGE_SECONDS;

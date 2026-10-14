@@ -79,7 +79,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
     <form onSubmit={onSubmit} className="grid gap-6">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı *</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">ÃœrÃ¼n AdÄ± *</span>
           <input
             required
             value={name}
@@ -88,13 +88,13 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Kodu *</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">ÃœrÃ¼n Kodu *</span>
           <input
             required
             value={code}
             onChange={(e) => setCode(e.target.value)}
             className={field}
-            placeholder="Örn: VT-828"
+            placeholder="Ã–rn: VT-828"
           />
         </label>
         <label className="grid gap-2">
@@ -105,7 +105,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
             value={cat}
             onChange={(e) => setCat(e.target.value)}
             className={field}
-            placeholder="Örn: MDF LAM"
+            placeholder="Ã–rn: MDF LAM"
           />
           <datalist id="admin-cat-list">
             {categories.map((c) => (
@@ -114,7 +114,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           </datalist>
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Yüzey</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">YÃ¼zey</span>
           <input
             value={face}
             onChange={(e) => setFace(e.target.value)}
@@ -123,17 +123,17 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Renkler (virgülle)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Renkler (virgÃ¼lle)</span>
           <input
             value={colors}
             onChange={(e) => setColors(e.target.value)}
             className={field}
-            placeholder="Meşe, Ceviz, Beyaz"
+            placeholder="MeÅŸe, Ceviz, Beyaz"
           />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">
-            Kalınlıklar (virgülle)
+            KalÄ±nlÄ±klar (virgÃ¼lle)
           </span>
           <input
             value={thicknesses}
@@ -146,10 +146,10 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
         <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          Çeviriler (boşsa Türkçe kullanılır)
+          Ã‡eviriler (boÅŸsa TÃ¼rkÃ§e kullanÄ±lÄ±r)
         </legend>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">ÃœrÃ¼n AdÄ± (EN)</span>
           <input
             value={nameEn}
             onChange={(e) => setNameEn(e.target.value)}
@@ -158,7 +158,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">ÃœrÃ¼n AdÄ± (AR)</span>
           <input
             value={nameAr}
             onChange={(e) => setNameAr(e.target.value)}
@@ -188,24 +188,24 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
         <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          SEO (boşsa otomatik üretilir)
+          SEO (boÅŸsa otomatik Ã¼retilir)
         </legend>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Başlık</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO BaÅŸlÄ±k</span>
           <input
             value={seoTitle}
             onChange={(e) => setSeoTitle(e.target.value)}
             className={field}
-            placeholder="Ürün adı | Bozkır Ağaç Ürünleri"
+            placeholder="ÃœrÃ¼n adÄ± | BozkÄ±r AÄŸaÃ§ ÃœrÃ¼nleri"
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Açıklama</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO AÃ§Ä±klama</span>
           <input
             value={seoDescription}
             onChange={(e) => setSeoDescription(e.target.value)}
             className={field}
-            placeholder="Arama sonuçlarında görünecek kısa açıklama"
+            placeholder="Arama sonuÃ§larÄ±nda gÃ¶rÃ¼necek kÄ±sa aÃ§Ä±klama"
           />
         </label>
       </fieldset>
@@ -215,10 +215,10 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         onChange={setImages}
         folder="products"
         ownerId={initial?.id}
-        label="Ürün Görselleri"
+        label="ÃœrÃ¼n GÃ¶rselleri"
       />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex items-center gap-4 border-t border-border pt-6">
         <button
@@ -233,7 +233,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           onClick={() => router.push('/admin/urunler')}
           className="text-sm text-muted-strong hover:text-foreground"
         >
-          İptal
+          Ä°ptal
         </button>
       </div>
     </form>

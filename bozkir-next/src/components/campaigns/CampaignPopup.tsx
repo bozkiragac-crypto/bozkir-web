@@ -67,9 +67,14 @@ export function CampaignPopup({
 
   useEffect(() => {
     if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onKey);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -89,7 +94,7 @@ export function CampaignPopup({
     >
       <div
         ref={ref}
-        className={`relative w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-background shadow-2xl transition-all duration-300 ease-out ${
+        className={`relative max-h-[90dvh] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border border-border bg-background shadow-2xl transition-all duration-300 ease-out ${
           shown ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-[0.97] opacity-0'
         }`}
       >
@@ -137,9 +142,9 @@ export function CampaignPopup({
         )}
 
         <div className="p-6 md:p-8">
-          <h3 id="campaign-popup-title" className="text-2xl font-medium tracking-tight md:text-3xl">
+          <h2 id="campaign-popup-title" className="text-2xl font-medium tracking-tight md:text-3xl">
             {campaign.title}
-          </h3>
+          </h2>
           {campaign.description && (
             <p
               id="campaign-popup-desc"

@@ -14,9 +14,10 @@ export function CookieBanner() {
 
   return (
     <div
-      role="dialog"
+      role="region"
       aria-live="polite"
       aria-label={c.consentPolicy}
+      data-cookie-banner
       className="no-print fixed inset-x-0 bottom-0 z-[140] border-t border-border bg-background/95 px-4 py-4 backdrop-blur md:px-6"
       style={{ paddingBottom: 'max(1rem, calc(env(safe-area-inset-bottom,0px) + 1rem))' }}
     >
@@ -34,14 +35,14 @@ export function CookieBanner() {
           <button
             type="button"
             onClick={deny}
-            className="inline-flex h-10 items-center rounded-full border border-border px-5 text-sm font-medium transition-colors hover:bg-surface-2"
+            className="inline-flex h-11 items-center rounded-full border border-border px-5 text-sm font-medium transition-colors hover:bg-surface-2"
           >
             {c.consentDeny}
           </button>
           <button
             type="button"
             onClick={grant}
-            className="inline-flex h-10 items-center rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            className="inline-flex h-11 items-center rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
           >
             {c.consentAccept}
           </button>

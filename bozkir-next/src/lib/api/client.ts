@@ -26,26 +26,16 @@ export function hasRemoteApi() {
  * Tek merkezi HTTP istemcisi. Bileşenler doğrudan fetch çağırmaz;
  * servis katmanı (lib/api/products vb.) bu fonksiyonu kullanır.
  */
-export async function apiGet<T>(path: string, init?: RequestInit & { revalidate?: number }): Promise<T> {
+export async function apiGet<T>(
+  path: string,
+  init?: RequestInit & { revalidate?: number },
+): Promise<T> {
   if (!BASE_URL) throw new ApiUnavailableError();
 
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { Accept: 'application/json', ...(init?.headers ?? {}) },
     next: init?.revalidate !== undefined ? { revalidate: init.revalidate } : undefined,
     ...init,
-  });
-
-  if (!res.ok) throw new ApiRequestError(res.status, await res.text().catch(() => undefined));
-  return (await res.json()) as T;
-}
-
-export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  if (!BASE_URL) throw new ApiUnavailableError();
-
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(body),
   });
 
   if (!res.ok) throw new ApiRequestError(res.status, await res.text().catch(() => undefined));

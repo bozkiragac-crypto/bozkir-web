@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ShieldCheck, ShieldOff, Copy } from 'lucide-react';
 import { startTotpSetup, enableTotp, disableTotp } from '@/lib/admin/safe-actions';
 
-/** Yönetici hesabı için iki adımlı doğrulama (TOTP) yönetimi. */
+/** YÃ¶netici hesabÄ± iÃ§in iki adÄ±mlÄ± doÄŸrulama (TOTP) yÃ¶netimi. */
 export function TotpSettings({ enabled }: { enabled: boolean }) {
   const [isOn, setIsOn] = useState(enabled);
   const [secret, setSecret] = useState('');
@@ -22,7 +22,7 @@ export function TotpSettings({ enabled }: { enabled: boolean }) {
       setSecret(res.secret);
       setUri(res.uri);
     } else {
-      setMsg({ ok: false, text: res.error ?? 'Kurulum başlatılamadı.' });
+      setMsg({ ok: false, text: res.error ?? 'Kurulum baÅŸlatÄ±lamadÄ±.' });
     }
   }
 
@@ -36,9 +36,9 @@ export function TotpSettings({ enabled }: { enabled: boolean }) {
       setSecret('');
       setUri('');
       setCode('');
-      setMsg({ ok: true, text: '2FA etkinleştirildi.' });
+      setMsg({ ok: true, text: '2FA etkinleÅŸtirildi.' });
     } else {
-      setMsg({ ok: false, text: res.error ?? 'Doğrulanamadı.' });
+      setMsg({ ok: false, text: res.error ?? 'DoÄŸrulanamadÄ±.' });
     }
   }
 
@@ -50,9 +50,9 @@ export function TotpSettings({ enabled }: { enabled: boolean }) {
     if (res.ok) {
       setIsOn(false);
       setCode('');
-      setMsg({ ok: true, text: '2FA kapatıldı.' });
+      setMsg({ ok: true, text: '2FA kapatÄ±ldÄ±.' });
     } else {
-      setMsg({ ok: false, text: res.error ?? 'Doğrulanamadı.' });
+      setMsg({ ok: false, text: res.error ?? 'DoÄŸrulanamadÄ±.' });
     }
   }
 
@@ -63,13 +63,13 @@ export function TotpSettings({ enabled }: { enabled: boolean }) {
     <div className="rounded-xl border border-border bg-surface p-6">
       <div className="flex items-center gap-3">
         {isOn ? <ShieldCheck className="h-5 w-5 text-green-600" /> : <ShieldOff className="h-5 w-5 text-muted-strong" />}
-        <p className="font-medium">İki Adımlı Doğrulama (2FA)</p>
-        <span className={isOn ? 'ml-auto rounded-full bg-green-100 px-2.5 py-1 text-xs text-green-800' : 'ml-auto rounded-full bg-surface-2 px-2.5 py-1 text-xs text-muted-strong'}>
-          {isOn ? 'Etkin' : 'Kapalı'}
+        <p className="font-medium">Ä°ki AdÄ±mlÄ± DoÄŸrulama (2FA)</p>
+        <span className={isOn ? 'ml-auto rounded-full bg-surface-2 px-2.5 py-1 text-xs text-success' : 'ml-auto rounded-full bg-surface-2 px-2.5 py-1 text-xs text-muted-strong'}>
+          {isOn ? 'Etkin' : 'KapalÄ±'}
         </span>
       </div>
       <p className="mt-2 text-sm text-muted-strong">
-        Authenticator uygulamasıyla (Google Authenticator, Authy) girişte 6 haneli kod istenir.
+        Authenticator uygulamasÄ±yla (Google Authenticator, Authy) giriÅŸte 6 haneli kod istenir.
       </p>
 
       {!isOn && !secret && (
@@ -79,13 +79,13 @@ export function TotpSettings({ enabled }: { enabled: boolean }) {
           disabled={busy}
           className="mt-4 inline-flex h-11 items-center rounded-full bg-foreground px-5 text-sm font-medium text-background disabled:opacity-50"
         >
-          Kurulumu Başlat
+          Kurulumu BaÅŸlat
         </button>
       )}
 
       {!isOn && secret && (
         <div className="mt-4 grid gap-3">
-          <p className="text-xs text-muted-strong">Authenticator uygulamasına aşağıdaki anahtarı ekleyin:</p>
+          <p className="text-xs text-muted-strong">Authenticator uygulamasÄ±na aÅŸaÄŸÄ±daki anahtarÄ± ekleyin:</p>
           <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2">
             <code className="min-w-0 flex-1 truncate text-xs">{secret}</code>
             <button type="button" onClick={() => navigator.clipboard?.writeText(secret)} aria-label="Kopyala" className="text-muted-strong hover:text-foreground">
@@ -93,7 +93,7 @@ export function TotpSettings({ enabled }: { enabled: boolean }) {
             </button>
           </div>
           <details className="text-xs text-muted">
-            <summary className="cursor-pointer">otpauth bağlantısını göster</summary>
+            <summary className="cursor-pointer">otpauth baÄŸlantÄ±sÄ±nÄ± gÃ¶ster</summary>
             <code className="mt-1 block break-all">{uri}</code>
           </details>
           <input
@@ -109,14 +109,14 @@ export function TotpSettings({ enabled }: { enabled: boolean }) {
             disabled={busy}
             className="inline-flex h-11 w-fit items-center rounded-full bg-foreground px-5 text-sm font-medium text-background disabled:opacity-50"
           >
-            Doğrula ve Etkinleştir
+            DoÄŸrula ve EtkinleÅŸtir
           </button>
         </div>
       )}
 
       {isOn && (
         <div className="mt-4 grid gap-3">
-          <p className="text-xs text-muted-strong">Kapatmak için mevcut 6 haneli kodu girin:</p>
+          <p className="text-xs text-muted-strong">Kapatmak iÃ§in mevcut 6 haneli kodu girin:</p>
           <input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" placeholder="6 haneli kod" className={`${field} numerals`} />
           <button
             type="button"
@@ -129,7 +129,7 @@ export function TotpSettings({ enabled }: { enabled: boolean }) {
         </div>
       )}
 
-      {msg && <p className={msg.ok ? 'mt-3 text-sm text-green-700' : 'mt-3 text-sm text-red-600'}>{msg.text}</p>}
+      {msg && <p className={msg.ok ? 'mt-3 text-sm text-success' : 'mt-3 text-sm text-danger'}>{msg.text}</p>}
     </div>
   );
 }

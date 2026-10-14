@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import {
   LayoutDashboard,
   Package,
@@ -61,7 +62,9 @@ function NavList({ onNavigate, role }: { onNavigate?: () => void; role: string }
             onClick={onNavigate}
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-              active ? 'bg-foreground text-background' : 'text-muted-strong hover:bg-surface-2 hover:text-foreground',
+              active
+                ? 'bg-foreground text-background'
+                : 'text-muted-strong hover:bg-surface-2 hover:text-foreground',
             )}
             aria-current={active ? 'page' : undefined}
           >
@@ -88,11 +91,17 @@ function UserBox({ username, role }: { username: string; role: string }) {
       <p className="truncate">{username}</p>
       <p className="mt-1 text-[0.65rem] uppercase tracking-[0.14em] text-muted">{role}</p>
       <div className="mt-3 flex flex-col gap-2">
-        <Link href="/admin/hesap" className="text-sm font-medium text-muted-strong hover:text-foreground">
+        <Link
+          href="/admin/hesap"
+          className="text-sm font-medium text-muted-strong hover:text-foreground"
+        >
           Hesabım
         </Link>
         <form action={signOut}>
-          <button type="submit" className="text-sm font-medium text-muted-strong hover:text-foreground">
+          <button
+            type="submit"
+            className="text-sm font-medium text-muted-strong hover:text-foreground"
+          >
             Çıkış Yap
           </button>
         </form>
@@ -111,6 +120,20 @@ export function AdminShell({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, drawerRef);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
 
   return (
     <div className="min-h-svh bg-background">
@@ -136,7 +159,10 @@ export function AdminShell({
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-[82%] max-w-xs overflow-y-auto bg-background px-5 pt-5 pb-[calc(var(--safe-bottom)+1.25rem)]">
+          <div
+            ref={drawerRef}
+            className="absolute inset-y-0 left-0 w-[82%] max-w-xs overflow-y-auto bg-background px-5 pt-5 pb-[calc(var(--safe-bottom)+1.25rem)]"
+          >
             <div className="mb-6 flex items-center justify-between">
               <span className="text-sm font-semibold tracking-[0.12em] uppercase">Menü</span>
               <button
@@ -157,7 +183,10 @@ export function AdminShell({
       <div className="mx-auto grid max-w-[1400px] gap-8 px-5 py-6 lg:grid-cols-[250px_minmax(0,1fr)]">
         <aside className="hidden lg:sticky lg:top-6 lg:block lg:self-start">
           <div className="mb-6 flex items-center justify-between gap-3">
-            <Link href="/admin" className="text-[0.8rem] font-semibold tracking-[0.1em] uppercase leading-tight">
+            <Link
+              href="/admin"
+              className="text-[0.8rem] font-semibold tracking-[0.1em] uppercase leading-tight"
+            >
               {siteConfig.legalName}
             </Link>
             <ThemeToggle />

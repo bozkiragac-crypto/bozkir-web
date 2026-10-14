@@ -93,17 +93,17 @@ export function AboutEditor({
   return (
     <div className="grid gap-6">
       <Section
-        title="İstatistikler"
-        hint="Örn. 1979 · Sektör tecrübesinin başlangıcı"
+        title="Ä°statistikler"
+        hint="Ã–rn. 1979 Â· SektÃ¶r tecrÃ¼besinin baÅŸlangÄ±cÄ±"
         onAdd={() => setStats((s) => [...s, { value: '', label: '', labelEn: '', labelAr: '' }])}
       >
         {stats.map((s, i) => (
           <div key={i} className="grid gap-2 rounded-lg border border-border p-3 sm:grid-cols-[90px_1fr_1fr_1fr_auto]">
-            <input className={field} value={s.value} onChange={(e) => setStats((a) => a.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))} placeholder="Değer" />
+            <input className={field} value={s.value} onChange={(e) => setStats((a) => a.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))} placeholder="DeÄŸer" />
             <input className={field} value={s.label} onChange={(e) => setStats((a) => a.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="Etiket (TR)" />
             <input className={field} value={s.labelEn} onChange={(e) => setStats((a) => a.map((x, j) => (j === i ? { ...x, labelEn: e.target.value } : x)))} placeholder="Label (EN)" />
-            <input className={field} dir="rtl" value={s.labelAr} onChange={(e) => setStats((a) => a.map((x, j) => (j === i ? { ...x, labelAr: e.target.value } : x)))} placeholder="التسمية (AR)" />
-            <button type="button" onClick={() => setStats((a) => a.filter((_, j) => j !== i))} aria-label="Sil" className="flex h-11 w-11 items-center justify-center rounded-md border border-border text-muted-strong hover:text-red-600">
+            <input className={field} dir="rtl" value={s.labelAr} onChange={(e) => setStats((a) => a.map((x, j) => (j === i ? { ...x, labelAr: e.target.value } : x)))} placeholder="Ø§Ù„ØªØ³Ù…ÙŠØ© (AR)" />
+            <button type="button" onClick={() => setStats((a) => a.filter((_, j) => j !== i))} aria-label="Sil" className="flex h-11 w-11 items-center justify-center rounded-md border border-border text-muted-strong hover:text-danger">
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
@@ -111,23 +111,23 @@ export function AboutEditor({
       </Section>
 
       <Section
-        title="Değerler"
-        hint="Hakkımızda sayfasındaki 3 kart (başlık + metin)"
+        title="DeÄŸerler"
+        hint="HakkÄ±mÄ±zda sayfasÄ±ndaki 3 kart (baÅŸlÄ±k + metin)"
         onAdd={() => setValues((s) => [...s, { title: '', text: '', titleEn: '', titleAr: '', textEn: '', textAr: '' }])}
       >
         {values.map((v, i) => (
           <div key={i} className="grid gap-2 rounded-lg border border-border p-4">
             <div className="grid gap-2 sm:grid-cols-3">
-              <input className={field} value={v.title} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} placeholder="Başlık (TR)" />
+              <input className={field} value={v.title} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} placeholder="BaÅŸlÄ±k (TR)" />
               <input className={field} value={v.titleEn} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, titleEn: e.target.value } : x)))} placeholder="Title (EN)" />
-              <input className={field} dir="rtl" value={v.titleAr} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, titleAr: e.target.value } : x)))} placeholder="العنوان (AR)" />
+              <input className={field} dir="rtl" value={v.titleAr} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, titleAr: e.target.value } : x)))} placeholder="Ø§Ù„Ø¹Ù†ÙˆØ§Ù† (AR)" />
             </div>
             <textarea className={area} rows={2} value={v.text} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} placeholder="Metin (TR)" />
             <div className="grid gap-2 sm:grid-cols-2">
               <textarea className={area} rows={2} value={v.textEn} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, textEn: e.target.value } : x)))} placeholder="Text (EN)" />
-              <textarea className={area} rows={2} dir="rtl" value={v.textAr} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, textAr: e.target.value } : x)))} placeholder="النص (AR)" />
+              <textarea className={area} rows={2} dir="rtl" value={v.textAr} onChange={(e) => setValues((a) => a.map((x, j) => (j === i ? { ...x, textAr: e.target.value } : x)))} placeholder="Ø§Ù„Ù†Øµ (AR)" />
             </div>
-            <button type="button" onClick={() => setValues((a) => a.filter((_, j) => j !== i))} className="inline-flex w-fit items-center gap-1.5 text-xs text-muted-strong hover:text-red-600">
+            <button type="button" onClick={() => setValues((a) => a.filter((_, j) => j !== i))} className="inline-flex w-fit items-center gap-1.5 text-xs text-muted-strong hover:text-danger">
               <Trash2 className="h-3.5 w-3.5" /> Sil
             </button>
           </div>
@@ -135,25 +135,25 @@ export function AboutEditor({
       </Section>
 
       <Section
-        title="Zaman Çizelgesi"
-        hint="Örn. 2016 · Kurumsallaşma · açıklama"
+        title="Zaman Ã‡izelgesi"
+        hint="Ã–rn. 2016 Â· KurumsallaÅŸma Â· aÃ§Ä±klama"
         onAdd={() => setTimeline((s) => [...s, { year: '', title: '', text: '', titleEn: '', titleAr: '', textEn: '', textAr: '' }])}
       >
         {timeline.map((m, i) => (
           <div key={i} className="grid gap-2 rounded-lg border border-border p-4">
             <div className="grid gap-2 sm:grid-cols-[100px_1fr_1fr_1fr_auto]">
-              <input className={field} value={m.year} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, year: e.target.value } : x)))} placeholder="Yıl" />
-              <input className={field} value={m.title} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} placeholder="Başlık (TR)" />
+              <input className={field} value={m.year} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, year: e.target.value } : x)))} placeholder="YÄ±l" />
+              <input className={field} value={m.title} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} placeholder="BaÅŸlÄ±k (TR)" />
               <input className={field} value={m.titleEn} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, titleEn: e.target.value } : x)))} placeholder="Title (EN)" />
-              <input className={field} dir="rtl" value={m.titleAr} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, titleAr: e.target.value } : x)))} placeholder="العنوان (AR)" />
-              <button type="button" onClick={() => setTimeline((a) => a.filter((_, j) => j !== i))} aria-label="Sil" className="flex h-11 w-11 items-center justify-center rounded-md border border-border text-muted-strong hover:text-red-600">
+              <input className={field} dir="rtl" value={m.titleAr} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, titleAr: e.target.value } : x)))} placeholder="Ø§Ù„Ø¹Ù†ÙˆØ§Ù† (AR)" />
+              <button type="button" onClick={() => setTimeline((a) => a.filter((_, j) => j !== i))} aria-label="Sil" className="flex h-11 w-11 items-center justify-center rounded-md border border-border text-muted-strong hover:text-danger">
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
             <textarea className={area} rows={2} value={m.text} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} placeholder="Metin (TR)" />
             <div className="grid gap-2 sm:grid-cols-2">
               <textarea className={area} rows={2} value={m.textEn} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, textEn: e.target.value } : x)))} placeholder="Text (EN)" />
-              <textarea className={area} rows={2} dir="rtl" value={m.textAr} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, textAr: e.target.value } : x)))} placeholder="النص (AR)" />
+              <textarea className={area} rows={2} dir="rtl" value={m.textAr} onChange={(e) => setTimeline((a) => a.map((x, j) => (j === i ? { ...x, textAr: e.target.value } : x)))} placeholder="Ø§Ù„Ù†Øµ (AR)" />
             </div>
           </div>
         ))}
@@ -168,7 +168,7 @@ export function AboutEditor({
         >
           <Save className="h-4 w-4" /> {busy ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
-        {msg && <p className={msg.ok ? 'text-sm text-green-700' : 'text-sm text-red-600'}>{msg.text}</p>}
+        {msg && <p className={msg.ok ? 'text-sm text-success' : 'text-sm text-danger'}>{msg.text}</p>}
       </div>
     </div>
   );

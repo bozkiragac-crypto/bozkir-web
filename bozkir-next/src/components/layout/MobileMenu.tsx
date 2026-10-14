@@ -50,14 +50,14 @@ export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
       aria-modal="true"
       aria-label={t('nav.menu')}
       className={cn(
-        'fixed inset-0 z-[90] overflow-y-auto overscroll-contain bg-background pb-[var(--safe-bottom)] transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] xl:hidden',
+        'fixed inset-0 z-[180] overflow-y-auto overscroll-contain bg-background pb-[var(--safe-bottom)] transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] xl:hidden',
         open ? 'pointer-events-auto opacity-100' : 'pointer-events-none translate-y-4 opacity-0',
       )}
       aria-hidden={!open}
       // Kapalıyken içeriği klavye/AT erişiminden tamamen çıkar.
       inert={!open}
     >
-      <div className="flex h-[var(--header-height)] items-center justify-between gap-2 px-5">
+      <div className="flex h-[var(--header-height)] items-center justify-between gap-2 px-5 pt-[var(--safe-top)]">
         <span className="min-w-0 truncate text-sm font-semibold tracking-[0.18em] uppercase">
           {siteConfig.name}
         </span>
@@ -101,7 +101,7 @@ export function MobileMenu({ open, onClose, categories }: MobileMenuProps) {
             .filter((c) => c.featured)
             .slice(0, 8)
             .map((c) => (
-              <Link key={c.id} href={`/kategoriler/${c.slug}`} onClick={onClose} className="py-1.5">
+              <Link key={c.id} href={`/kategoriler/${c.slug}`} onClick={onClose} className="py-2.5">
                 {c.name}
               </Link>
             ))}

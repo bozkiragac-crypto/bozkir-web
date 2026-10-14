@@ -152,7 +152,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
   return (
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 px-4 pt-[12vh] backdrop-blur-sm"
+      className="fixed inset-0 z-[180] flex items-start justify-center bg-black/40 px-4 pt-[12dvh] backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={t('search.label')}

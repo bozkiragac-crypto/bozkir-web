@@ -1,6 +1,15 @@
 import { and, count, desc, eq, ilike, or, type SQL } from 'drizzle-orm';
 import Link from 'next/link';
-import { Mail, Phone, Building2, Package, Paperclip, Calendar, Search, Download } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Building2,
+  Package,
+  Paperclip,
+  Calendar,
+  Search,
+  Download,
+} from 'lucide-react';
 import { getDb } from '@/lib/db/client';
 import { quoteRequests } from '@/lib/db/schema';
 import { DeleteQuoteButton } from '@/components/admin/DeleteButtons';
@@ -10,7 +19,7 @@ import { QUOTE_STATUSES, QUOTE_STATUS_LABEL, type QuoteStatus } from '@/lib/quot
 
 export const dynamic = 'force-dynamic';
 
-/** Tüm teklifler tek seferde render ediliyordu; talep sayısı arttıkça sayfa kilitleniyordu. */
+/** TÃƒÂ¼m teklifler tek seferde render ediliyordu; talep sayÃ„Â±sÃ„Â± arttÃ„Â±kÃƒÂ§a sayfa kilitleniyordu. */
 const PAGE_SIZE = 20;
 
 const STATUS_ORDER: QuoteStatus[] = [...QUOTE_STATUSES];
@@ -67,7 +76,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
       <div>
         <h1 className="text-2xl font-medium tracking-tight">Teklifler</h1>
         <div className="mt-8 rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
-          <strong className="font-medium">Veritabanı bağlantısı yok.</strong>
+          <strong className="font-medium">VeritabanÃ„Â± baÃ„Å¸lantÃ„Â±sÃ„Â± yok.</strong>
         </div>
       </div>
     );
@@ -106,8 +115,12 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
   const exportHref = `/api/admin/quote-export${exportQs.toString() ? `?${exportQs}` : ''}`;
 
   const tabs: { key: string; label: string; value: number }[] = [
-    { key: '', label: 'Tümü', value: allCount },
-    ...STATUS_ORDER.map((s) => ({ key: s, label: QUOTE_STATUS_LABEL[s], value: counts.get(s) ?? 0 })),
+    { key: '', label: 'TÃƒÂ¼mÃƒÂ¼', value: allCount },
+    ...STATUS_ORDER.map((s) => ({
+      key: s,
+      label: QUOTE_STATUS_LABEL[s],
+      value: counts.get(s) ?? 0,
+    })),
   ];
 
   return (
@@ -116,7 +129,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
         <div>
           <h1 className="text-2xl font-medium tracking-tight">Teklifler</h1>
           <p className="mt-2 text-sm text-muted-strong">
-            {total} adet teklif talebi. Durum takibi ve dahili notlar aşağıdadır.
+            {total} adet teklif talebi. Durum takibi ve dahili notlar aÃ…Å¸aÃ„Å¸Ã„Â±dadÃ„Â±r.
           </p>
         </div>
         <a
@@ -156,15 +169,16 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
           <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
           <input
             type="search"
+            aria-label="Teklif ara"
             name="q"
             defaultValue={q}
-            placeholder="Ad, firma, telefon, e-posta veya ürün ara…"
-            className="w-full rounded-md border border-border bg-surface py-2 pr-3 pl-9 text-sm text-fg"
+            placeholder="Ad, firma, telefon, e-posta veya ÃƒÂ¼rÃƒÂ¼n araÃ¢â‚¬Â¦"
+            className="w-full rounded-md border border-border bg-surface py-2 pr-3 pl-9 text-base text-foreground sm:text-sm"
           />
         </div>
         <button
           type="submit"
-          className="rounded-md border border-border px-4 py-2 text-xs text-fg transition-colors hover:bg-surface-2"
+          className="rounded-md border border-border px-4 py-2 text-xs text-foreground transition-colors hover:bg-surface-2"
         >
           Ara
         </button>
@@ -180,7 +194,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
 
       {rows.length === 0 ? (
         <p className="mt-10 rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted">
-          {q || status ? 'Bu filtrelere uyan teklif talebi yok.' : 'Henüz teklif talebi yok.'}
+          {q || status ? 'Bu filtrelere uyan teklif talebi yok.' : 'HenÃƒÂ¼z teklif talebi yok.'}
         </p>
       ) : (
         <ul className="mt-8 flex flex-col gap-4">
@@ -190,17 +204,23 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
                 <div className="min-w-0">
                   <h2 className="flex flex-wrap items-center gap-2 text-lg font-medium tracking-tight">
                     {r.fullName}
-                    {r.company ? <span className="text-muted-strong"> · {r.company}</span> : null}
+                    {r.company ? (
+                      <span className="text-muted-strong"> Ã‚Â· {r.company}</span>
+                    ) : null}
                     <QuoteStatusBadge status={(r.status as QuoteStatus) ?? 'new'} />
                   </h2>
                   <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-strong">
                     <span className="inline-flex items-center gap-2">
                       <Phone className="h-3.5 w-3.5" />
-                      <a href={`tel:${r.phone}`} className="hover:text-foreground">{r.phone}</a>
+                      <a href={`tel:${r.phone}`} className="hover:text-foreground">
+                        {r.phone}
+                      </a>
                     </span>
                     <span className="inline-flex items-center gap-2">
                       <Mail className="h-3.5 w-3.5" />
-                      <a href={`mailto:${r.email}`} className="hover:text-foreground">{r.email}</a>
+                      <a href={`mailto:${r.email}`} className="hover:text-foreground">
+                        {r.email}
+                      </a>
                     </span>
                     {r.company && (
                       <span className="inline-flex items-center gap-2">
@@ -220,7 +240,9 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
               <dl className="mt-5 grid gap-x-6 gap-y-3 border-t border-border pt-5 text-sm sm:grid-cols-3">
                 {r.product && (
                   <div>
-                    <dt className="text-xs tracking-[0.14em] text-muted uppercase">Ürün / Model</dt>
+                    <dt className="text-xs tracking-[0.14em] text-muted uppercase">
+                      ÃƒÅ“rÃƒÂ¼n / Model
+                    </dt>
                     <dd className="mt-1 flex flex-col items-start gap-2">
                       <span className="inline-flex items-center gap-2">
                         <Package className="h-3.5 w-3.5 flex-none text-muted" />
@@ -256,7 +278,9 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
                 )}
                 {r.dimensions && (
                   <div>
-                    <dt className="text-xs tracking-[0.14em] text-muted uppercase">Ölçü</dt>
+                    <dt className="text-xs tracking-[0.14em] text-muted uppercase">
+                      Ãƒâ€“lÃƒÂ§ÃƒÂ¼
+                    </dt>
                     <dd className="mt-1 numerals">{r.dimensions}</dd>
                   </div>
                 )}
@@ -280,7 +304,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
                 ) : (
                   <p className="mt-4 inline-flex items-center gap-2 text-xs text-muted">
                     <Paperclip className="h-3.5 w-3.5" />
-                    Ek dosya (yüklenmedi): {r.attachmentName}
+                    Ek dosya (yÃƒÂ¼klenmedi): {r.attachmentName}
                   </p>
                 ))}
 
@@ -297,13 +321,16 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
       )}
 
       {totalPages > 1 && (
-        <nav aria-label="Teklif sayfaları" className="mt-8 flex items-center justify-center gap-2">
+        <nav
+          aria-label="Teklif sayfalarÃ„Â±"
+          className="mt-8 flex items-center justify-center gap-2"
+        >
           {page > 1 && (
             <Link
               href={`/admin/teklifler${buildQuery({ durum: status, q, sayfa: page - 1 })}`}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >
-              Önceki
+              Ãƒâ€“nceki
             </Link>
           )}
           <span className="numerals px-2 text-xs text-muted-strong">

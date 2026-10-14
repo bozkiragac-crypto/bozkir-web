@@ -36,7 +36,7 @@ function useDelete(
 }
 
 const btn =
-  'inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-strong transition-colors hover:border-red-300 hover:text-red-600 disabled:opacity-50';
+  'inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-strong transition-colors hover:border-red-300 hover:text-danger disabled:opacity-50';
 
 function DeleteButton({
   action,
@@ -59,7 +59,7 @@ export function DeleteProductButton({ id }: { id: string }) {
   return (
     <DeleteButton
       action={deleteProduct}
-      message="Bu ürünü silmek istediğinize emin misiniz?"
+      message="Bu ÃƒÂ¼rÃƒÂ¼nÃƒÂ¼ silmek istediÃ„Å¸inize emin misiniz?"
       id={id}
     />
   );
@@ -69,7 +69,7 @@ export function DeleteCampaignButton({ id }: { id: string }) {
   return (
     <DeleteButton
       action={deleteCampaign}
-      message="Bu kampanyayı silmek istediğinize emin misiniz?"
+      message="Bu kampanyayÃ„Â± silmek istediÃ„Å¸inize emin misiniz?"
       id={id}
     />
   );
@@ -79,7 +79,7 @@ export function DeleteCatalogButton({ id }: { id: string }) {
   return (
     <DeleteButton
       action={deleteCatalog}
-      message="Bu kataloğu silmek istediğinize emin misiniz?"
+      message="Bu kataloÃ„Å¸u silmek istediÃ„Å¸inize emin misiniz?"
       id={id}
     />
   );
@@ -99,6 +99,8 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
 
   useEffect(() => {
     if (!block && !ask) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setBlock(null);
@@ -106,7 +108,10 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
       }
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onKey);
+    };
   }, [block, ask]);
 
   async function run(mode: 'block' | 'cascade' | 'deactivate') {
@@ -121,7 +126,7 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
       return;
     }
 
-    // Bağlı ürün varsa üç seçenekli karar ekranı açılır.
+    // BaÃ„Å¸lÃ„Â± ÃƒÂ¼rÃƒÂ¼n varsa ÃƒÂ¼ÃƒÂ§ seÃƒÂ§enekli karar ekranÃ„Â± aÃƒÂ§Ã„Â±lÃ„Â±r.
     if (typeof res.productCount === 'number' && res.productCount > 0) {
       setBlock({
         count: res.productCount,
@@ -143,7 +148,7 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
           aria-labelledby="cat-del-title"
           className="w-full max-w-md rounded-lg border border-border bg-surface p-5 shadow-xl"
         >
-          <h2 id="cat-del-title" className="text-sm font-semibold text-fg">
+          <h2 id="cat-del-title" className="text-sm font-semibold text-foreground">
             &quot;{name}&quot; kategorisi silinemez
           </h2>
           <p className="mt-2 text-xs text-muted-strong">{block.error}</p>
@@ -152,11 +157,13 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
             <ul className="mt-3 space-y-1 rounded-md bg-surface-2 p-3 text-xs text-muted-strong">
               {block.samples.map((s) => (
                 <li key={s} className="truncate">
-                  • {s}
+                  Ã¢â‚¬Â¢ {s}
                 </li>
               ))}
               {block.count > block.samples.length && (
-                <li className="text-muted">ve {block.count - block.samples.length} ürün daha</li>
+                <li className="text-muted">
+                  ve {block.count - block.samples.length} ÃƒÂ¼rÃƒÂ¼n daha
+                </li>
               )}
             </ul>
           )}
@@ -166,9 +173,9 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
               type="button"
               disabled={busy}
               onClick={() => run('deactivate')}
-              className="w-full rounded-md border border-border px-3 py-2 text-xs font-medium text-fg transition-colors hover:bg-surface-2 disabled:opacity-50"
+              className="w-full rounded-md border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-surface-2 disabled:opacity-50"
             >
-              Kategoriyi pasifleştir · {block.count} ürün korunur
+              Kategoriyi pasifleÃ…Å¸tir Ã‚Â· {block.count} ÃƒÂ¼rÃƒÂ¼n korunur
             </button>
             <button
               type="button"
@@ -176,15 +183,15 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
               onClick={() => {
                 if (
                   confirm(
-                    `Bu kategorideki ${block.count} ürün kalıcı olarak silinecek. Emin misiniz?`,
+                    `Bu kategorideki ${block.count} ÃƒÂ¼rÃƒÂ¼n kalÃ„Â±cÃ„Â± olarak silinecek. Emin misiniz?`,
                   )
                 ) {
                   run('cascade');
                 }
               }}
-              className="w-full rounded-md border border-red-300 px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+              className="w-full rounded-md border border-red-300 px-3 py-2 text-xs font-medium text-danger transition-colors hover:bg-surface-2 disabled:opacity-50"
             >
-              Ürünleri de sil ve kategoriyi kaldır
+              ÃƒÅ“rÃƒÂ¼nleri de sil ve kategoriyi kaldÃ„Â±r
             </button>
             <button
               type="button"
@@ -192,7 +199,7 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
               onClick={() => setBlock(null)}
               className="w-full rounded-md px-3 py-2 text-xs text-muted-strong transition-colors hover:bg-surface-2 disabled:opacity-50"
             >
-              Vazgeç
+              VazgeÃƒÂ§
             </button>
           </div>
         </div>
@@ -210,18 +217,18 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
           aria-labelledby="cat-del-ask-title"
           className="w-full max-w-sm rounded-lg border border-border bg-surface p-5 shadow-xl"
         >
-          <h2 id="cat-del-ask-title" className="text-sm font-semibold text-fg">
-            Bu kategoriyi silmek istediğinize emin misiniz?
+          <h2 id="cat-del-ask-title" className="text-sm font-semibold text-foreground">
+            Bu kategoriyi silmek istediÃ„Å¸inize emin misiniz?
           </h2>
           <p className="mt-2 text-xs text-muted-strong">
-            Bağlı ürün varsa silme durdurulur; o durumda üç seçenek sunulur.
+            BaÃ„Å¸lÃ„Â± ÃƒÂ¼rÃƒÂ¼n varsa silme durdurulur; o durumda ÃƒÂ¼ÃƒÂ§ seÃƒÂ§enek sunulur.
           </p>
           <div className="mt-5 flex flex-col gap-2">
             <button
               type="button"
               disabled={busy}
               onClick={() => run('block')}
-              className="w-full rounded-md border border-red-300 px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+              className="w-full rounded-md border border-red-300 px-3 py-2 text-xs font-medium text-danger transition-colors hover:bg-surface-2 disabled:opacity-50"
             >
               Sil
             </button>
@@ -231,7 +238,7 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
               onClick={() => setAsk(false)}
               className="w-full rounded-md px-3 py-2 text-xs text-muted-strong transition-colors hover:bg-surface-2"
             >
-              Vazgeç
+              VazgeÃƒÂ§
             </button>
           </div>
         </div>
@@ -250,7 +257,7 @@ export function DeleteBrandButton({ id }: { id: string }) {
   return (
     <DeleteButton
       action={deleteBrand}
-      message="Bu markayı silmek istediğinize emin misiniz?"
+      message="Bu markayÃ„Â± silmek istediÃ„Å¸inize emin misiniz?"
       id={id}
     />
   );
@@ -260,7 +267,7 @@ export function DeleteQuoteButton({ id }: { id: string }) {
   return (
     <DeleteButton
       action={deleteQuoteRequest}
-      message="Bu teklif talebini silmek istediğinize emin misiniz?"
+      message="Bu teklif talebini silmek istediÃ„Å¸inize emin misiniz?"
       id={id}
     />
   );

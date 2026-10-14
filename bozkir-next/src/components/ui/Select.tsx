@@ -11,7 +11,7 @@ export function Select({ className, children, ...rest }: ComponentPropsWithoutRe
     <div className={cn('relative inline-block', className)}>
       <select
         {...rest}
-        className="h-11 w-full appearance-none rounded-full border border-border bg-transparent ps-4 pe-10 text-sm outline-none transition-colors focus-visible:border-foreground"
+        className="h-11 w-full appearance-none rounded-full border border-border bg-transparent ps-4 pe-10 text-base outline-none transition-colors focus-visible:border-foreground sm:text-sm"
       >
         {children}
       </select>

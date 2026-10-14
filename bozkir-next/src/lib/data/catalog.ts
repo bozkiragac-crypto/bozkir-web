@@ -4,7 +4,7 @@ import { DATA_TAGS } from '@/lib/data/tags';
 import type { Locale } from '@/i18n/config';
 import type { Category } from '@/types/category';
 import type { Product, ProductFilters, ProductQueryResult } from '@/types/product';
-import { fallbackCategories, primaryCategorySlugs } from '@/data/categories';
+import { fallbackCategories } from '@/data/categories';
 import { getDb, hasDb } from '@/lib/db/client';
 import { products as productsTable } from '@/lib/db/schema';
 import { publicUrl } from '@/lib/storage/s3';
@@ -304,14 +304,6 @@ export async function fetchCategories(locale?: Locale): Promise<Category[]> {
   return merged.sort(
     (a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99) || a.name.localeCompare(b.name, 'tr'),
   );
-}
-
-export async function fetchPrimaryCategories(): Promise<Category[]> {
-  const all = await fetchCategories();
-  const order = new Map(primaryCategorySlugs.map((slug, i) => [slug, i]));
-  return all
-    .filter((c) => order.has(c.slug))
-    .sort((a, b) => (order.get(a.slug) ?? 99) - (order.get(b.slug) ?? 99));
 }
 
 /** Tek ürünün ham görsel alanı (legacy /api/image fallback için). */

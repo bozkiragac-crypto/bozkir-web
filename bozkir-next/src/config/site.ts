@@ -35,5 +35,3 @@ export const siteConfig = {
     { label: 'İletişim', href: '/iletisim', key: 'contact' },
   ],
 } as const;
-
-export type NavKey = (typeof siteConfig.nav)[number]['key'];

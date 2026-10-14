@@ -10,10 +10,6 @@ export function setLenis(lenis: Lenis | null): void {
   instance = lenis;
 }
 
-export function getLenis(): Lenis | null {
-  return instance;
-}
-
 /** Sayfayı en üste kaydırır (Lenis varsa yumuşak, yoksa anında). */
 export function scrollPageToTop(): void {
   const lenis = instance;

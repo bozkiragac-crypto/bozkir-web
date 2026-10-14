@@ -20,14 +20,14 @@ export function PasswordForm() {
     setError('');
     setDone(false);
     if (next !== confirm) {
-      setError('Yeni şifreler eşleşmiyor.');
+      setError('Yeni ÅŸifreler eÅŸleÅŸmiyor.');
       return;
     }
     setBusy(true);
     const res = await changeOwnPassword(current, next);
     setBusy(false);
     if (!res.ok) {
-      setError(res.error ?? 'Şifre değiştirilemedi.');
+      setError(res.error ?? 'Åifre deÄŸiÅŸtirilemedi.');
       return;
     }
     setCurrent('');
@@ -39,12 +39,12 @@ export function PasswordForm() {
   return (
     <form onSubmit={submit} className="mt-6 max-w-md rounded-xl border border-border bg-surface p-5">
       <p className="flex items-center gap-2 font-medium">
-        <KeyRound className="h-4 w-4" /> Şifre değiştir
+        <KeyRound className="h-4 w-4" /> Åifre deÄŸiÅŸtir
       </p>
 
       <div className="mt-4 grid gap-4">
         <label className="grid gap-1">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Mevcut şifre</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Mevcut ÅŸifre</span>
           <input
             className={field}
             type="password"
@@ -54,7 +54,7 @@ export function PasswordForm() {
           />
         </label>
         <label className="grid gap-1">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Yeni şifre (min 8)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Yeni ÅŸifre (min 8)</span>
           <input
             className={field}
             type="password"
@@ -64,7 +64,7 @@ export function PasswordForm() {
           />
         </label>
         <label className="grid gap-1">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Yeni şifre (tekrar)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Yeni ÅŸifre (tekrar)</span>
           <input
             className={field}
             type="password"
@@ -75,10 +75,10 @@ export function PasswordForm() {
         </label>
       </div>
 
-      {error && <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="mt-4 rounded-md border border-red-200 bg-surface-2 p-3 text-sm text-danger">{error}</p>}
       {done && (
-        <p className="mt-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-          Şifreniz güncellendi.
+        <p className="mt-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-success">
+          Åifreniz gÃ¼ncellendi.
         </p>
       )}
 
@@ -88,7 +88,7 @@ export function PasswordForm() {
         className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background disabled:opacity-50"
       >
         {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-        Şifreyi güncelle
+        Åifreyi gÃ¼ncelle
       </button>
     </form>
   );

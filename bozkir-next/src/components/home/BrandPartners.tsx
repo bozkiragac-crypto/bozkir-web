@@ -28,7 +28,7 @@ export async function BrandPartners({ brands, locale }: { brands: Brand[]; local
         alt={brand.name}
         width={brand.width ?? 140}
         height={brand.height ?? 56}
-        className="h-12 w-auto object-contain opacity-60 grayscale transition-all duration-500 group-hover:opacity-100 group-hover:grayscale-0"
+        className="h-12 w-auto object-contain transition-all duration-500 md:opacity-60 md:grayscale md:group-hover:opacity-100 md:group-hover:grayscale-0"
       />
       <div>
         <p className="text-sm font-medium">{brand.name}</p>

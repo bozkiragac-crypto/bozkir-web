@@ -5,7 +5,7 @@ import { FileText, Upload, X } from 'lucide-react';
 import { uploadMedia } from '@/lib/admin/safe-actions';
 import { MAX_PDF_MB } from '@/lib/media';
 
-/** Katalog PDF'i yükler; yüklenen dosyanın genel URL'ini tutar. */
+/** Katalog PDF'i yÃ¼kler; yÃ¼klenen dosyanÄ±n genel URL'ini tutar. */
 export function PdfUpload({ value, onChange }: { value: string; onChange: (url: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -39,7 +39,7 @@ export function PdfUpload({ value, onChange }: { value: string; onChange: (url: 
           className="inline-flex items-center gap-2 rounded-md border border-dashed border-border-strong px-3 py-1.5 text-xs font-medium transition-colors hover:bg-surface-2 disabled:opacity-50"
         >
           <Upload className="h-3.5 w-3.5" />
-          {busy ? 'Yükleniyor...' : 'PDF Yükle'}
+          {busy ? 'YÃ¼kleniyor...' : 'PDF YÃ¼kle'}
         </button>
         <input
           ref={inputRef}
@@ -59,17 +59,17 @@ export function PdfUpload({ value, onChange }: { value: string; onChange: (url: 
           <button
             type="button"
             onClick={() => onChange('')}
-            aria-label="PDF kaldır"
-            className="flex h-8 w-8 flex-none items-center justify-center rounded-full text-muted-strong hover:text-red-600"
+            aria-label="PDF kaldÄ±r"
+            className="flex h-8 w-8 flex-none items-center justify-center rounded-full text-muted-strong hover:text-danger"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
       ) : (
-        <p className="mt-3 text-xs text-muted">PDF yüklenmedi (en fazla {MAX_PDF_MB} MB).</p>
+        <p className="mt-3 text-xs text-muted">PDF yÃ¼klenmedi (en fazla {MAX_PDF_MB} MB).</p>
       )}
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-sm text-danger">{error}</p>}
     </div>
   );
 }

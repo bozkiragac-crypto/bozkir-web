@@ -35,7 +35,7 @@ export function UsersManager({ users, currentId }: { users: AdminUserRow[]; curr
     setError(null);
     const res = await fn();
     setBusy(false);
-    if (!res.ok) setError(res.error ?? 'İşlem başarısız.');
+    if (!res.ok) setError(res.error ?? 'Ä°ÅŸlem baÅŸarÄ±sÄ±z.');
     else router.refresh();
     return res.ok;
   }
@@ -44,19 +44,19 @@ export function UsersManager({ users, currentId }: { users: AdminUserRow[]; curr
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">Kullanıcılar</h1>
-          <p className="mt-1 text-sm text-muted-strong">{users.length} yönetici hesabı</p>
+          <h1 className="text-2xl font-medium tracking-tight">KullanÄ±cÄ±lar</h1>
+          <p className="mt-1 text-sm text-muted-strong">{users.length} yÃ¶netici hesabÄ±</p>
         </div>
         <button
           type="button"
           onClick={() => setCreating((v) => !v)}
           className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90"
         >
-          <Plus className="h-4 w-4" /> Yeni Kullanıcı
+          <Plus className="h-4 w-4" /> Yeni KullanÄ±cÄ±
         </button>
       </div>
 
-      {error && <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <p className="mt-4 rounded-md border border-red-200 bg-surface-2 p-3 text-sm text-danger">{error}</p>}
 
       {creating && <CreateForm busy={busy} onCancel={() => setCreating(false)} onSubmit={(input) => run(() => createUser(input)).then((ok) => ok && setCreating(false))} />}
 
@@ -64,12 +64,12 @@ export function UsersManager({ users, currentId }: { users: AdminUserRow[]; curr
         <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="bg-surface text-foreground">
             <tr>
-              <th className="p-4 font-medium">Kullanıcı adı</th>
+              <th className="p-4 font-medium">KullanÄ±cÄ± adÄ±</th>
               <th className="p-4 font-medium">Ad</th>
               <th className="p-4 font-medium">Rol</th>
               <th className="p-4 font-medium">Durum</th>
               <th className="p-4 font-medium">2FA</th>
-              <th className="p-4 font-medium">Son giriş</th>
+              <th className="p-4 font-medium">Son giriÅŸ</th>
               <th className="p-4" />
             </tr>
           </thead>
@@ -96,10 +96,10 @@ function CreateForm({
   const [form, setForm] = useState<UserInput>({ username: '', name: '', email: '', role: 'editor', isActive: true, password: '' });
   return (
     <div className="mt-6 rounded-xl border border-border bg-surface p-5">
-      <p className="font-medium">Yeni kullanıcı</p>
+      <p className="font-medium">Yeni kullanÄ±cÄ±</p>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="grid gap-1">
-          <span className="text-xs uppercase tracking-[0.14em] text-muted">Kullanıcı adı *</span>
+          <span className="text-xs uppercase tracking-[0.14em] text-muted">KullanÄ±cÄ± adÄ± *</span>
           <input className={field} value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
         </label>
         <label className="grid gap-1">
@@ -113,12 +113,12 @@ function CreateForm({
         <label className="grid gap-1">
           <span className="text-xs uppercase tracking-[0.14em] text-muted">Rol</span>
           <select className={field} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as 'owner' | 'editor' })}>
-            <option value="editor">Editör</option>
+            <option value="editor">EditÃ¶r</option>
             <option value="owner">Sahip</option>
           </select>
         </label>
         <label className="grid gap-1 sm:col-span-2">
-          <span className="text-xs uppercase tracking-[0.14em] text-muted">Şifre * (min 8)</span>
+          <span className="text-xs uppercase tracking-[0.14em] text-muted">Åifre * (min 8)</span>
           <input className={field} type="text" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </label>
       </div>
@@ -132,7 +132,7 @@ function CreateForm({
           <Save className="h-4 w-4" /> Kaydet
         </button>
         <button type="button" onClick={onCancel} className="h-11 rounded-full border border-border px-5 text-sm">
-          İptal
+          Ä°ptal
         </button>
       </div>
     </div>
@@ -172,7 +172,7 @@ function UserRow({
         </td>
         <td className="p-4">
           <select className={field} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as 'owner' | 'editor' })}>
-            <option value="editor">Editör</option>
+            <option value="editor">EditÃ¶r</option>
             <option value="owner">Sahip</option>
           </select>
         </td>
@@ -182,9 +182,9 @@ function UserRow({
             Aktif
           </label>
         </td>
-        <td className="p-4 text-muted-strong">{user.totpEnabled ? 'Açık' : '—'}</td>
+        <td className="p-4 text-muted-strong">{user.totpEnabled ? 'AÃ§Ä±k' : 'â€”'}</td>
         <td className="p-4">
-          <input className={field} placeholder="Yeni şifre (ops.)" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <input className={field} placeholder="Yeni ÅŸifre (ops.)" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </td>
         <td className="p-4 text-right">
           <div className="flex justify-end gap-2">
@@ -197,7 +197,7 @@ function UserRow({
               Kaydet
             </button>
             <button type="button" onClick={() => setEditing(false)} className="rounded-md border border-border px-3 py-1.5 text-xs">
-              İptal
+              Ä°ptal
             </button>
           </div>
         </td>
@@ -211,20 +211,20 @@ function UserRow({
         {user.username}
         {isSelf && <span className="ml-2 rounded-full bg-surface-2 px-2 py-0.5 text-[0.6rem] uppercase text-muted">siz</span>}
       </td>
-      <td className="p-4 text-muted-strong">{user.name ?? '—'}</td>
+      <td className="p-4 text-muted-strong">{user.name ?? 'â€”'}</td>
       <td className="p-4">
         <span className={cn('rounded-full px-2.5 py-1 text-xs', user.role === 'owner' ? 'bg-foreground text-background' : 'bg-surface-2 text-muted-strong')}>
-          {user.role === 'owner' ? 'Sahip' : 'Editör'}
+          {user.role === 'owner' ? 'Sahip' : 'EditÃ¶r'}
         </span>
       </td>
       <td className="p-4">
-        <span className={cn('rounded-full px-2.5 py-1 text-xs', user.isActive ? 'bg-green-100 text-green-800' : 'bg-surface-2 text-muted-strong')}>
+        <span className={cn('rounded-full px-2.5 py-1 text-xs', user.isActive ? 'bg-surface-2 text-success' : 'bg-surface-2 text-muted-strong')}>
           {user.isActive ? 'Aktif' : 'Pasif'}
         </span>
       </td>
       <td className="p-4">
-        <span className={cn('rounded-full px-2.5 py-1 text-xs', user.totpEnabled ? 'bg-green-100 text-green-800' : 'bg-surface-2 text-muted-strong')}>
-          {user.totpEnabled ? 'Açık' : 'Kapalı'}
+        <span className={cn('rounded-full px-2.5 py-1 text-xs', user.totpEnabled ? 'bg-surface-2 text-success' : 'bg-surface-2 text-muted-strong')}>
+          {user.totpEnabled ? 'AÃ§Ä±k' : 'KapalÄ±'}
         </span>
       </td>
       <td className="p-4 text-muted-strong">{fmt(user.lastLoginAt)}</td>
@@ -235,20 +235,20 @@ function UserRow({
             onClick={() => setEditing(true)}
             className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-surface-2"
           >
-            <KeyRound className="h-3.5 w-3.5" /> Düzenle
+            <KeyRound className="h-3.5 w-3.5" /> DÃ¼zenle
           </button>
           {user.totpEnabled && (
             <button
               type="button"
               disabled={busy}
               onClick={() => {
-                if (confirm(`${user.username} için 2FA sıfırlansın mı? Kullanıcı bir sonraki girişte kurulum yapar.`)) {
+                if (confirm(`${user.username} iÃ§in 2FA sÄ±fÄ±rlansÄ±n mÄ±? KullanÄ±cÄ± bir sonraki giriÅŸte kurulum yapar.`)) {
                   onRun(() => resetUserTotp(user.id));
                 }
               }}
               className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-strong hover:border-amber-300 hover:text-amber-700 disabled:opacity-50"
             >
-              <ShieldOff className="h-3.5 w-3.5" /> 2FA sıfırla
+              <ShieldOff className="h-3.5 w-3.5" /> 2FA sÄ±fÄ±rla
             </button>
           )}
           {!isSelf && (
@@ -258,7 +258,7 @@ function UserRow({
               onClick={() => {
                 if (confirm(`${user.username} silinsin mi?`)) onRun(() => deleteUser(user.id));
               }}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-strong hover:border-red-300 hover:text-red-600 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-strong hover:border-red-300 hover:text-danger disabled:opacity-50"
             >
               <Trash2 className="h-3.5 w-3.5" /> Sil
             </button>

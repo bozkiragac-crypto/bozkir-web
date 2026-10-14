@@ -92,7 +92,7 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('catalog.searchPlaceholder')}
           aria-label={t('catalog.search')}
-          className="h-11 flex-1 bg-transparent text-sm outline-none placeholder:text-muted"
+          className="h-11 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
         />
         {query && (
           <button
@@ -112,6 +112,8 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
       <button
         type="button"
         onClick={() => setSheet(true)}
+        aria-expanded={sheet}
+        aria-controls="product-filter-sheet"
         className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border text-sm font-medium lg:hidden"
       >
         <SlidersHorizontal className="h-4 w-4" aria-hidden />
@@ -185,6 +187,7 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
       {sheet && (
         <div
           ref={sheetRef}
+          id="product-filter-sheet"
           className="fixed inset-0 z-[200] lg:hidden"
           role="dialog"
           aria-modal="true"
@@ -203,7 +206,7 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
                 type="button"
                 onClick={() => setSheet(false)}
                 aria-label={t('search.close')}
-                className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface-2"
+                className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface-2"
               >
                 <X className="h-5 w-5" />
               </button>

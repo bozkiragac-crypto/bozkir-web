@@ -18,8 +18,6 @@ export function PanelGrid({ className, children }: { className?: string; childre
 
 const surface = 'flex flex-col bg-surface';
 
-export { surface as panelSurface };
-
 /** Tek panel hücresi (yüzey). */
 export function Panel({
   className,

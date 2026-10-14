@@ -12,10 +12,7 @@ import type { Locale } from '@/i18n/config';
 const getAllCategoriesCached = unstable_cache(
   async (): Promise<Category[]> => {
     const db = getDb()!;
-    const rows = await db
-      .select()
-      .from(categories)
-      .orderBy(asc(categories.sortOrder));
+    const rows = await db.select().from(categories).orderBy(asc(categories.sortOrder));
 
     return rows.map((r) => ({
       id: String(r.id),
@@ -42,15 +39,6 @@ const getAllCategoriesCached = unstable_cache(
   { tags: [DATA_TAGS.products], revalidate: 300 },
 );
 
-const getCategoriesCached = unstable_cache(
-  async (): Promise<Category[]> => {
-    const all = await getAllCategoriesCached();
-    return all.filter((c) => c.isActive !== false);
-  },
-  ['categories:active'],
-  { tags: [DATA_TAGS.products], revalidate: 300 },
-);
-
 /**
  * Pasif kategoriler dahil tüm meta satırları.
  *
@@ -68,22 +56,17 @@ export async function fetchAllCategoryMeta(locale?: Locale): Promise<Category[]>
   }
 }
 
-/** DB kategorileri (locale'e göre ad/açıklama seçilir). DB boşsa boş dizi. */
-export async function fetchCategoryMeta(locale?: Locale): Promise<Category[]> {
-  if (!hasDb()) return [];
-  try {
-    const all = await getCategoriesCached();
-    return all.map((c) => localize(c, locale));
-  } catch {
-    return [];
-  }
-}
-
 function localize(c: Category, locale?: Locale): Category {
   return {
     ...c,
     name: pickLocaleText(c.name, locale, c.nameEn, c.nameAr),
     description: pickLocaleText(c.description, locale, c.descriptionEn, c.descriptionAr),
-    shortDescription: pickLocaleText(c.shortDescription ?? '', locale, c.shortDescriptionEn, c.shortDescriptionAr) || undefined,
+    shortDescription:
+      pickLocaleText(
+        c.shortDescription ?? '',
+        locale,
+        c.shortDescriptionEn,
+        c.shortDescriptionAr,
+      ) || undefined,
   };
 }
