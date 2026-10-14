@@ -1,5 +1,24 @@
 @import 'tailwindcss';
 
+/* Renk, `@layer components`'te tanımlanır ki `text-*` utility'leri (ör. koyu
+   zemin üzerinde `text-white/75`) rengi geçersiz kılabilsin. Aksi halde
+   `.text-eyebrow` açık temada koyu renkle koyu heroların üstünde okunmaz. */
+@layer components {
+  .text-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted-strong);
+  }
+
+  .text-caption {
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    color: var(--muted-strong);
+  }
+}
+
 /* ==========================================================================
    BOZKIR AĞAÇ — DESIGN TOKENS
    Editoryal/magazine yön: Fraunces (display) + Inter (UI).
@@ -291,20 +310,6 @@ html[data-compare='1'] [data-product-cta] {
     font-style: italic;
     font-weight: 300;
     letter-spacing: -0.01em;
-  }
-
-  .text-eyebrow {
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted-strong);
-  }
-
-  .text-caption {
-    font-size: 0.78rem;
-    letter-spacing: 0.02em;
-    color: var(--muted-strong);
   }
 
   .rule {
