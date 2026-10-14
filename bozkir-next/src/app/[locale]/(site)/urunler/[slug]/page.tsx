@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getProductBySlug, getRelatedProducts } from '@/lib/api/products';
 import { siteConfig } from '@/config/site';
 import { telHref } from '@/lib/phone';
-import { buildMetadata, breadcrumbJsonLd, absoluteUrl, localeUrl } from '@/lib/seo';
+import { buildMetadata, breadcrumbJsonLd, absoluteUrl, localeUrl, jsonLdString } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
@@ -116,12 +116,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdString(productJsonLd) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdString(
             breadcrumbJsonLd(
               [
                 { name: dict.common.home, path: '/' },
@@ -168,6 +168,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   <ButtonLink
                     href={`/teklif-al?urun=${encodeURIComponent(product.slug)}`}
                     size="lg"
+                    data-cursor-label={dict.common.getQuote}
                   >
                     {dict.common.getQuote}
                   </ButtonLink>

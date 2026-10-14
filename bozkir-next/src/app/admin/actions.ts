@@ -4,12 +4,35 @@ import bcrypt from 'bcryptjs';
 import { and, eq, inArray, or } from 'drizzle-orm';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getDb } from '@/lib/db/client';
-import { adminUsers, brands, campaigns, catalogs, categories, contentBlocks, contentItems, products, quoteRequests } from '@/lib/db/schema';
+import {
+  adminUsers,
+  brands,
+  campaigns,
+  catalogs,
+  categories,
+  contentBlocks,
+  contentItems,
+  products,
+  quoteRequests,
+} from '@/lib/db/schema';
 import { createSession, destroySession } from '@/lib/auth/session';
-import { parseImageField, serializeImageField, validateUpload, validateImageSignature, MAX_PDF_MB, ALLOWED_PDF_MIME } from '@/lib/media';
+import {
+  parseImageField,
+  serializeImageField,
+  validateUpload,
+  validateImageSignature,
+  MAX_PDF_MB,
+  ALLOWED_PDF_MIME,
+} from '@/lib/media';
 import { optimizeImage } from '@/lib/image-optimize';
 import { DATA_TAGS } from '@/lib/data/tags';
-import { deleteObject, objectKeyFromUrl, putObject, publicUrl, toObjectKey } from '@/lib/storage/s3';
+import {
+  deleteObject,
+  objectKeyFromUrl,
+  putObject,
+  publicUrl,
+  toObjectKey,
+} from '@/lib/storage/s3';
 import { logActivity, requireAdminUser, requireOwner } from '@/lib/admin/guard';
 import { createTotpSecret, totpKeyUri, verifyTotp } from '@/lib/auth/totp';
 import { parseCsv } from '@/lib/csv';
@@ -20,7 +43,8 @@ import { slugify } from '@/lib/slug';
 
 function extOf(name: string, type: string) {
   const fromName = name.split('.').pop()?.toLowerCase();
-  if (fromName && /^(jpe?g|png|webp|avif|pdf)$/.test(fromName)) return fromName === 'jpg' ? 'jpg' : fromName;
+  if (fromName && /^(jpe?g|png|webp|avif|pdf)$/.test(fromName))
+    return fromName === 'jpg' ? 'jpg' : fromName;
   if (type === 'application/pdf') return 'pdf';
   if (type === 'image/png') return 'png';
   if (type === 'image/avif') return 'avif';
@@ -51,7 +75,11 @@ export interface SignInResult {
 const MAX_LOGIN_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS ?? 5);
 const LOGIN_LOCK_MINUTES = Number(process.env.LOGIN_LOCK_MINUTES ?? 15);
 
-export async function signIn(identifier: string, password: string, totp?: string): Promise<SignInResult> {
+export async function signIn(
+  identifier: string,
+  password: string,
+  totp?: string,
+): Promise<SignInResult> {
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
@@ -60,7 +88,10 @@ export async function signIn(identifier: string, password: string, totp?: string
 
   // Hesap kilitlemeye ek olarak kaba kuvvet denemelerini IP/hesap bazında sınırla.
   if (isRateLimited(`login:${id}`, 10)) {
-    return { ok: false, error: 'Çok fazla giriş denemesi. Lütfen birkaç dakika sonra tekrar deneyin.' };
+    return {
+      ok: false,
+      error: 'Çok fazla giriş denemesi. Lütfen birkaç dakika sonra tekrar deneyin.',
+    };
   }
 
   const rows = await db
@@ -74,7 +105,10 @@ export async function signIn(identifier: string, password: string, totp?: string
   // Kilitliyse kalan süreyi bildir.
   if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
     const mins = Math.max(1, Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60_000));
-    return { ok: false, error: `Hesap geçici olarak kilitli. ${mins} dakika sonra tekrar deneyin.` };
+    return {
+      ok: false,
+      error: `Hesap geçici olarak kilitli. ${mins} dakika sonra tekrar deneyin.`,
+    };
   }
 
   const valid = await bcrypt.compare(password, user.passwordHash);
@@ -88,7 +122,13 @@ export async function signIn(identifier: string, password: string, totp?: string
         lockedUntil: shouldLock ? new Date(Date.now() + LOGIN_LOCK_MINUTES * 60_000) : null,
       })
       .where(eq(adminUsers.id, user.id));
-    await logActivity(user, 'login_failed', 'auth', user.id, `Başarısız giriş denemesi (${attempts})`);
+    await logActivity(
+      user,
+      'login_failed',
+      'auth',
+      user.id,
+      `Başarısız giriş denemesi (${attempts})`,
+    );
     return {
       ok: false,
       error: shouldLock
@@ -157,7 +197,12 @@ export async function changeOwnPassword(
 }
 
 /** 2FA kurulumu başlatır: secret + otpauth URI döndürür (henüz etkinleştirmez). */
-export async function startTotpSetup(): Promise<{ ok: boolean; secret?: string; uri?: string; error?: string }> {
+export async function startTotpSetup(): Promise<{
+  ok: boolean;
+  secret?: string;
+  uri?: string;
+  error?: string;
+}> {
   const admin = await requireAdminUser();
   const secret = createTotpSecret();
   const uri = totpKeyUri(admin.username ?? admin.email ?? 'admin', secret);
@@ -165,13 +210,19 @@ export async function startTotpSetup(): Promise<{ ok: boolean; secret?: string; 
 }
 
 /** Girilen kodla 2FA'yı doğrulayıp etkinleştirir. */
-export async function enableTotp(secret: string, code: string): Promise<{ ok: boolean; error?: string }> {
+export async function enableTotp(
+  secret: string,
+  code: string,
+): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
   const ok = await verifyTotp(secret, code);
   if (!ok) return { ok: false, error: 'Kod doğrulanamadı.' };
-  await db.update(adminUsers).set({ totpSecret: secret, totpEnabled: true }).where(eq(adminUsers.id, admin.id));
+  await db
+    .update(adminUsers)
+    .set({ totpSecret: secret, totpEnabled: true })
+    .where(eq(adminUsers.id, admin.id));
   await logActivity(admin, 'update', 'auth', admin.id, '2FA etkinleştirildi');
   return { ok: true };
 }
@@ -184,7 +235,10 @@ export async function disableTotp(code: string): Promise<{ ok: boolean; error?: 
   if (!admin.totpSecret || !admin.totpEnabled) return { ok: false, error: '2FA zaten kapalı.' };
   const ok = await verifyTotp(admin.totpSecret, code);
   if (!ok) return { ok: false, error: 'Kod doğrulanamadı.' };
-  await db.update(adminUsers).set({ totpEnabled: false, totpSecret: null }).where(eq(adminUsers.id, admin.id));
+  await db
+    .update(adminUsers)
+    .set({ totpEnabled: false, totpSecret: null })
+    .where(eq(adminUsers.id, admin.id));
   await logActivity(admin, 'update', 'auth', admin.id, '2FA kapatıldı');
   return { ok: true };
 }
@@ -212,7 +266,8 @@ export async function uploadMedia(
 
   const isPdf = ALLOWED_PDF_MIME.includes(file.type);
   if (isPdf) {
-    if (file.size > MAX_PDF_MB * 1024 * 1024) return { error: `PDF en fazla ${MAX_PDF_MB} MB olabilir.` };
+    if (file.size > MAX_PDF_MB * 1024 * 1024)
+      return { error: `PDF en fazla ${MAX_PDF_MB} MB olabilir.` };
   } else {
     const invalid = validateUpload(file);
     if (invalid) return { error: invalid };
@@ -278,6 +333,9 @@ export interface ProductInput {
   code: string;
   cat: string;
   face: string;
+  /** Virgülle ayrılmış renk / kalınlık seçenekleri. */
+  colors?: string;
+  thicknesses?: string;
   images: string[];
   isActive?: boolean;
   /** Çok dilli alanlar (opsiyonel); boşsa TR değeri kullanılır. */
@@ -289,7 +347,9 @@ export interface ProductInput {
   seoDescription?: string;
 }
 
-export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; error?: string; id?: string }> {
+export async function saveProduct(
+  input: ProductInput,
+): Promise<{ ok: boolean; error?: string; id?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
@@ -330,9 +390,15 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
   const catAr = input.catAr?.trim() || null;
   const seoTitle = input.seoTitle?.trim() || null;
   const seoDescription = input.seoDescription?.trim() || null;
+  const colors = input.colors?.trim() || null;
+  const thicknesses = input.thicknesses?.trim() || null;
 
   if (input.id) {
-    const prev = await db.select({ img: products.img }).from(products).where(eq(products.id, input.id)).limit(1);
+    const prev = await db
+      .select({ img: products.img })
+      .from(products)
+      .where(eq(products.id, input.id))
+      .limit(1);
     const oldKeys = parseImageField(prev[0]?.img ?? '')
       .map((v) => toObjectKey(v))
       .filter((k): k is string => !!k);
@@ -345,6 +411,8 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
         code,
         cat,
         face: input.face.trim() || null,
+        colors,
+        thicknesses,
         img,
         isActive,
         nameEn,
@@ -371,6 +439,8 @@ export async function saveProduct(input: ProductInput): Promise<{ ok: boolean; e
       code,
       cat,
       face: input.face.trim() || null,
+      colors,
+      thicknesses,
       img,
       isActive,
       nameEn,
@@ -392,7 +462,11 @@ export async function deleteProduct(id: string): Promise<{ ok: boolean; error?: 
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const prev = await db.select({ img: products.img, name: products.name }).from(products).where(eq(products.id, id)).limit(1);
+  const prev = await db
+    .select({ img: products.img, name: products.name })
+    .from(products)
+    .where(eq(products.id, id))
+    .limit(1);
   const keys = parseImageField(prev[0]?.img ?? '')
     .map((v) => toObjectKey(v))
     .filter((k): k is string => !!k);
@@ -405,12 +479,21 @@ export async function deleteProduct(id: string): Promise<{ ok: boolean; error?: 
   return { ok: true };
 }
 
-export async function setProductActive(id: string, isActive: boolean): Promise<{ ok: boolean; error?: string }> {
+export async function setProductActive(
+  id: string,
+  isActive: boolean,
+): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
   await db.update(products).set({ isActive }).where(eq(products.id, id));
-  await logActivity(admin, 'update', 'product', id, isActive ? 'Ürün aktifleştirildi' : 'Ürün pasifleştirildi');
+  await logActivity(
+    admin,
+    'update',
+    'product',
+    id,
+    isActive ? 'Ürün aktifleştirildi' : 'Ürün pasifleştirildi',
+  );
   await flushSiteCaches();
   return { ok: true };
 }
@@ -420,7 +503,10 @@ export async function bulkDeleteProducts(ids: string[]): Promise<{ ok: boolean; 
   const db = getDb();
   if (!db || ids.length === 0) return { ok: false, deleted: 0 };
 
-  const rows = await db.select({ img: products.img }).from(products).where(inArray(products.id, ids));
+  const rows = await db
+    .select({ img: products.img })
+    .from(products)
+    .where(inArray(products.id, ids));
   for (const row of rows) {
     const keys = parseImageField(row.img ?? '')
       .map((v) => toObjectKey(v))
@@ -455,7 +541,12 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
   const iName = idx('name');
   const iCat = idx('cat');
   if (iCode === -1 || iName === -1 || iCat === -1) {
-    return { ok: false, error: 'CSV başlığı code,name,cat en az içermeli.', created: 0, updated: 0 };
+    return {
+      ok: false,
+      error: 'CSV başlığı code,name,cat en az içermeli.',
+      created: 0,
+      updated: 0,
+    };
   }
   const iFace = idx('face');
   const iImg = idx('img');
@@ -477,7 +568,8 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
     const face = iFace >= 0 ? (r[iFace] ?? '').trim() || null : null;
     const imgRaw = iImg >= 0 ? (r[iImg] ?? '').trim() : '';
     const img = imgRaw ? (objectKeyFromUrl(imgRaw) ?? imgRaw) : null;
-    const isActive = iActive >= 0 ? !/^(0|false|pasif|hayir)$/i.test((r[iActive] ?? '').trim()) : true;
+    const isActive =
+      iActive >= 0 ? !/^(0|false|pasif|hayir)$/i.test((r[iActive] ?? '').trim()) : true;
     const nameEn = iNameEn >= 0 ? (r[iNameEn] ?? '').trim() || null : null;
     const nameAr = iNameAr >= 0 ? (r[iNameAr] ?? '').trim() || null : null;
     const catEn = iCatEn >= 0 ? (r[iCatEn] ?? '').trim() || null : null;
@@ -501,13 +593,21 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
     } else {
       created++;
       if (!dryRun) {
-        await db.insert(products).values({ code, name, cat, face, img, isActive, nameEn, nameAr, catEn, catAr });
+        await db
+          .insert(products)
+          .values({ code, name, cat, face, img, isActive, nameEn, nameAr, catEn, catAr });
       }
     }
   }
 
   if (!dryRun) {
-    await logActivity(admin, 'update', 'product', undefined, `CSV içe aktarma: ${created} yeni, ${updated} güncelleme`);
+    await logActivity(
+      admin,
+      'update',
+      'product',
+      undefined,
+      `CSV içe aktarma: ${created} yeni, ${updated} güncelleme`,
+    );
     await flushSiteCaches();
   }
   return { ok: true, created, updated };
@@ -534,7 +634,9 @@ export interface CampaignInput {
   linkLabelAr?: string;
 }
 
-export async function saveCampaign(input: CampaignInput): Promise<{ ok: boolean; error?: string; id?: string }> {
+export async function saveCampaign(
+  input: CampaignInput,
+): Promise<{ ok: boolean; error?: string; id?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
@@ -579,7 +681,11 @@ export async function deleteCampaign(id: string): Promise<{ ok: boolean; error?:
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const prev = await db.select({ imageUrl: campaigns.imageUrl, title: campaigns.title }).from(campaigns).where(eq(campaigns.id, id)).limit(1);
+  const prev = await db
+    .select({ imageUrl: campaigns.imageUrl, title: campaigns.title })
+    .from(campaigns)
+    .where(eq(campaigns.id, id))
+    .limit(1);
   await db.delete(campaigns).where(eq(campaigns.id, id));
 
   const url = prev[0]?.imageUrl;
@@ -613,14 +719,16 @@ function slugifyCatalog(value: string): string {
   return slugify(value);
 }
 
-export async function saveCatalog(input: CatalogInput): Promise<{ ok: boolean; error?: string; id?: string }> {
+export async function saveCatalog(
+  input: CatalogInput,
+): Promise<{ ok: boolean; error?: string; id?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
   const title = input.title.trim();
   if (!title) return { ok: false, error: 'Başlık zorunludur.' };
-  const slug = (input.slug.trim() || slugifyCatalog(title)) || crypto.randomUUID();
+  const slug = input.slug.trim() || slugifyCatalog(title) || crypto.randomUUID();
 
   const coverInput = input.cover.trim();
   const pdfInput = input.pdfUrl.trim();
@@ -658,7 +766,11 @@ export async function deleteCatalog(id: string): Promise<{ ok: boolean; error?: 
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const prev = await db.select({ cover: catalogs.cover, pdfUrl: catalogs.pdfUrl, title: catalogs.title }).from(catalogs).where(eq(catalogs.id, id)).limit(1);
+  const prev = await db
+    .select({ cover: catalogs.cover, pdfUrl: catalogs.pdfUrl, title: catalogs.title })
+    .from(catalogs)
+    .where(eq(catalogs.id, id))
+    .limit(1);
   await db.delete(catalogs).where(eq(catalogs.id, id));
 
   for (const url of [prev[0]?.cover, prev[0]?.pdfUrl]) {
@@ -693,14 +805,16 @@ export interface CategoryInput {
   seoDescription?: string;
 }
 
-export async function saveCategory(input: CategoryInput): Promise<{ ok: boolean; error?: string; id?: string }> {
+export async function saveCategory(
+  input: CategoryInput,
+): Promise<{ ok: boolean; error?: string; id?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
   const name = input.name.trim();
   if (!name) return { ok: false, error: 'Ad zorunludur.' };
-  const slug = (input.slug.trim() || slugify(name)) || crypto.randomUUID();
+  const slug = input.slug.trim() || slugify(name) || crypto.randomUUID();
   const thumb = input.thumbnail.trim();
   const hero = input.heroImage.trim();
 
@@ -768,7 +882,13 @@ async function findProductsInCategory(slug: string): Promise<CategoryProductRow[
   const db = getDb();
   if (!db) return [];
   const rows = await db
-    .select({ id: products.id, name: products.name, code: products.code, cat: products.cat, img: products.img })
+    .select({
+      id: products.id,
+      name: products.name,
+      code: products.code,
+      cat: products.cat,
+      img: products.img,
+    })
     .from(products);
   return rows
     .filter((p) => categorySlugOf(p.cat ?? '') === slug)
@@ -881,7 +1001,9 @@ export interface BrandInput {
   isActive: boolean;
 }
 
-export async function saveBrand(input: BrandInput): Promise<{ ok: boolean; error?: string; id?: string }> {
+export async function saveBrand(
+  input: BrandInput,
+): Promise<{ ok: boolean; error?: string; id?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
@@ -920,7 +1042,11 @@ export async function deleteBrand(id: string): Promise<{ ok: boolean; error?: st
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const prev = await db.select({ logo: brands.logo, name: brands.name }).from(brands).where(eq(brands.id, id)).limit(1);
+  const prev = await db
+    .select({ logo: brands.logo, name: brands.name })
+    .from(brands)
+    .where(eq(brands.id, id))
+    .limit(1);
   await db.delete(brands).where(eq(brands.id, id));
 
   const key = prev[0]?.logo ? toObjectKey(prev[0].logo) : null;
@@ -945,7 +1071,9 @@ export interface ContentBlockInput {
   bodyAr?: string;
 }
 
-export async function saveContentBlock(input: ContentBlockInput): Promise<{ ok: boolean; error?: string }> {
+export async function saveContentBlock(
+  input: ContentBlockInput,
+): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
@@ -998,7 +1126,9 @@ export interface ContentItemInput {
   tagAr?: string;
 }
 
-export async function saveContentItem(input: ContentItemInput): Promise<{ ok: boolean; error?: string }> {
+export async function saveContentItem(
+  input: ContentItemInput,
+): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
@@ -1027,7 +1157,13 @@ export async function saveContentItem(input: ContentItemInput): Promise<{ ok: bo
     await db.insert(contentItems).values(payload);
   }
 
-  await logActivity(admin, 'update', 'content', input.blockKey, `İçerik öğesi kaydedildi (${input.blockKey})`);
+  await logActivity(
+    admin,
+    'update',
+    'content',
+    input.blockKey,
+    `İçerik öğesi kaydedildi (${input.blockKey})`,
+  );
   await flushSiteCaches();
   return { ok: true };
 }
@@ -1037,7 +1173,11 @@ export async function deleteContentItem(id: string): Promise<{ ok: boolean; erro
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const prev = await db.select({ imageUrl: contentItems.imageUrl }).from(contentItems).where(eq(contentItems.id, id)).limit(1);
+  const prev = await db
+    .select({ imageUrl: contentItems.imageUrl })
+    .from(contentItems)
+    .where(eq(contentItems.id, id))
+    .limit(1);
   await db.delete(contentItems).where(eq(contentItems.id, id));
 
   const url = prev[0]?.imageUrl;
@@ -1080,7 +1220,9 @@ export interface AboutInput {
 }
 
 /** Hakkımızda içeriğini (istatistik/değer/zaman çizelgesi) topluca kaydeder. */
-export async function saveAboutContent(input: AboutInput): Promise<{ ok: boolean; error?: string }> {
+export async function saveAboutContent(
+  input: AboutInput,
+): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
@@ -1166,12 +1308,20 @@ export interface TranslationUpdate {
 }
 
 /** Toplu çeviri aracından tek bir kaydın çeviri alanlarını günceller. */
-export async function saveTranslations(updates: TranslationUpdate[]): Promise<{ ok: boolean; saved: number; error?: string }> {
+export async function saveTranslations(
+  updates: TranslationUpdate[],
+): Promise<{ ok: boolean; saved: number; error?: string }> {
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, saved: 0, error: 'Veritabanı bağlantısı yok.' };
 
-  const tables = { product: products, category: categories, campaign: campaigns, catalog: catalogs, content: contentItems } as const;
+  const tables = {
+    product: products,
+    category: categories,
+    campaign: campaigns,
+    catalog: catalogs,
+    content: contentItems,
+  } as const;
   const allowed: Record<TranslationKind, string[]> = {
     product: ['nameEn', 'nameAr', 'catEn', 'catAr'],
     category: ['nameEn', 'nameAr'],
@@ -1197,7 +1347,13 @@ export async function saveTranslations(updates: TranslationUpdate[]): Promise<{ 
     }
   }
 
-  await logActivity(admin, 'update', 'translation', undefined, `Toplu çeviri: ${saved} kayıt güncellendi`);
+  await logActivity(
+    admin,
+    'update',
+    'translation',
+    undefined,
+    `Toplu çeviri: ${saved} kayıt güncellendi`,
+  );
   await flushSiteCaches();
   return { ok: true, saved };
 }

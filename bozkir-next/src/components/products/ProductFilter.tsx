@@ -1,10 +1,11 @@
 'use client';
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import type { Category } from '@/types/category';
 import { Select } from '@/components/ui/Select';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { track } from '@/lib/analytics';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
@@ -23,9 +24,12 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
   const locale = typeof routeParams?.locale === 'string' ? routeParams.locale : 'tr';
   const [query, setQuery] = useState(params.get('q') ?? '');
   const [sheet, setSheet] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const activeCategory = params.get('kategori') ?? '';
   const activeSurface = params.get('yuzey') ?? '';
   const activeSort = params.get('sirala') ?? '';
+
+  useFocusTrap(sheet, sheetRef);
 
   useEffect(() => {
     setQuery(params.get('q') ?? '');
@@ -180,6 +184,7 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
       {/* Mobil bottom-sheet */}
       {sheet && (
         <div
+          ref={sheetRef}
           className="fixed inset-0 z-[200] lg:hidden"
           role="dialog"
           aria-modal="true"

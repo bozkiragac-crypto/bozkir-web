@@ -14,7 +14,8 @@ import type { Product } from '@/types/product';
 import { cn } from '@/lib/utils';
 
 export function FavoritesView() {
-  const { favorites, ready, removeFavorite, clearFavorites, toggleCompare, inCompare, compare } = useFavorites();
+  const { favorites, ready, removeFavorite, clearFavorites, toggleCompare, inCompare, compare } =
+    useFavorites();
   const { t, locale } = useDictionary();
   const [details, setDetails] = useState<Record<string, Product>>({});
   const { imported } = useImportFromUrl('favorites');
@@ -45,7 +46,10 @@ export function FavoritesView() {
   }, [favorites]);
 
   const items = favorites.map((f) => ({ ref: f, product: details[f.slug] }));
-  const quoteHref = `/teklif-al?urunler=${favorites.slice(0, 4).map((f) => encodeURIComponent(f.slug)).join(',')}`;
+  const quoteHref = `/teklif-al?urunler=${favorites
+    .slice(0, 4)
+    .map((f) => encodeURIComponent(f.slug))
+    .join(',')}`;
 
   return (
     <>
@@ -57,7 +61,9 @@ export function FavoritesView() {
       />
       <Container className="pb-28">
         {imported > 0 && (
-          <p className="mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">{t('favorites.imported')}</p>
+          <p className="mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">
+            {t('favorites.imported')}
+          </p>
         )}
         {!ready ? (
           <p className="py-20 text-center text-sm text-muted">{t('common.loading')}</p>
@@ -65,9 +71,7 @@ export function FavoritesView() {
           <div className="py-20 text-center">
             <Heart className="mx-auto h-10 w-10 text-muted" />
             <p className="mt-5 text-lg">{t('favorites.empty')}</p>
-            <p className="mt-2 text-sm text-muted-strong">
-              {t('favorites.emptyHint')}
-            </p>
+            <p className="mt-2 text-sm text-muted-strong">{t('favorites.emptyHint')}</p>
             <Link
               href="/urunler"
               className="mt-8 inline-flex h-12 items-center rounded-full bg-foreground px-7 text-sm font-medium text-background"
@@ -98,9 +102,13 @@ export function FavoritesView() {
                 </button>
                 <Link
                   href="/karsilastir"
+                  aria-disabled={compare.length < 2 || undefined}
+                  tabIndex={compare.length < 2 ? -1 : undefined}
                   className={cn(
                     'inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-medium',
-                    compare.length >= 2 ? 'border border-border' : 'pointer-events-none bg-surface-2 text-muted',
+                    compare.length >= 2
+                      ? 'border border-border'
+                      : 'pointer-events-none bg-surface-2 text-muted',
                   )}
                 >
                   <Scale className="h-4 w-4" /> {t('favorites.compare')}
@@ -136,8 +144,14 @@ export function FavoritesView() {
                   </button>
                   <div className="mt-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      {ref.code && <p className="numerals truncate text-xs tracking-[0.16em] text-muted uppercase">{ref.code}</p>}
-                      <h3 className="mt-1 truncate text-sm font-medium sm:text-base">{product?.name ?? ref.name}</h3>
+                      {ref.code && (
+                        <p className="numerals truncate text-xs tracking-[0.16em] text-muted uppercase">
+                          {ref.code}
+                        </p>
+                      )}
+                      <h3 className="mt-1 truncate text-sm font-medium sm:text-base">
+                        {product?.name ?? ref.name}
+                      </h3>
                       <p className="mt-1 truncate text-xs text-muted-strong sm:text-sm">
                         {product?.category ?? ref.category}
                         {product?.face

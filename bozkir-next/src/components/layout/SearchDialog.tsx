@@ -94,11 +94,16 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
 
   useEffect(() => {
     if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', onKey);
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -161,6 +166,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
           <Search className="h-5 w-5 text-muted-strong" />
           <input
             ref={inputRef}
+            type="search"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={t('search.placeholder')}

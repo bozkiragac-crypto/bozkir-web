@@ -5,7 +5,7 @@ import { isLocale, localeDir, localeHtmlLang, locales, type Locale } from '@/i18
 import { fontVariables } from '@/lib/fonts';
 import { getDictionary } from '@/i18n/dictionaries';
 import { getPrimaryCategories } from '@/lib/api/categories';
-import { getSiteSettingsFresh } from '@/lib/data/settings';
+import { getSiteSettings } from '@/lib/data/settings';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab';
@@ -23,13 +23,15 @@ import { CookieBanner } from '@/components/consent/CookieBanner';
 import { AnalyticsScripts } from '@/components/consent/AnalyticsScripts';
 import { WebVitals } from '@/components/layout/WebVitals';
 import { siteConfig } from '@/config/site';
-import { organizationJsonLd, siteMetadata, websiteJsonLd } from '@/lib/seo';
+import { jsonLdString, organizationJsonLd, siteMetadata, websiteJsonLd } from '@/lib/seo';
 
 // Kayıtlı tercih varsa ona uy; yoksa işletim sistemi temasına düş (FOUC yok).
 const themeScript = `(function(){try{var s=localStorage.getItem('theme');var user=s==='dark'||s==='light';var t=user?s:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t;r.dataset.themeSource=user?'user':'system';var m=document.querySelector('meta[name="theme-color"]');if(!m){m=document.createElement('meta');m.setAttribute('name','theme-color');document.head.appendChild(m);}m.setAttribute('content',t==='dark'?'#0e0e10':'#f7f7f5');}catch(e){}})();`;
 
-// Dinamik davranışı sayfalara bırakıyoruz; statik/ISR mümkün olduğunca korunur.
-// (Metadata ve organizer JSON-LD statik üretilebilir.)
+// DB'ye bağlı içerik (ürün/kategori/içerik blokları) request-time render edilir.
+// Aksi halde Docker imajı derlenirken (DB erişimi yok) statik HTML verisiz kalır
+// (ör. ana sayfa vitrini boş görünür). Ayarlar yine tag-revalidate ile önbellekli.
+export const dynamic = 'force-dynamic';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -70,7 +72,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   const dict = getDictionary(typed);
   const [categories, settings] = await Promise.all([
     getPrimaryCategories(typed),
-    getSiteSettingsFresh(),
+    getSiteSettings(),
   ]);
 
   return (
@@ -89,11 +91,15 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+          dangerouslySetInnerHTML={{
+            __html: jsonLdString(
+              organizationJsonLd(Object.values(settings.social).filter(Boolean)),
+            ),
+          }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd(typed)) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdString(websiteJsonLd(typed)) }}
         />
       </head>
       <body className="antialiased">

@@ -52,8 +52,8 @@
   --surface: #ffffff;
   --surface-2: #efefec;
   --fg: #111111;
-  --muted: #6d6d76;
-  --muted-strong: #5c5c66;
+  --muted: #5b5b64;
+  --muted-strong: #4f4f58;
   --border: #e8e8e5;
   --border-strong: #d7d7d1;
   --accent: #8d8474;
@@ -353,6 +353,10 @@ html[data-compare='1'] [data-product-cta] {
   html.has-cursor.cursor-native textarea {
     cursor: text !important;
   }
+  /* Klavye odağında native imleç görünür (a11y). */
+  html.has-cursor :focus-visible {
+    cursor: auto !important;
+  }
 
   /* Hover'da kayan alt çizgi (nav / footer linkleri). */
   .link-underline {
@@ -444,6 +448,21 @@ li {
   }
 }
 
+/* Toast giriş animasyonu. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.toast-item {
+  animation: toast-in 0.25s var(--ease-out-expo);
+}
+
 /* Marka şeridi: sonsuz kayan marquee (hover'da durur, reduced-motion'da kapalı). */
 @keyframes marquee {
   to {
@@ -514,6 +533,40 @@ li {
 @media (max-width: 767px) {
   body:has([data-product-cta]) [data-whatsapp-fab] {
     bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* GSAP'sız reveal & başlık maskesi (yalnızca JS varken gizlenir). */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 40px));
+  transition:
+    opacity 0.7s var(--ease-out-expo),
+    transform 0.7s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js [data-reveal][data-in='true'] {
+  opacity: 1;
+  transform: none;
+}
+.js [data-unit] {
+  opacity: 0;
+  transform: translateY(110%);
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js [data-heading-in='true'] [data-unit] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal],
+  .js [data-unit] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }
 

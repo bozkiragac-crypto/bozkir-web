@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { getPrimaryCategories } from '@/lib/api/categories';
 import { getActiveCampaigns } from '@/lib/api/campaigns';
 import { getContentBlock } from '@/lib/api/content';
-import { getSiteSettings, getSiteSettingsFresh } from '@/lib/data/settings';
+import { getSiteSettings } from '@/lib/data/settings';
 import { fallbackBrands } from '@/data/brands';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, jsonLdString } from '@/lib/seo';
 import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { Hero } from '@/components/home/Hero';
@@ -37,7 +37,7 @@ export async function generateMetadata({
   const lang = isLocale(locale) ? locale : 'tr';
   const dict = getDictionary(lang);
   // Admin panelindeki SEO ayarları varsa site başlığı/açıklamasını onlar belirler.
-  const seo = await getSiteSettingsFresh();
+  const seo = await getSiteSettings();
   return buildMetadata({
     title: seo.seoTitle || dict.meta.home,
     description: seo.seoDescription || dict.meta.homeDescription,
@@ -103,7 +103,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: jsonLdString({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: dict.meta.brand,

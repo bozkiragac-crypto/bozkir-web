@@ -207,6 +207,7 @@ export function Header({ categories }: HeaderProps) {
             <MagneticButton className="hidden sm:inline-block">
               <Link
                 href="/teklif-al"
+                data-cursor-label={t('nav.quote')}
                 className={cn(
                   'inline-flex h-11 items-center rounded-full px-5 text-sm font-medium transition-colors',
                   onDark

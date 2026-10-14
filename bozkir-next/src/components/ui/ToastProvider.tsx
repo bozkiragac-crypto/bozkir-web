@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 
 type ToastItem = { id: number; message: string };
 
@@ -36,8 +37,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {items.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto rounded-full border border-border bg-background/95 px-5 py-2.5 text-sm shadow-lg backdrop-blur"
+            className="toast-item pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-background/95 px-5 py-2.5 text-sm shadow-lg backdrop-blur"
           >
+            <CheckCircle2 className="h-4 w-4 flex-none text-success" aria-hidden />
             {t.message}
           </div>
         ))}

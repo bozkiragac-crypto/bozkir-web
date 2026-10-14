@@ -1,9 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { gsap, useGSAP } from '@/lib/gsap';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
-import { DUR, STAGGER } from '@/lib/motion';
 
 interface SectionHeadingProps {
   eyebrow?: string;
@@ -15,41 +13,38 @@ interface SectionHeadingProps {
 }
 
 /**
- * Bölüm başlığı: satır/sözcük bazlı maske reveal (editoryal).
- * prefers-reduced-motion'da animasyonsuz görünür.
+ * Bölüm başlığı: kelime bazlı maske reveal — GSAP'sız (IO + CSS).
+ * Görünürlük `html.js` ile kapılanır; JS yoksa başlık görünür kalır.
  */
 export function SectionHeading({ eyebrow, title, body, className, action }: SectionHeadingProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
   const words = title.split(' ');
 
-  useGSAP(
-    () => {
-      const el = ref.current;
-      if (!el) return;
-      const units = el.querySelectorAll('[data-unit]');
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        gsap.set(units, { yPercent: 0, opacity: 1 });
-        return;
-      }
-      gsap.fromTo(
-        units,
-        { yPercent: 110, opacity: 0 },
-        {
-          yPercent: 0,
-          opacity: 1,
-          duration: DUR.reveal,
-          ease: 'power4.out',
-          stagger: STAGGER.compact,
-          scrollTrigger: { trigger: el, start: 'top 85%' },
-        },
-      );
-    },
-    { scope: ref, dependencies: [title] },
-  );
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '0px 0px -12% 0px', threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <div
       ref={ref}
+      data-heading-in={inView ? 'true' : 'false'}
       className={cn(
         'flex flex-wrap items-end justify-between gap-6 border-b border-border pb-8',
         className,
@@ -69,7 +64,11 @@ export function SectionHeading({ eyebrow, title, body, className, action }: Sect
               className="relative -mb-[0.16em] -mt-[0.1em] inline-block overflow-hidden pb-[0.16em] pt-[0.1em] align-bottom"
               aria-hidden
             >
-              <span data-unit className="inline-block">
+              <span
+                data-unit
+                className="inline-block"
+                style={{ '--reveal-delay': `${i * 45}ms` } as CSSProperties}
+              >
                 {word}
                 {i < words.length - 1 ? '\u00A0' : ''}
               </span>

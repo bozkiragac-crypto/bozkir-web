@@ -13,6 +13,8 @@ interface ProductFormProps {
     code: string;
     cat: string;
     face: string;
+    colors?: string | null;
+    thicknesses?: string | null;
     images: string[];
     nameEn?: string | null;
     nameAr?: string | null;
@@ -32,6 +34,8 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
   const [code, setCode] = useState(initial?.code ?? '');
   const [cat, setCat] = useState(initial?.cat ?? '');
   const [face, setFace] = useState(initial?.face ?? '');
+  const [colors, setColors] = useState(initial?.colors ?? '');
+  const [thicknesses, setThicknesses] = useState(initial?.thicknesses ?? '');
   const [nameEn, setNameEn] = useState(initial?.nameEn ?? '');
   const [nameAr, setNameAr] = useState(initial?.nameAr ?? '');
   const [catEn, setCatEn] = useState(initial?.catEn ?? '');
@@ -52,6 +56,8 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       code,
       cat,
       face,
+      colors,
+      thicknesses,
       images,
       nameEn,
       nameAr,
@@ -74,11 +80,22 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı *</span>
-          <input required value={name} onChange={(e) => setName(e.target.value)} className={field} />
+          <input
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className={field}
+          />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Kodu *</span>
-          <input required value={code} onChange={(e) => setCode(e.target.value)} className={field} placeholder="Örn: VT-828" />
+          <input
+            required
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className={field}
+            placeholder="Örn: VT-828"
+          />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori *</span>
@@ -98,7 +115,32 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Yüzey</span>
-          <input value={face} onChange={(e) => setFace(e.target.value)} className={field} placeholder="1 / 2 / 3" />
+          <input
+            value={face}
+            onChange={(e) => setFace(e.target.value)}
+            className={field}
+            placeholder="1 / 2 / 3"
+          />
+        </label>
+        <label className="grid gap-2">
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Renkler (virgülle)</span>
+          <input
+            value={colors}
+            onChange={(e) => setColors(e.target.value)}
+            className={field}
+            placeholder="Meşe, Ceviz, Beyaz"
+          />
+        </label>
+        <label className="grid gap-2">
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">
+            Kalınlıklar (virgülle)
+          </span>
+          <input
+            value={thicknesses}
+            onChange={(e) => setThicknesses(e.target.value)}
+            className={field}
+            placeholder="8, 10, 18"
+          />
         </label>
       </div>
 
@@ -108,24 +150,46 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         </legend>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı (EN)</span>
-          <input value={nameEn} onChange={(e) => setNameEn(e.target.value)} className={field} placeholder="e.g. MDF Lam" />
+          <input
+            value={nameEn}
+            onChange={(e) => setNameEn(e.target.value)}
+            className={field}
+            placeholder="e.g. MDF Lam"
+          />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı (AR)</span>
-          <input value={nameAr} onChange={(e) => setNameAr(e.target.value)} className={field} dir="rtl" />
+          <input
+            value={nameAr}
+            onChange={(e) => setNameAr(e.target.value)}
+            className={field}
+            dir="rtl"
+          />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori (EN)</span>
-          <input value={catEn} onChange={(e) => setCatEn(e.target.value)} className={field} placeholder="e.g. MDF Lam" />
+          <input
+            value={catEn}
+            onChange={(e) => setCatEn(e.target.value)}
+            className={field}
+            placeholder="e.g. MDF Lam"
+          />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori (AR)</span>
-          <input value={catAr} onChange={(e) => setCatAr(e.target.value)} className={field} dir="rtl" />
+          <input
+            value={catAr}
+            onChange={(e) => setCatAr(e.target.value)}
+            className={field}
+            dir="rtl"
+          />
         </label>
       </fieldset>
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
-        <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">SEO (boşsa otomatik üretilir)</legend>
+        <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
+          SEO (boşsa otomatik üretilir)
+        </legend>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Başlık</span>
           <input

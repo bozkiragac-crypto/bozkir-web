@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": ["http://localhost/", "http://localhost/tr/urunler"],
+      "url": ["http://localhost:3000/", "http://localhost:3000/tr/urunler"],
       "numberOfRuns": 1,
       "settings": { "preset": "desktop" }
     },

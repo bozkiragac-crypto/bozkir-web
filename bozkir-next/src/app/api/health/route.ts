@@ -67,11 +67,6 @@ export async function GET(request: Request) {
     ok: true,
     ts: Date.now(),
     uptime: Math.round((Date.now() - startedAt) / 1000),
-    version:
-      process.env.APP_VERSION ??
-      process.env.NEXT_PUBLIC_APP_VERSION ??
-      process.env.GIT_SHA ??
-      'dev',
   };
 
   if (!deep) {

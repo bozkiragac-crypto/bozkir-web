@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Suspense } from 'react';
 import { getCategories, getCategoryBySlug } from '@/lib/api/categories';
 import { getProducts } from '@/lib/api/products';
-import { buildMetadata, breadcrumbJsonLd, absoluteUrl } from '@/lib/seo';
+import { buildMetadata, breadcrumbJsonLd, absoluteUrl, jsonLdString } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ProductCard } from '@/components/products/ProductCard';
@@ -96,7 +96,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdString(
             breadcrumbJsonLd(
               [
                 { name: dict.common.home, path: '/' },
@@ -112,7 +112,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: jsonLdString({
               '@context': 'https://schema.org',
               '@type': 'ItemList',
               itemListElement: items.map((p, i) => ({

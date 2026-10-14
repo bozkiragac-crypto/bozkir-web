@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { unstable_noStore } from 'next/cache';
 import { siteConfig } from '@/config/site';
 import { defaultLocale, locales, switchLocaleInPath, type Locale } from '@/i18n/config';
-import { getSiteSettingsFresh } from '@/lib/data/settings';
+import { getSiteSettings } from '@/lib/data/settings';
 
 interface BuildMetadataInput {
   title: string;
@@ -22,18 +21,30 @@ export function absoluteUrl(path = '/') {
 }
 
 /**
+ * JSON-LD'yi `<script type="application/ld+json">` içine güvenle gömer.
+ * `JSON.stringify` `<` kaçırmadığı için, DB'den gelen içerik `</script>` ile
+ * script etiketinden çıkabilir (XSS). Bu yardımcı `< > &` ve satır ayraçlarını kaçırır.
+ */
+export function jsonLdString(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
+/**
  * Site geneli metadata: admin panelindeki SEO ayarlarını okur,
  * boş alanlarda `siteConfig` varsayılanlarına düşer.
  */
 export async function siteMetadata(locale?: Locale): Promise<Metadata> {
-  // SEO ayarları panelden değiştirilebilir; statik HTML'e gömülüp
-  // güncellenmemesini önlemek için metadata istek başına okunur.
-  unstable_noStore();
+  // Ayarlar tag-revalidate ile önbelleklenir; admin kaydında tazelenir.
   let seoTitle = '';
   let seoDescription = '';
   let ogImage = '';
   try {
-    const s = await getSiteSettingsFresh();
+    const s = await getSiteSettings();
     seoTitle = s.seoTitle;
     seoDescription = s.seoDescription;
     ogImage = s.ogImage;
@@ -101,8 +112,12 @@ export function buildMetadata({
 }
 
 /** Organization + WebSite + SearchAction şeması (site geneli). */
-export function organizationJsonLd() {
+export function organizationJsonLd(social?: string[]) {
   const [lat, lng] = siteConfig.warehouse.coords.split(',').map((v) => Number(v.trim()));
+  const sameAs = (social && social.length > 0
+    ? social
+    : [siteConfig.social.instagram, siteConfig.social.facebook]
+  ).filter(Boolean);
   return {
     '@context': 'https://schema.org',
     '@type': ['Organization', 'Store'],
@@ -116,7 +131,7 @@ export function organizationJsonLd() {
     priceRange: '$$',
     currenciesAccepted: 'TRY',
     paymentAccepted: 'Nakit, Kredi Kartı, Havale',
-    sameAs: [siteConfig.social.instagram, siteConfig.social.facebook].filter(Boolean),
+    sameAs,
     contactPoint: [
       {
         '@type': 'ContactPoint',

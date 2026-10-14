@@ -89,3 +89,31 @@ jobs:
           name: playwright-report
           path: bozkir-next/playwright-report/
           retention-days: 7
+
+  lighthouse:
+    name: Lighthouse (bütçe, bilgilendirici)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: [build]
+    env:
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: bozkir-next/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Başlat + Lighthouse bütçe denetimi
+        run: |
+          npm run start &
+          sleep 8
+          npx lhci autorun --config=.lighthouserc.json
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lighthouse-report
+          path: bozkir-next/.lighthouseci/
+          retention-days: 7

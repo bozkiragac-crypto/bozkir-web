@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS products (
     name TEXT NOT NULL,
     cat TEXT NOT NULL,
     face TEXT,
+    colors TEXT,
+    thicknesses TEXT,
     img TEXT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

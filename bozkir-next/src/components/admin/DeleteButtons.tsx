@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import {
   deleteProduct,
   deleteCampaign,
@@ -12,7 +13,10 @@ import {
   deleteBrand,
 } from '@/lib/admin/safe-actions';
 
-function useDelete(action: (id: string) => Promise<{ ok: boolean; error?: string }>, message: string) {
+function useDelete(
+  action: (id: string) => Promise<{ ok: boolean; error?: string }>,
+  message: string,
+) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -52,22 +56,58 @@ function DeleteButton({
 }
 
 export function DeleteProductButton({ id }: { id: string }) {
-  return <DeleteButton action={deleteProduct} message="Bu ürünü silmek istediğinize emin misiniz?" id={id} />;
+  return (
+    <DeleteButton
+      action={deleteProduct}
+      message="Bu ürünü silmek istediğinize emin misiniz?"
+      id={id}
+    />
+  );
 }
 
 export function DeleteCampaignButton({ id }: { id: string }) {
-  return <DeleteButton action={deleteCampaign} message="Bu kampanyayı silmek istediğinize emin misiniz?" id={id} />;
+  return (
+    <DeleteButton
+      action={deleteCampaign}
+      message="Bu kampanyayı silmek istediğinize emin misiniz?"
+      id={id}
+    />
+  );
 }
 
 export function DeleteCatalogButton({ id }: { id: string }) {
-  return <DeleteButton action={deleteCatalog} message="Bu kataloğu silmek istediğinize emin misiniz?" id={id} />;
+  return (
+    <DeleteButton
+      action={deleteCatalog}
+      message="Bu kataloğu silmek istediğinize emin misiniz?"
+      id={id}
+    />
+  );
 }
 
 export function DeleteCategoryButton({ id, name }: { id: string; name: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [ask, setAsk] = useState(false);
-  const [block, setBlock] = useState<{ count: number; samples: string[]; error: string } | null>(null);
+  const [block, setBlock] = useState<{ count: number; samples: string[]; error: string } | null>(
+    null,
+  );
+  const blockRef = useRef<HTMLDivElement>(null);
+  const askRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!block, blockRef);
+  useFocusTrap(!!ask, askRef);
+
+  useEffect(() => {
+    if (!block && !ask) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setBlock(null);
+        setAsk(false);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [block, ask]);
 
   async function run(mode: 'block' | 'cascade' | 'deactivate') {
     setBusy(true);
@@ -97,6 +137,7 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
     return (
       <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4">
         <div
+          ref={blockRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="cat-del-title"
@@ -163,6 +204,7 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
     return (
       <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4">
         <div
+          ref={askRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="cat-del-ask-title"
@@ -205,9 +247,21 @@ export function DeleteCategoryButton({ id, name }: { id: string; name: string })
 }
 
 export function DeleteBrandButton({ id }: { id: string }) {
-  return <DeleteButton action={deleteBrand} message="Bu markayı silmek istediğinize emin misiniz?" id={id} />;
+  return (
+    <DeleteButton
+      action={deleteBrand}
+      message="Bu markayı silmek istediğinize emin misiniz?"
+      id={id}
+    />
+  );
 }
 
 export function DeleteQuoteButton({ id }: { id: string }) {
-  return <DeleteButton action={deleteQuoteRequest} message="Bu teklif talebini silmek istediğinize emin misiniz?" id={id} />;
+  return (
+    <DeleteButton
+      action={deleteQuoteRequest}
+      message="Bu teklif talebini silmek istediğinize emin misiniz?"
+      id={id}
+    />
+  );
 }

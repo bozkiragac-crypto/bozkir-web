@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { getCategories } from '@/lib/api/categories';
 import { getProductFacets, getProducts } from '@/lib/api/products';
-import { buildMetadata, absoluteUrl } from '@/lib/seo';
+import { buildMetadata, absoluteUrl, jsonLdString } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ProductFilter } from '@/components/products/ProductFilter';
@@ -95,7 +95,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: jsonLdString({
               '@context': 'https://schema.org',
               '@type': 'ItemList',
               itemListElement: result.items.map((p, i) => ({

@@ -96,7 +96,11 @@ export function LoginForm() {
       >
         {loading ? 'Giriş yapılıyor...' : needsTotp ? 'Kodu Doğrula' : 'Giriş Yap'}
       </button>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="text-sm text-red-600" role="alert">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

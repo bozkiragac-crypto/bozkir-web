@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Plus } from 'lucide-react';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, jsonLdString } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
@@ -52,7 +52,7 @@ export default async function FaqPage({ params }: PageProps) {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdString(faqJsonLd) }}
       />
 
       <PageHero
@@ -68,10 +68,14 @@ export default async function FaqPage({ params }: PageProps) {
             {items.map((item) => (
               <details key={item.id} className="group">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-start">
-                  <span className="text-base font-medium tracking-tight md:text-lg">{item.title}</span>
+                  <span className="text-base font-medium tracking-tight md:text-lg">
+                    {item.title}
+                  </span>
                   <Plus className="h-5 w-5 flex-none text-muted transition-transform duration-300 group-open:rotate-45" />
                 </summary>
-                <div className="pb-6 pe-10 text-sm leading-relaxed text-muted-strong">{item.description}</div>
+                <div className="pb-6 pe-10 text-sm leading-relaxed text-muted-strong">
+                  {item.description}
+                </div>
               </details>
             ))}
           </div>

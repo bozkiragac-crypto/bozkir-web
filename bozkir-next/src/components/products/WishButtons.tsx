@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { track } from '@/lib/analytics';
 
 const base =
-  'flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground';
+  'flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition-[transform,border-color,color] active:scale-95 hover:border-foreground';
 
 /** Kısa dokunsal geri bildirim (destekleyen cihazlarda; hatasız). */
 function haptic() {

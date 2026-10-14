@@ -57,7 +57,7 @@ const nextConfig = {
     minimumCacheTTL: 31536000,
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', 'gsap', '@react-three/drei'],
+    optimizePackageImports: ['lucide-react', 'gsap', '@react-three/fiber', '@react-three/drei'],
     // Server Action gövde limiti: görsel/PDF yüklemeleri (varsayılan 1 MB yetmiyor).
     serverActions: {
       bodySizeLimit: '25mb',
@@ -68,14 +68,14 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), xr-spatial-tracking=(self)' },
+          // X-Content-Type-Options / Referrer-Policy / X-Frame-Options / HSTS
+          // nginx tarafından (deploy/nginx-security-headers.conf) tek noktadan
+          // eklenir; burada tekrarlanmaz. Yalnızca Next'e özgü başlıklar kalır.
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), xr-spatial-tracking=(self)',
+          },
           { key: 'Content-Security-Policy', value: csp },
-          // HTTPS arkasında (nginx) HSTS zaten eklenir; doğrudan Next erişiminde
-          // de tarayıcıya tutarlı sinyal verilir. HTTP üzerinden UA'lar yok sayar.
-          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
         ],
       },
     ];

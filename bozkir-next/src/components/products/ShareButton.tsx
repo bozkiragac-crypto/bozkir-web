@@ -107,7 +107,7 @@ export function ShareButton({
         aria-expanded={open}
         title={c.shareMenu}
         className={cn(
-          'flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground',
+          'flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition active:scale-95 hover:border-foreground',
           className,
         )}
       >

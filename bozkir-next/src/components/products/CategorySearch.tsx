@@ -40,6 +40,7 @@ export function CategorySearch() {
     >
       <Search className="h-4 w-4 text-muted" />
       <input
+        type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t('catalog.searchPlaceholder')}

@@ -7,7 +7,7 @@ import { publicUrl } from '@/lib/storage/s3';
 import { fallbackCategories, primaryCategorySlugs } from '@/data/categories';
 import { dictFor } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
-import { localeUrl } from '@/lib/seo';
+import { jsonLdString, localeUrl } from '@/lib/seo';
 
 interface ShowcaseItem {
   id: string;
@@ -129,7 +129,7 @@ export async function MaterialGallery({ block, locale }: { block: ContentBlock; 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: jsonLdString({
             '@context': 'https://schema.org',
             '@type': 'ItemList',
             itemListElement: items.map((item, i) => ({

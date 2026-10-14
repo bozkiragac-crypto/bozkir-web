@@ -26,24 +26,29 @@ function detectLocale(request: NextRequest): Locale {
 }
 
 /**
- * Bakım modu DB ayarından okunur. Middleware Edge'de çalıştığı ve DB'ye
- * erişemediği için iç `/api/maintenance-status` ucu 60 sn cache ile çağrılır.
- * Env `MAINTENANCE_MODE=1` her durumda önceliklidir; fetch başarısız olursa
- * env değerine düşülür (istek asla bloklanmaz).
+ * Bakım modu: `MAINTENANCE_MODE=1` önceliklidir. Aksi halde DB ayarı iç
+ * `/api/maintenance-status` ucundan okunur. Edge'de Next Data Cache
+ * desteklenmediğinden sonuç **modül-seviyesi TTL** ile önbelleğe alınır
+ * (istek başına loopback fetch'i önler). Fetch başarısızsa son değere düşülür.
  */
+let maintenanceCache: { value: boolean; ts: number } = { value: false, ts: 0 };
+
 async function isMaintenanceEnabled(): Promise<boolean> {
   if (process.env.MAINTENANCE_MODE === '1') return true;
+  const now = Date.now();
+  if (now - maintenanceCache.ts < 60_000) return maintenanceCache.value;
   try {
     const base = process.env.INTERNAL_APP_URL || 'http://127.0.0.1:3000';
     const res = await fetch(new URL('/api/maintenance-status', base), {
-      next: { revalidate: 60 },
+      cache: 'no-store',
       signal: AbortSignal.timeout(2500),
     });
-    if (!res.ok) return false;
+    if (!res.ok) return maintenanceCache.value;
     const data = (await res.json()) as { maintenance?: boolean };
-    return !!data.maintenance;
+    maintenanceCache = { value: !!data.maintenance, ts: now };
+    return maintenanceCache.value;
   } catch {
-    return false;
+    return maintenanceCache.value;
   }
 }
 

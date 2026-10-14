@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react';
 import type { ContentBlock } from '@/types/content';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { jsonLdString } from '@/lib/seo';
 import { dictFor } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
@@ -39,7 +40,7 @@ export async function FaqAccordion({ block, locale }: { block: ContentBlock; loc
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: jsonLdString({
             '@context': 'https://schema.org',
             '@type': 'FAQPage',
             mainEntity: block.items.map((item) => ({

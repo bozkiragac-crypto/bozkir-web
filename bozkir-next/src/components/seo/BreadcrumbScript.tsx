@@ -1,4 +1,4 @@
-import { breadcrumbJsonLd } from '@/lib/seo';
+import { breadcrumbJsonLd, jsonLdString } from '@/lib/seo';
 import type { Locale } from '@/i18n/config';
 
 /** Sayfalara BreadcrumbList JSON-LD basar. */
@@ -12,7 +12,7 @@ export function BreadcrumbScript({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(items, locale)) }}
+      dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumbJsonLd(items, locale)) }}
     />
   );
 }

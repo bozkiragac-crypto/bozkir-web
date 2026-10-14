@@ -122,12 +122,14 @@ export const dictionaries = {
       viewAR: "AR'da gör",
       arStart: "AR'ı başlat",
       print: 'Yazdır',
-      arError: 'AR başlatılamadı. Cihazınızın AR desteklediğinden ve HTTPS kullandığınızdan emin olun.',
+      arError:
+        'AR başlatılamadı. Cihazınızın AR desteklediğinden ve HTTPS kullandığınızdan emin olun.',
       notFound: 'Ürün bulunamadı | Bozkır Ağaç Ürünleri',
     },
     categories: {
       title: 'Malzeme koleksiyonları',
-      description: 'Her ürün grubunu yakından tanıyın; yüzey, renk ve uygulama seçeneklerini keşfedin.',
+      description:
+        'Her ürün grubunu yakından tanıyın; yüzey, renk ve uygulama seçeneklerini keşfedin.',
       metaTitle: 'Koleksiyonlar | Bozkır Ağaç Ürünleri',
       metaDescription:
         'MDF lam, lake panel, kapı panel, suntalam, sunta, MDF, duvar profili ve PVC kenar bant koleksiyonları.',
@@ -185,12 +187,25 @@ export const dictionaries = {
         eyebrow: 'Tedarik & Lojistik',
         title: 'Stoktan sevkiyata, kesintisiz tedarik.',
         cta: 'Teklif Al',
-        contactNote: 'Sipariş ve sevkiyat planlaması için {phone} numarasından bize ulaşabilirsiniz.',
+        contactNote:
+          'Sipariş ve sevkiyat planlaması için {phone} numarasından bize ulaşabilirsiniz.',
         items: [
-          { title: 'Güçlü Stok Yapısı', text: 'Aradığınız ürünleri beklemeden, hızlı ve eksiksiz şekilde temin edersiniz.' },
-          { title: 'Hızlı Tedarik', text: 'İşinizin aksamaması için siparişlerinizi zamanında teslim ederiz.' },
-          { title: 'Depo & Sevkiyat', text: "Antakya'daki depomuzdan bölge geneline düzenli sevkiyat." },
-          { title: 'Esnek Ödeme', text: 'Nakit, kredi kartı ve çekle ödeme imkanıyla alışverişinizi kolaylaştırıyoruz.' },
+          {
+            title: 'Güçlü Stok Yapısı',
+            text: 'Aradığınız ürünleri beklemeden, hızlı ve eksiksiz şekilde temin edersiniz.',
+          },
+          {
+            title: 'Hızlı Tedarik',
+            text: 'İşinizin aksamaması için siparişlerinizi zamanında teslim ederiz.',
+          },
+          {
+            title: 'Depo & Sevkiyat',
+            text: "Antakya'daki depomuzdan bölge geneline düzenli sevkiyat.",
+          },
+          {
+            title: 'Esnek Ödeme',
+            text: 'Nakit, kredi kartı ve çekle ödeme imkanıyla alışverişinizi kolaylaştırıyoruz.',
+          },
         ],
       },
       catalog: {
@@ -259,7 +274,8 @@ export const dictionaries = {
       legal: {
         eyebrow: 'Yasal',
         updated: 'Son güncelleme',
-        disclaimer: 'Bu metin genel bir taslaktır ve yayına almadan önce hukuki incelemeden geçirilmesi önerilir.',
+        disclaimer:
+          'Bu metin genel bir taslaktır ve yayına almadan önce hukuki incelemeden geçirilmesi önerilir.',
       },
       notFound: {
         eyebrow: 'Hata 404',
@@ -288,16 +304,27 @@ export const dictionaries = {
       },
       about: {
         metaTitle: 'Hakkımızda | Bozkır Ağaç Ürünleri',
-        metaDescription: "1979'a dayanan sektör tecrübesi, 2016'da kurumsallaşma. Bozkır Ağaç Ürünleri'nin hikâyesi.",
+        metaDescription:
+          "1979'a dayanan sektör tecrübesi, 2016'da kurumsallaşma. Bozkır Ağaç Ürünleri'nin hikâyesi.",
         heroEyebrow: 'Hakkımızda',
         heroTitle: 'Köklü bir tecrübe, modern bir yapı.',
-        heroDescription: "Bozkır Ağaç Ürünleri, 1979'a dayanan ticari tecrübenin 2016'da kurumsallaşmasıyla bugünkü yapısına ulaştı.",
+        heroDescription:
+          "Bozkır Ağaç Ürünleri, 1979'a dayanan ticari tecrübenin 2016'da kurumsallaşmasıyla bugünkü yapısına ulaştı.",
         crumbHome: 'Ana Sayfa',
         crumb: 'Hakkımızda',
         values: [
-          { title: 'Güçlü Stok', text: 'Üreticilerin ihtiyaç duyduğu ürünleri beklemeden temin edilecek stok derinliği.' },
-          { title: 'Hızlı Tedarik', text: 'Siparişlerin zamanında ve eksiksiz teslimi için planlı lojistik.' },
-          { title: 'Güvenilir Çözüm Ortağı', text: 'Tek seferlik satış değil, uzun vadeli iş ortaklığı anlayışı.' },
+          {
+            title: 'Güçlü Stok',
+            text: 'Üreticilerin ihtiyaç duyduğu ürünleri beklemeden temin edilecek stok derinliği.',
+          },
+          {
+            title: 'Hızlı Tedarik',
+            text: 'Siparişlerin zamanında ve eksiksiz teslimi için planlı lojistik.',
+          },
+          {
+            title: 'Güvenilir Çözüm Ortağı',
+            text: 'Tek seferlik satış değil, uzun vadeli iş ortaklığı anlayışı.',
+          },
         ],
         stats: [
           { value: 1979, label: 'Sektör tecrübesinin başlangıcı' },
@@ -309,15 +336,28 @@ export const dictionaries = {
           eyebrow: 'Hakkımızda',
           title: 'Köklü bir tecrübe, modern bir yapı.',
           items: [
-            { year: '1979', title: 'Sektör tecrübesinin başlangıcı', text: 'Bozkır ailesinin mobilya ve ahşap sektöründeki ticari faaliyetleri başladı.' },
-            { year: '2016', title: 'Bozkır Ağaç Ürünleri', text: 'İbrahim Bozkır ve oğulları İlker ve Hakan Bozkır öncülüğünde kurumsal yapı kuruldu.' },
-            { year: 'Bugün', title: 'Geniş ürün gamı', text: 'MDF, sunta, lake panel ve yardımcı ürün gruplarında güçlü stok ve hızlı tedarik.' },
+            {
+              year: '1979',
+              title: 'Sektör tecrübesinin başlangıcı',
+              text: 'Bozkır ailesinin mobilya ve ahşap sektöründeki ticari faaliyetleri başladı.',
+            },
+            {
+              year: '2016',
+              title: 'Bozkır Ağaç Ürünleri',
+              text: 'İbrahim Bozkır ve oğulları İlker ve Hakan Bozkır öncülüğünde kurumsal yapı kuruldu.',
+            },
+            {
+              year: 'Bugün',
+              title: 'Geniş ürün gamı',
+              text: 'MDF, sunta, lake panel ve yardımcı ürün gruplarında güçlü stok ve hızlı tedarik.',
+            },
           ],
         },
       },
       contact: {
         metaTitle: 'İletişim | Bozkır Ağaç Ürünleri',
-        metaDescription: 'Bozkır Ağaç Ürünleri iletişim: telefon, WhatsApp, adres ve çalışma saatleri.',
+        metaDescription:
+          'Bozkır Ağaç Ürünleri iletişim: telefon, WhatsApp, adres ve çalışma saatleri.',
         heroEyebrow: 'İletişim',
         heroTitle: 'Ofis, depo ve destek',
         heroDescription: 'Sorularınız ve teklif talepleriniz için bize ulaşın.',
@@ -345,7 +385,8 @@ export const dictionaries = {
         metaDescription: 'Bozkır Ağaç Ürünleri ürün kataloğu.',
         heroEyebrow: 'Katalog',
         heroTitle: 'Ürün kataloğu',
-        heroDescription: 'Tüm ürün gruplarını, dekor ve renk seçeneklerini tek dokümanda inceleyin.',
+        heroDescription:
+          'Tüm ürün gruplarını, dekor ve renk seçeneklerini tek dokümanda inceleyin.',
         crumbHome: 'Ana Sayfa',
         crumb: 'Katalog',
         download: 'PDF İndir',
@@ -354,10 +395,12 @@ export const dictionaries = {
       },
       dealers: {
         metaTitle: 'Bayilikler | Bozkır Ağaç Ürünleri',
-        metaDescription: 'Yıldız Entegre, Teverpan, AGT, Apel Tutkal ve HSÇ Plastik yetkili bayiliği.',
+        metaDescription:
+          'Yıldız Entegre, Teverpan, AGT, Apel Tutkal ve HSÇ Plastik yetkili bayiliği.',
         heroEyebrow: 'Bayilikler',
         heroTitle: 'Çalıştığımız markalar',
-        heroDescription: 'Güvenilir üreticilerin yetkili bayisi olarak, doğru ürünü doğru kaynaktan tedarik ediyoruz.',
+        heroDescription:
+          'Güvenilir üreticilerin yetkili bayisi olarak, doğru ürünü doğru kaynaktan tedarik ediyoruz.',
         crumbHome: 'Ana Sayfa',
         crumb: 'Bayilikler',
       },
@@ -380,7 +423,8 @@ export const dictionaries = {
       },
       kvkk: {
         metaTitle: 'KVKK Aydınlatma Metni | Bozkır Ağaç Ürünleri',
-        metaDescription: '6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında aydınlatma metni.',
+        metaDescription:
+          '6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında aydınlatma metni.',
         title: 'KVKK Aydınlatma Metni',
         sections: [
           {
@@ -405,7 +449,7 @@ export const dictionaries = {
           {
             title: '4. Hukuki Sebepler',
             body: [
-              "Verileriniz; sözleşmenin kurulması veya ifası, hukuki yükümlülüklerin yerine getirilmesi, meşru menfaat ve açık rıza hukuki sebeplerine dayanılarak KVKK m.5 ve m.6 kapsamında işlenir.",
+              'Verileriniz; sözleşmenin kurulması veya ifası, hukuki yükümlülüklerin yerine getirilmesi, meşru menfaat ve açık rıza hukuki sebeplerine dayanılarak KVKK m.5 ve m.6 kapsamında işlenir.',
             ],
           },
           {
@@ -485,9 +529,21 @@ export const dictionaries = {
         title: 'Çerez Politikası',
         tableHead: { type: 'Tür', purpose: 'Amaç', duration: 'Süre' },
         types: [
-          { type: 'Zorunlu çerezler', purpose: 'Sitenin temel işlevleri (güvenlik, formlar, oturum) için gereklidir.', duration: 'Oturum' },
-          { type: 'Performans/analitik çerezleri', purpose: 'Ziyaretlerin anonim istatistikleri ile siteyi iyileştirmek için kullanılır.', duration: 'Kalıcı (azami 24 ay)' },
-          { type: 'Tercih çerezleri', purpose: 'Dil/tema gibi kullanıcı tercihlerini hatırlamak için kullanılır.', duration: 'Kalıcı (azami 12 ay)' },
+          {
+            type: 'Zorunlu çerezler',
+            purpose: 'Sitenin temel işlevleri (güvenlik, formlar, oturum) için gereklidir.',
+            duration: 'Oturum',
+          },
+          {
+            type: 'Performans/analitik çerezleri',
+            purpose: 'Ziyaretlerin anonim istatistikleri ile siteyi iyileştirmek için kullanılır.',
+            duration: 'Kalıcı (azami 24 ay)',
+          },
+          {
+            type: 'Tercih çerezleri',
+            purpose: 'Dil/tema gibi kullanıcı tercihlerini hatırlamak için kullanılır.',
+            duration: 'Kalıcı (azami 12 ay)',
+          },
         ],
         sections: [
           {
@@ -521,7 +577,8 @@ export const dictionaries = {
       heading: 'Teklif alın',
       combinedTitle: 'Karşılaştırılan ürünler için teklif',
       forProduct: '{name} için teklif',
-      description: 'Formu doldurun veya doğrudan telefon/WhatsApp ile ulaşın. Aynı gün içinde dönüş yapıyoruz.',
+      description:
+        'Formu doldurun veya doğrudan telefon/WhatsApp ile ulaşın. Aynı gün içinde dönüş yapıyoruz.',
       contactTitle: 'Doğrudan ulaşın',
       fullName: 'Ad Soyad',
       company: 'Firma',
@@ -541,7 +598,8 @@ export const dictionaries = {
       errorGeneric: 'Talebiniz gönderilemedi. Lütfen tekrar deneyin.',
       errorRate: 'Çok fazla deneme yaptınız. Lütfen birkaç dakika sonra tekrar deneyin.',
       errorValidation: 'Lütfen formdaki alanları kontrol edin.',
-      privacyNote: 'Bilgileriniz yalnızca teklifiniz için kullanılır; üçüncü taraflarla paylaşılmaz.',
+      privacyNote:
+        'Bilgileriniz yalnızca teklifiniz için kullanılır; üçüncü taraflarla paylaşılmaz.',
       selectedProduct: 'Teklif ürünü',
       selectedProducts: 'Teklif ürünleri',
       removeProduct: 'Ürünü tekliften çıkar',
@@ -574,7 +632,8 @@ export const dictionaries = {
     },
     compare: {
       title: 'Ürün Karşılaştırma',
-      description: 'En fazla 4 ürünü yan yana görüntüleyin, beğendikleriniz için toplu teklif isteyin.',
+      description:
+        'En fazla 4 ürünü yan yana görüntüleyin, beğendikleriniz için toplu teklif isteyin.',
       empty: 'Karşılaştırma listeniz boş',
       emptyHint: 'Ürün kartlarındaki terazi simgesine dokunarak en fazla 4 ürün ekleyebilirsiniz.',
       counter: 'karşılaştırılıyor',
@@ -726,7 +785,8 @@ export const dictionaries = {
       viewAR: 'View in AR',
       arStart: 'Start AR',
       print: 'Print',
-      arError: 'Could not start AR. Make sure your device supports AR and you are on a secure (HTTPS) connection.',
+      arError:
+        'Could not start AR. Make sure your device supports AR and you are on a secure (HTTPS) connection.',
       notFound: 'Product not found | Bozkır Wood Products',
     },
     categories: {
@@ -747,7 +807,8 @@ export const dictionaries = {
         eyebrow: 'Antakya · Since 1979',
         titleLead: 'A new',
         titleAccent: 'form of material.',
-        intro: 'Panel, surface and complementary solutions for furniture and interior manufacturers.',
+        intro:
+          'Panel, surface and complementary solutions for furniture and interior manufacturers.',
         ctaProducts: 'Explore Products',
         ctaQuote: 'Get a Quote',
         scroll: 'Scroll to explore',
@@ -791,10 +852,22 @@ export const dictionaries = {
         cta: 'Get a Quote',
         contactNote: 'For order and shipment planning, reach us at {phone}.',
         items: [
-          { title: 'Strong Stock', text: 'Get the products you need quickly and completely, without waiting.' },
-          { title: 'Fast Supply', text: 'We deliver your orders on time so your work never stops.' },
-          { title: 'Warehouse & Shipping', text: 'Regular shipments across the region from our warehouse in Antakya.' },
-          { title: 'Flexible Payment', text: 'We make shopping easy with cash, credit card and cheque payment options.' },
+          {
+            title: 'Strong Stock',
+            text: 'Get the products you need quickly and completely, without waiting.',
+          },
+          {
+            title: 'Fast Supply',
+            text: 'We deliver your orders on time so your work never stops.',
+          },
+          {
+            title: 'Warehouse & Shipping',
+            text: 'Regular shipments across the region from our warehouse in Antakya.',
+          },
+          {
+            title: 'Flexible Payment',
+            text: 'We make shopping easy with cash, credit card and cheque payment options.',
+          },
         ],
       },
       catalog: {
@@ -863,7 +936,8 @@ export const dictionaries = {
       legal: {
         eyebrow: 'Legal',
         updated: 'Last updated',
-        disclaimer: 'This text is a general draft and should be reviewed by a legal professional before publication.',
+        disclaimer:
+          'This text is a general draft and should be reviewed by a legal professional before publication.',
       },
       notFound: {
         eyebrow: 'Error 404',
@@ -892,16 +966,27 @@ export const dictionaries = {
       },
       about: {
         metaTitle: 'About | Bozkır Wood Products',
-        metaDescription: 'Industry experience dating back to 1979, corporate structure since 2016. The story of Bozkır Wood Products.',
+        metaDescription:
+          'Industry experience dating back to 1979, corporate structure since 2016. The story of Bozkır Wood Products.',
         heroEyebrow: 'About',
         heroTitle: 'Deep-rooted experience, a modern structure.',
-        heroDescription: 'Bozkır Wood Products reached its current form through the incorporation in 2016 of commercial experience dating back to 1979.',
+        heroDescription:
+          'Bozkır Wood Products reached its current form through the incorporation in 2016 of commercial experience dating back to 1979.',
         crumbHome: 'Home',
         crumb: 'About',
         values: [
-          { title: 'Strong Stock', text: 'Stock depth that lets manufacturers source the products they need without waiting.' },
-          { title: 'Fast Supply', text: 'Planned logistics for on-time and complete delivery of orders.' },
-          { title: 'Reliable Partner', text: 'A long-term business partnership, not a one-off sale.' },
+          {
+            title: 'Strong Stock',
+            text: 'Stock depth that lets manufacturers source the products they need without waiting.',
+          },
+          {
+            title: 'Fast Supply',
+            text: 'Planned logistics for on-time and complete delivery of orders.',
+          },
+          {
+            title: 'Reliable Partner',
+            text: 'A long-term business partnership, not a one-off sale.',
+          },
         ],
         stats: [
           { value: 1979, label: 'Start of industry experience' },
@@ -913,15 +998,28 @@ export const dictionaries = {
           eyebrow: 'About',
           title: 'Deep-rooted experience, a modern structure.',
           items: [
-            { year: '1979', title: 'Start of industry experience', text: 'The Bozkır family began its commercial activities in the furniture and wood sector.' },
-            { year: '2016', title: 'Bozkır Wood Products', text: 'A corporate structure was founded under İbrahim Bozkır and his sons İlker and Hakan Bozkır.' },
-            { year: 'Today', title: 'A wide product range', text: 'Strong stock and fast supply across MDF, chipboard, lacquer panels and complementary product groups.' },
+            {
+              year: '1979',
+              title: 'Start of industry experience',
+              text: 'The Bozkır family began its commercial activities in the furniture and wood sector.',
+            },
+            {
+              year: '2016',
+              title: 'Bozkır Wood Products',
+              text: 'A corporate structure was founded under İbrahim Bozkır and his sons İlker and Hakan Bozkır.',
+            },
+            {
+              year: 'Today',
+              title: 'A wide product range',
+              text: 'Strong stock and fast supply across MDF, chipboard, lacquer panels and complementary product groups.',
+            },
           ],
         },
       },
       contact: {
         metaTitle: 'Contact | Bozkır Wood Products',
-        metaDescription: 'Contact Bozkır Wood Products: phone, WhatsApp, address and working hours.',
+        metaDescription:
+          'Contact Bozkır Wood Products: phone, WhatsApp, address and working hours.',
         heroEyebrow: 'Contact',
         heroTitle: 'Office, warehouse and support',
         heroDescription: 'Reach us for your questions and quote requests.',
@@ -949,7 +1047,8 @@ export const dictionaries = {
         metaDescription: 'Bozkır Wood Products product catalog.',
         heroEyebrow: 'Catalog',
         heroTitle: 'Product catalog',
-        heroDescription: 'Browse all product groups, decor and colour options in a single document.',
+        heroDescription:
+          'Browse all product groups, decor and colour options in a single document.',
         crumbHome: 'Home',
         crumb: 'Catalog',
         download: 'Download PDF',
@@ -958,10 +1057,12 @@ export const dictionaries = {
       },
       dealers: {
         metaTitle: 'Dealerships | Bozkır Wood Products',
-        metaDescription: 'Authorised dealer of Yıldız Entegre, Teverpan, AGT, Apel Tutkal and HSÇ Plastik.',
+        metaDescription:
+          'Authorised dealer of Yıldız Entegre, Teverpan, AGT, Apel Tutkal and HSÇ Plastik.',
         heroEyebrow: 'Dealerships',
         heroTitle: 'Brands we work with',
-        heroDescription: 'As an authorised dealer of reliable manufacturers, we source the right product from the right source.',
+        heroDescription:
+          'As an authorised dealer of reliable manufacturers, we source the right product from the right source.',
         crumbHome: 'Home',
         crumb: 'Dealerships',
       },
@@ -971,7 +1072,8 @@ export const dictionaries = {
       },
       compare: {
         metaTitle: 'Product Comparison | Bozkır Wood Products',
-        metaDescription: 'Compare your selected products side by side and request a combined quote.',
+        metaDescription:
+          'Compare your selected products side by side and request a combined quote.',
       },
       whatsapp: {
         message:
@@ -1074,7 +1176,9 @@ export const dictionaries = {
           },
           {
             title: '6. Changes',
-            body: ['This policy may be updated from time to time. The current version is published on this page.'],
+            body: [
+              'This policy may be updated from time to time. The current version is published on this page.',
+            ],
           },
           {
             title: '7. Contact',
@@ -1088,9 +1192,21 @@ export const dictionaries = {
         title: 'Cookie Policy',
         tableHead: { type: 'Type', purpose: 'Purpose', duration: 'Duration' },
         types: [
-          { type: 'Strictly necessary cookies', purpose: 'Required for the basic functions of the site (security, forms, session).', duration: 'Session' },
-          { type: 'Performance/analytics cookies', purpose: 'Used to improve the site through anonymous visit statistics.', duration: 'Persistent (up to 24 months)' },
-          { type: 'Preference cookies', purpose: 'Used to remember user preferences such as language/theme.', duration: 'Persistent (up to 12 months)' },
+          {
+            type: 'Strictly necessary cookies',
+            purpose: 'Required for the basic functions of the site (security, forms, session).',
+            duration: 'Session',
+          },
+          {
+            type: 'Performance/analytics cookies',
+            purpose: 'Used to improve the site through anonymous visit statistics.',
+            duration: 'Persistent (up to 24 months)',
+          },
+          {
+            type: 'Preference cookies',
+            purpose: 'Used to remember user preferences such as language/theme.',
+            duration: 'Persistent (up to 12 months)',
+          },
         ],
         sections: [
           {
@@ -1124,7 +1240,8 @@ export const dictionaries = {
       heading: 'Get a quote',
       combinedTitle: 'Quote for compared products',
       forProduct: 'Quote for {name}',
-      description: 'Fill in the form or reach us directly by phone/WhatsApp. We respond the same day.',
+      description:
+        'Fill in the form or reach us directly by phone/WhatsApp. We respond the same day.',
       contactTitle: 'Reach us directly',
       fullName: 'Full Name',
       company: 'Company',
@@ -1144,7 +1261,8 @@ export const dictionaries = {
       errorGeneric: 'Your request could not be sent. Please try again.',
       errorRate: 'Too many attempts. Please try again in a few minutes.',
       errorValidation: 'Please check the fields in the form.',
-      privacyNote: 'Your details are used only for this quote and are never shared with third parties.',
+      privacyNote:
+        'Your details are used only for this quote and are never shared with third parties.',
       selectedProduct: 'Quote product',
       selectedProducts: 'Quote products',
       removeProduct: 'Remove product from quote',
@@ -1177,7 +1295,8 @@ export const dictionaries = {
     },
     compare: {
       title: 'Product Comparison',
-      description: 'View up to 4 products side by side and request a combined quote for the ones you like.',
+      description:
+        'View up to 4 products side by side and request a combined quote for the ones you like.',
       empty: 'Your comparison list is empty',
       emptyHint: 'Tap the scale icon on product cards to add up to 4 products.',
       counter: 'comparing',
@@ -1199,7 +1318,8 @@ export const dictionaries = {
       address: 'Address',
       rights: 'All rights reserved.',
       madeIn: 'Bozkır Wood Products',
-      tagline: 'Panel, surface and complementary solutions for furniture and interior manufacturers.',
+      tagline:
+        'Panel, surface and complementary solutions for furniture and interior manufacturers.',
       productsColumn: 'Products',
       corporateColumn: 'Company',
       kvkk: 'GDPR',
@@ -1281,8 +1401,7 @@ export const dictionaries = {
       shareNative: 'شارك عبر تطبيقات أخرى',
       copyLink: 'انسخ الرابط',
       copied: 'تم نسخ الرابط',
-      consentText:
-        'نستخدم ملفات الارتباط لتحسين تجربتك وجمع إحصاءات مجهولة. يمكنك اختيار تفضيلك.',
+      consentText: 'نستخدم ملفات الارتباط لتحسين تجربتك وجمع إحصاءات مجهولة. يمكنك اختيار تفضيلك.',
       consentAccept: 'قبول',
       consentDeny: 'رفض',
       consentPolicy: 'سياسة ملفات الارتباط',
@@ -1394,10 +1513,19 @@ export const dictionaries = {
         cta: 'اطلب عرض سعر',
         contactNote: 'لتخطيط الطلبات والشحن، تواصل معنا على {phone}.',
         items: [
-          { title: 'مخزون قوي', text: 'احصل على المنتجات التي تحتاجها بسرعة وبشكل كامل دون انتظار.' },
+          {
+            title: 'مخزون قوي',
+            text: 'احصل على المنتجات التي تحتاجها بسرعة وبشكل كامل دون انتظار.',
+          },
           { title: 'توريد سريع', text: 'نوصّل طلباتك في الوقت المحدد حتى لا يتعطّل عملك.' },
-          { title: 'المستودع والشحن', text: 'شحنات منتظمة إلى عموم المنطقة من مستودعنا في أنطاكية.' },
-          { title: 'دفع مرن', text: 'نسهّل تجربتك مع خيارات الدفع نقداً أو ببطاقة الائتمان أو بالشيك.' },
+          {
+            title: 'المستودع والشحن',
+            text: 'شحنات منتظمة إلى عموم المنطقة من مستودعنا في أنطاكية.',
+          },
+          {
+            title: 'دفع مرن',
+            text: 'نسهّل تجربتك مع خيارات الدفع نقداً أو ببطاقة الائتمان أو بالشيك.',
+          },
         ],
       },
       catalog: {
@@ -1495,15 +1623,23 @@ export const dictionaries = {
       },
       about: {
         metaTitle: 'من نحن | منتجات بوزكير الخشبية',
-        metaDescription: 'خبرة في القطاع تعود إلى 1979، وهيكل مؤسسي منذ 2016. قصة منتجات بوزكير الخشبية.',
+        metaDescription:
+          'خبرة في القطاع تعود إلى 1979، وهيكل مؤسسي منذ 2016. قصة منتجات بوزكير الخشبية.',
         heroEyebrow: 'من نحن',
         heroTitle: 'خبرة راسخة وهيكل حديث.',
-        heroDescription: 'وصلت منتجات بوزكير الخشبية إلى شكلها الحالي عبر تأسيس شركة عام 2016 لخبرة تجارية تعود إلى 1979.',
+        heroDescription:
+          'وصلت منتجات بوزكير الخشبية إلى شكلها الحالي عبر تأسيس شركة عام 2016 لخبرة تجارية تعود إلى 1979.',
         crumbHome: 'الرئيسية',
         crumb: 'من نحن',
         values: [
-          { title: 'مخزون قوي', text: 'عمق في المخزون يتيح للمصنّعين تأمين المنتجات التي يحتاجونها دون انتظار.' },
-          { title: 'توريد سريع', text: 'لوجستيات مخططة لتسليم الطلبات في الوقت المحدد وبشكل كامل.' },
+          {
+            title: 'مخزون قوي',
+            text: 'عمق في المخزون يتيح للمصنّعين تأمين المنتجات التي يحتاجونها دون انتظار.',
+          },
+          {
+            title: 'توريد سريع',
+            text: 'لوجستيات مخططة لتسليم الطلبات في الوقت المحدد وبشكل كامل.',
+          },
           { title: 'شريك موثوق', text: 'شراكة أعمال طويلة الأمد، وليست بيعاً لمرة واحدة.' },
         ],
         stats: [
@@ -1516,9 +1652,21 @@ export const dictionaries = {
           eyebrow: 'من نحن',
           title: 'خبرة راسخة وهيكل حديث.',
           items: [
-            { year: '1979', title: 'بداية الخبرة في القطاع', text: 'بدأت عائلة بوزكير أنشطتها التجارية في قطاع الأثاث والأخشاب.' },
-            { year: '2016', title: 'منتجات بوزكير الخشبية', text: 'تأسس هيكل مؤسسي بقيادة إبراهيم بوزكير وابنيه إلكر وهاكان بوزكير.' },
-            { year: 'اليوم', title: 'تشكيلة منتجات واسعة', text: 'مخزون قوي وتوريد سريع في MDF والخشب المضغوط وألواح الدهان والمجموعات التكميلية.' },
+            {
+              year: '1979',
+              title: 'بداية الخبرة في القطاع',
+              text: 'بدأت عائلة بوزكير أنشطتها التجارية في قطاع الأثاث والأخشاب.',
+            },
+            {
+              year: '2016',
+              title: 'منتجات بوزكير الخشبية',
+              text: 'تأسس هيكل مؤسسي بقيادة إبراهيم بوزكير وابنيه إلكر وهاكان بوزكير.',
+            },
+            {
+              year: 'اليوم',
+              title: 'تشكيلة منتجات واسعة',
+              text: 'مخزون قوي وتوريد سريع في MDF والخشب المضغوط وألواح الدهان والمجموعات التكميلية.',
+            },
           ],
         },
       },
@@ -1561,7 +1709,8 @@ export const dictionaries = {
       },
       dealers: {
         metaTitle: 'الوكلاء | منتجات بوزكير الخشبية',
-        metaDescription: 'وكيل معتمد لـ يلدز إنتيغري وتيفر بان وAGT وأبيل توتكال وإتش إس سي بلاستيك.',
+        metaDescription:
+          'وكيل معتمد لـ يلدز إنتيغري وتيفر بان وAGT وأبيل توتكال وإتش إس سي بلاستيك.',
         heroEyebrow: 'الوكلاء',
         heroTitle: 'العلامات التي نعمل معها',
         heroDescription: 'كوكيل معتمد لشركات مصنّعة موثوقة، نؤمّن المنتج الصحيح من المصدر الصحيح.',
@@ -1577,7 +1726,8 @@ export const dictionaries = {
         metaDescription: 'قارن المنتجات المحددة جنباً إلى جنب واطلب عرض سعر جماعي.',
       },
       whatsapp: {
-        message: 'مرحباً، أود الحصول على معلومات وعرض سعر لمنتجات بوزكير الخشبية. هل يمكنكم مساعدتي؟',
+        message:
+          'مرحباً، أود الحصول على معلومات وعرض سعر لمنتجات بوزكير الخشبية. هل يمكنكم مساعدتي؟',
         productMessage: 'مرحباً، أود الحصول على معلومات وعرض سعر لمنتج {product}. {url}',
         aria: 'راسلنا عبر واتساب',
         label: 'راسلنا عبر واتساب',
@@ -1690,9 +1840,21 @@ export const dictionaries = {
         title: 'سياسة ملفات الارتباط',
         tableHead: { type: 'النوع', purpose: 'الغرض', duration: 'المدة' },
         types: [
-          { type: 'ملفات الارتباط الضرورية', purpose: 'مطلوبة للوظائف الأساسية للموقع (الأمان والنماذج والجلسة).', duration: 'الجلسة' },
-          { type: 'ملفات الأداء/التحليل', purpose: 'تُستخدم لتحسين الموقع عبر إحصاءات الزيارة المجهولة.', duration: 'دائمة (حتى 24 شهراً)' },
-          { type: 'ملفات التفضيل', purpose: 'تُستخدم لتذكر تفضيلات المستخدم مثل اللغة/المظهر.', duration: 'دائمة (حتى 12 شهراً)' },
+          {
+            type: 'ملفات الارتباط الضرورية',
+            purpose: 'مطلوبة للوظائف الأساسية للموقع (الأمان والنماذج والجلسة).',
+            duration: 'الجلسة',
+          },
+          {
+            type: 'ملفات الأداء/التحليل',
+            purpose: 'تُستخدم لتحسين الموقع عبر إحصاءات الزيارة المجهولة.',
+            duration: 'دائمة (حتى 24 شهراً)',
+          },
+          {
+            type: 'ملفات التفضيل',
+            purpose: 'تُستخدم لتذكر تفضيلات المستخدم مثل اللغة/المظهر.',
+            duration: 'دائمة (حتى 12 شهراً)',
+          },
         ],
         sections: [
           {
@@ -1821,8 +1983,4 @@ export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale] ?? dictionaries.tr;
 }
 
-/** Sözlükten nokta ile yol okur: t(dict, 'nav.products') */
-export function t<T extends Dictionary = Dictionary>(dict: T, path: string): string {
-  const value = path.split('.').reduce<unknown>((acc, key) => (acc as Record<string, unknown>)?.[key], dict);
-  return typeof value === 'string' ? value : path;
-}
+export { t } from './translate';

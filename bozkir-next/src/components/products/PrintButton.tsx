@@ -13,7 +13,7 @@ export function PrintButton({ className }: { className?: string }) {
       onClick={() => window.print()}
       aria-label={t('product.print')}
       className={cn(
-        'inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition-colors hover:border-foreground sm:w-auto sm:gap-2 sm:px-4',
+        'inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition-colors active:scale-95 hover:border-foreground sm:w-auto sm:gap-2 sm:px-4',
         className,
       )}
     >

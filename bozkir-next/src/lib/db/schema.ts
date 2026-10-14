@@ -1,4 +1,13 @@
-import { pgTable, uuid, text, integer, boolean, timestamp, jsonb, index } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  uuid,
+  text,
+  integer,
+  boolean,
+  timestamp,
+  jsonb,
+  index,
+} from 'drizzle-orm/pg-core';
 
 export const products = pgTable(
   'products',
@@ -8,6 +17,10 @@ export const products = pgTable(
     name: text('name').notNull(),
     cat: text('cat').notNull(),
     face: text('face'),
+    /** Renk seçenekleri (virgülle ayrılmış metin). */
+    colors: text('colors'),
+    /** Kalınlık seçenekleri (virgülle ayrılmış metin). */
+    thicknesses: text('thicknesses'),
     img: text('img'),
     isActive: boolean('is_active').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

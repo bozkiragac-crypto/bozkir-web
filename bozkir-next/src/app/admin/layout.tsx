@@ -28,7 +28,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <DictionaryProvider locale="tr" dictionary={getDictionary('tr')}>
           {/* Giriş sayfası: kabuk olmadan gösterilir. */}
           {session?.admin ? (
-            <AdminShell username={session.username || session.email || session.name} role={session.role}>
+            <AdminShell
+              username={session.username || session.email || session.name}
+              role={session.role}
+            >
               <AdminTabGuard />
               {children}
             </AdminShell>

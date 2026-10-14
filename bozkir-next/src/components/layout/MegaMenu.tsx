@@ -68,6 +68,7 @@ export function MegaMenu({
           <Link
             href="/urunler"
             onClick={onClose}
+            data-cursor-label={t('common.viewAll')}
             className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-foreground"
           >
             {t('common.viewAll')} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />

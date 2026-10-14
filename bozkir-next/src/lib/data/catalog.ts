@@ -48,6 +48,8 @@ interface IndexItem {
   category: string;
   categorySlug: string;
   face: string;
+  colors: string[];
+  thicknesses: string[];
   createdAt: string;
   images: string[];
   /** Çeviri alanları; boşsa Türkçeye düşer. Slug daima Türkçe isimden üretilir. */
@@ -65,6 +67,8 @@ interface RawRow {
   name: string | null;
   cat: string | null;
   face: string | null;
+  colors?: string | null;
+  thicknesses?: string | null;
   img: string | null;
   createdAt: Date | string | null;
   nameEn?: string | null;
@@ -109,6 +113,8 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       category: cat,
       categorySlug: categorySlugOf(cat),
       face: String(row.face ?? '').trim(),
+      colors: parseImageList(row.colors),
+      thicknesses: parseImageList(row.thicknesses),
       createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : '',
       images: parseImageList(row.img),
       nameEn: String(row.nameEn ?? '').trim(),
@@ -160,6 +166,8 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
     category: pickLocaleText(item.category, locale, item.catEn, item.catAr),
     categorySlug: item.categorySlug,
     face: item.face,
+    colors: item.colors,
+    thicknesses: item.thicknesses,
     images,
     thumbnail: images[0],
     seoTitle: item.seoTitle || undefined,

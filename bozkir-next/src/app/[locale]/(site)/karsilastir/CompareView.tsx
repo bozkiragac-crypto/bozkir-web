@@ -48,12 +48,24 @@ export function CompareView() {
 
   // Fark vurgusu için satır değerleri (aynı olanlar soluk, farklılar öne çıkar).
   const rows: { label: string; values: string[]; numerals?: boolean }[] = [
-    { label: t('compare.code'), values: items.map(({ ref, product }) => product?.code ?? ref.code ?? '—'), numerals: true },
-    { label: t('compare.category'), values: items.map(({ ref, product }) => product?.category ?? ref.category ?? '—') },
-    { label: t('compare.surface'), values: items.map(({ ref, product }) => (product?.face ?? ref.face) || '—') },
+    {
+      label: t('compare.code'),
+      values: items.map(({ ref, product }) => product?.code ?? ref.code ?? '—'),
+      numerals: true,
+    },
+    {
+      label: t('compare.category'),
+      values: items.map(({ ref, product }) => product?.category ?? ref.category ?? '—'),
+    },
+    {
+      label: t('compare.surface'),
+      values: items.map(({ ref, product }) => (product?.face ?? ref.face) || '—'),
+    },
     {
       label: t('compare.thickness'),
-      values: items.map(({ product }) => (product?.thicknesses?.length ? product.thicknesses.join(' · ') : '—')),
+      values: items.map(({ product }) =>
+        product?.thicknesses?.length ? product.thicknesses.join(' · ') : '—',
+      ),
       numerals: true,
     },
   ];
@@ -69,7 +81,9 @@ export function CompareView() {
       />
       <Container className="pb-28">
         {imported > 0 && (
-          <p className="mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">{t('favorites.imported')}</p>
+          <p className="mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">
+            {t('favorites.imported')}
+          </p>
         )}
         {!ready ? (
           <p className="py-20 text-center text-sm text-muted">{t('common.loading')}</p>
@@ -77,9 +91,7 @@ export function CompareView() {
           <div className="py-20 text-center">
             <Scale className="mx-auto h-10 w-10 text-muted" />
             <p className="mt-5 text-lg">{t('compare.empty')}</p>
-            <p className="mt-2 text-sm text-muted-strong">
-              {t('compare.emptyHint')}
-            </p>
+            <p className="mt-2 text-sm text-muted-strong">{t('compare.emptyHint')}</p>
             <Link
               href="/urunler"
               className="mt-8 inline-flex h-12 items-center rounded-full bg-foreground px-7 text-sm font-medium text-background"
@@ -104,8 +116,12 @@ export function CompareView() {
                 </button>
                 <Link
                   href={quoteHref}
+                  aria-disabled={items.length < 2 || undefined}
+                  tabIndex={items.length < 2 ? -1 : undefined}
                   className={`inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-medium ${
-                    items.length >= 2 ? 'bg-foreground text-background' : 'pointer-events-none bg-surface-2 text-muted'
+                    items.length >= 2
+                      ? 'bg-foreground text-background'
+                      : 'pointer-events-none bg-surface-2 text-muted'
                   }`}
                 >
                   {t('compare.quoteAll')} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
@@ -125,13 +141,22 @@ export function CompareView() {
                         className="relative block h-24 w-24 flex-none overflow-hidden rounded-lg bg-surface-2"
                       >
                         {src ? (
-                          <Image src={src} alt={product?.name ?? ref.name} fill sizes="96px" className="object-cover" />
+                          <Image
+                            src={src}
+                            alt={product?.name ?? ref.name}
+                            fill
+                            sizes="96px"
+                            className="object-cover"
+                          />
                         ) : (
                           <ImagePlaceholder iconClassName="h-5 w-5" />
                         )}
                       </Link>
                       <div className="min-w-0 flex-1">
-                        <Link href={`/urunler/${ref.slug}`} className="text-base font-medium leading-snug">
+                        <Link
+                          href={`/urunler/${ref.slug}`}
+                          className="text-base font-medium leading-snug"
+                        >
                           {product?.name ?? ref.name}
                         </Link>
                         <button
@@ -149,8 +174,13 @@ export function CompareView() {
                         const value = row.values[i] ?? '—';
                         const hi = differing.has(row.label);
                         return (
-                          <div key={row.label} className="flex items-center justify-between gap-4 py-2.5 text-sm">
-                            <dt className="text-xs tracking-[0.14em] text-muted uppercase">{row.label}</dt>
+                          <div
+                            key={row.label}
+                            className="flex items-center justify-between gap-4 py-2.5 text-sm"
+                          >
+                            <dt className="text-xs tracking-[0.14em] text-muted uppercase">
+                              {row.label}
+                            </dt>
                             <dd
                               className={cn(
                                 'text-end',
@@ -203,7 +233,11 @@ export function CompareView() {
                           <div className="relative aspect-square w-40 overflow-hidden rounded-md bg-surface-2">
                             {(product?.thumbnail ?? product?.images?.[0] ?? ref.image) ? (
                               <Image
-                                src={(product?.thumbnail ?? product?.images?.[0] ?? ref.image) as string}
+                                src={
+                                  (product?.thumbnail ??
+                                    product?.images?.[0] ??
+                                    ref.image) as string
+                                }
                                 alt={product?.name ?? ref.name}
                                 fill
                                 sizes="160px"
@@ -230,10 +264,15 @@ export function CompareView() {
                           {row.label}
                         </th>
                         {row.values.map((value, i) => (
-                          <td key={items[i]?.ref.slug ?? i} className={cn('py-4 pe-4', row.numerals && 'numerals')}>
+                          <td
+                            key={items[i]?.ref.slug ?? i}
+                            className={cn('py-4 pe-4', row.numerals && 'numerals')}
+                          >
                             <span
                               className={cn(
-                                highlight ? 'rounded-md bg-surface-2 px-2 py-1 font-medium' : 'text-muted-strong',
+                                highlight
+                                  ? 'rounded-md bg-surface-2 px-2 py-1 font-medium'
+                                  : 'text-muted-strong',
                               )}
                             >
                               {value}
@@ -273,7 +312,9 @@ export function CompareView() {
             {/* Favorilerden hızlı ekleme */}
             {favorites.length > 0 && (
               <div className="mt-10">
-                <h2 className="text-lg font-medium tracking-tight">{t('compare.addFromFavorites')}</h2>
+                <h2 className="text-lg font-medium tracking-tight">
+                  {t('compare.addFromFavorites')}
+                </h2>
                 <ul className="mt-4 flex flex-wrap gap-3">
                   {favorites.map((f) => {
                     const inList = compare.some((c) => c.slug === f.slug);
@@ -284,7 +325,9 @@ export function CompareView() {
                           onClick={() => toggleCompare(f)}
                           disabled={inList}
                           className={`inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm transition ${
-                            inList ? 'border-transparent bg-foreground text-background' : 'border-border hover:border-foreground'
+                            inList
+                              ? 'border-transparent bg-foreground text-background'
+                              : 'border-border hover:border-foreground'
                           }`}
                         >
                           {f.name}

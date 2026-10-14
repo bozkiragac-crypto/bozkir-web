@@ -20,6 +20,7 @@ export function ProductCard({
 }) {
   const [broken, setBroken] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
+  const [hover, setHover] = useState(false);
   const { t } = useDictionary();
   const image = product.thumbnail ?? product.images[0];
   const secondImage = product.images.find((u) => u !== image);
@@ -34,11 +35,16 @@ export function ProductCard({
   };
 
   return (
-    <>
+    // Kök `div`: aksiyon butonları `<a>` DIŞINDA kardeş olarak durur (geçerli HTML + klavye).
+    <div className="group relative">
       <Link
         href={`/urunler/${product.slug}`}
-        className="group block [-webkit-tap-highlight-color:transparent] active:scale-[0.99] transition-transform"
+        className="block transition-transform [-webkit-tap-highlight-color:transparent] active:scale-[0.99]"
         data-cursor-label={t('catalog.inspect')}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onFocus={() => setHover(true)}
+        onBlur={() => setHover(false)}
       >
         <div className="sheen relative aspect-[4/5] overflow-hidden rounded-md bg-surface-2 ring-1 ring-transparent transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-1 group-hover:shadow-[var(--card-shadow)] group-hover:ring-border-strong">
           {image && !broken ? (
@@ -52,7 +58,8 @@ export function ProductCard({
                 onError={() => setBroken(true)}
                 className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
               />
-              {secondImage ? (
+              {/* 2. görsel yalnız hover/focus'ta yüklenir (bant genişliği tasarrufu). */}
+              {secondImage && hover ? (
                 <SmartImage
                   src={secondImage}
                   alt=""
@@ -71,25 +78,8 @@ export function ProductCard({
             aria-hidden
             className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-500 ease-[var(--ease-out-expo)] group-hover:opacity-100"
           />
-
-          {/* Favori / karşılaştırma — mobilde her zaman, masaüstünde hover'da */}
-          <div className="absolute end-2 top-2 flex flex-col gap-2 opacity-100 transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] md:translate-x-2 md:opacity-0 md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:translate-x-0 md:group-hover:opacity-100">
-            <FavoriteButton product={ref} />
-            <CompareButton product={ref} />
-            <button
-              type="button"
-              aria-label={`${product.name} — ${t('catalog.quickView')}`}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setQuickOpen(true);
-              }}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition hover:border-foreground"
-            >
-              <Eye className="h-4 w-4" />
-            </button>
-          </div>
         </div>
+
         <div className="mt-3 flex items-start justify-between gap-3 sm:mt-4">
           <div className="min-w-0">
             {product.code && (
@@ -140,7 +130,22 @@ export function ProductCard({
           <ArrowUpRight className="mt-1 h-4 w-4 flex-none text-muted transition-[transform,color] duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
         </div>
       </Link>
+
+      {/* Favori / karşılaştırma / hızlı bakış — mobilde her zaman, masaüstünde hover'da */}
+      <div className="absolute end-2 top-2 z-10 flex flex-col gap-2 opacity-100 transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] md:translate-x-2 md:opacity-0 md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:translate-x-0 md:group-hover:opacity-100">
+        <FavoriteButton product={ref} />
+        <CompareButton product={ref} />
+        <button
+          type="button"
+          aria-label={`${product.name} — ${t('catalog.quickView')}`}
+          onClick={() => setQuickOpen(true)}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition active:scale-95 hover:border-foreground"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+      </div>
+
       <ProductQuickView product={product} open={quickOpen} onClose={() => setQuickOpen(false)} />
-    </>
+    </div>
   );
 }

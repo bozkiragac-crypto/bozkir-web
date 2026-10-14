@@ -69,6 +69,9 @@ const statements = [
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS name_ar TEXT`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS cat_en TEXT`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS cat_ar TEXT`,
+  // ürün renk / kalınlık seçenekleri (virgülle ayrılmış metin)
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS colors TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS thicknesses TEXT`,
 
   // çok dilli kampanya metinleri
   `ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS title_en TEXT`,

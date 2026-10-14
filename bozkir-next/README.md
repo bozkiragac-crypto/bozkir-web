@@ -148,7 +148,7 @@ göre ayarlayın. Ayrıntı: `deploy/README.md`.
 - [x] Depo konumu + çok dilli çalışma saatleri
 - [x] Test altyapısı (Vitest + Playwright) + GitHub Actions CI/CD
 - [x] Dayanıklılık: derin sağlık kontrolü (DB+S3), graceful shutdown, yedek/restore scriptleri, bakım modu, hata log'u
-- [x] Statik/ISR üretim (SSG) + gelişmiş SEO (JSON-LD, breadcrumb, hreflang, og:image) + a11y (inert, focus trap)
+- [x] Statik/ISR üretim (tag-revalidate) + gelişmiş SEO (JSON-LD, breadcrumb, hreflang, og:image) + a11y (inert, focus trap)
 - [x] Kategori & marka admin CRUD; Hakkımızda içeriği admin; çoklu katalog listeleme
 
 ## Test

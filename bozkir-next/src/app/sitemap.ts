@@ -18,6 +18,7 @@ function entry(path: string, changeFrequency: 'weekly' | 'monthly', priority: nu
   };
   return {
     url: languages[defaultLocale]!,
+    lastModified: new Date(),
     changeFrequency,
     priority,
     alternates: { languages },

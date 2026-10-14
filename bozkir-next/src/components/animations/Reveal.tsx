@@ -1,9 +1,15 @@
 'use client';
 
-import { createElement, useRef, type ElementType, type ReactNode } from 'react';
-import { gsap, useGSAP } from '@/lib/gsap';
+import {
+  createElement,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ElementType,
+  type ReactNode,
+} from 'react';
 import { cn } from '@/lib/utils';
-import { DUR } from '@/lib/motion';
 
 interface RevealProps {
   children: ReactNode;
@@ -16,7 +22,9 @@ interface RevealProps {
 }
 
 /**
- * Scroll ile yumuşak reveal. `prefers-reduced-motion` durumunda animasyon yok.
+ * Scroll ile yumuşak reveal — GSAP'sız (IntersectionObserver + CSS).
+ * Görünürlük `html.js` ile kapılanır: JS yoksa içerik görünür kalır;
+ * `prefers-reduced-motion` durumunda animasyon yok.
  */
 export function Reveal({
   children,
@@ -27,37 +35,41 @@ export function Reveal({
   once = true,
 }: RevealProps) {
   const ref = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(false);
 
-  useGSAP(
-    () => {
-      const el = ref.current;
-      if (!el) return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        gsap.set(el, { opacity: 1, y: 0 });
-        return;
-      }
-      gsap.fromTo(
-        el,
-        { opacity: 0, y },
-        {
-          opacity: 1,
-          y: 0,
-          duration: DUR.reveal,
-          delay,
-          ease: 'power3.out',
-          // Animasyon bitince transform'u bırak: kalıcı `transform`, altındaki
-          // fixed/pin elemanların referans kutusunu bozar.
-          onComplete: () => gsap.set(el, { clearProps: 'transform' }),
-          scrollTrigger: { trigger: el, start: 'top 88%', once },
-        },
-      );
-    },
-    { scope: ref, dependencies: [delay, y, once] },
-  );
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          setInView(true);
+          if (once) io.disconnect();
+        } else if (!once) {
+          setInView(false);
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [once]);
 
   return createElement(
     as,
-    { ref: ref as never, className: cn(className), 'data-reveal': true },
+    {
+      ref: ref as never,
+      className: cn(className),
+      'data-reveal': true,
+      'data-in': inView ? 'true' : 'false',
+      style: { '--reveal-y': `${y}px`, '--reveal-delay': `${delay * 1000}ms` } as CSSProperties,
+    },
     children,
   );
 }

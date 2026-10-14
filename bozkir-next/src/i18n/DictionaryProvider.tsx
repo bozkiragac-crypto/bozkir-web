@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo } from 'react';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
-import { t, dictionaries } from '@/i18n/dictionaries';
+import { t } from '@/i18n/translate';
 
 interface DictCtx {
   locale: Locale;
@@ -24,19 +24,17 @@ export function DictionaryProvider({
   dictionary: Dictionary;
   children: React.ReactNode;
 }) {
-  const value = useMemo<DictCtx>(() => {
-    /** Anahtar yoksa Türkçe karşılığına düşer. */
-    const lookup = (key: string) => {
-      const path = `nav.${key}`;
-      return t(dictionary, path) === path ? t(dictionaries.tr, path) : t(dictionary, path);
-    };
-    return {
+  const value = useMemo<DictCtx>(
+    () => ({
       locale,
       dict: dictionary,
       t: (path: string) => t(dictionary, path),
-      navLabel: lookup,
-    };
-  }, [locale, dictionary]);
+      // Parite `tests/unit/dictionaries.test.ts` ile korunur; ayrı TR fallback
+      // gönderilmez (aksi halde tüm TR sözlük her sayfaya gömülür).
+      navLabel: (key: string) => t(dictionary, `nav.${key}`),
+    }),
+    [locale, dictionary],
+  );
   return <DictionaryCtx.Provider value={value}>{children}</DictionaryCtx.Provider>;
 }
 

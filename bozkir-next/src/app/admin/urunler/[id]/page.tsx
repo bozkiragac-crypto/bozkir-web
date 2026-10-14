@@ -27,7 +27,10 @@ export default async function EditProductPage({ params }: PageProps) {
 
   return (
     <div>
-      <Link href="/admin/urunler" className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
+      <Link
+        href="/admin/urunler"
+        className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Ürünler
       </Link>
       <h1 className="mt-6 text-2xl font-medium tracking-tight">Ürünü Düzenle</h1>
@@ -43,6 +46,8 @@ export default async function EditProductPage({ params }: PageProps) {
             code: product.code ?? '',
             cat: product.cat ?? '',
             face: product.face ?? '',
+            colors: product.colors ?? '',
+            thicknesses: product.thicknesses ?? '',
             images: parseImageField(product.img).map((value) => publicUrl(value)),
             nameEn: product.nameEn ?? '',
             nameAr: product.nameAr ?? '',
