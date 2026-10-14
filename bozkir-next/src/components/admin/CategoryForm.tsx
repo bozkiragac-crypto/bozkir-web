@@ -96,19 +96,19 @@ export function CategoryForm({ initial }: CategoryFormProps) {
           <input required value={name} onChange={(e) => setName(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Slug (boÅŸsa addan Ã¼retilir)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Slug (boşsa addan üretilir)</span>
           <input value={slug} onChange={(e) => setSlug(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2 sm:col-span-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama</span>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={area} />
         </label>
         <label className="grid gap-2 sm:col-span-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">KÄ±sa aÃ§Ä±klama</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Kısa açıklama</span>
           <input value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SÄ±ra</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Sıra</span>
           <input value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} inputMode="numeric" className={field} />
         </label>
         <label className="grid gap-2">
@@ -120,13 +120,13 @@ export function CategoryForm({ initial }: CategoryFormProps) {
         </label>
         <label className="flex items-center gap-3 text-sm sm:col-span-2">
           <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
-          Vitrinde gÃ¶ster (Ã¶ne Ã§Ä±kan)
+          Vitrinde göster (öne çıkan)
         </label>
       </div>
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
         <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          Ã‡eviriler (boÅŸsa TÃ¼rkÃ§e kullanÄ±lÄ±r)
+          Çeviriler (boşsa Türkçe kullanılır)
         </legend>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Ad (EN)</span>
@@ -137,19 +137,19 @@ export function CategoryForm({ initial }: CategoryFormProps) {
           <input value={nameAr} onChange={(e) => setNameAr(e.target.value)} className={field} dir="rtl" />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama (EN)</span>
           <textarea value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={2} className={area} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama (AR)</span>
           <textarea value={descriptionAr} onChange={(e) => setDescriptionAr(e.target.value)} rows={2} className={area} dir="rtl" />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">KÄ±sa aÃ§Ä±klama (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Kısa açıklama (EN)</span>
           <input value={shortDescriptionEn} onChange={(e) => setShortDescriptionEn(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">KÄ±sa aÃ§Ä±klama (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Kısa açıklama (AR)</span>
           <input value={shortDescriptionAr} onChange={(e) => setShortDescriptionAr(e.target.value)} className={field} dir="rtl" />
         </label>
       </fieldset>
@@ -157,11 +157,11 @@ export function CategoryForm({ initial }: CategoryFormProps) {
       <fieldset className="grid gap-5 rounded-md border border-border p-5">
         <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">SEO</legend>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO baÅŸlÄ±k</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO başlık</span>
           <input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO aÃ§Ä±klama</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO açıklama</span>
           <textarea value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} rows={2} className={area} />
         </label>
       </fieldset>
@@ -172,14 +172,14 @@ export function CategoryForm({ initial }: CategoryFormProps) {
           onChange={(next) => setThumbnail(next[0] ?? '')}
           folder="content"
           multiple={false}
-          label="KÃ¼Ã§Ã¼k gÃ¶rsel"
+          label="Küçük görsel"
         />
         <ImageManager
           images={heroImage ? [heroImage] : []}
           onChange={(next) => setHeroImage(next[0] ?? '')}
           folder="content"
           multiple={false}
-          label="Vitrin gÃ¶rseli"
+          label="Vitrin görseli"
         />
       </div>
 
@@ -194,7 +194,7 @@ export function CategoryForm({ initial }: CategoryFormProps) {
           {busy ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
         <button type="button" onClick={() => router.push('/admin/kategoriler')} className="text-sm text-muted-strong hover:text-foreground">
-          Ä°ptal
+          İptal
         </button>
       </div>
     </form>

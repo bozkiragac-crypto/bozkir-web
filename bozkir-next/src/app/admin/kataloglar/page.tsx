@@ -8,7 +8,7 @@ import { DeleteCatalogButton } from '@/components/admin/DeleteButtons';
 export default async function AdminCatalogsPage() {
   const db = getDb();
   if (!db) {
-    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">VeritabanÄ± baÄŸlantÄ±sÄ± yok.</p>;
+    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">Veritabanı bağlantısı yok.</p>;
   }
 
   const rows = await db.select().from(catalogs).orderBy(asc(catalogs.sortOrder));
@@ -18,7 +18,7 @@ export default async function AdminCatalogsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">Kataloglar</h1>
-          <p className="mt-1 text-sm text-muted-strong">Sitedeki katalog bÃ¶lÃ¼mÃ¼nde gÃ¶sterilir (kapak + PDF).</p>
+          <p className="mt-1 text-sm text-muted-strong">Sitedeki katalog bölümünde gösterilir (kapak + PDF).</p>
         </div>
         <Link
           href="/admin/kataloglar/yeni"
@@ -33,11 +33,11 @@ export default async function AdminCatalogsPage() {
           <thead className="bg-surface text-foreground">
             <tr>
               <th className="p-4 font-medium">Kapak</th>
-              <th className="p-4 font-medium">BaÅŸlÄ±k</th>
-              <th className="p-4 font-medium">YÄ±l</th>
+              <th className="p-4 font-medium">Başlık</th>
+              <th className="p-4 font-medium">Yıl</th>
               <th className="p-4 font-medium">PDF</th>
               <th className="p-4 font-medium">Durum</th>
-              <th className="p-4 font-medium">SÄ±ra</th>
+              <th className="p-4 font-medium">Sıra</th>
               <th className="p-4" />
             </tr>
           </thead>
@@ -57,7 +57,7 @@ export default async function AdminCatalogsPage() {
                     {c.title}
                   </Link>
                 </td>
-                <td className="numerals p-4 text-muted-strong">{c.year ?? 'â€”'}</td>
+                <td className="numerals p-4 text-muted-strong">{c.year ?? '—'}</td>
                 <td className="p-4">
                   {c.pdfUrl ? (
                     <a href={c.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-xs underline underline-offset-4">
@@ -85,7 +85,7 @@ export default async function AdminCatalogsPage() {
                       href={`/admin/kataloglar/${c.id}`}
                       className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
                     >
-                      DÃ¼zenle
+                      Düzenle
                     </Link>
                     <DeleteCatalogButton id={c.id} />
                   </div>
@@ -95,7 +95,7 @@ export default async function AdminCatalogsPage() {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={7} className="p-10 text-center text-muted-strong">
-                  HenÃ¼z katalog yok. &quot;Yeni Katalog&quot; ile ekleyin.
+                  Henüz katalog yok. &quot;Yeni Katalog&quot; ile ekleyin.
                 </td>
               </tr>
             )}

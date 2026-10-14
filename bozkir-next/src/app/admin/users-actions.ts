@@ -40,17 +40,32 @@ export async function createUser(input: UserInput): Promise<{ ok: boolean; error
     return { ok: false, error: 'Şifre en az 8 karakter olmalı.' };
   }
 
-  const exists = await db.select({ id: adminUsers.id }).from(adminUsers).where(eq(adminUsers.username, data.username)).limit(1);
+  const exists = await db
+    .select({ id: adminUsers.id })
+    .from(adminUsers)
+    .where(eq(adminUsers.username, data.username))
+    .limit(1);
   if (exists.length) return { ok: false, error: 'Bu kullanıcı adı zaten kayıtlı.' };
 
   const passwordHash = await bcrypt.hash(input.password, 10);
-  const inserted = await db.insert(adminUsers).values({ ...data, passwordHash }).returning({ id: adminUsers.id });
-  await logActivity(admin, 'create', 'user', inserted[0]?.id, `Kullanıcı eklendi: ${data.username}`);
+  const inserted = await db
+    .insert(adminUsers)
+    .values({ ...data, passwordHash })
+    .returning({ id: adminUsers.id });
+  await logActivity(
+    admin,
+    'create',
+    'user',
+    inserted[0]?.id,
+    `Kullanıcı eklendi: ${data.username}`,
+  );
   revalidatePath('/admin/kullanicilar');
   return { ok: true };
 }
 
-export async function updateUser(input: UserInput & { id: string }): Promise<{ ok: boolean; error?: string }> {
+export async function updateUser(
+  input: UserInput & { id: string },
+): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
@@ -64,6 +79,24 @@ export async function updateUser(input: UserInput & { id: string }): Promise<{ o
     .where(and(eq(adminUsers.username, data.username), ne(adminUsers.id, input.id)))
     .limit(1);
   if (clash.length) return { ok: false, error: 'Bu kullanıcı adı başka bir hesapta kullanılıyor.' };
+
+  // Son aktif sahip hesabı kilitlenmeye karşı korunur (rol düşürme/pasifleştirme).
+  const targetRows = await db
+    .select({ role: adminUsers.role, isActive: adminUsers.isActive })
+    .from(adminUsers)
+    .where(eq(adminUsers.id, input.id))
+    .limit(1);
+  const target = targetRows[0];
+  if (!target) return { ok: false, error: 'Kullanıcı bulunamadı.' };
+  if (target.role === 'owner' && (data.role !== 'owner' || !data.isActive)) {
+    const owners = await db
+      .select({ id: adminUsers.id })
+      .from(adminUsers)
+      .where(and(eq(adminUsers.role, 'owner'), eq(adminUsers.isActive, true)));
+    if (owners.length <= 1) {
+      return { ok: false, error: 'Son aktif sahip hesabının rolü veya durumu değiştirilemez.' };
+    }
+  }
 
   const patch: Record<string, unknown> = { ...data };
   if (input.password) {
@@ -89,7 +122,10 @@ export async function deleteUser(id: string): Promise<{ ok: boolean; error?: str
   if (!target) return { ok: false, error: 'Kullanıcı bulunamadı.' };
 
   if (target.role === 'owner') {
-    const owners = await db.select({ id: adminUsers.id }).from(adminUsers).where(eq(adminUsers.role, 'owner'));
+    const owners = await db
+      .select({ id: adminUsers.id })
+      .from(adminUsers)
+      .where(eq(adminUsers.role, 'owner'));
     if (owners.length <= 1) return { ok: false, error: 'Son sahip hesabı silinemez.' };
   }
 

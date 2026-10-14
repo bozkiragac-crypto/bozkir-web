@@ -4,23 +4,28 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, ArrowUp, ArrowDown } from 'lucide-react';
 import { saveSiteSettings } from '@/lib/admin/safe-actions';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { SiteSettings } from '@/lib/data/settings';
 
-const field = 'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-foreground';
+const field =
+  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-foreground';
 
 export function SettingsForm({
   initial,
   categories,
   campaigns = [],
+  smtpPassSet = false,
 }: {
   initial: SiteSettings;
   categories: { slug: string; name: string }[];
   campaigns?: { id: string; title: string }[];
+  smtpPassSet?: boolean;
 }) {
   const router = useRouter();
   const [form, setForm] = useState<SiteSettings>(initial);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const toast = useToast();
 
   const order = form.featuredOrder.length ? form.featuredOrder : categories.map((c) => c.slug);
   const nameOf = (slug: string) => categories.find((c) => c.slug === slug)?.name ?? slug;
@@ -42,7 +47,12 @@ export function SettingsForm({
     setMsg(null);
     const res = await saveSiteSettings({ ...form, featuredOrder: order });
     setBusy(false);
-    setMsg(res.ok ? { ok: true, text: 'Ayarlar kaydedildi.' } : { ok: false, text: res.error ?? 'Kaydedilemedi.' });
+    setMsg(
+      res.ok
+        ? { ok: true, text: 'Ayarlar kaydedildi.' }
+        : { ok: false, text: res.error ?? 'Kaydedilemedi.' },
+    );
+    toast(res.ok ? 'Ayarlar kaydedildi.' : (res.error ?? 'Kaydedilemedi.'));
     if (res.ok) router.refresh();
   }
 
@@ -50,33 +60,64 @@ export function SettingsForm({
 
   return (
     <form onSubmit={onSubmit}>
-      <h1 className="text-2xl font-medium tracking-tight">Site ayarlarÄ±</h1>
-      <p className="mt-1 text-sm text-muted-strong">Ä°letiÅŸim bilgileri ve vitrin kategori sÄ±rasÄ±.</p>
+      <h1 className="text-2xl font-medium tracking-tight">Site ayarları</h1>
+      <p className="mt-1 text-sm text-muted-strong">
+        İletişim bilgileri ve vitrin kategori sırası.
+      </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <div className={section}>
-          <p className="font-medium">Ä°letiÅŸim</p>
+          <p className="font-medium">İletişim</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Label t="Telefon *">
-              <input className={field} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <input
+                className={field}
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
             </Label>
             <Label t="Telefon 2 (depo)">
-              <input className={field} value={form.phone2} onChange={(e) => setForm({ ...form, phone2: e.target.value })} />
+              <input
+                className={field}
+                value={form.phone2}
+                onChange={(e) => setForm({ ...form, phone2: e.target.value })}
+              />
             </Label>
             <Label t="WhatsApp linki">
-              <input className={field} value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} />
+              <input
+                className={field}
+                value={form.whatsapp}
+                onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+              />
             </Label>
             <Label t="E-posta">
-              <input className={field} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <input
+                className={field}
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
             </Label>
-            <Label t="Ã‡alÄ±ÅŸma saatleri (TR)" full>
-              <input className={field} value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })} />
+            <Label t="Çalışma saatleri (TR)" full>
+              <input
+                className={field}
+                value={form.hours}
+                onChange={(e) => setForm({ ...form, hours: e.target.value })}
+              />
             </Label>
-            <Label t="Ã‡alÄ±ÅŸma saatleri (EN)" full>
-              <input className={field} value={form.hoursEn} onChange={(e) => setForm({ ...form, hoursEn: e.target.value })} />
+            <Label t="Çalışma saatleri (EN)" full>
+              <input
+                className={field}
+                value={form.hoursEn}
+                onChange={(e) => setForm({ ...form, hoursEn: e.target.value })}
+              />
             </Label>
-            <Label t="Ã‡alÄ±ÅŸma saatleri (AR)" full>
-              <input className={field} dir="rtl" value={form.hoursAr} onChange={(e) => setForm({ ...form, hoursAr: e.target.value })} />
+            <Label t="Çalışma saatleri (AR)" full>
+              <input
+                className={field}
+                dir="rtl"
+                value={form.hoursAr}
+                onChange={(e) => setForm({ ...form, hoursAr: e.target.value })}
+              />
             </Label>
           </div>
         </div>
@@ -84,32 +125,86 @@ export function SettingsForm({
         <div className={section}>
           <p className="font-medium">Adres & Sosyal</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <Label t="Adres satÄ±rÄ±" full>
-              <input className={field} value={form.address.street} onChange={(e) => setForm({ ...form, address: { ...form.address, street: e.target.value } })} />
+            <Label t="Adres satırı" full>
+              <input
+                className={field}
+                value={form.address.street}
+                onChange={(e) =>
+                  setForm({ ...form, address: { ...form.address, street: e.target.value } })
+                }
+              />
             </Label>
-            <Label t="Ä°lÃ§e">
-              <input className={field} value={form.address.locality} onChange={(e) => setForm({ ...form, address: { ...form.address, locality: e.target.value } })} />
+            <Label t="İlçe">
+              <input
+                className={field}
+                value={form.address.locality}
+                onChange={(e) =>
+                  setForm({ ...form, address: { ...form.address, locality: e.target.value } })
+                }
+              />
             </Label>
-            <Label t="Ä°l">
-              <input className={field} value={form.address.region} onChange={(e) => setForm({ ...form, address: { ...form.address, region: e.target.value } })} />
+            <Label t="İl">
+              <input
+                className={field}
+                value={form.address.region}
+                onChange={(e) =>
+                  setForm({ ...form, address: { ...form.address, region: e.target.value } })
+                }
+              />
             </Label>
             <Label t="Posta kodu">
-              <input className={field} value={form.address.postalCode} onChange={(e) => setForm({ ...form, address: { ...form.address, postalCode: e.target.value } })} />
+              <input
+                className={field}
+                value={form.address.postalCode}
+                onChange={(e) =>
+                  setForm({ ...form, address: { ...form.address, postalCode: e.target.value } })
+                }
+              />
             </Label>
             <Label t="Instagram">
-              <input className={field} value={form.social.instagram} onChange={(e) => setForm({ ...form, social: { ...form.social, instagram: e.target.value } })} />
+              <input
+                className={field}
+                value={form.social.instagram}
+                onChange={(e) =>
+                  setForm({ ...form, social: { ...form.social, instagram: e.target.value } })
+                }
+              />
             </Label>
             <Label t="Facebook">
-              <input className={field} value={form.social.facebook} onChange={(e) => setForm({ ...form, social: { ...form.social, facebook: e.target.value } })} />
+              <input
+                className={field}
+                value={form.social.facebook}
+                onChange={(e) =>
+                  setForm({ ...form, social: { ...form.social, facebook: e.target.value } })
+                }
+              />
             </Label>
             <Label t="YouTube">
-              <input className={field} value={form.social.youtube} onChange={(e) => setForm({ ...form, social: { ...form.social, youtube: e.target.value } })} />
+              <input
+                className={field}
+                value={form.social.youtube}
+                onChange={(e) =>
+                  setForm({ ...form, social: { ...form.social, youtube: e.target.value } })
+                }
+              />
             </Label>
             <Label t="LinkedIn">
-              <input className={field} value={form.social.linkedin} onChange={(e) => setForm({ ...form, social: { ...form.social, linkedin: e.target.value } })} />
+              <input
+                className={field}
+                value={form.social.linkedin}
+                onChange={(e) =>
+                  setForm({ ...form, social: { ...form.social, linkedin: e.target.value } })
+                }
+              />
             </Label>
             <Label t="X (Twitter)" full>
-              <input className={field} value={form.social.x} onChange={(e) => setForm({ ...form, social: { ...form.social, x: e.target.value } })} />
+              <input
+                className={field}
+                value={form.social.x}
+                onChange={(e) =>
+                  setForm({ ...form, social: { ...form.social, x: e.target.value } })
+                }
+              />
             </Label>
           </div>
         </div>
@@ -118,17 +213,32 @@ export function SettingsForm({
           <p className="font-medium">Depo konumu</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Label t="Depo adresi (opsiyonel)" full>
-              <input className={field} value={form.warehouse.address} onChange={(e) => setForm({ ...form, warehouse: { ...form.warehouse, address: e.target.value } })} />
+              <input
+                className={field}
+                value={form.warehouse.address}
+                onChange={(e) =>
+                  setForm({ ...form, warehouse: { ...form.warehouse, address: e.target.value } })
+                }
+              />
             </Label>
             <Label t="Koordinatlar (enlem,boylam)" full>
-              <input className={field} value={form.warehouse.coords} onChange={(e) => setForm({ ...form, warehouse: { ...form.warehouse, coords: e.target.value } })} placeholder="36.238639,36.176806" />
+              <input
+                className={field}
+                value={form.warehouse.coords}
+                onChange={(e) =>
+                  setForm({ ...form, warehouse: { ...form.warehouse, coords: e.target.value } })
+                }
+                placeholder="36.238639,36.176806"
+              />
             </Label>
           </div>
         </div>
 
         <div className={`${section} lg:col-span-2`}>
           <p className="font-medium">Kampanya popup</p>
-          <p className="mt-1 text-sm text-muted-strong">Siteye giriÅŸte bir kez gÃ¶sterilen kampanya modalÄ± (gÃ¼nde 1 kez).</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Siteye girişte bir kez gösterilen kampanya modalı (günde 1 kez).
+          </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <label className="flex h-11 items-center gap-3 rounded-md border border-border bg-surface px-4 sm:col-span-2">
               <input
@@ -136,15 +246,15 @@ export function SettingsForm({
                 checked={form.popupEnabled}
                 onChange={(e) => setForm({ ...form, popupEnabled: e.target.checked })}
               />
-              <span className="text-sm">Popup&apos;Ä± etkinleÅŸtir</span>
+              <span className="text-sm">Popup&apos;ı etkinleştir</span>
             </label>
-            <Label t="GÃ¶sterilecek kampanya" full>
+            <Label t="Gösterilecek kampanya" full>
               <select
                 className={field}
                 value={form.popupCampaignId}
                 onChange={(e) => setForm({ ...form, popupCampaignId: e.target.value })}
               >
-                <option value="">Ä°lk aktif kampanya</option>
+                <option value="">İlk aktif kampanya</option>
                 {campaigns.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.title}
@@ -158,7 +268,8 @@ export function SettingsForm({
         <div className={`${section} lg:col-span-2`}>
           <p className="font-medium">Webhook</p>
           <p className="mt-1 text-sm text-muted-strong">
-            TanÄ±mlanÄ±rsa olaylarda (Ã¶r. yeni teklif) JSON POST atÄ±lÄ±r. Slack/CRM/e-posta entegrasyonlarÄ± bu URL Ã¼zerinden yapÄ±labilir.
+            Tanımlanırsa olaylarda (ör. yeni teklif) JSON POST atılır. Slack/CRM/e-posta
+            entegrasyonları bu URL üzerinden yapılabilir.
           </p>
           <div className="mt-5">
             <Label t="Webhook URL" full>
@@ -175,20 +286,24 @@ export function SettingsForm({
         <div className={`${section} lg:col-span-2`}>
           <p className="font-medium">SEO / Meta</p>
           <p className="mt-1 text-sm text-muted-strong">
-            BoÅŸ bÄ±rakÄ±lÄ±rsa site varsayÄ±lanlarÄ± kullanÄ±lÄ±r. OG gÃ¶rseli tam URL veya /yol olabilir.
+            Boş bırakılırsa site varsayılanları kullanılır. OG görseli tam URL veya /yol olabilir.
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <Label t="Site baÅŸlÄ±ÄŸÄ± (SEO title)" full>
-              <input className={field} value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} />
+            <Label t="Site başlığı (SEO title)" full>
+              <input
+                className={field}
+                value={form.seoTitle}
+                onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
+              />
             </Label>
-            <Label t="Site aÃ§Ä±klamasÄ± (meta description)" full>
+            <Label t="Site açıklaması (meta description)" full>
               <textarea
                 className={`${field} h-20 py-2`}
                 value={form.seoDescription}
                 onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
               />
             </Label>
-            <Label t="OG gÃ¶rseli" full>
+            <Label t="OG görseli" full>
               <input
                 className={field}
                 value={form.ogImage}
@@ -201,21 +316,33 @@ export function SettingsForm({
 
         <div className={section}>
           <p className="font-medium">Analitik</p>
-          <p className="mt-1 text-sm text-muted-strong">YalnÄ±zca Ã§erez onayÄ± verildiÄŸinde yÃ¼klenir.</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Yalnızca çerez onayı verildiğinde yüklenir.
+          </p>
           <div className="mt-5 grid gap-4">
-            <Label t="Google Analytics Ã¶lÃ§Ã¼m kimliÄŸi">
-              <input className={field} value={form.gaMeasurementId} onChange={(e) => setForm({ ...form, gaMeasurementId: e.target.value })} placeholder="G-XXXXXXXXXX" />
+            <Label t="Google Analytics ölçüm kimliği">
+              <input
+                className={field}
+                value={form.gaMeasurementId}
+                onChange={(e) => setForm({ ...form, gaMeasurementId: e.target.value })}
+                placeholder="G-XXXXXXXXXX"
+              />
             </Label>
-            <Label t="Meta Pixel kimliÄŸi">
-              <input className={field} value={form.metaPixelId} onChange={(e) => setForm({ ...form, metaPixelId: e.target.value })} placeholder="1234567890" />
+            <Label t="Meta Pixel kimliği">
+              <input
+                className={field}
+                value={form.metaPixelId}
+                onChange={(e) => setForm({ ...form, metaPixelId: e.target.value })}
+                placeholder="1234567890"
+              />
             </Label>
           </div>
         </div>
 
         <div className={section}>
-          <p className="font-medium">BakÄ±m modu</p>
+          <p className="font-medium">Bakım modu</p>
           <p className="mt-1 text-sm text-muted-strong">
-            AÃ§Ä±kken public site bakÄ±m sayfasÄ±na yÃ¶nlenir. Admin ve API etkilenmez.
+            Açıkken public site bakım sayfasına yönlenir. Admin ve API etkilenmez.
           </p>
           <label className="mt-5 flex h-11 items-center gap-3 rounded-md border border-border bg-surface px-4">
             <input
@@ -223,47 +350,74 @@ export function SettingsForm({
               checked={form.maintenance}
               onChange={(e) => setForm({ ...form, maintenance: e.target.checked })}
             />
-            <span className="text-sm">BakÄ±m modunu etkinleÅŸtir</span>
+            <span className="text-sm">Bakım modunu etkinleştir</span>
           </label>
         </div>
 
         <div className={`${section} lg:col-span-2`}>
           <p className="font-medium">SMTP / teklif bildirimi</p>
           <p className="mt-1 text-sm text-muted-strong">
-            Yeni teklif geldiÄŸinde bildirim e-postasÄ± gÃ¶nderilir. GÃ¶nderim baÅŸarÄ±sÄ±z olsa da teklif kaydedilir.
+            Yeni teklif geldiğinde bildirim e-postası gönderilir. Gönderim başarısız olsa da teklif
+            kaydedilir.
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Label t="SMTP sunucu">
-              <input className={field} value={form.smtp.host} onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, host: e.target.value } })} placeholder="smtp.example.com" />
+              <input
+                className={field}
+                value={form.smtp.host}
+                onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, host: e.target.value } })}
+                placeholder="smtp.example.com"
+              />
             </Label>
             <Label t="Port">
-              <input className={field} value={form.smtp.port} onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, port: e.target.value } })} placeholder="587" />
+              <input
+                className={field}
+                value={form.smtp.port}
+                onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, port: e.target.value } })}
+                placeholder="587"
+              />
             </Label>
-            <Label t="KullanÄ±cÄ±">
-              <input className={field} value={form.smtp.user} onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, user: e.target.value } })} />
+            <Label t="Kullanıcı">
+              <input
+                className={field}
+                value={form.smtp.user}
+                onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, user: e.target.value } })}
+              />
             </Label>
-            <Label t="Åifre">
+            <Label t="Şifre">
               <input
                 className={field}
                 type="password"
                 autoComplete="new-password"
                 value={form.smtp.pass}
+                placeholder={smtpPassSet ? '•••••• (değiştirmek için yazın)' : ''}
                 onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, pass: e.target.value } })}
               />
             </Label>
-            <Label t="GÃ¶nderen adresi (From)">
-              <input className={field} value={form.smtp.from} onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, from: e.target.value } })} placeholder="BozkÄ±r AÄŸaÃ§ <no-reply@...>" />
+            <Label t="Gönderen adresi (From)">
+              <input
+                className={field}
+                value={form.smtp.from}
+                onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, from: e.target.value } })}
+                placeholder="Bozkır Ağaç <no-reply@...>"
+              />
             </Label>
-            <Label t="Bildirim alÄ±cÄ±sÄ±">
-              <input className={field} value={form.notifyEmail} onChange={(e) => setForm({ ...form, notifyEmail: e.target.value })} placeholder="info@bozkiragac.com" />
+            <Label t="Bildirim alıcısı">
+              <input
+                className={field}
+                value={form.notifyEmail}
+                onChange={(e) => setForm({ ...form, notifyEmail: e.target.value })}
+                placeholder="info@bozkiragac.com"
+              />
             </Label>
           </div>
         </div>
 
         <div className={`${section} lg:col-span-2`}>
-          <p className="font-medium">Ã‡erez politikasÄ± metni</p>
+          <p className="font-medium">Çerez politikası metni</p>
           <p className="mt-1 text-sm text-muted-strong">
-            Doldurulursa /cerez-politikasi sayfasÄ± bu metni gÃ¶sterir (paragraflar boÅŸ satÄ±rla ayrÄ±lÄ±r).
+            Doldurulursa /cerez-politikasi sayfası bu metni gösterir (paragraflar boş satırla
+            ayrılır).
           </p>
           <div className="mt-5">
             <Label t="Metin" full>
@@ -271,7 +425,7 @@ export function SettingsForm({
                 className={`${field} h-40 py-2`}
                 value={form.cookiePolicyText}
                 onChange={(e) => setForm({ ...form, cookiePolicyText: e.target.value })}
-                placeholder="Bu sitede ... Ã§erezler kullanÄ±lmaktadÄ±r.&#10;&#10;..."
+                placeholder="Bu sitede ... çerezler kullanılmaktadır.&#10;&#10;..."
               />
             </Label>
           </div>
@@ -279,28 +433,49 @@ export function SettingsForm({
       </div>
 
       <div className={`${section} mt-6`}>
-        <p className="font-medium">Vitrin kategori sÄ±rasÄ±</p>
-        <p className="mt-1 text-sm text-muted-strong">Anasayfadaki &quot;Malzeme koleksiyonu&quot; ve &quot;Malzemeyi KeÅŸfet&quot; bÃ¶lÃ¼mlerinin sÄ±rasÄ±.</p>
+        <p className="font-medium">Vitrin kategori sırası</p>
+        <p className="mt-1 text-sm text-muted-strong">
+          Anasayfadaki &quot;Malzeme koleksiyonu&quot; ve &quot;Malzemeyi Keşfet&quot; bölümlerinin
+          sırası.
+        </p>
         <ul className="mt-5 divide-y divide-border">
           {order.map((slug, i) => (
             <li key={slug} className="flex items-center justify-between gap-3 py-2.5 text-sm">
               <span>
-                <span className="numerals mr-3 text-xs text-muted">{String(i + 1).padStart(2, '0')}</span>
+                <span className="numerals mr-3 text-xs text-muted">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 {nameOf(slug)}
               </span>
               <span className="flex gap-1">
-                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="YukarÄ±" className="rounded-md border border-border p-1.5 disabled:opacity-30">
+                <button
+                  type="button"
+                  onClick={() => move(i, -1)}
+                  disabled={i === 0}
+                  aria-label="Yukarı"
+                  className="rounded-md border border-border p-1.5 disabled:opacity-30"
+                >
                   <ArrowUp className="h-3.5 w-3.5" />
                 </button>
-                <button type="button" onClick={() => move(i, 1)} disabled={i === order.length - 1} aria-label="AÅŸaÄŸÄ±" className="rounded-md border border-border p-1.5 disabled:opacity-30">
+                <button
+                  type="button"
+                  onClick={() => move(i, 1)}
+                  disabled={i === order.length - 1}
+                  aria-label="Aşağı"
+                  className="rounded-md border border-border p-1.5 disabled:opacity-30"
+                >
                   <ArrowDown className="h-3.5 w-3.5" />
                 </button>
               </span>
             </li>
           ))}
         </ul>
-        <button type="button" onClick={() => setOrder(categories.map((c) => c.slug))} className="mt-3 text-xs text-muted underline">
-          VarsayÄ±lan sÄ±raya dÃ¶n
+        <button
+          type="button"
+          onClick={() => setOrder(categories.map((c) => c.slug))}
+          className="mt-3 text-xs text-muted underline"
+        >
+          Varsayılan sıraya dön
         </button>
       </div>
 
@@ -312,7 +487,9 @@ export function SettingsForm({
         >
           <Save className="h-4 w-4" /> {busy ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
-        {msg && <p className={msg.ok ? 'text-sm text-success' : 'text-sm text-danger'}>{msg.text}</p>}
+        {msg && (
+          <p className={msg.ok ? 'text-sm text-success' : 'text-sm text-danger'}>{msg.text}</p>
+        )}
       </div>
     </form>
   );

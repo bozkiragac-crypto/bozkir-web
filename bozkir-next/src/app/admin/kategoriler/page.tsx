@@ -9,13 +9,13 @@ import { DeleteCategoryButton } from '@/components/admin/DeleteButtons';
 export default async function AdminCategoriesPage() {
   const db = getDb();
   if (!db) {
-    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">VeritabanÄ± baÄŸlantÄ±sÄ± yok.</p>;
+    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">Veritabanı bağlantısı yok.</p>;
   }
 
   const rows = await db.select().from(categories).orderBy(asc(categories.sortOrder));
 
-  // `products.cat` dÃ¼z metin olduÄŸu iÃ§in sayaÃ§ `fetchCategories()` ile aynÄ±
-  // normalizasyonu kullanmalÄ±; aksi halde panelde 0 gÃ¶rÃ¼nen kategoriyi
+  // `products.cat` düz metin olduğu için sayaç `fetchCategories()` ile aynı
+  // normalizasyonu kullanmalı; aksi halde panelde 0 görünen kategoriyi
   // silmek vitrinde kaybolmaz.
   const allProducts = await db
     .select({ cat: products.cat })
@@ -33,7 +33,7 @@ export default async function AdminCategoriesPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">Kategoriler</h1>
-          <p className="mt-1 text-sm text-muted-strong">Koleksiyonlar ve vitrin. ÃœrÃ¼nler kategorilere gÃ¶re gruplanÄ±r.</p>
+          <p className="mt-1 text-sm text-muted-strong">Koleksiyonlar ve vitrin. Ürünler kategorilere göre gruplanır.</p>
         </div>
         <Link
           href="/admin/kategoriler/yeni"
@@ -47,13 +47,13 @@ export default async function AdminCategoriesPage() {
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="bg-surface text-foreground">
             <tr>
-              <th className="p-4 font-medium">GÃ¶rsel</th>
+              <th className="p-4 font-medium">Görsel</th>
               <th className="p-4 font-medium">Ad</th>
               <th className="p-4 font-medium">Slug</th>
               <th className="p-4 font-medium">Vitrin</th>
               <th className="p-4 font-medium">Durum</th>
-              <th className="p-4 font-medium">ÃœrÃ¼n</th>
-              <th className="p-4 font-medium">SÄ±ra</th>
+              <th className="p-4 font-medium">Ürün</th>
+              <th className="p-4 font-medium">Sıra</th>
               <th className="p-4" />
             </tr>
           </thead>
@@ -74,7 +74,7 @@ export default async function AdminCategoriesPage() {
                   </Link>
                 </td>
                 <td className="p-4 text-muted-strong">{c.slug}</td>
-                <td className="p-4">{c.featured ? 'Evet' : 'â€”'}</td>
+                <td className="p-4">{c.featured ? 'Evet' : '—'}</td>
                 <td className="p-4">
                   <span className={c.isActive ? 'rounded-full bg-surface-2 px-2.5 py-1 text-xs text-success' : 'rounded-full bg-surface-2 px-2.5 py-1 text-xs text-muted-strong'}>
                     {c.isActive ? 'Aktif' : 'Pasif'}
@@ -87,7 +87,7 @@ export default async function AdminCategoriesPage() {
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-2">
                     <Link href={`/admin/kategoriler/${c.id}`} className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2">
-                      DÃ¼zenle
+                      Düzenle
                     </Link>
                     <DeleteCategoryButton id={c.id} name={c.name} />
                   </div>
@@ -97,7 +97,7 @@ export default async function AdminCategoriesPage() {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={8} className="p-10 text-center text-muted-strong">
-                  HenÃ¼z kategori yok. &quot;Yeni Kategori&quot; ile ekleyin.
+                  Henüz kategori yok. &quot;Yeni Kategori&quot; ile ekleyin.
                 </td>
               </tr>
             )}

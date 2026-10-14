@@ -12,6 +12,8 @@ export async function verifyTurnstile(token: string, ip?: string): Promise<boole
   const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
   if (!secret) return true;
   if (!token) return false;
+  // Ağ/HTTP hatasında varsayılan fail-open; TURNSTILE_FAIL_CLOSED=1 ile fail-closed.
+  const failClosed = process.env.TURNSTILE_FAIL_CLOSED === '1';
 
   try {
     const body = new URLSearchParams({ secret, response: token });
@@ -22,11 +24,11 @@ export async function verifyTurnstile(token: string, ip?: string): Promise<boole
       body,
       signal: AbortSignal.timeout(5000),
     });
-    if (!res.ok) return true; // Cloudflare hatası: fail-open
+    if (!res.ok) return !failClosed; // Cloudflare hatası
     const data = (await res.json()) as { success?: boolean };
     return Boolean(data.success);
   } catch (e) {
-    console.error('[turnstile] doğrulama hatası (fail-open):', e instanceof Error ? e.message : e);
-    return true; // ağ/timeout: fail-open
+    console.error('[turnstile] doğrulama hatası:', e instanceof Error ? e.message : e);
+    return !failClosed; // ağ/timeout
   }
 }

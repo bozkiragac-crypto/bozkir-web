@@ -3,7 +3,7 @@ import { desc } from 'drizzle-orm';
 import { getDb } from '@/lib/db/client';
 import { activityLog } from '@/lib/db/schema';
 import { getCurrentAdmin } from '@/lib/admin/guard';
-import { csvCell } from '@/lib/csv';
+import { csvCell, MAX_EXPORT_ROWS } from '@/lib/csv';
 import { ACTION_LABEL, activityWhere, parseActivityFilters } from '@/lib/activity';
 
 export const runtime = 'nodejs';
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     .from(activityLog)
     .where(activityWhere(filters))
     .orderBy(desc(activityLog.createdAt))
-    .limit(10000);
+    .limit(MAX_EXPORT_ROWS);
 
   const lines = [['Tarih', 'Kullanıcı', 'İşlem', 'Varlık', 'Açıklama'].map(csvCell).join(',')];
   for (const r of rows) {

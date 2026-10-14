@@ -3,7 +3,7 @@ import { getDb } from '@/lib/db/client';
 import { products } from '@/lib/db/schema';
 import { getCurrentAdmin } from '@/lib/admin/guard';
 import { parseImageField } from '@/lib/media';
-import { csvCell as cell } from '@/lib/csv';
+import { csvCell as cell, MAX_EXPORT_ROWS } from '@/lib/csv';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,12 +29,24 @@ export async function GET(request: Request) {
     .select()
     .from(products)
     .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(asc(products.code));
+    .orderBy(asc(products.code))
+    .limit(MAX_EXPORT_ROWS);
 
   const header = 'code,name,cat,face,img,is_active,name_en,name_ar,cat_en,cat_ar';
   const lines = rows.map((r) => {
     const img = parseImageField(r.img ?? '').join('|');
-    return [r.code, r.name, r.cat, r.face ?? '', img, r.isActive ? '1' : '0', r.nameEn ?? '', r.nameAr ?? '', r.catEn ?? '', r.catAr ?? '']
+    return [
+      r.code,
+      r.name,
+      r.cat,
+      r.face ?? '',
+      img,
+      r.isActive ? '1' : '0',
+      r.nameEn ?? '',
+      r.nameAr ?? '',
+      r.catEn ?? '',
+      r.catAr ?? '',
+    ]
       .map(cell)
       .join(',');
   });

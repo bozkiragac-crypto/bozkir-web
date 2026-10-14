@@ -1,3 +1,6 @@
+/** CSV dışa aktarımlarında tek istekte üretilecek en fazla satır sayısı. */
+export const MAX_EXPORT_ROWS = 20000;
+
 /** Basit CSV ayrıştırıcı (tırnaklı alan destekli, CRLF/LF). */
 export function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -33,6 +36,8 @@ export function parseCsv(text: string): string[][] {
 
 /** Tek bir CSV hücresini güvenli biçimde kaçırır. */
 export function csvCell(value: unknown): string {
-  const s = String(value ?? '');
+  let s = String(value ?? '');
+  // CSV formula injection: başta = + - @ ya da tab/CR varsa metne sabitle.
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }

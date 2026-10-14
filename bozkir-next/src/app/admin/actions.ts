@@ -1,6 +1,7 @@
 'use server';
 
 import bcrypt from 'bcryptjs';
+import { headers } from 'next/headers';
 import { and, eq, inArray, or } from 'drizzle-orm';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getDb } from '@/lib/db/client';
@@ -38,7 +39,7 @@ import { createTotpSecret, totpKeyUri, verifyTotp } from '@/lib/auth/totp';
 import { parseCsv } from '@/lib/csv';
 import { categorySlugOf } from '@/lib/data/category-key';
 import { isQuoteStatus, type QuoteStatus } from '@/lib/quotes/status';
-import { isRateLimited } from '@/lib/ratelimit';
+import { isRateLimited, pickClientIp } from '@/lib/ratelimit';
 import { slugify } from '@/lib/slug';
 
 function extOf(name: string, type: string) {
@@ -86,12 +87,23 @@ export async function signIn(
   const id = identifier.trim().toLowerCase();
   if (!id || !password) return { ok: false, error: 'Kullanıcı adı ve şifre gerekli.' };
 
-  // Hesap kilitlemeye ek olarak kaba kuvvet denemelerini IP/hesap bazında sınırla.
+  // Hesap kilitlemeye ek olarak kaba kuvvet denemelerini hesap ve IP bazında sınırla.
   if (isRateLimited(`login:${id}`, 10)) {
     return {
       ok: false,
       error: 'Çok fazla giriş denemesi. Lütfen birkaç dakika sonra tekrar deneyin.',
     };
+  }
+  try {
+    const ip = pickClientIp((await headers()) as unknown as Headers);
+    if (isRateLimited(`login-ip:${ip}`, 30)) {
+      return {
+        ok: false,
+        error: 'Çok fazla giriş denemesi. Lütfen birkaç dakika sonra tekrar deneyin.',
+      };
+    }
+  } catch {
+    // Başlık okunamazsa IP limitini atla (hesap bazlı limit yine devrede).
   }
 
   const rows = await db
@@ -277,10 +289,12 @@ export async function uploadMedia(
 
   const original = Buffer.from(await file.arrayBuffer());
 
-  // Uzantısı değiştirilmiş dosyalar sharp'e girmeden reddedilir.
+  // Uzantısı değiştirilmiş dosyalar sharp'e girmeden reddedilir (imza kontrolü).
   if (!isPdf) {
     const bad = validateImageSignature(original.subarray(0, 16));
     if (bad) return { error: bad };
+  } else if (original.subarray(0, 5).toString('latin1') !== '%PDF-') {
+    return { error: 'PDF içeriği geçersiz.' };
   }
 
   let body: Buffer = original;
@@ -559,46 +573,52 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
   let created = 0;
   let updated = 0;
 
-  for (const r of rows.slice(1)) {
-    const code = (r[iCode] ?? '').trim();
-    const name = (r[iName] ?? '').trim();
-    const cat = (r[iCat] ?? '').trim();
-    if (!code || !name || !cat) continue;
+  // Mevcut ürünleri tek sorguda çek (satır başına SELECT = N+1 önlenir).
+  const existingRows = await db
+    .select({ id: products.id, code: products.code, cat: products.cat, name: products.name })
+    .from(products);
+  const existingMap = new Map(
+    existingRows.map((p) => [`${p.code}\u0000${p.cat}\u0000${p.name}`, p.id]),
+  );
 
-    const face = iFace >= 0 ? (r[iFace] ?? '').trim() || null : null;
-    const imgRaw = iImg >= 0 ? (r[iImg] ?? '').trim() : '';
-    const img = imgRaw ? (objectKeyFromUrl(imgRaw) ?? imgRaw) : null;
-    const isActive =
-      iActive >= 0 ? !/^(0|false|pasif|hayir)$/i.test((r[iActive] ?? '').trim()) : true;
-    const nameEn = iNameEn >= 0 ? (r[iNameEn] ?? '').trim() || null : null;
-    const nameAr = iNameAr >= 0 ? (r[iNameAr] ?? '').trim() || null : null;
-    const catEn = iCatEn >= 0 ? (r[iCatEn] ?? '').trim() || null : null;
-    const catAr = iCatAr >= 0 ? (r[iCatAr] ?? '').trim() || null : null;
+  await db.transaction(async (tx) => {
+    for (const r of rows.slice(1)) {
+      const code = (r[iCode] ?? '').trim();
+      const name = (r[iName] ?? '').trim();
+      const cat = (r[iCat] ?? '').trim();
+      if (!code || !name || !cat) continue;
 
-    // Eşleştirme `code` ile yapılırsa seri kodlu ürünler çakışır (105 ürünün
-    // kodu `PVC`); bu satırın adını ve kategorisini de eşleştirmeye katıyoruz.
-    const existing = await db
-      .select({ id: products.id })
-      .from(products)
-      .where(and(eq(products.code, code), eq(products.cat, cat), eq(products.name, name)))
-      .limit(1);
-    if (existing[0]) {
-      updated++;
-      if (!dryRun) {
-        await db
-          .update(products)
-          .set({ name, cat, face, img, isActive, nameEn, nameAr, catEn, catAr })
-          .where(eq(products.id, existing[0].id));
-      }
-    } else {
-      created++;
-      if (!dryRun) {
-        await db
-          .insert(products)
-          .values({ code, name, cat, face, img, isActive, nameEn, nameAr, catEn, catAr });
+      const face = iFace >= 0 ? (r[iFace] ?? '').trim() || null : null;
+      const imgRaw = iImg >= 0 ? (r[iImg] ?? '').trim() : '';
+      const img = imgRaw ? (objectKeyFromUrl(imgRaw) ?? imgRaw) : null;
+      const isActive =
+        iActive >= 0 ? !/^(0|false|pasif|hayir)$/i.test((r[iActive] ?? '').trim()) : true;
+      const nameEn = iNameEn >= 0 ? (r[iNameEn] ?? '').trim() || null : null;
+      const nameAr = iNameAr >= 0 ? (r[iNameAr] ?? '').trim() || null : null;
+      const catEn = iCatEn >= 0 ? (r[iCatEn] ?? '').trim() || null : null;
+      const catAr = iCatAr >= 0 ? (r[iCatAr] ?? '').trim() || null : null;
+
+      // Eşleştirme `code` ile yapılırsa seri kodlu ürünler çakışır (105 ürünün
+      // kodu `PVC`); bu satırın adını ve kategorisini de eşleştirmeye katıyoruz.
+      const existingId = existingMap.get(`${code}\u0000${cat}\u0000${name}`);
+      if (existingId) {
+        updated++;
+        if (!dryRun) {
+          await tx
+            .update(products)
+            .set({ name, cat, face, img, isActive, nameEn, nameAr, catEn, catAr })
+            .where(eq(products.id, existingId));
+        }
+      } else {
+        created++;
+        if (!dryRun) {
+          await tx
+            .insert(products)
+            .values({ code, name, cat, face, img, isActive, nameEn, nameAr, catEn, catAr });
+        }
       }
     }
-  }
+  });
 
   if (!dryRun) {
     await logActivity(
@@ -1229,15 +1249,7 @@ export async function saveAboutContent(
 
   const KEY = 'about';
 
-  // about bloğunu garanti altına al.
-  await db
-    .insert(contentBlocks)
-    .values({ key: KEY, title: 'Hakkımızda', isActive: true, updatedAt: new Date() })
-    .onConflictDoNothing({ target: contentBlocks.key });
-
   // Mevcut about öğelerini değiştir.
-  await db.delete(contentItems).where(eq(contentItems.blockKey, KEY));
-
   const rows: (typeof contentItems.$inferInsert)[] = [];
   let order = 0;
 
@@ -1290,7 +1302,15 @@ export async function saveAboutContent(
     });
   }
 
-  if (rows.length > 0) await db.insert(contentItems).values(rows);
+  // Blok + öğe değişimini tek transaction'da yap (kısmi hata veri kaybı yaratmasın).
+  await db.transaction(async (tx) => {
+    await tx
+      .insert(contentBlocks)
+      .values({ key: KEY, title: 'Hakkımızda', isActive: true, updatedAt: new Date() })
+      .onConflictDoNothing({ target: contentBlocks.key });
+    await tx.delete(contentItems).where(eq(contentItems.blockKey, KEY));
+    if (rows.length > 0) await tx.insert(contentItems).values(rows);
+  });
 
   await logActivity(admin, 'update', 'content', KEY, 'Hakkımızda içeriği güncellendi');
   await flushSiteCaches();

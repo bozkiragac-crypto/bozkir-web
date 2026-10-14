@@ -68,12 +68,12 @@ export function BrandForm({ initial }: BrandFormProps) {
     <form onSubmit={onSubmit} className="grid gap-6">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Marka adÄ± *</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Marka adı *</span>
           <input required value={name} onChange={(e) => setName(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori (TR)</span>
-          <input value={category} onChange={(e) => setCategory(e.target.value)} className={field} placeholder="Ã–rn: MDF / Panel" />
+          <input value={category} onChange={(e) => setCategory(e.target.value)} className={field} placeholder="Örn: MDF / Panel" />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori (EN)</span>
@@ -88,11 +88,11 @@ export function BrandForm({ initial }: BrandFormProps) {
           <input value={url} onChange={(e) => setUrl(e.target.value)} className={field} placeholder="https://..." />
         </label>
         <label className="grid gap-2 sm:col-span-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama</span>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className={area} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SÄ±ra</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Sıra</span>
           <input value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} inputMode="numeric" className={field} />
         </label>
         <label className="grid gap-2">
@@ -123,7 +123,7 @@ export function BrandForm({ initial }: BrandFormProps) {
           {busy ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
         <button type="button" onClick={() => router.push('/admin/bayilikler')} className="text-sm text-muted-strong hover:text-foreground">
-          Ä°ptal
+          İptal
         </button>
       </div>
     </form>

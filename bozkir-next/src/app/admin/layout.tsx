@@ -4,6 +4,7 @@ import { getSession } from '@/lib/auth/session';
 import { fontVariables } from '@/lib/fonts';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { AdminTabGuard } from '@/components/admin/AdminTabGuard';
+import { ToastProvider } from '@/components/ui/ToastProvider';
 import { themeScript } from '@/components/layout/DocumentAssets';
 import { DictionaryProvider } from '@/i18n/DictionaryProvider';
 import { getDictionary } from '@/i18n/dictionaries';
@@ -26,18 +27,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </head>
       <body className="antialiased">
         <DictionaryProvider locale="tr" dictionary={getDictionary('tr')}>
-          {/* Giriş sayfası: kabuk olmadan gösterilir. */}
-          {session?.admin ? (
-            <AdminShell
-              username={session.username || session.email || session.name}
-              role={session.role}
-            >
-              <AdminTabGuard />
-              {children}
-            </AdminShell>
-          ) : (
-            <div className="min-h-svh bg-background">{children}</div>
-          )}
+          <ToastProvider>
+            {/* Giriş sayfası: kabuk olmadan gösterilir. */}
+            {session?.admin ? (
+              <AdminShell
+                username={session.username || session.email || session.name}
+                role={session.role}
+              >
+                <AdminTabGuard />
+                {children}
+              </AdminShell>
+            ) : (
+              <div className="min-h-svh bg-background">{children}</div>
+            )}
+          </ToastProvider>
         </DictionaryProvider>
       </body>
     </html>

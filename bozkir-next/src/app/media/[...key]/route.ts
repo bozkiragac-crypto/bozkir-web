@@ -12,8 +12,19 @@ export async function GET(_request: Request, { params }: { params: Promise<{ key
   if (!storageConfigured()) return new Response('depolama yapılandırılmadı', { status: 503 });
 
   const { key } = await params;
-  const path = (key ?? []).join('/').trim();
-  if (!path || path.includes('..')) return new Response('geçersiz anahtar', { status: 400 });
+  const path = (key ?? [])
+    .map((s) => s.normalize('NFC'))
+    .join('/')
+    .trim();
+  if (
+    !path ||
+    path.includes('..') ||
+    path.includes('\\') ||
+    path.includes('\0') ||
+    path.split('/').some((seg) => seg === '.' || seg === '')
+  ) {
+    return new Response('geçersiz anahtar', { status: 400 });
+  }
   // Private teklif ekleri public medya rotasından servis edilmez.
   if (path.startsWith('quotes/')) return new Response('bulunamadı', { status: 404 });
 

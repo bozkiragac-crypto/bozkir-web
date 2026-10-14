@@ -53,7 +53,11 @@ export async function ensureBucket(): Promise<void> {
   }
 }
 
-export async function putObject(key: string, body: Buffer | Uint8Array, contentType: string): Promise<void> {
+export async function putObject(
+  key: string,
+  body: Buffer | Uint8Array,
+  contentType: string,
+): Promise<void> {
   await getClient().send(
     new PutObjectCommand({
       Bucket: MEDIA_BUCKET,
@@ -73,11 +77,25 @@ export async function deleteObject(key: string): Promise<void> {
   }
 }
 
-export async function getObject(key: string): Promise<{ bytes: Uint8Array; contentType: string }> {
-  const res = await getClient().send(new GetObjectCommand({ Bucket: MEDIA_BUCKET, Key: key }));
-  const body = res.Body as { transformToByteArray?: () => Promise<Uint8Array> } | undefined;
-  const bytes = body?.transformToByteArray ? await body.transformToByteArray() : new Uint8Array();
-  return { bytes, contentType: res.ContentType ?? 'application/octet-stream' };
+export async function getObject(
+  key: string,
+  timeoutMs = Number(process.env.S3_REQUEST_TIMEOUT_MS ?? 8000),
+): Promise<{ bytes: Uint8Array; contentType: string }> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('S3 getObject zaman aşımı')), timeoutMs);
+  });
+  try {
+    const res = await Promise.race([
+      getClient().send(new GetObjectCommand({ Bucket: MEDIA_BUCKET, Key: key })),
+      timeout,
+    ]);
+    const body = res.Body as { transformToByteArray?: () => Promise<Uint8Array> } | undefined;
+    const bytes = body?.transformToByteArray ? await body.transformToByteArray() : new Uint8Array();
+    return { bytes, contentType: res.ContentType ?? 'application/octet-stream' };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 export interface MediaObject {
@@ -122,6 +140,31 @@ export function publicUrl(key: string): string {
   return `${PUBLIC_BASE}/${value}`;
 }
 
+/** Verilen mutlak URL kendi depolama alan adımıza mı ait? (open-redirect/SSRF guard) */
+export function isOwnStorageUrl(url: string): boolean {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return false;
+  }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+  const hosts = new Set<string>();
+  try {
+    if (PUBLIC_BASE.startsWith('http')) hosts.add(new URL(PUBLIC_BASE).host);
+  } catch {
+    // göreli PUBLIC_BASE — atla
+  }
+  if (ENDPOINT) {
+    try {
+      hosts.add(new URL(ENDPOINT).host);
+    } catch {
+      // geçersiz endpoint — atla
+    }
+  }
+  return hosts.has(u.host);
+}
+
 /**
  * Public URL'den nesne anahtarını çıkarır. Bizim depomuza ait değilse `null`
  * döner (harici URL'ler ve data: URI'ler korunur).
@@ -130,12 +173,14 @@ export function objectKeyFromUrl(url: string): string | null {
   const value = (url ?? '').trim();
   if (!value || value.startsWith('data:')) return null;
 
-  if (PUBLIC_BASE && value.startsWith(`${PUBLIC_BASE}/`)) return value.slice(PUBLIC_BASE.length + 1);
+  if (PUBLIC_BASE && value.startsWith(`${PUBLIC_BASE}/`))
+    return value.slice(PUBLIC_BASE.length + 1);
   if (value.startsWith('/media/')) return value.slice('/media/'.length);
 
   const bucketPrefix = `/${MEDIA_BUCKET}/`;
   const idx = value.indexOf(bucketPrefix);
-  if (idx !== -1 && idx < value.length - bucketPrefix.length) return value.slice(idx + bucketPrefix.length);
+  if (idx !== -1 && idx < value.length - bucketPrefix.length)
+    return value.slice(idx + bucketPrefix.length);
 
   try {
     const u = new URL(value);

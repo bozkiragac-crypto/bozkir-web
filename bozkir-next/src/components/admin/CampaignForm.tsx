@@ -46,7 +46,7 @@ export function CampaignForm({ initial }: CampaignFormProps) {
   const [description, setDescription] = useState(initial?.description ?? '');
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? '');
   const [linkUrl, setLinkUrl] = useState(initial?.linkUrl ?? '');
-  const [linkLabel, setLinkLabel] = useState(initial?.linkLabel ?? 'Ä°ncele');
+  const [linkLabel, setLinkLabel] = useState(initial?.linkLabel ?? 'İncele');
   const [titleEn, setTitleEn] = useState(initial?.titleEn ?? '');
   const [titleAr, setTitleAr] = useState(initial?.titleAr ?? '');
   const [descriptionEn, setDescriptionEn] = useState(initial?.descriptionEn ?? '');
@@ -95,11 +95,11 @@ export function CampaignForm({ initial }: CampaignFormProps) {
     <form onSubmit={onSubmit} className="grid gap-6">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2 sm:col-span-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BaÅŸlÄ±k *</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Başlık *</span>
           <input required value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2 sm:col-span-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama / Metin</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama / Metin</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -108,60 +108,60 @@ export function CampaignForm({ initial }: CampaignFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BaÄŸlantÄ± (URL)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Bağlantı (URL)</span>
           <input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} className={field} placeholder="/urunler veya https://..." />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Buton YazÄ±sÄ±</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Buton Yazısı</span>
           <input value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SÄ±ra</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Sıra</span>
           <input value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} inputMode="numeric" className={field} />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Durum</span>
           <span className="flex h-12 items-center gap-3 rounded-md border border-border bg-surface px-4">
             <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-            <span className="text-sm">Aktif (sitede gÃ¶ster)</span>
+            <span className="text-sm">Aktif (sitede göster)</span>
           </span>
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BaÅŸlangÄ±Ã§ (opsiyonel)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Başlangıç (opsiyonel)</span>
           <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BitiÅŸ (opsiyonel)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Bitiş (opsiyonel)</span>
           <input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className={field} />
         </label>
       </div>
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
         <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          Ã‡eviriler (boÅŸsa TÃ¼rkÃ§e kullanÄ±lÄ±r)
+          Çeviriler (boşsa Türkçe kullanılır)
         </legend>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BaÅŸlÄ±k (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Başlık (EN)</span>
           <input value={titleEn} onChange={(e) => setTitleEn(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BaÅŸlÄ±k (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Başlık (AR)</span>
           <input value={titleAr} onChange={(e) => setTitleAr(e.target.value)} className={field} dir="rtl" />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama (EN)</span>
           <textarea value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={3} className={area} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama (AR)</span>
           <textarea value={descriptionAr} onChange={(e) => setDescriptionAr(e.target.value)} rows={3} className={area} dir="rtl" />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Buton YazÄ±sÄ± (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Buton Yazısı (EN)</span>
           <input value={linkLabelEn} onChange={(e) => setLinkLabelEn(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Buton YazÄ±sÄ± (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Buton Yazısı (AR)</span>
           <input value={linkLabelAr} onChange={(e) => setLinkLabelAr(e.target.value)} className={field} dir="rtl" />
         </label>
       </fieldset>
@@ -171,7 +171,7 @@ export function CampaignForm({ initial }: CampaignFormProps) {
         onChange={(next) => setImageUrl(next[0] ?? '')}
         folder="campaigns"
         multiple={false}
-        label="Kampanya GÃ¶rseli"
+        label="Kampanya Görseli"
       />
 
       {error && <p className="text-sm text-danger">{error}</p>}
@@ -185,7 +185,7 @@ export function CampaignForm({ initial }: CampaignFormProps) {
           {busy ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
         <button type="button" onClick={() => router.push('/admin/kampanyalar')} className="text-sm text-muted-strong hover:text-foreground">
-          Ä°ptal
+          İptal
         </button>
       </div>
     </form>

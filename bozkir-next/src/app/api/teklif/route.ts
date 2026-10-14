@@ -54,13 +54,24 @@ export async function POST(request: Request) {
   const ip = clientIp(request);
   if (isRateLimited(`teklif:${ip}`, RATE_MAX)) {
     return NextResponse.json(
-      { ok: false, message: 'Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin.' },
+      {
+        ok: false,
+        message: 'Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin.',
+      },
       { status: 429 },
     );
   }
 
   let form: FormData;
   try {
+    // Gövde boyutunu formData() ayrıştırmadan önce sınırla (bellek DoS).
+    const declared = Number(request.headers.get('content-length') ?? '0');
+    if (declared > (MAX_FILE_MB + 2) * 1024 * 1024) {
+      return NextResponse.json(
+        { ok: false, message: `Dosya en fazla ${MAX_FILE_MB} MB olabilir.` },
+        { status: 413 },
+      );
+    }
     form = await request.formData();
   } catch {
     return NextResponse.json({ ok: false, message: 'Geçersiz form verisi.' }, { status: 400 });
@@ -85,7 +96,12 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     const consentIssue = parsed.error.issues.some((i) => i.path[0] === 'consent');
     return NextResponse.json(
-      { ok: false, message: consentIssue ? 'Devam etmek için KVKK onayı gereklidir.' : 'Lütfen alanları kontrol edin.' },
+      {
+        ok: false,
+        message: consentIssue
+          ? 'Devam etmek için KVKK onayı gereklidir.'
+          : 'Lütfen alanları kontrol edin.',
+      },
       { status: 422 },
     );
   }
@@ -109,7 +125,10 @@ export async function POST(request: Request) {
   const guard = await checkQuoteGuard({ email: d.email, phone: d.phone, note: d.note });
   if (guard.action === 'duplicate') {
     // Aynı talep kısa süre içinde tekrar geldi: insert yok, sessiz başarı.
-    return NextResponse.json({ ok: true, message: 'Talebiniz alındı. En kısa sürede dönüş yapacağız.' });
+    return NextResponse.json({
+      ok: true,
+      message: 'Talebiniz alındı. En kısa sürede dönüş yapacağız.',
+    });
   }
   if (guard.action === 'limit') {
     if (guard.reason !== 'contact') {
@@ -148,7 +167,10 @@ export async function POST(request: Request) {
     // Uzantıya değil, dosya imzasına (magic bytes) göre doğrula.
     if (!isAllowedAttachment(fileBuffer.subarray(0, 16))) {
       return NextResponse.json(
-        { ok: false, message: 'Dosya içeriği geçersiz. Yalnızca PDF/JPG/PNG/DWG yükleyebilirsiniz.' },
+        {
+          ok: false,
+          message: 'Dosya içeriği geçersiz. Yalnızca PDF/JPG/PNG/DWG yükleyebilirsiniz.',
+        },
         { status: 422 },
       );
     }
@@ -157,7 +179,11 @@ export async function POST(request: Request) {
   const db = getDb();
   if (!db) {
     return NextResponse.json(
-      { ok: false, message: 'Teklif servisi geçici olarak kullanılamıyor. Lütfen telefon veya WhatsApp ile ulaşın.' },
+      {
+        ok: false,
+        message:
+          'Teklif servisi geçici olarak kullanılamıyor. Lütfen telefon veya WhatsApp ile ulaşın.',
+      },
       { status: 503 },
     );
   }
@@ -233,5 +259,8 @@ export async function POST(request: Request) {
     hasAttachment: !!attachmentKey,
   });
 
-  return NextResponse.json({ ok: true, message: 'Talebiniz alındı. En kısa sürede dönüş yapacağız.' });
+  return NextResponse.json({
+    ok: true,
+    message: 'Talebiniz alındı. En kısa sürede dönüş yapacağız.',
+  });
 }

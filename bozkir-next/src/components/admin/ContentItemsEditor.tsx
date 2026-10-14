@@ -3,8 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2 } from 'lucide-react';
-import { saveContentItem, deleteContentItem, type ContentItemInput } from '@/lib/admin/safe-actions';
+import {
+  saveContentItem,
+  deleteContentItem,
+  type ContentItemInput,
+} from '@/lib/admin/safe-actions';
 import { ImageManager } from './ImageManager';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export interface EditableItem {
   id: string;
@@ -61,6 +66,7 @@ function ItemCard({
   const [state, setState] = useState<EditableItem>(item);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const toast = useToast();
 
   function set<K extends keyof EditableItem>(key: K, value: EditableItem[K]) {
     setState((s) => ({ ...s, [key]: value }));
@@ -71,7 +77,8 @@ function ItemCard({
     setMsg(null);
     const res = await saveContentItem(toInput(blockKey, state));
     setBusy(false);
-    setMsg(res.ok ? 'Kaydedildi' : res.error ?? 'Hata');
+    setMsg(res.ok ? 'Kaydedildi' : (res.error ?? 'Hata'));
+    toast(res.ok ? 'Kaydedildi.' : (res.error ?? 'Hata'));
   }
 
   async function remove() {
@@ -79,22 +86,33 @@ function ItemCard({
       onDeleted();
       return;
     }
-    if (!confirm('Bu Ã¶ÄŸe silinsin mi?')) return;
+    if (!confirm('Bu öğe silinsin mi?')) return;
     setBusy(true);
     await deleteContentItem(item.id);
     setBusy(false);
+    toast('Öğe silindi.');
     onDeleted();
   }
 
   return (
     <div className="rounded-lg border border-border bg-surface p-5">
       <div className="grid gap-3 sm:grid-cols-2">
-        <input value={state.title} onChange={(e) => set('title', e.target.value)} placeholder="BaÅŸlÄ±k" className={field} />
-        <input value={state.tag} onChange={(e) => set('tag', e.target.value)} placeholder="Etiket (opsiyonel)" className={field} />
+        <input
+          value={state.title}
+          onChange={(e) => set('title', e.target.value)}
+          placeholder="Başlık"
+          className={field}
+        />
+        <input
+          value={state.tag}
+          onChange={(e) => set('tag', e.target.value)}
+          placeholder="Etiket (opsiyonel)"
+          className={field}
+        />
         <input
           value={state.linkUrl}
           onChange={(e) => set('linkUrl', e.target.value)}
-          placeholder="BaÄŸlantÄ± (opsiyonel)"
+          placeholder="Bağlantı (opsiyonel)"
           className={field}
         />
         <div className="flex items-center gap-3">
@@ -102,28 +120,68 @@ function ItemCard({
             value={state.sortOrder}
             onChange={(e) => set('sortOrder', Number(e.target.value) || 0)}
             inputMode="numeric"
-            placeholder="SÄ±ra"
+            placeholder="Sıra"
             className={field}
           />
           <label className="flex items-center gap-2 whitespace-nowrap text-sm">
-            <input type="checkbox" checked={state.isActive} onChange={(e) => set('isActive', e.target.checked)} /> Aktif
+            <input
+              type="checkbox"
+              checked={state.isActive}
+              onChange={(e) => set('isActive', e.target.checked)}
+            />{' '}
+            Aktif
           </label>
         </div>
         <textarea
           value={state.description}
           onChange={(e) => set('description', e.target.value)}
-          placeholder="AÃ§Ä±klama / cevap"
+          placeholder="Açıklama / cevap"
           rows={3}
           className={`${area} sm:col-span-2`}
         />
         <div className="grid gap-3 rounded-md border border-dashed border-border p-3 sm:col-span-2">
-          <p className="text-xs tracking-[0.14em] text-muted uppercase">Ã‡eviriler (boÅŸsa TÃ¼rkÃ§e)</p>
-          <input value={state.titleEn} onChange={(e) => set('titleEn', e.target.value)} placeholder="BaÅŸlÄ±k (EN)" className={field} />
-          <input value={state.titleAr} onChange={(e) => set('titleAr', e.target.value)} placeholder="BaÅŸlÄ±k (AR)" dir="rtl" className={field} />
-          <textarea value={state.descriptionEn} onChange={(e) => set('descriptionEn', e.target.value)} placeholder="AÃ§Ä±klama (EN)" rows={2} className={area} />
-          <textarea value={state.descriptionAr} onChange={(e) => set('descriptionAr', e.target.value)} placeholder="AÃ§Ä±klama (AR)" rows={2} dir="rtl" className={area} />
-          <input value={state.tagEn} onChange={(e) => set('tagEn', e.target.value)} placeholder="Etiket (EN)" className={field} />
-          <input value={state.tagAr} onChange={(e) => set('tagAr', e.target.value)} placeholder="Etiket (AR)" dir="rtl" className={field} />
+          <p className="text-xs tracking-[0.14em] text-muted uppercase">Çeviriler (boşsa Türkçe)</p>
+          <input
+            value={state.titleEn}
+            onChange={(e) => set('titleEn', e.target.value)}
+            placeholder="Başlık (EN)"
+            className={field}
+          />
+          <input
+            value={state.titleAr}
+            onChange={(e) => set('titleAr', e.target.value)}
+            placeholder="Başlık (AR)"
+            dir="rtl"
+            className={field}
+          />
+          <textarea
+            value={state.descriptionEn}
+            onChange={(e) => set('descriptionEn', e.target.value)}
+            placeholder="Açıklama (EN)"
+            rows={2}
+            className={area}
+          />
+          <textarea
+            value={state.descriptionAr}
+            onChange={(e) => set('descriptionAr', e.target.value)}
+            placeholder="Açıklama (AR)"
+            rows={2}
+            dir="rtl"
+            className={area}
+          />
+          <input
+            value={state.tagEn}
+            onChange={(e) => set('tagEn', e.target.value)}
+            placeholder="Etiket (EN)"
+            className={field}
+          />
+          <input
+            value={state.tagAr}
+            onChange={(e) => set('tagAr', e.target.value)}
+            placeholder="Etiket (AR)"
+            dir="rtl"
+            className={field}
+          />
         </div>
       </div>
 
@@ -133,7 +191,7 @@ function ItemCard({
           onChange={(next) => set('imageUrl', next[0] ?? '')}
           folder="content"
           multiple={false}
-          label="GÃ¶rsel"
+          label="Görsel"
         />
       </div>
 
@@ -159,7 +217,13 @@ function ItemCard({
   );
 }
 
-export function ContentItemsEditor({ blockKey, items }: { blockKey: string; items: EditableItem[] }) {
+export function ContentItemsEditor({
+  blockKey,
+  items,
+}: {
+  blockKey: string;
+  items: EditableItem[];
+}) {
   const router = useRouter();
   const [list, setList] = useState<EditableItem[]>(items);
 
@@ -188,13 +252,13 @@ export function ContentItemsEditor({ blockKey, items }: { blockKey: string; item
   return (
     <div>
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-sm font-medium tracking-wide uppercase">Ã–ÄŸeler ({list.length})</h2>
+        <h2 className="text-sm font-medium tracking-wide uppercase">Öğeler ({list.length})</h2>
         <button
           type="button"
           onClick={addNew}
           className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium transition-colors hover:bg-surface-2"
         >
-          <Plus className="h-3.5 w-3.5" /> Yeni Ã–ÄŸe
+          <Plus className="h-3.5 w-3.5" /> Yeni Öğe
         </button>
       </div>
 
@@ -212,7 +276,7 @@ export function ContentItemsEditor({ blockKey, items }: { blockKey: string; item
         ))}
         {list.length === 0 && (
           <p className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted">
-            HenÃ¼z Ã¶ÄŸe yok.
+            Henüz öğe yok.
           </p>
         )}
       </div>

@@ -32,7 +32,8 @@ export default async function AdminSettingsPage() {
     <div className="grid gap-6">
       <TotpSettings enabled={admin?.totpEnabled ?? false} />
       <SettingsForm
-        initial={settings}
+        initial={{ ...settings, smtp: { ...settings.smtp, pass: '' } }}
+        smtpPassSet={Boolean(settings.smtp.pass)}
         categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
         campaigns={campaigns.map((c) => ({ id: c.id, title: c.title }))}
       />

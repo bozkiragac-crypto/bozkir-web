@@ -3,7 +3,7 @@ import { and, desc, eq, ilike, or, type SQL } from 'drizzle-orm';
 import { getDb } from '@/lib/db/client';
 import { quoteRequests } from '@/lib/db/schema';
 import { getCurrentAdmin } from '@/lib/admin/guard';
-import { csvCell } from '@/lib/csv';
+import { csvCell, MAX_EXPORT_ROWS } from '@/lib/csv';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -45,7 +45,8 @@ export async function GET(request: Request) {
     .select()
     .from(quoteRequests)
     .where(quoteFilters(status, q))
-    .orderBy(desc(quoteRequests.createdAt));
+    .orderBy(desc(quoteRequests.createdAt))
+    .limit(MAX_EXPORT_ROWS);
 
   const header = [
     'Tarih',

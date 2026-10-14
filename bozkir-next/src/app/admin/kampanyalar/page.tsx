@@ -7,13 +7,13 @@ import { DeleteCampaignButton } from '@/components/admin/DeleteButtons';
 import { formatDate } from '@/lib/datetime';
 
 function fmt(d: Date | null) {
-  return d ? formatDate(d) : 'â€”';
+  return d ? formatDate(d) : '—';
 }
 
 export default async function AdminCampaignsPage() {
   const db = getDb();
   if (!db) {
-    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">VeritabanÄ± baÄŸlantÄ±sÄ± yok.</p>;
+    return <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">Veritabanı bağlantısı yok.</p>;
   }
 
   const rows = await db.select().from(campaigns).orderBy(asc(campaigns.sortOrder));
@@ -23,7 +23,7 @@ export default async function AdminCampaignsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">Kampanyalar</h1>
-          <p className="mt-1 text-sm text-muted-strong">Anasayfada hero altÄ±ndaki kayar vitrinde gÃ¶sterilir.</p>
+          <p className="mt-1 text-sm text-muted-strong">Anasayfada hero altındaki kayar vitrinde gösterilir.</p>
         </div>
         <Link
           href="/admin/kampanyalar/yeni"
@@ -37,11 +37,11 @@ export default async function AdminCampaignsPage() {
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead className="bg-surface text-foreground">
             <tr>
-              <th className="p-4 font-medium">GÃ¶rsel</th>
-              <th className="p-4 font-medium">BaÅŸlÄ±k</th>
+              <th className="p-4 font-medium">Görsel</th>
+              <th className="p-4 font-medium">Başlık</th>
               <th className="p-4 font-medium">Durum</th>
               <th className="p-4 font-medium">Tarih</th>
-              <th className="p-4 font-medium">SÄ±ra</th>
+              <th className="p-4 font-medium">Sıra</th>
               <th className="p-4" />
             </tr>
           </thead>
@@ -73,7 +73,7 @@ export default async function AdminCampaignsPage() {
                   </span>
                 </td>
                 <td className="p-4 text-muted-strong">
-                  {fmt(c.startsAt)} â†’ {fmt(c.endsAt)}
+                  {fmt(c.startsAt)} → {fmt(c.endsAt)}
                 </td>
                 <td className="numerals p-4 text-muted-strong">{c.sortOrder}</td>
                 <td className="p-4 text-right">
@@ -82,7 +82,7 @@ export default async function AdminCampaignsPage() {
                       href={`/admin/kampanyalar/${c.id}`}
                       className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
                     >
-                      DÃ¼zenle
+                      Düzenle
                     </Link>
                     <DeleteCampaignButton id={c.id} />
                   </div>
@@ -92,7 +92,7 @@ export default async function AdminCampaignsPage() {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-10 text-center text-muted-strong">
-                  HenÃ¼z kampanya yok. &quot;Yeni Kampanya&quot; ile ekleyin.
+                  Henüz kampanya yok. &quot;Yeni Kampanya&quot; ile ekleyin.
                 </td>
               </tr>
             )}

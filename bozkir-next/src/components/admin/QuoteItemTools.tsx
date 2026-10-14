@@ -1,10 +1,10 @@
 'use client';
 
 /**
- * Teklif durumu + dahili not + WhatsApp hÃ„Â±zlÃ„Â± yanÃ„Â±t.
+ * Teklif durumu + dahili not + WhatsApp hızlı yanıt.
  *
- * Durum ve not ayrÃ„Â± ayrÃ„Â± kaydedilir; ikisi de `safe-actions` ÃƒÂ¼zerinden
- * ÃƒÂ§aÃ„Å¸rÃ„Â±ldÃ„Â±Ã„Å¸Ã„Â± iÃƒÂ§in yetki/DB hatasÃ„Â± butonu kilitlemez, mesaj olarak dÃƒÂ¶ner.
+ * Durum ve not ayrı ayrı kaydedilir; ikisi de `safe-actions` üzerinden
+ * çağrıldığı için yetki/DB hatası butonu kilitlemez, mesaj olarak döner.
  */
 
 import { useState } from 'react';
@@ -64,7 +64,7 @@ export function QuoteItemTools({
     setBusy(false);
     if (!res.ok) {
       setCurrent(prev);
-      setError(res.error ?? 'Durum gÃƒÂ¼ncellenemedi.');
+      setError(res.error ?? 'Durum güncellenemedi.');
       return;
     }
     router.refresh();
@@ -109,7 +109,7 @@ export function QuoteItemTools({
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 rounded-md border border-emerald-300 px-3 py-1.5 text-xs text-emerald-700 transition-colors hover:bg-emerald-50"
-          title={`${fullName} ile WhatsApp'ta yazÃ„Â±Ã…Å¸`}
+          title={`${fullName} ile WhatsApp'ta yazış`}
         >
           <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
         </a>
@@ -118,14 +118,14 @@ export function QuoteItemTools({
 
       <div className="mt-4">
         <label className="text-xs tracking-[0.14em] text-muted uppercase" htmlFor={`note-${id}`}>
-          Dahili not (mÃƒÂ¼Ã…Å¸teriye gÃƒÂ¶sterilmez)
+          Dahili not (müşteriye gösterilmez)
         </label>
         <textarea
           id={`note-${id}`}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
-          placeholder="GÃƒÂ¶rÃƒÂ¼Ã…Å¸me ÃƒÂ¶zeti, verilen fiyat, takip tarihiÃ¢â‚¬Â¦"
+          placeholder="Görüşme özeti, verilen fiyat, takip tarihi…"
           className="mt-2 w-full resize-y rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground"
         />
         <div className="mt-2 flex items-center gap-3">

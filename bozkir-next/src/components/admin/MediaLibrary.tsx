@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Trash2, Upload, Search, CheckCircle2 } from 'lucide-react';
 import { deleteMediaKey, uploadMedia } from '@/lib/admin/safe-actions';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export interface MediaItem {
   key: string;
@@ -52,46 +53,55 @@ export function MediaLibrary({
   const [uploadFolder, setUploadFolder] = useState<MediaFolder>(
     (folders.includes('content') ? 'content' : (folders[0] as MediaFolder)) as MediaFolder,
   );
+  const toast = useToast();
 
   async function onUpload(files: FileList | null) {
     if (!files?.length) return;
     setBusy(true);
     setError(null);
+    let ok = 0;
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.set('file', file);
       const res = await uploadMedia(fd, uploadFolder);
-      if (res.error) setError(res.error);
+      if (res.error) {
+        setError(res.error);
+        toast(res.error);
+      } else ok++;
     }
     setBusy(false);
+    if (ok > 0) toast(`${ok} dosya yüklendi.`);
     router.refresh();
   }
 
   async function onDelete(key: string, inUse: boolean) {
     if (inUse) {
-      if (!confirm('Bu gÃƒÂ¶rsel bir iÃƒÂ§erikte kullanÃ„Â±lÃ„Â±yor. Yine de silinsin mi?')) return;
-    } else if (!confirm('Bu gÃƒÂ¶rsel silinsin mi?')) return;
+      if (!confirm('Bu görsel bir içerikte kullanılıyor. Yine de silinsin mi?')) return;
+    } else if (!confirm('Bu görsel silinsin mi?')) return;
     setBusy(true);
     const res = await deleteMediaKey(key);
     setBusy(false);
-    if (!res.ok) setError(res.error ?? 'Silinemedi.');
-    else router.refresh();
+    if (!res.ok) {
+      setError(res.error ?? 'Silinemedi.');
+      toast(res.error ?? 'Silinemedi.');
+    } else {
+      toast('Görsel silindi.');
+      router.refresh();
+    }
   }
 
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">Medya kÃƒÂ¼tÃƒÂ¼phanesi</h1>
-          <p className="mt-1 text-sm text-muted-strong">
-            {total} gÃƒÂ¶rsel Ã‚Â· depolama: SeaweedFS
-          </p>
+          <h1 className="text-2xl font-medium tracking-tight">Medya kütüphanesi</h1>
+          <p className="mt-1 text-sm text-muted-strong">{total} görsel · depolama: SeaweedFS</p>
         </div>
         <div className="flex items-center gap-2">
           <select
             value={uploadFolder}
             onChange={(e) => setUploadFolder(e.target.value as MediaFolder)}
-            aria-label="YÃƒÂ¼kleme klasÃƒÂ¶rÃƒÂ¼"
+            aria-label="Yükleme klasörü"
             className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
           >
             {folders.map((f) => (
@@ -102,7 +112,7 @@ export function MediaLibrary({
           </select>
           <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90">
             <Upload className="h-4 w-4" />
-            {busy ? 'YÃƒÂ¼kleniyor...' : 'YÃƒÂ¼kle'}
+            {busy ? 'Yükleniyor...' : 'Yükle'}
             <input
               type="file"
               multiple
@@ -134,10 +144,10 @@ export function MediaLibrary({
         <select
           value={folder}
           onChange={(e) => router.push(buildUrl(e.target.value, q))}
-          aria-label="KlasÃƒÂ¶r filtresi"
+          aria-label="Klasör filtresi"
           className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
         >
-          <option value="all">TÃƒÂ¼m klasÃƒÂ¶rler</option>
+          <option value="all">Tüm klasörler</option>
           {folders.map((f) => (
             <option key={f} value={f}>
               {f}
@@ -149,7 +159,7 @@ export function MediaLibrary({
             href={buildUrl(folder, '')}
             className="text-xs text-muted-strong transition-colors hover:text-foreground"
           >
-            AramayÃ„Â± temizle
+            Aramayı temizle
           </Link>
         )}
       </div>
@@ -171,7 +181,7 @@ export function MediaLibrary({
               <img src={item.url} alt="" loading="lazy" className="h-full w-full object-cover" />
               {item.inUse && (
                 <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-green-600/90 px-2 py-1 text-[0.6rem] font-medium text-white">
-                  <CheckCircle2 className="h-3 w-3" /> KullanÃ„Â±mda
+                  <CheckCircle2 className="h-3 w-3" /> Kullanımda
                 </span>
               )}
             </div>
@@ -196,22 +206,19 @@ export function MediaLibrary({
         ))}
         {items.length === 0 && (
           <p className="col-span-full rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted">
-            GÃƒÂ¶rsel bulunamadÃ„Â±.
+            Görsel bulunamadı.
           </p>
         )}
       </div>
 
       {totalPages > 1 && (
-        <nav
-          aria-label="Medya sayfalarÃ„Â±"
-          className="mt-8 flex items-center justify-center gap-2"
-        >
+        <nav aria-label="Medya sayfaları" className="mt-8 flex items-center justify-center gap-2">
           {page > 1 && (
             <Link
               href={buildUrl(folder, q, page - 1)}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >
-              Ãƒâ€“nceki
+              Önceki
             </Link>
           )}
           <span className="numerals px-2 text-xs text-muted-strong">

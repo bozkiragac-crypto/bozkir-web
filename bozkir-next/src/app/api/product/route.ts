@@ -7,7 +7,8 @@ export const runtime = 'nodejs';
 export async function GET(request: Request) {
   const sp = new URL(request.url).searchParams;
   const slug = sp.get('slug') ?? '';
-  if (!slug) return NextResponse.json({ error: 'slug parametresi gerekli' }, { status: 400 });
+  if (!slug || slug.length > 160)
+    return NextResponse.json({ error: 'Geçersiz slug' }, { status: 400 });
 
   const localeParam = sp.get('locale') ?? undefined;
   const locale = isLocale(localeParam) ? localeParam : undefined;

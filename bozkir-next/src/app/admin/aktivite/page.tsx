@@ -35,7 +35,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
   if (!db) {
     return (
       <p className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
-        VeritabanÃ„Â± baÃ„Å¸lantÃ„Â±sÃ„Â± yok.
+        Veritabanı bağlantısı yok.
       </p>
     );
   }
@@ -74,8 +74,8 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">Aktivite kaydÃ„Â±</h1>
-          <p className="mt-1 text-sm text-muted-strong">{total} iÃ…Å¸lem</p>
+          <h1 className="text-2xl font-medium tracking-tight">Aktivite kaydı</h1>
+          <p className="mt-1 text-sm text-muted-strong">{total} işlem</p>
         </div>
         <div className="flex items-start gap-3">
           <a
@@ -100,7 +100,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
             aria-label="Kayıt ara"
             name="q"
             defaultValue={filters.q}
-            placeholder="KullanÃ„Â±cÃ„Â± veya aÃƒÂ§Ã„Â±klama ara..."
+            placeholder="Kullanıcı veya açıklama ara..."
             className="h-11 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
           />
         </div>
@@ -110,7 +110,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
           defaultValue={filters.aralik}
           className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
         >
-          <option value="">TÃƒÂ¼m zamanlar</option>
+          <option value="">Tüm zamanlar</option>
           {Object.entries(RANGE_LABEL).map(([k, label]) => (
             <option key={k} value={k}>
               {label}
@@ -123,7 +123,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
           defaultValue={filters.islem}
           className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
         >
-          <option value="">TÃƒÂ¼m iÃ…Å¸lemler</option>
+          <option value="">Tüm işlemler</option>
           {actions.map((a) => (
             <option key={a} value={a}>
               {ACTION_LABEL[a] ?? a}
@@ -136,7 +136,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
           defaultValue={filters.varlik}
           className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
         >
-          <option value="">TÃƒÂ¼m varlÃ„Â±klar</option>
+          <option value="">Tüm varlıklar</option>
           {entities.map((e) => (
             <option key={e} value={e}>
               {e}
@@ -156,9 +156,9 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
           <thead className="bg-surface text-foreground">
             <tr>
               <th className="p-4 font-medium">Tarih</th>
-              <th className="p-4 font-medium">KullanÃ„Â±cÃ„Â±</th>
-              <th className="p-4 font-medium">Ã„Â°Ã…Å¸lem</th>
-              <th className="p-4 font-medium">AÃƒÂ§Ã„Â±klama</th>
+              <th className="p-4 font-medium">Kullanıcı</th>
+              <th className="p-4 font-medium">İşlem</th>
+              <th className="p-4 font-medium">Açıklama</th>
             </tr>
           </thead>
           <tbody>
@@ -181,7 +181,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={4} className="p-10 text-center text-muted-strong">
-                  KayÃ„Â±t bulunamadÃ„Â±.
+                  Kayıt bulunamadı.
                 </td>
               </tr>
             )}
@@ -191,7 +191,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
 
       {totalPages > 1 && (
         <nav
-          aria-label="Aktivite sayfalarÃ„Â±"
+          aria-label="Aktivite sayfaları"
           className="mt-8 flex items-center justify-center gap-2"
         >
           {page > 1 && (
@@ -199,7 +199,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
               href={`/admin/aktivite${activityQueryString(filters, page - 1)}`}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >
-              Ãƒâ€“nceki
+              Önceki
             </Link>
           )}
           <span className="numerals px-2 text-xs text-muted-strong">

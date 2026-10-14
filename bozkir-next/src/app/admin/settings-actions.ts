@@ -4,13 +4,18 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { getDb } from '@/lib/db/client';
 import { siteSettings } from '@/lib/db/schema';
 import { requireOwner, logActivity } from '@/lib/admin/guard';
-import { SETTINGS_TAG, type SiteSettings } from '@/lib/data/settings';
+import { SETTINGS_TAG, getSiteSettingsFresh, type SiteSettings } from '@/lib/data/settings';
 import { locales } from '@/i18n/config';
 
-export async function saveSiteSettings(input: SiteSettings): Promise<{ ok: boolean; error?: string }> {
+export async function saveSiteSettings(
+  input: SiteSettings,
+): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+
+  // Boş bırakılan SMTP parolası mevcut değeri korur (client'a hiç gönderilmez).
+  const current = await getSiteSettingsFresh();
 
   const value: SiteSettings = {
     phone: input.phone.trim(),
@@ -53,7 +58,7 @@ export async function saveSiteSettings(input: SiteSettings): Promise<{ ok: boole
       host: (input.smtp?.host ?? '').trim(),
       port: (input.smtp?.port ?? '587').trim() || '587',
       user: (input.smtp?.user ?? '').trim(),
-      pass: input.smtp?.pass ?? '',
+      pass: (input.smtp?.pass ?? '') || current.smtp.pass,
       from: (input.smtp?.from ?? '').trim(),
     },
     cookiePolicyText: (input.cookiePolicyText ?? '').trim(),

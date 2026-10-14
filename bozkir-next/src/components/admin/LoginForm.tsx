@@ -27,14 +27,14 @@ export function LoginForm() {
       return;
     }
     if (!res.ok) {
-      setError(res.error ?? 'GiriÅŸ yapÄ±lamadÄ±.');
+      setError(res.error ?? 'Giriş yapılamadı.');
       return;
     }
     try {
       sessionStorage.setItem(ADMIN_TAB_KEY, '1');
       localStorage.setItem(ADMIN_SEEN_KEY, String(Date.now()));
     } catch {
-      // Depolama eriÅŸilemezse geÃ§ (gizli sekme vb.).
+      // Depolama erişilemezse geç (gizli sekme vb.).
     }
     router.replace('/admin');
     router.refresh();
@@ -49,7 +49,7 @@ export function LoginForm() {
         <BrandLogo className="h-12" />
       </div>
       <label className="grid gap-2">
-        <span className="text-xs tracking-[0.14em] text-muted uppercase">KullanÄ±cÄ± adÄ±</span>
+        <span className="text-xs tracking-[0.14em] text-muted uppercase">Kullanıcı adı</span>
         <input
           type="text"
           value={identifier}
@@ -62,7 +62,7 @@ export function LoginForm() {
         />
       </label>
       <label className="grid gap-2">
-        <span className="text-xs tracking-[0.14em] text-muted uppercase">Åifre</span>
+        <span className="text-xs tracking-[0.14em] text-muted uppercase">Şifre</span>
         <input
           type="password"
           value={password}
@@ -75,7 +75,7 @@ export function LoginForm() {
       {needsTotp && (
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">
-            DoÄŸrulama kodu (2FA)
+            Doğrulama kodu (2FA)
           </span>
           <input
             type="text"
@@ -94,7 +94,7 @@ export function LoginForm() {
         disabled={loading}
         className="mt-2 inline-flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {loading ? 'GiriÅŸ yapÄ±lÄ±yor...' : needsTotp ? 'Kodu DoÄŸrula' : 'GiriÅŸ Yap'}
+        {loading ? 'Giriş yapılıyor...' : needsTotp ? 'Kodu Doğrula' : 'Giriş Yap'}
       </button>
       {error && (
         <p className="text-sm text-danger" role="alert">

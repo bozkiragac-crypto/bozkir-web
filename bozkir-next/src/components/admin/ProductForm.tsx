@@ -79,7 +79,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
     <form onSubmit={onSubmit} className="grid gap-6">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">ÃœrÃ¼n AdÄ± *</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı *</span>
           <input
             required
             value={name}
@@ -88,13 +88,13 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">ÃœrÃ¼n Kodu *</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Kodu *</span>
           <input
             required
             value={code}
             onChange={(e) => setCode(e.target.value)}
             className={field}
-            placeholder="Ã–rn: VT-828"
+            placeholder="Örn: VT-828"
           />
         </label>
         <label className="grid gap-2">
@@ -105,7 +105,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
             value={cat}
             onChange={(e) => setCat(e.target.value)}
             className={field}
-            placeholder="Ã–rn: MDF LAM"
+            placeholder="Örn: MDF LAM"
           />
           <datalist id="admin-cat-list">
             {categories.map((c) => (
@@ -114,7 +114,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           </datalist>
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">YÃ¼zey</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Yüzey</span>
           <input
             value={face}
             onChange={(e) => setFace(e.target.value)}
@@ -123,17 +123,17 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Renkler (virgÃ¼lle)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Renkler (virgülle)</span>
           <input
             value={colors}
             onChange={(e) => setColors(e.target.value)}
             className={field}
-            placeholder="MeÅŸe, Ceviz, Beyaz"
+            placeholder="Meşe, Ceviz, Beyaz"
           />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">
-            KalÄ±nlÄ±klar (virgÃ¼lle)
+            Kalınlıklar (virgülle)
           </span>
           <input
             value={thicknesses}
@@ -146,10 +146,10 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
         <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          Ã‡eviriler (boÅŸsa TÃ¼rkÃ§e kullanÄ±lÄ±r)
+          Çeviriler (boşsa Türkçe kullanılır)
         </legend>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">ÃœrÃ¼n AdÄ± (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı (EN)</span>
           <input
             value={nameEn}
             onChange={(e) => setNameEn(e.target.value)}
@@ -158,7 +158,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">ÃœrÃ¼n AdÄ± (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı (AR)</span>
           <input
             value={nameAr}
             onChange={(e) => setNameAr(e.target.value)}
@@ -188,24 +188,24 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
         <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          SEO (boÅŸsa otomatik Ã¼retilir)
+          SEO (boşsa otomatik üretilir)
         </legend>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO BaÅŸlÄ±k</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Başlık</span>
           <input
             value={seoTitle}
             onChange={(e) => setSeoTitle(e.target.value)}
             className={field}
-            placeholder="ÃœrÃ¼n adÄ± | BozkÄ±r AÄŸaÃ§ ÃœrÃ¼nleri"
+            placeholder="Ürün adı | Bozkır Ağaç Ürünleri"
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO AÃ§Ä±klama</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Açıklama</span>
           <input
             value={seoDescription}
             onChange={(e) => setSeoDescription(e.target.value)}
             className={field}
-            placeholder="Arama sonuÃ§larÄ±nda gÃ¶rÃ¼necek kÄ±sa aÃ§Ä±klama"
+            placeholder="Arama sonuçlarında görünecek kısa açıklama"
           />
         </label>
       </fieldset>
@@ -215,7 +215,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         onChange={setImages}
         folder="products"
         ownerId={initial?.id}
-        label="ÃœrÃ¼n GÃ¶rselleri"
+        label="Ürün Görselleri"
       />
 
       {error && <p className="text-sm text-danger">{error}</p>}
@@ -233,7 +233,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           onClick={() => router.push('/admin/urunler')}
           className="text-sm text-muted-strong hover:text-foreground"
         >
-          Ä°ptal
+          İptal
         </button>
       </div>
     </form>

@@ -81,56 +81,56 @@ export function CatalogForm({ initial }: CatalogFormProps) {
     <form onSubmit={onSubmit} className="grid gap-6">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2 sm:col-span-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BaÅŸlÄ±k *</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Başlık *</span>
           <input required value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2 sm:col-span-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama</span>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={area} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">YÄ±l</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Yıl</span>
           <input value={year} onChange={(e) => setYear(e.target.value)} inputMode="numeric" className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Sayfa sayÄ±sÄ±</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Sayfa sayısı</span>
           <input value={pageCount} onChange={(e) => setPageCount(e.target.value)} inputMode="numeric" className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Slug (boÅŸsa baÅŸlÄ±ktan Ã¼retilir)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Slug (boşsa başlıktan üretilir)</span>
           <input value={slug} onChange={(e) => setSlug(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SÄ±ra</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Sıra</span>
           <input value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} inputMode="numeric" className={field} />
         </label>
         <label className="grid gap-2">
           <span className="text-xs tracking-[0.14em] text-muted uppercase">Durum</span>
           <span className="flex h-12 items-center gap-3 rounded-md border border-border bg-surface px-4">
             <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-            <span className="text-sm">Aktif (sitede gÃ¶ster)</span>
+            <span className="text-sm">Aktif (sitede göster)</span>
           </span>
         </label>
       </div>
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
         <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          Ã‡eviriler (boÅŸsa TÃ¼rkÃ§e kullanÄ±lÄ±r)
+          Çeviriler (boşsa Türkçe kullanılır)
         </legend>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BaÅŸlÄ±k (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Başlık (EN)</span>
           <input value={titleEn} onChange={(e) => setTitleEn(e.target.value)} className={field} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">BaÅŸlÄ±k (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Başlık (AR)</span>
           <input value={titleAr} onChange={(e) => setTitleAr(e.target.value)} className={field} dir="rtl" />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama (EN)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama (EN)</span>
           <textarea value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={3} className={area} />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">AÃ§Ä±klama (AR)</span>
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Açıklama (AR)</span>
           <textarea value={descriptionAr} onChange={(e) => setDescriptionAr(e.target.value)} rows={3} className={area} dir="rtl" />
         </label>
       </fieldset>
@@ -140,7 +140,7 @@ export function CatalogForm({ initial }: CatalogFormProps) {
         onChange={(next) => setCover(next[0] ?? '')}
         folder="catalogs"
         multiple={false}
-        label="Katalog KapaÄŸÄ±"
+        label="Katalog Kapağı"
       />
 
       <PdfUpload value={pdfUrl} onChange={setPdfUrl} />
@@ -156,7 +156,7 @@ export function CatalogForm({ initial }: CatalogFormProps) {
           {busy ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
         <button type="button" onClick={() => router.push('/admin/kataloglar')} className="text-sm text-muted-strong hover:text-foreground">
-          Ä°ptal
+          İptal
         </button>
       </div>
     </form>

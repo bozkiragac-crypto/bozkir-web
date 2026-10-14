@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchProductImageRaw, parseImageList } from '@/lib/data/catalog';
-import { publicUrl } from '@/lib/storage/s3';
+import { isOwnStorageUrl, publicUrl } from '@/lib/storage/s3';
 
 export const runtime = 'nodejs';
 
@@ -25,6 +25,8 @@ export async function GET(request: Request) {
 
   const resolved = publicUrl(value);
   if (resolved.startsWith('http')) {
+    // Açık yönlendirmeyi önle: yalnızca kendi depolama alan adımıza izin ver.
+    if (!isOwnStorageUrl(resolved)) return new Response('görsel yok', { status: 404 });
     return NextResponse.redirect(resolved, 302);
   }
   if (resolved.startsWith('/')) {

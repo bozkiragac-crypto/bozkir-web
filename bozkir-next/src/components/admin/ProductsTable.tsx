@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Plus, Search, Download, Upload, Trash2, Eye, EyeOff } from 'lucide-react';
 import { bulkDeleteProducts, setProductActive, importProductsCsv } from '@/lib/admin/safe-actions';
+import { useToast } from '@/components/ui/ToastProvider';
 import { cn } from '@/lib/utils';
 
 export interface ProductRow {
@@ -31,6 +32,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const someChecked = selected.size > 0;
@@ -64,14 +66,17 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
   const exportHref = `/admin/urunler/export?${qs.toString()}`;
 
   async function onBulkDelete() {
-    if (!confirm(`${selected.size} Ã¼rÃ¼n silinsin mi? Bu iÅŸlem geri alÄ±namaz.`)) return;
+    if (!confirm(`${selected.size} ürün silinsin mi? Bu işlem geri alınamaz.`)) return;
     setBusy(true);
     setError(null);
     const res = await bulkDeleteProducts([...selected]);
     setBusy(false);
-    if (!res.ok) setError('Toplu silme baÅŸarÄ±sÄ±z.');
-    else {
+    if (!res.ok) {
+      setError('Toplu silme başarısız.');
+      toast('Toplu silme başarısız.');
+    } else {
       setSelected(new Set());
+      toast('Seçilen ürünler silindi.');
       router.refresh();
     }
   }
@@ -80,24 +85,28 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
     setBusy(true);
     const res = await setProductActive(id, next);
     setBusy(false);
-    if (!res.ok) setError(res.error ?? 'GÃ¼ncellenemedi.');
-    else router.refresh();
+    if (!res.ok) {
+      setError(res.error ?? 'Güncellenemedi.');
+      toast(res.error ?? 'Güncellenemedi.');
+    } else router.refresh();
   }
 
   async function onImport(files: FileList | null) {
     const file = files?.[0];
     if (!file) return;
     const text = await file.text();
-    const dry = !confirm('CSV iÃ§e aktarÄ±lsÄ±n mÄ±? (Ä°ptal = yalnÄ±zca Ã¶nizleme)');
+    const dry = !confirm('CSV içe aktarılsın mı? (İptal = yalnızca önizleme)');
     setBusy(true);
     setError(null);
     const res = await importProductsCsv(text, dry);
     setBusy(false);
-    if (!res.ok) setError(res.error ?? 'Ä°Ã§e aktarma baÅŸarÄ±sÄ±z.');
-    else {
+    if (!res.ok) {
+      setError(res.error ?? 'İçe aktarma başarısız.');
+      toast(res.error ?? 'İçe aktarma başarısız.');
+    } else {
       setError(null);
-      alert(
-        `Ã–nizleme/Ä°ÅŸlem: ${res.created} yeni, ${res.updated} gÃ¼ncellenecek${dry ? ' (uygulanmadÄ±)' : ''}.`,
+      toast(
+        `Önizleme/İşlem: ${res.created} yeni, ${res.updated} güncellenecek${dry ? ' (uygulanmadı)' : ''}.`,
       );
       if (!dry) router.refresh();
     }
@@ -109,8 +118,8 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">ÃœrÃ¼nler</h1>
-          <p className="mt-1 text-sm text-muted-strong">{total} kayÄ±t</p>
+          <h1 className="text-2xl font-medium tracking-tight">Ürünler</h1>
+          <p className="mt-1 text-sm text-muted-strong">{total} kayıt</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <a
@@ -120,7 +129,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
             <Download className="h-4 w-4" /> CSV
           </a>
           <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-border px-4 text-sm font-medium hover:bg-surface-2">
-            <Upload className="h-4 w-4" /> Ä°Ã§e aktar
+            <Upload className="h-4 w-4" /> İçe aktar
             <input
               type="file"
               accept=".csv,text/csv"
@@ -132,7 +141,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
             href="/admin/urunler/yeni"
             className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90"
           >
-            <Plus className="h-4 w-4" /> Yeni ÃœrÃ¼n
+            <Plus className="h-4 w-4" /> Yeni Ürün
           </Link>
         </div>
       </div>
@@ -149,7 +158,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
           />
         </div>
         <select name="kategori" defaultValue={filters.cat} aria-label="Kategori" className={select}>
-          <option value="">TÃ¼m kategoriler</option>
+          <option value="">Tüm kategoriler</option>
           {cats.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -157,14 +166,14 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
           ))}
         </select>
         <select name="durum" defaultValue={filters.durum} aria-label="Durum" className={select}>
-          <option value="all">TÃ¼m durumlar</option>
+          <option value="all">Tüm durumlar</option>
           <option value="active">Aktif</option>
           <option value="passive">Pasif</option>
         </select>
         <select name="sirala" defaultValue={filters.sort} aria-label="Sıralama" className={select}>
           <option value="new">Yeni eklenen</option>
-          <option value="code">Koda gÃ¶re</option>
-          <option value="name">Ada gÃ¶re</option>
+          <option value="code">Koda göre</option>
+          <option value="name">Ada göre</option>
         </select>
         <button
           type="submit"
@@ -182,21 +191,21 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
 
       {someChecked && (
         <div className="mt-4 flex items-center gap-4 rounded-lg border border-border bg-surface-2 px-4 py-3 text-sm">
-          <span className="numerals">{selected.size} seÃ§ili</span>
+          <span className="numerals">{selected.size} seçili</span>
           <button
             type="button"
             onClick={onBulkDelete}
             disabled={busy}
             className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-muted-strong hover:border-red-300 hover:text-danger disabled:opacity-50"
           >
-            <Trash2 className="h-3.5 w-3.5" /> SeÃ§ilenleri sil
+            <Trash2 className="h-3.5 w-3.5" /> Seçilenleri sil
           </button>
           <button
             type="button"
             onClick={() => setSelected(new Set())}
             className="text-xs text-muted underline"
           >
-            SeÃ§imi temizle
+            Seçimi temizle
           </button>
         </div>
       )}
@@ -210,10 +219,10 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
                   type="checkbox"
                   checked={allChecked}
                   onChange={toggleAll}
-                  aria-label="TÃ¼mÃ¼nÃ¼ seÃ§"
+                  aria-label="Tümünü seç"
                 />
               </th>
-              <th className="p-4 font-medium">GÃ¶rsel</th>
+              <th className="p-4 font-medium">Görsel</th>
               <th className="p-4 font-medium">Kod</th>
               <th className="p-4 font-medium">Ad</th>
               <th className="p-4 font-medium">Kategori</th>
@@ -229,7 +238,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
                     type="checkbox"
                     checked={selected.has(p.id)}
                     onChange={() => toggle(p.id)}
-                    aria-label={`${p.code} seÃ§`}
+                    aria-label={`${p.code} seç`}
                   />
                 </td>
                 <td className="p-4">
@@ -268,7 +277,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
                     href={`/admin/urunler/${p.id}`}
                     className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-surface-2"
                   >
-                    DÃ¼zenle
+                    Düzenle
                   </Link>
                 </td>
               </tr>
@@ -276,7 +285,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
             {rows.length === 0 && (
               <tr>
                 <td colSpan={7} className="p-10 text-center text-muted-strong">
-                  KayÄ±t bulunamadÄ±.
+                  Kayıt bulunamadı.
                 </td>
               </tr>
             )}
@@ -292,7 +301,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
             tabIndex={page === 1 ? -1 : undefined}
             className={page === 1 ? 'pointer-events-none opacity-40' : ''}
           >
-            Ã–nceki
+            Önceki
           </Link>
           <span className="numerals text-muted">
             {page} / {totalPages}
