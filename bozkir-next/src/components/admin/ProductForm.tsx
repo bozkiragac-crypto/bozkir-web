@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ChevronDown } from 'lucide-react';
 import { saveProduct } from '@/lib/admin/safe-actions';
+import { useToast } from '@/components/ui/ToastProvider';
 import { ImageManager } from './ImageManager';
 
 interface ProductFormProps {
@@ -27,9 +29,11 @@ interface ProductFormProps {
 
 const field =
   'h-12 w-full rounded-md border border-border bg-surface px-4 text-sm outline-none transition-colors focus:border-foreground';
+const label = 'text-xs tracking-[0.14em] text-muted uppercase';
 
 export function ProductForm({ categories, initial }: ProductFormProps) {
   const router = useRouter();
+  const toast = useToast();
   const [name, setName] = useState(initial?.name ?? '');
   const [code, setCode] = useState(initial?.code ?? '');
   const [cat, setCat] = useState(initial?.cat ?? '');
@@ -45,6 +49,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveTarget, setSaveTarget] = useState<'list' | 'new'>('list');
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -71,6 +76,20 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       setError(res.error ?? 'Kaydedilemedi.');
       return;
     }
+    toast(initial?.id ? 'Ürün güncellendi.' : 'Ürün oluşturuldu.');
+
+    // Yeni ürün akışında "kaydet ve yeni ekle": formu temizle, sayfada kal.
+    if (!initial?.id && saveTarget === 'new') {
+      setName('');
+      setCode('');
+      setFace('');
+      setColors('');
+      setThicknesses('');
+      setImages([]);
+      setError(null);
+      router.refresh();
+      return;
+    }
     router.push('/admin/urunler');
     router.refresh();
   }
@@ -79,7 +98,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
     <form onSubmit={onSubmit} className="grid gap-6">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı *</span>
+          <span className={label}>Ürün Adı *</span>
           <input
             required
             value={name}
@@ -88,7 +107,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Kodu *</span>
+          <span className={label}>Ürün Kodu *</span>
           <input
             required
             value={code}
@@ -98,14 +117,14 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori *</span>
+          <span className={label}>Kategori *</span>
           <input
             required
             list="admin-cat-list"
             value={cat}
             onChange={(e) => setCat(e.target.value)}
             className={field}
-            placeholder="Örn: MDF LAM"
+            placeholder="Listeden seçin veya yazın"
           />
           <datalist id="admin-cat-list">
             {categories.map((c) => (
@@ -114,7 +133,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           </datalist>
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Yüzey</span>
+          <span className={label}>Yüzey</span>
           <input
             value={face}
             onChange={(e) => setFace(e.target.value)}
@@ -123,7 +142,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Renkler (virgülle)</span>
+          <span className={label}>Renkler (virgülle)</span>
           <input
             value={colors}
             onChange={(e) => setColors(e.target.value)}
@@ -132,9 +151,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           />
         </label>
         <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">
-            Kalınlıklar (virgülle)
-          </span>
+          <span className={label}>Kalınlıklar (virgülle)</span>
           <input
             value={thicknesses}
             onChange={(e) => setThicknesses(e.target.value)}
@@ -144,72 +161,6 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         </label>
       </div>
 
-      <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
-        <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          Çeviriler (boşsa Türkçe kullanılır)
-        </legend>
-        <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı (EN)</span>
-          <input
-            value={nameEn}
-            onChange={(e) => setNameEn(e.target.value)}
-            className={field}
-            placeholder="e.g. MDF Lam"
-          />
-        </label>
-        <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Ürün Adı (AR)</span>
-          <input
-            value={nameAr}
-            onChange={(e) => setNameAr(e.target.value)}
-            className={field}
-            dir="rtl"
-          />
-        </label>
-        <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori (EN)</span>
-          <input
-            value={catEn}
-            onChange={(e) => setCatEn(e.target.value)}
-            className={field}
-            placeholder="e.g. MDF Lam"
-          />
-        </label>
-        <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">Kategori (AR)</span>
-          <input
-            value={catAr}
-            onChange={(e) => setCatAr(e.target.value)}
-            className={field}
-            dir="rtl"
-          />
-        </label>
-      </fieldset>
-
-      <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
-        <legend className="px-2 text-xs tracking-[0.14em] text-muted uppercase">
-          SEO (boşsa otomatik üretilir)
-        </legend>
-        <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Başlık</span>
-          <input
-            value={seoTitle}
-            onChange={(e) => setSeoTitle(e.target.value)}
-            className={field}
-            placeholder="Ürün adı | Bozkır Ağaç Ürünleri"
-          />
-        </label>
-        <label className="grid gap-2">
-          <span className="text-xs tracking-[0.14em] text-muted uppercase">SEO Açıklama</span>
-          <input
-            value={seoDescription}
-            onChange={(e) => setSeoDescription(e.target.value)}
-            className={field}
-            placeholder="Arama sonuçlarında görünecek kısa açıklama"
-          />
-        </label>
-      </fieldset>
-
       <ImageManager
         images={images}
         onChange={setImages}
@@ -218,16 +169,97 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         label="Ürün Görselleri"
       />
 
+      <details className="group rounded-md border border-border p-5">
+        <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium">
+          Gelişmiş (çeviri ve SEO)
+          <ChevronDown className="h-4 w-4 text-muted transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="mt-5 grid gap-6">
+          <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
+            <legend className={`px-2 ${label}`}>Çeviriler (boşsa Türkçe kullanılır)</legend>
+            <label className="grid gap-2">
+              <span className={label}>Ürün Adı (EN)</span>
+              <input
+                value={nameEn}
+                onChange={(e) => setNameEn(e.target.value)}
+                className={field}
+                placeholder="e.g. MDF Lam"
+              />
+            </label>
+            <label className="grid gap-2">
+              <span className={label}>Ürün Adı (AR)</span>
+              <input
+                value={nameAr}
+                onChange={(e) => setNameAr(e.target.value)}
+                className={field}
+                dir="rtl"
+              />
+            </label>
+            <label className="grid gap-2">
+              <span className={label}>Kategori (EN)</span>
+              <input
+                value={catEn}
+                onChange={(e) => setCatEn(e.target.value)}
+                className={field}
+                placeholder="e.g. MDF Lam"
+              />
+            </label>
+            <label className="grid gap-2">
+              <span className={label}>Kategori (AR)</span>
+              <input
+                value={catAr}
+                onChange={(e) => setCatAr(e.target.value)}
+                className={field}
+                dir="rtl"
+              />
+            </label>
+          </fieldset>
+
+          <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
+            <legend className={`px-2 ${label}`}>SEO (boşsa otomatik üretilir)</legend>
+            <label className="grid gap-2">
+              <span className={label}>SEO Başlık</span>
+              <input
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+                className={field}
+                placeholder="Ürün adı | Bozkır Ağaç Ürünleri"
+              />
+            </label>
+            <label className="grid gap-2">
+              <span className={label}>SEO Açıklama</span>
+              <input
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
+                className={field}
+                placeholder="Arama sonuçlarında görünecek kısa açıklama"
+              />
+            </label>
+          </fieldset>
+        </div>
+      </details>
+
       {error && <p className="text-sm text-danger">{error}</p>}
 
-      <div className="flex items-center gap-4 border-t border-border pt-6">
+      <div className="flex flex-wrap items-center gap-4 border-t border-border pt-6">
         <button
           type="submit"
+          onClick={() => setSaveTarget('list')}
           disabled={busy}
           className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {busy ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
+        {!initial?.id && (
+          <button
+            type="submit"
+            onClick={() => setSaveTarget('new')}
+            disabled={busy}
+            className="inline-flex h-12 items-center justify-center rounded-full border border-border px-6 text-sm font-medium hover:bg-surface-2 disabled:opacity-50"
+          >
+            Kaydet ve yeni ekle
+          </button>
+        )}
         <button
           type="button"
           onClick={() => router.push('/admin/urunler')}

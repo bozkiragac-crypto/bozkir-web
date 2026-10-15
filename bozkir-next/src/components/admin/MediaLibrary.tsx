@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Trash2, Upload, Search, CheckCircle2 } from 'lucide-react';
 import { deleteMediaKey, uploadMedia } from '@/lib/admin/safe-actions';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Select } from '@/components/ui/Select';
 
 export interface MediaItem {
   key: string;
@@ -16,6 +17,16 @@ export interface MediaItem {
 }
 
 type MediaFolder = 'products' | 'campaigns' | 'content' | 'catalogs' | 'quotes';
+
+/** Klasör anahtarlarının Türkçe görünen adları. */
+const FOLDER_LABEL: Record<string, string> = {
+  products: 'Ürünler',
+  campaigns: 'Kampanyalar',
+  content: 'İçerik',
+  catalogs: 'Kataloglar',
+  quotes: 'Teklif Ekleri',
+};
+const folderLabel = (f: string) => FOLDER_LABEL[f] ?? f;
 
 function kb(n: number) {
   return n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.round(n / 1024)} KB`;
@@ -98,18 +109,17 @@ export function MediaLibrary({
           <p className="mt-1 text-sm text-muted-strong">{total} görsel · depolama: SeaweedFS</p>
         </div>
         <div className="flex items-center gap-2">
-          <select
+          <Select
             value={uploadFolder}
             onChange={(e) => setUploadFolder(e.target.value as MediaFolder)}
             aria-label="Yükleme klasörü"
-            className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
           >
             {folders.map((f) => (
               <option key={f} value={f}>
-                {f}
+                {folderLabel(f)}
               </option>
             ))}
-          </select>
+          </Select>
           <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90">
             <Upload className="h-4 w-4" />
             {busy ? 'Yükleniyor...' : 'Yükle'}
@@ -141,19 +151,18 @@ export function MediaLibrary({
             className="h-11 w-48 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm sm:w-64"
           />
         </form>
-        <select
+        <Select
           value={folder}
           onChange={(e) => router.push(buildUrl(e.target.value, q))}
           aria-label="Klasör filtresi"
-          className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
         >
           <option value="all">Tüm klasörler</option>
           {folders.map((f) => (
             <option key={f} value={f}>
-              {f}
+              {folderLabel(f)}
             </option>
           ))}
-        </select>
+        </Select>
         {q && (
           <Link
             href={buildUrl(folder, '')}

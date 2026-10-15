@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useToast } from '@/components/ui/ToastProvider';
+import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import {
   deleteProduct,
   deleteCampaign,
@@ -58,13 +59,48 @@ function DeleteButton({
   );
 }
 
-export function DeleteProductButton({ id }: { id: string }) {
+export function DeleteProductButton({
+  id,
+  label,
+  redirectTo,
+}: {
+  id: string;
+  label?: string;
+  redirectTo?: string;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function run() {
+    setBusy(true);
+    const res = await deleteProduct(id);
+    setBusy(false);
+    if (!res.ok) {
+      toast(res.error ?? 'Silinemedi.');
+      return;
+    }
+    setOpen(false);
+    toast('Ürün silindi.');
+    if (redirectTo) router.push(redirectTo);
+    router.refresh();
+  }
+
   return (
-    <DeleteButton
-      action={deleteProduct}
-      message="Bu ürünü silmek istediğinize emin misiniz?"
-      id={id}
-    />
+    <>
+      <button type="button" onClick={() => setOpen(true)} className={btn}>
+        <Trash2 className="h-3.5 w-3.5" /> {label ?? 'Sil'}
+      </button>
+      <ConfirmDialog
+        open={open}
+        title="Ürünü sil"
+        message="Bu ürün kalıcı olarak silinecek. Bu işlem geri alınamaz."
+        busy={busy}
+        onConfirm={run}
+        onCancel={() => !busy && setOpen(false)}
+      />
+    </>
   );
 }
 

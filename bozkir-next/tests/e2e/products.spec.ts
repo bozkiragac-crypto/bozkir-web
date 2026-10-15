@@ -76,13 +76,17 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
     await adminPage.goto('/admin/urunler?q=PVC', { waitUntil: 'domcontentloaded' });
     await adminPage.getByRole('link', { name: 'Düzenle' }).first().click();
 
-    await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({ timeout: 15_000 });
+    await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(adminPage.getByLabel('Ürün Kodu *')).toHaveValue('PVC');
 
     // Hiçbir alanı değiştirmeden kaydet: seri kodu çakışması hatası vermemeli.
-    await adminPage.getByRole('button', { name: 'Kaydet' }).click();
+    await adminPage.getByRole('button', { name: 'Kaydet', exact: true }).click();
 
-    await expect(adminPage.getByText('Bu ürün kodu zaten kullanılıyor')).toHaveCount(0, { timeout: 15_000 });
+    await expect(adminPage.getByText('Bu ürün kodu zaten kullanılıyor')).toHaveCount(0, {
+      timeout: 15_000,
+    });
     await expect(adminPage).toHaveURL(/\/admin\/urunler$/, { timeout: 15_000 });
   });
 
@@ -90,7 +94,9 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
     // Var olan bir ürünün kategori/kod/ad üçlüsünü oku.
     await adminPage.goto('/admin/urunler?q=PVC', { waitUntil: 'domcontentloaded' });
     await adminPage.getByRole('link', { name: 'Düzenle' }).first().click();
-    await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({ timeout: 15_000 });
+    await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({
+      timeout: 15_000,
+    });
 
     const code = await adminPage.getByLabel('Ürün Kodu *').inputValue();
     const name = await adminPage.getByLabel('Ürün Adı *').inputValue();
@@ -101,9 +107,11 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
     await adminPage.getByLabel('Ürün Adı *').fill(name);
     await adminPage.getByLabel('Ürün Kodu *').fill(code);
     await adminPage.getByLabel('Kategori *').fill(cat);
-    await adminPage.getByRole('button', { name: 'Kaydet' }).click();
+    await adminPage.getByRole('button', { name: 'Kaydet', exact: true }).click();
 
-    await expect(adminPage.getByText('aynı kod ve adla bir ürün zaten var')).toBeVisible({ timeout: 15_000 });
+    await expect(adminPage.getByText('aynı kod ve adla bir ürün zaten var')).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(adminPage).toHaveURL(/\/admin\/urunler\/yeni$/, { timeout: 15_000 });
   });
 });

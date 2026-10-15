@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Plus, Search, Download, Upload, Trash2, Eye, EyeOff } from 'lucide-react';
 import { bulkDeleteProducts, setProductActive, importProductsCsv } from '@/lib/admin/safe-actions';
+import { DeleteProductButton } from '@/components/admin/DeleteButtons';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Select } from '@/components/ui/Select';
 import { cn } from '@/lib/utils';
 
 export interface ProductRow {
@@ -111,9 +113,6 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
       if (!dry) router.refresh();
     }
   }
-
-  const select = 'h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none';
-
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -157,24 +156,24 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
             className="h-11 w-44 bg-transparent text-base outline-none placeholder:text-muted sm:w-56 sm:text-sm"
           />
         </div>
-        <select name="kategori" defaultValue={filters.cat} aria-label="Kategori" className={select}>
+        <Select name="kategori" defaultValue={filters.cat} aria-label="Kategori">
           <option value="">Tüm kategoriler</option>
           {cats.map((c) => (
             <option key={c} value={c}>
               {c}
             </option>
           ))}
-        </select>
-        <select name="durum" defaultValue={filters.durum} aria-label="Durum" className={select}>
+        </Select>
+        <Select name="durum" defaultValue={filters.durum} aria-label="Durum">
           <option value="all">Tüm durumlar</option>
           <option value="active">Aktif</option>
           <option value="passive">Pasif</option>
-        </select>
-        <select name="sirala" defaultValue={filters.sort} aria-label="Sıralama" className={select}>
+        </Select>
+        <Select name="sirala" defaultValue={filters.sort} aria-label="Sıralama">
           <option value="new">Yeni eklenen</option>
           <option value="code">Koda göre</option>
           <option value="name">Ada göre</option>
-        </select>
+        </Select>
         <button
           type="submit"
           className="h-11 rounded-full bg-foreground px-5 text-sm font-medium text-background"
@@ -273,12 +272,15 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
                   </button>
                 </td>
                 <td className="p-4 text-right">
-                  <Link
-                    href={`/admin/urunler/${p.id}`}
-                    className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-surface-2"
-                  >
-                    Düzenle
-                  </Link>
+                  <div className="flex justify-end gap-2">
+                    <Link
+                      href={`/admin/urunler/${p.id}`}
+                      className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-surface-2"
+                    >
+                      Düzenle
+                    </Link>
+                    <DeleteProductButton id={p.id} />
+                  </div>
                 </td>
               </tr>
             ))}

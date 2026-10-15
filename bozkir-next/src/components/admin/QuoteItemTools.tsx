@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, MessageCircle, Loader2 } from 'lucide-react';
 import { updateQuoteStatus, updateQuoteNote } from '@/lib/admin/safe-actions';
+import { Select } from '@/components/ui/Select';
 import {
   QUOTE_STATUSES,
   QUOTE_STATUS_CLASS,
@@ -90,18 +91,20 @@ export function QuoteItemTools({
       <div className="flex flex-wrap items-center gap-3">
         <label className="inline-flex items-center gap-2 text-xs text-muted-strong">
           Durum
-          <select
+          <Select
+            size="sm"
+            shape="rounded"
+            selectClassName="numerals bg-surface"
             value={current}
             disabled={busy}
             onChange={(e) => changeStatus(e.target.value as QuoteStatus)}
-            className="numerals rounded-md border border-border bg-surface px-2 py-1 text-xs text-foreground disabled:opacity-50"
           >
             {STATUS_ORDER.map((s) => (
               <option key={s} value={s}>
                 {QUOTE_STATUS_LABEL[s]}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <QuoteStatusBadge status={current} />
         <a

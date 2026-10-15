@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/lib/datetime';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Select } from '@/components/ui/Select';
 
 export interface AdminUserRow {
   id: string;
@@ -156,14 +157,16 @@ function CreateForm({
         </label>
         <label className="grid gap-1">
           <span className="text-xs uppercase tracking-[0.14em] text-muted">Rol</span>
-          <select
-            className={`${field} text-foreground`}
+          <Select
+            className="w-full"
+            shape="rounded"
+            selectClassName="h-11 bg-surface"
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value as 'owner' | 'editor' })}
           >
             <option value="editor">Editör</option>
             <option value="owner">Sahip</option>
-          </select>
+          </Select>
         </label>
         <label className="grid gap-1 sm:col-span-2">
           <span className="text-xs uppercase tracking-[0.14em] text-muted">Şifre * (min 8)</span>
@@ -236,14 +239,16 @@ function UserRow({
           />
         </td>
         <td className="p-4">
-          <select
-            className={`${field} text-foreground`}
+          <Select
+            className="w-full"
+            shape="rounded"
+            selectClassName="h-11 bg-surface"
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value as 'owner' | 'editor' })}
           >
             <option value="editor">Editör</option>
             <option value="owner">Sahip</option>
-          </select>
+          </Select>
         </td>
         <td className="p-4">
           <label className="inline-flex items-center gap-2">

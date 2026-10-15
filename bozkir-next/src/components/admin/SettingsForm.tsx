@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, ArrowUp, ArrowDown } from 'lucide-react';
+import { Save, ArrowUp, ArrowDown, X } from 'lucide-react';
 import { saveSiteSettings } from '@/lib/admin/safe-actions';
 import { useToast } from '@/components/ui/ToastProvider';
 import { ImageManager } from '@/components/admin/ImageManager';
+import { Select } from '@/components/ui/Select';
 import type { SiteSettings } from '@/lib/data/settings';
 
 const field =
@@ -28,7 +29,18 @@ export function SettingsForm({
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const toast = useToast();
 
-  const order = form.featuredOrder.length ? form.featuredOrder : categories.map((c) => c.slug);
+  // Kayıtlı sırayı mevcut kategorilerle uzlaştır: artık var olmayan (ürünleri/
+  // kaydı silinmiş) slug'lar listeden düşer. Hiç sıra kaydedilmemişse tüm
+  // kategoriler gösterilir. Kullanıcı listeden kategori çıkarabilir (×).
+  const order = useMemo(() => {
+    const all = categories.map((c) => c.slug);
+    if (form.featuredOrder.length === 0) return all;
+    return form.featuredOrder.filter((s) => all.includes(s));
+  }, [form.featuredOrder, categories]);
+  const unused = useMemo(
+    () => categories.filter((c) => !order.includes(c.slug)),
+    [categories, order],
+  );
   const nameOf = (slug: string) => categories.find((c) => c.slug === slug)?.name ?? slug;
 
   function setOrder(next: string[]) {
@@ -250,8 +262,9 @@ export function SettingsForm({
               <span className="text-sm">Popup&apos;ı etkinleştir</span>
             </label>
             <Label t="Gösterilecek kampanya" full>
-              <select
-                className={field}
+              <Select
+                shape="rounded"
+                selectClassName="h-11 bg-surface"
                 value={form.popupCampaignId}
                 onChange={(e) => setForm({ ...form, popupCampaignId: e.target.value })}
               >
@@ -261,7 +274,7 @@ export function SettingsForm({
                     {c.title}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Label>
           </div>
         </div>
@@ -484,10 +497,44 @@ export function SettingsForm({
                 >
                   <ArrowDown className="h-3.5 w-3.5" />
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setOrder(order.filter((s) => s !== slug))}
+                  aria-label={`${nameOf(slug)} kaldır`}
+                  className="rounded-md border border-border p-1.5 text-muted-strong hover:border-red-300 hover:text-danger"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </span>
             </li>
           ))}
         </ul>
+        {order.length === 0 && (
+          <p className="mt-4 rounded-md border border-dashed border-border p-4 text-center text-xs text-muted">
+            Vitrinde listelenecek kategori yok.
+          </p>
+        )}
+        {unused.length > 0 && (
+          <div className="mt-4">
+            <Select
+              aria-label="Vitrin sırasına kategori ekle"
+              shape="rounded"
+              selectClassName="h-11 bg-surface"
+              value=""
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v) setOrder([...order, v]);
+              }}
+            >
+              <option value="">Kategori ekle…</option>
+              {unused.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
         <button
           type="button"
           onClick={() => setOrder(categories.map((c) => c.slug))}

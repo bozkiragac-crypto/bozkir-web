@@ -13,6 +13,7 @@ import {
   parseActivityFilters,
 } from '@/lib/activity';
 import { ClearActivityButton } from '@/components/admin/ClearActivityButton';
+import { Select } from '@/components/ui/Select';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,45 +105,30 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
             className="h-11 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
           />
         </div>
-        <select
-          aria-label="Zaman aralığı"
-          name="aralik"
-          defaultValue={filters.aralik}
-          className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
-        >
+        <Select aria-label="Zaman aralığı" name="aralik" defaultValue={filters.aralik}>
           <option value="">Tüm zamanlar</option>
           {Object.entries(RANGE_LABEL).map(([k, label]) => (
             <option key={k} value={k}>
               {label}
             </option>
           ))}
-        </select>
-        <select
-          aria-label="İşlem"
-          name="islem"
-          defaultValue={filters.islem}
-          className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
-        >
+        </Select>
+        <Select aria-label="İşlem" name="islem" defaultValue={filters.islem}>
           <option value="">Tüm işlemler</option>
           {actions.map((a) => (
             <option key={a} value={a}>
               {ACTION_LABEL[a] ?? a}
             </option>
           ))}
-        </select>
-        <select
-          aria-label="Varlık"
-          name="varlik"
-          defaultValue={filters.varlik}
-          className="h-11 rounded-full border border-border bg-transparent px-4 text-sm outline-none"
-        >
+        </Select>
+        <Select aria-label="Varlık" name="varlik" defaultValue={filters.varlik}>
           <option value="">Tüm varlıklar</option>
           {entities.map((e) => (
             <option key={e} value={e}>
               {e}
             </option>
           ))}
-        </select>
+        </Select>
         <button
           type="submit"
           className="h-11 rounded-full border border-border px-5 text-sm text-foreground transition-colors hover:bg-surface-2"
