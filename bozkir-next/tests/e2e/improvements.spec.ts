@@ -68,7 +68,10 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
 
   test('footer çalışma saatlerini gösterir', async ({ page, isMobile }) => {
     await gotoWithRetry(page, '/tr');
-    const hours = page.locator('footer').getByText(/Pazartesi.{0,6}Cuma/).first();
+    const hours = page
+      .locator('footer')
+      .getByText(/Pazartesi.{0,6}Cuma/)
+      .first();
     // Mobilde footer bölümleri katlanmış olabilir; DOM'da bulunması yeterli.
     if (isMobile) await expect(hours).toBeAttached();
     else await expect(hours).toBeVisible();
@@ -89,7 +92,7 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
     const href = (await product.getAttribute('href')) ?? '';
     await page.goto(href, { waitUntil: 'domcontentloaded' });
     const expand = page.getByRole('button', { name: 'Görseli büyüt' }).first();
-    await expect(expand).toBeAttached({ timeout: 10_000 });
+    await expect(expand).toBeVisible({ timeout: 15_000 });
     // Scroll/animasyon sürtünmesini elemek için doğrudan DOM tıklaması.
     await expand.evaluate((el) => (el as HTMLButtonElement).click());
     const dialog = page.locator('[role="dialog"][data-lenis-prevent]');
@@ -109,7 +112,9 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
       await page.waitForTimeout(400);
     }
     await expect(heart).toHaveAttribute('aria-pressed', 'true', { timeout: 10_000 });
-    await expect(page.getByRole('status').getByText(/Favorilere eklendi|Favorilerden çıkarıldı/)).toBeVisible();
+    await expect(
+      page.getByRole('status').getByText(/Favorilere eklendi|Favorilerden çıkarıldı/),
+    ).toBeVisible();
   });
 });
 

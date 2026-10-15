@@ -37,17 +37,20 @@ if (!process.env.DATABASE_URL) {
 const force = process.argv.includes('--force');
 
 // [code, name, cat, face, img]
+// Görseller repodaki statik dosyalardır (public/images/gallery); böylece S3
+// yapılandırılmadan (CI) da next/image başarıyla yükler ve galeri/lightbox
+// butonları güvenilir biçimde render edilir.
 // Not: her kategori en az 2 ürün içerir; böylece ürün detayındaki "Benzer
 // Ürünler" bölümü hangi ürün ilk sırada gelirse gelsin dolu olur.
 const PRODUCTS = [
-  ['PVC', 'PVC Kenar Bant', 'PVC KENAR', 'PVC', 'products/e2e/pvc.webp'],
-  ['PVC-02', 'PVC Kenar Bant Beyaz', 'PVC KENAR', 'PVC', 'products/e2e/pvc-beyaz.webp'],
-  ['LAK-01', 'Lak Panel Bej', 'LAK PANEL', 'Lak', 'products/e2e/lak-bej.webp'],
-  ['LAK-02', 'Lak Panel Beyaz', 'LAK PANEL', 'Lak', 'products/e2e/lak-beyaz.webp'],
-  ['MDF-01', 'MDF Lam Panel Bej', 'MDF LAM', 'Bej', 'products/e2e/mdf-bej.webp'],
-  ['MDF-02', 'MDF Lam Panel Antrasit', 'MDF LAM', 'Antrasit', 'products/e2e/mdf-antrasit.webp'],
-  ['SUNTA-01', 'Suntalam Panel Beyaz', 'SUNTALAM', 'Beyaz', 'products/e2e/suntalam.webp'],
-  ['SUNTA-02', 'Suntalam Panel Kestane', 'SUNTALAM', 'Kestane', 'products/e2e/suntalam-2.webp'],
+  ['PVC', 'PVC Kenar Bant', 'PVC KENAR', 'PVC', '/images/gallery/SGL_849.webp'],
+  ['PVC-02', 'PVC Kenar Bant Beyaz', 'PVC KENAR', 'PVC', '/images/gallery/SGL_859.webp'],
+  ['LAK-01', 'Lak Panel Bej', 'LAK PANEL', 'Lak', '/images/gallery/milano.webp'],
+  ['LAK-02', 'Lak Panel Beyaz', 'LAK PANEL', 'Lak', '/images/gallery/dubai.webp'],
+  ['MDF-01', 'MDF Lam Panel Bej', 'MDF LAM', 'Bej', '/images/gallery/SGL_02B.webp'],
+  ['MDF-02', 'MDF Lam Panel Antrasit', 'MDF LAM', 'Antrasit', '/images/gallery/SGL_297.webp'],
+  ['SUNTA-01', 'Suntalam Panel Beyaz', 'SUNTALAM', 'Beyaz', '/images/gallery/lima.webp'],
+  ['SUNTA-02', 'Suntalam Panel Kestane', 'SUNTALAM', 'Kestane', '/images/gallery/odessa.webp'],
 ];
 
 const SEED_CODES = PRODUCTS.map((p) => p[0]);

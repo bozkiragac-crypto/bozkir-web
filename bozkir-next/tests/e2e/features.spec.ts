@@ -62,6 +62,8 @@ test.describe('Yeni özellikler', () => {
 
   test('paylaşılan liste bağlantısı favorilere ürün ekler ve URL temizlenir', async ({ page }) => {
     await gotoWithRetry(page, '/tr/urunler');
+    const firstLink = page.locator('main a[href*="/tr/urunler/"]').first();
+    await expect(firstLink).toBeVisible({ timeout: 15_000 });
     const slugs = await page.locator('main a[href*="/tr/urunler/"]').evaluateAll((els) =>
       els
         .map((e) => (e.getAttribute('href') ?? '').split('/tr/urunler/')[1])

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Genel site gezinme', () => {
   test('ana sayfa bölümleri yüklenir', async ({ page }) => {
     await page.goto('/tr');
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.locator('h1').first()).toBeVisible();
     // Vitrin/ürün bölümleri en az bir başlık içerir
     await expect(page.getByRole('heading', { level: 2 }).first()).toBeVisible();
   });
@@ -59,7 +59,12 @@ test.describe('Genel site gezinme', () => {
 
   test('çalışma saatleri yeni aralığı gösterir', async ({ page }) => {
     await page.goto('/tr/iletisim');
-    await expect(page.locator('main').getByText(/Cumartesi: 08:00 .{1,3} 14:00/).first()).toBeVisible();
+    await expect(
+      page
+        .locator('main')
+        .getByText(/Cumartesi: 08:00 .{1,3} 14:00/)
+        .first(),
+    ).toBeVisible();
   });
 
   test('bilinmeyen sayfa 404 içeriğini gösterir', async ({ page }) => {
