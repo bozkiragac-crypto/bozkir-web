@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
-import { Select } from '@/components/ui/Select';
+import { Dropdown } from '@/components/ui/Dropdown';
 import { GalleryShowcase, type ShowcaseItem } from '@/components/home/GalleryShowcase';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
@@ -38,19 +38,16 @@ export function MaterialShowcase({
           body={body}
           action={
             tags.length > 1 ? (
-              <Select
+              <Dropdown
                 value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                aria-label={t('catalog.category')}
-                className="min-w-[13rem]"
-              >
-                <option value="">{t('catalog.all')}</option>
-                {tags.map((tag) => (
-                  <option key={tag} value={tag}>
-                    {tag}
-                  </option>
-                ))}
-              </Select>
+                onChange={setFilter}
+                ariaLabel={t('catalog.category')}
+                className="min-w-[12rem]"
+                options={[
+                  { value: '', label: t('catalog.all') },
+                  ...tags.map((tag) => ({ value: tag, label: tag })),
+                ]}
+              />
             ) : undefined
           }
         />
