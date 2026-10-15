@@ -175,6 +175,20 @@ export function SettingsForm({
                 }
               />
             </Label>
+            <Label t="İş yeri koordinatları (enlem,boylam)" full>
+              <input
+                className={field}
+                value={form.address.coords}
+                onChange={(e) =>
+                  setForm({ ...form, address: { ...form.address, coords: e.target.value } })
+                }
+                placeholder="36.238639,36.176806"
+              />
+            </Label>
+            <p className="text-xs text-muted sm:col-span-2">
+              Ondalık (36.238639,36.176806) ya da DMS (36°14&#39;19.1&quot;N 36°10&#39;36.5&quot;E)
+              girebilirsiniz; kaydederken ondalığa çevrilir.
+            </p>
             <Label t="Instagram">
               <input
                 className={field}
@@ -235,14 +249,14 @@ export function SettingsForm({
                 }
               />
             </Label>
-            <Label t="Koordinatlar (enlem,boylam)" full>
+            <Label t="Depo koordinatları (enlem,boylam)" full>
               <input
                 className={field}
                 value={form.warehouse.coords}
                 onChange={(e) =>
                   setForm({ ...form, warehouse: { ...form.warehouse, coords: e.target.value } })
                 }
-                placeholder="36.238639,36.176806"
+                placeholder="36.250556,36.181472"
               />
             </Label>
           </div>

@@ -25,11 +25,12 @@ test.describe('Genel site gezinme', () => {
 
   test('iletişim sayfası ofis + depo haritalarını gösterir', async ({ page }) => {
     await page.goto('/tr/iletisim');
+    await expect(page.getByText('İş yeri konumu').first()).toBeVisible();
     await expect(page.getByText('Depo konumu').first()).toBeVisible();
     const maps = page.locator('iframe[title*="konum"]');
-    await expect(maps).toHaveCount(2);
-    await expect(page.getByRole('link', { name: /Yol tarifi al/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Haritada aç/ })).toBeVisible();
+    await expect(maps).toHaveCount(3);
+    await expect(page.getByRole('link', { name: /Yol tarifi al/ }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Haritada aç/ }).first()).toBeVisible();
   });
 
   test('footerda dil seçici yok', async ({ page }) => {

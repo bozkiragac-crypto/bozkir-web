@@ -28,6 +28,92 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
+/** Bir konum bölümü: bilgi kartı (adres/koordinat/yol tarifi) + gömülü harita. */
+function LocationSection({
+  id,
+  eyebrow,
+  title,
+  description,
+  address,
+  coords,
+  mapTitle,
+  labels,
+}: {
+  id: string;
+  eyebrow: string;
+  title: string;
+  description?: string;
+  address?: string;
+  coords: string;
+  mapTitle: string;
+  labels: { coordinates: string; directions: string; openInMaps: string };
+}) {
+  if (!coords) return null;
+  return (
+    <section id={id} className="mt-20">
+      <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-stretch">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface p-8 md:p-10">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[color:var(--color-accent-soft)]/20 blur-3xl"
+          />
+          <div className="relative">
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background">
+              <MapPin className="h-5 w-5" />
+            </span>
+            <p className="text-eyebrow mt-6">{eyebrow}</p>
+            <h2 className="text-headline mt-3 text-3xl md:text-4xl">{title}</h2>
+            {description && (
+              <p className="mt-4 max-w-md leading-relaxed text-muted-strong">{description}</p>
+            )}
+            {address && (
+              <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-muted-strong">
+                <MapPin className="mt-0.5 h-4 w-4 flex-none" />
+                {address}
+              </p>
+            )}
+          </div>
+
+          <div className="relative mt-8 border-t border-border pt-6">
+            <p className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">
+              {labels.coordinates}
+            </p>
+            <p className="numerals mt-1 text-sm font-medium">{coords}</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(coords)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              >
+                <Navigation className="h-4 w-4" /> {labels.directions}
+              </a>
+              <a
+                href={`https://www.google.com/maps?q=${encodeURIComponent(coords)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium transition-colors hover:bg-surface-2"
+              >
+                <ExternalLink className="h-4 w-4" /> {labels.openInMaps}
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-border">
+          <iframe
+            title={mapTitle}
+            src={`https://www.google.com/maps?q=${encodeURIComponent(coords)}&output=embed`}
+            className="h-[320px] w-full lg:h-full"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default async function ContactPage({ params }: PageProps) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
@@ -35,17 +121,29 @@ export default async function ContactPage({ params }: PageProps) {
   const c = dict.pages.contact;
   const s = await getSiteSettings();
   const hours = pickLocaleText(s.hours, lang, s.hoursEn, s.hoursAr);
-  const depotCoords = s.warehouse.coords;
+  const officeCoords = s.address.coords.trim();
+  const depotCoords = s.warehouse.coords.trim();
+  const officeAddress = `${s.address.street}, ${s.address.postalCode} ${s.address.locality} / ${s.address.region}`;
+  const mapLabels = {
+    coordinates: c.coordinates,
+    directions: c.directions,
+    openInMaps: c.openInMaps,
+  };
 
   const items = [
     { icon: Phone, label: c.phone, value: s.phone, href: telHref(s.phone) },
-    { icon: Phone, label: c.warehouse, value: s.phone2, href: s.phone2 ? telHref(s.phone2) : undefined },
+    {
+      icon: Phone,
+      label: c.warehouse,
+      value: s.phone2,
+      href: s.phone2 ? telHref(s.phone2) : undefined,
+    },
     { icon: MessageCircle, label: c.whatsapp, value: c.whatsappValue, href: s.whatsapp },
     { icon: Mail, label: c.email, value: s.email, href: `mailto:${s.email}` },
     {
       icon: MapPin,
       label: c.address,
-      value: `${s.address.street}, ${s.address.postalCode} ${s.address.locality} / ${s.address.region}`,
+      value: officeAddress,
       href: undefined,
     },
     { icon: Clock, label: c.hours, value: hours, href: undefined },
@@ -53,15 +151,18 @@ export default async function ContactPage({ params }: PageProps) {
 
   return (
     <>
-      <BreadcrumbScript locale={lang} items={[{ name: c.crumbHome, path: '/' }, { name: c.crumb, path: '/iletisim' }]} />
+      <BreadcrumbScript
+        locale={lang}
+        items={[
+          { name: c.crumbHome, path: '/' },
+          { name: c.crumb, path: '/iletisim' },
+        ]}
+      />
       <PageHero
         eyebrow={c.heroEyebrow}
         title={c.heroTitle}
         description={c.heroDescription}
-        crumbs={[
-          { label: c.crumbHome, href: '/' },
-          { label: c.crumb },
-        ]}
+        crumbs={[{ label: c.crumbHome, href: '/' }, { label: c.crumb }]}
       />
 
       <Container className="pb-24 md:pb-32">
@@ -87,7 +188,11 @@ export default async function ContactPage({ params }: PageProps) {
                   {content}
                 </TrackedLink>
               ) : (
-                <a key={item.label} href={item.href} className="bg-surface p-7 transition-colors hover:bg-surface-2">
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="bg-surface p-7 transition-colors hover:bg-surface-2"
+                >
                   {content}
                 </a>
               )
@@ -117,7 +222,7 @@ export default async function ContactPage({ params }: PageProps) {
           <iframe
             title={c.mapTitle}
             src={`https://www.google.com/maps?q=${encodeURIComponent(
-              depotCoords || 'Güzelburç Mah Yunus Emre Cad No:10/C Antakya Hatay',
+              officeCoords || depotCoords || officeAddress,
             )}&output=embed`}
             className="h-[320px] w-full sm:h-[420px]"
             loading="lazy"
@@ -125,65 +230,27 @@ export default async function ContactPage({ params }: PageProps) {
           />
         </div>
 
-        {depotCoords && (
-          <section className="mt-20">
-            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-stretch">
-              <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface p-8 md:p-10">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[color:var(--color-accent-soft)]/20 blur-3xl"
-                />
-                <div className="relative">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background">
-                    <MapPin className="h-5 w-5" />
-                  </span>
-                  <p className="text-eyebrow mt-6">{c.depotTitle}</p>
-                  <h2 className="text-headline mt-3 text-3xl md:text-4xl">{c.depotTitle}</h2>
-                  <p className="mt-4 max-w-md leading-relaxed text-muted-strong">{c.depotDescription}</p>
-                  {s.warehouse.address && (
-                    <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-muted-strong">
-                      <MapPin className="mt-0.5 h-4 w-4 flex-none" />
-                      {s.warehouse.address}
-                    </p>
-                  )}
-                </div>
+        <LocationSection
+          id="is-yeri"
+          eyebrow={c.address}
+          title={c.officeTitle}
+          description={c.officeDescription}
+          address={officeAddress}
+          coords={officeCoords}
+          mapTitle={c.officeMapTitle}
+          labels={mapLabels}
+        />
 
-                <div className="relative mt-8 border-t border-border pt-6">
-                  <p className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">{c.coordinates}</p>
-                  <p className="numerals mt-1 text-sm font-medium">{depotCoords}</p>
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(depotCoords)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-                    >
-                      <Navigation className="h-4 w-4" /> {c.directions}
-                    </a>
-                    <a
-                      href={`https://www.google.com/maps?q=${encodeURIComponent(depotCoords)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium transition-colors hover:bg-surface-2"
-                    >
-                      <ExternalLink className="h-4 w-4" /> {c.openInMaps}
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div className="overflow-hidden rounded-2xl border border-border">
-                <iframe
-                  title={c.depotMapTitle}
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(depotCoords)}&output=embed`}
-                  className="h-[320px] w-full lg:h-full"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
-            </div>
-          </section>
-        )}
+        <LocationSection
+          id="depo"
+          eyebrow={c.warehouse}
+          title={c.depotTitle}
+          description={c.depotDescription}
+          address={s.warehouse.address}
+          coords={depotCoords}
+          mapTitle={c.depotMapTitle}
+          labels={mapLabels}
+        />
       </Container>
     </>
   );

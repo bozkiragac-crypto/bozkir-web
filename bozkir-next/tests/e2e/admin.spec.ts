@@ -42,11 +42,12 @@ test.describe('Admin CRUD (oturumlu)', () => {
     await expect(adminPage.getByText('Öğeler')).toBeVisible();
   });
 
-  test('ayarlar: çalışma saatleri ve depo alanları', async ({ adminPage }) => {
+  test('ayarlar: çalışma saatleri ve konum alanları', async ({ adminPage }) => {
     await adminPage.goto('/admin/ayarlar');
     await expect(adminPage.getByText('Çalışma saatleri (TR)')).toBeVisible();
     await expect(adminPage.getByText('Depo konumu')).toBeVisible();
-    await expect(adminPage.getByText('Koordinatlar')).toBeVisible();
+    await expect(adminPage.getByText('İş yeri koordinatları (enlem,boylam)')).toBeVisible();
+    await expect(adminPage.getByText('Depo koordinatları (enlem,boylam)')).toBeVisible();
   });
 
   test('içerik blokları düzenlenebilir', async ({ adminPage }) => {

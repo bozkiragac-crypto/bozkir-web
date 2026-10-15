@@ -6,6 +6,7 @@ import { siteSettings } from '@/lib/db/schema';
 import { requireOwner, logActivity } from '@/lib/admin/guard';
 import { SETTINGS_TAG, getSiteSettingsFresh, type SiteSettings } from '@/lib/data/settings';
 import { locales } from '@/i18n/config';
+import { parseCoords, formatLatLng } from '@/lib/geo';
 
 export async function saveSiteSettings(
   input: SiteSettings,
@@ -31,6 +32,7 @@ export async function saveSiteSettings(
       region: input.address.region.trim(),
       postalCode: input.address.postalCode.trim(),
       country: input.address.country.trim() || 'TR',
+      coords: (input.address.coords ?? '').trim(),
     },
     warehouse: {
       address: input.warehouse.address.trim(),
@@ -64,6 +66,12 @@ export async function saveSiteSettings(
     },
     cookiePolicyText: (input.cookiePolicyText ?? '').trim(),
   };
+
+  // Koordinatlar ondalık ya da DMS girilebilir; kaydederken "lat,lng"e normalize et.
+  const officeLL = parseCoords(value.address.coords);
+  if (officeLL) value.address.coords = formatLatLng(officeLL);
+  const depotLL = parseCoords(value.warehouse.coords);
+  if (depotLL) value.warehouse.coords = formatLatLng(depotLL);
 
   await db
     .insert(siteSettings)

@@ -21,6 +21,8 @@ export interface SiteSettings {
     region: string;
     postalCode: string;
     country: string;
+    /** İş yeri (ofis) koordinatı: "lat,lng". */
+    coords: string;
   };
   warehouse: {
     address: string;

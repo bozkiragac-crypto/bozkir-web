@@ -55,15 +55,17 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
     expect(res.headers()['x-content-type-options']).toBe('nosniff');
   });
 
-  test('iletişim haritaları işletme koordinatını kullanır', async ({ page }) => {
+  test('iletişim haritaları iki farklı konumu (iş yeri + depo) gösterir', async ({ page }) => {
     await gotoWithRetry(page, '/tr/iletisim');
-    const coord = '36.238639%2C36.176806';
     const maps = page.locator('iframe[src*="google.com/maps"]');
     await expect(maps.first()).toBeVisible();
     const sources = await maps.evaluateAll((els) => els.map((e) => (e as HTMLIFrameElement).src));
     expect(sources.length).toBeGreaterThanOrEqual(2);
-    for (const src of sources) expect(src).toContain(coord);
+    const joined = sources.join(' ');
+    expect(joined).toContain('36.238639%2C36.176806'); // iş yeri
+    expect(joined).toContain('36.250556%2C36.181472'); // depo
     await expect(page.getByText('36.238639,36.176806')).toBeVisible();
+    await expect(page.getByText('36.250556,36.181472')).toBeVisible();
   });
 
   test('footer çalışma saatlerini gösterir', async ({ page, isMobile }) => {

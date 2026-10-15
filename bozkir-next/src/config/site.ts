@@ -15,10 +15,13 @@ export const siteConfig = {
     region: 'Hatay',
     postalCode: '31030',
     country: 'TR',
+    /** İş yeri (ofis) koordinatı: 36°14'19.1"N 36°10'36.5"E. */
+    coords: '36.238639,36.176806',
   },
   warehouse: {
     address: '',
-    coords: '36.238639,36.176806',
+    /** Depo koordinatı: 36°15'02.0"N 36°10'53.3"E. */
+    coords: '36.250556,36.181472',
   },
   hours: 'Pazartesi – Cuma: 08:00 – 18:00 · Cumartesi: 08:00 – 14:00',
   hoursEn: 'Monday – Friday: 08:00 – 18:00 · Saturday: 08:00 – 14:00',
