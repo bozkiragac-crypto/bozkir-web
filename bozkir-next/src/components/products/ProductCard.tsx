@@ -19,6 +19,7 @@ export function ProductCard({
   priority?: boolean;
 }) {
   const [broken, setBroken] = useState(false);
+  const [brokenAlt, setBrokenAlt] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const { t } = useDictionary();
@@ -59,12 +60,13 @@ export function ProductCard({
                 className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105"
               />
               {/* 2. görsel yalnız hover/focus'ta yüklenir (bant genişliği tasarrufu). */}
-              {secondImage && hover ? (
+              {secondImage && hover && !brokenAlt ? (
                 <SmartImage
                   src={secondImage}
                   alt=""
                   fill
                   sizes="(max-width: 768px) 50vw, 25vw"
+                  onError={() => setBrokenAlt(true)}
                   className="object-cover opacity-0 transition-opacity duration-700 ease-[var(--ease-out-expo)] group-hover:opacity-100"
                 />
               ) : null}

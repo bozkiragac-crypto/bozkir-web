@@ -1,8 +1,12 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+/** SSR'da `useLayoutEffect` uyarısını önlemek için izomorfik sürüm. */
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export interface DropdownOption {
   value: string;
@@ -12,10 +16,11 @@ export interface DropdownOption {
 /**
  * Yumuşak köşeli, özel açılır seçici (native `<select>` yerine).
  *
- * Native select'in işletim sistemi popup'ı keskin köşeli ve tema dışı
- * kalabildiği için (özellikle Windows'ta metin okunmuyor), bu bileşen kendi
- * `<ul>`'unu `bg-surface text-foreground` ile render eder. Klavye (ok/Enter/Esc)
- * ve dış tıklama ile kapanma desteklenir.
+ * Liste, kırpılmayı önlemek için `document.body`'ye **portal** edilir ve
+ * `position: fixed` ile tetikleyicinin altına/üstüne konumlanır (yer yoksa
+ * yukarı açılır). Böylece `overflow` konteynerleri (tablo sarmalayıcıları vb.)
+ * listeyi kesmez; kaydırma gerekmez. Klavye (ok/Enter/Esc) ve dış tıklama
+ * ile kapanma desteklenir.
  */
 export function Dropdown({
   value,
@@ -40,22 +45,56 @@ export function Dropdown({
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const listId = useId();
   const sm = size === 'sm';
 
   const selectedIndex = options.findIndex((o) => o.value === value);
   const selected = options[selectedIndex < 0 ? 0 : selectedIndex];
 
-  useEffect(() => {
+  const update = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const gap = 8;
+    const estH = listRef.current?.offsetHeight || Math.min(options.length * 40 + 8, 320);
+    const spaceBelow = window.innerHeight - r.bottom - gap;
+    const openUp = spaceBelow < estH && r.top - gap > spaceBelow;
+    const width = Math.max(r.width, 192);
+    let left = align === 'start' ? r.left : r.right - width;
+    left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
+    const top = openUp ? Math.max(gap, r.top - estH - gap) : r.bottom + gap;
+    setPos({ top, left, width });
+  }, [align, options.length]);
+
+  useIsoLayoutEffect(() => {
     if (!open) return;
     setActive(selectedIndex < 0 ? 0 : selectedIndex);
+    update();
+    // Liste ölçüldükten sonra (flip kararı için) tekrar konumlandır.
+    const raf = requestAnimationFrame(update);
+    const onScroll = () => update();
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [open, selectedIndex, update]);
+
+  useEffect(() => {
+    if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t) || listRef.current?.contains(t)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
-  }, [open, selectedIndex]);
+  }, [open]);
 
   function choose(i: number) {
     const opt = options[i];
@@ -93,8 +132,9 @@ export function Dropdown({
   }
 
   return (
-    <div ref={ref} className={cn('relative inline-block', className)} onKeyDown={onKeyDown}>
+    <div className={cn('relative inline-block', className)} onKeyDown={onKeyDown}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={disabled}
@@ -119,41 +159,43 @@ export function Dropdown({
         />
       </button>
 
-      {open && (
-        <ul
-          id={listId}
-          role="listbox"
-          aria-label={ariaLabel}
-          className={cn(
-            'absolute top-full z-[120] mt-2 w-full min-w-[12rem] overflow-hidden rounded-2xl border border-border bg-surface p-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]',
-            'max-w-[calc(100vw-2rem)]',
-            align === 'start' ? 'start-0' : 'end-0',
-          )}
-        >
-          {options.map((opt, i) => {
-            const isSelected = opt.value === value;
-            return (
-              <li key={opt.value || '__all'} role="none">
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  onMouseEnter={() => setActive(i)}
-                  onClick={() => choose(i)}
-                  className={cn(
-                    'flex w-full items-center justify-between gap-3 rounded-xl text-start transition-colors',
-                    sm ? 'px-3 py-2 text-xs' : 'px-3.5 py-2.5 text-sm',
-                    i === active ? 'bg-surface-2' : 'hover:bg-surface-2',
-                  )}
-                >
-                  <span className="truncate">{opt.label}</span>
-                  {isSelected && <Check className="h-4 w-4 flex-none" aria-hidden />}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      {open &&
+        pos &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <ul
+            ref={listRef}
+            id={listId}
+            role="listbox"
+            aria-label={ariaLabel}
+            style={{ position: 'fixed', top: pos.top, left: pos.left, width: pos.width }}
+            className="z-[300] max-h-[min(20rem,60vh)] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-surface p-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]"
+          >
+            {options.map((opt, i) => {
+              const isSelected = opt.value === value;
+              return (
+                <li key={opt.value || '__all'} role="none">
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onMouseEnter={() => setActive(i)}
+                    onClick={() => choose(i)}
+                    className={cn(
+                      'flex w-full items-center justify-between gap-3 rounded-xl text-start transition-colors',
+                      sm ? 'px-3 py-2 text-xs' : 'px-3.5 py-2.5 text-sm',
+                      i === active ? 'bg-surface-2' : 'hover:bg-surface-2',
+                    )}
+                  >
+                    <span className="truncate">{opt.label}</span>
+                    {isSelected && <Check className="h-4 w-4 flex-none" aria-hidden />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>,
+          document.body,
+        )}
     </div>
   );
 }
