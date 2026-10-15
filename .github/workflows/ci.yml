@@ -56,7 +56,7 @@ jobs:
           POSTGRES_USER: bozkir
           POSTGRES_PASSWORD: bozkir
           POSTGRES_DB: bozkir
-        ports: ['5432:5432']
+        ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U bozkir" --health-interval 10s
           --health-timeout 5s --health-retries 10
@@ -64,8 +64,8 @@ jobs:
       DATABASE_URL: postgresql://bozkir:bozkir@localhost:5432/bozkir
       AUTH_SECRET: ci-e2e-secret-please-change-0123456789abcdef
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      S3_ENDPOINT: ''
-      QUOTE_RATE_LIMIT_MAX: '0'
+      S3_ENDPOINT: ""
+      QUOTE_RATE_LIMIT_MAX: "0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -77,7 +77,11 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Şema uygula + yönetici oluştur
         run: |
+          # CI postgres servisi boş başlar; taban şemayı önce uygula (compose'daki
+          # docker/initdb/01-schema.sql ile aynı, idempotent).
+          PGPASSWORD=bozkir psql -h localhost -U bozkir -d bozkir -v ON_ERROR_STOP=1 -f docker/initdb/01-schema.sql
           npm run db:migrate
+          node scripts/seed-e2e.mjs
           npm run admin:reset -- bozkir "Bozkir.1905"
       - name: Build
         run: npm run build

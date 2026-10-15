@@ -68,9 +68,11 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          // X-Content-Type-Options / Referrer-Policy / X-Frame-Options / HSTS
-          // nginx tarafından (deploy/nginx-security-headers.conf) tek noktadan
-          // eklenir; burada tekrarlanmaz. Yalnızca Next'e özgü başlıklar kalır.
+          // X-Content-Type-Options / Referrer-Policy / X-Frame-Options nginx
+          // tarafından (deploy/nginx-security-headers.conf) eklenir.
+          // HSTS hem nginx'te hem burada tanımlıdır: nginx'siz çalıştırmalarda
+          // (örn. CI E2E) da tutarlı olsun diye. Değerler nginx ile aynıdır.
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), xr-spatial-tracking=(self)',

@@ -59,7 +59,7 @@ test.describe('Admin CRUD: kategori & marka (oturumlu)', () => {
   test('kategoriler listesi ve yeni kategori formu', async ({ adminPage }) => {
     await adminPage.goto('/admin/kategoriler');
     await expect(adminPage.getByRole('heading', { name: 'Kategoriler' })).toBeVisible();
-    await expect(adminPage.locator('table')).toBeVisible();
+    await expect(adminPage.getByRole('table').first()).toBeVisible();
     await adminPage.getByRole('link', { name: /Yeni Kategori/ }).click();
     await expect(adminPage).toHaveURL(/\/admin\/kategoriler\/yeni/);
     await expect(adminPage.getByText('Vitrinde göster (öne çıkan)')).toBeVisible();

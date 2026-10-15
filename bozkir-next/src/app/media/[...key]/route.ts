@@ -9,7 +9,15 @@ export const dynamic = 'force-dynamic';
  * bu uç yalnızca yerel geliştirme/doğrudan erişimde devreye girer).
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ key: string[] }> }) {
-  if (!storageConfigured()) return new Response('depolama yapılandırılmadı', { status: 503 });
+  if (!storageConfigured()) {
+    return new Response('depolama yapılandırılmadı', {
+      status: 503,
+      headers: {
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+  }
 
   const { key } = await params;
   const path = (key ?? [])

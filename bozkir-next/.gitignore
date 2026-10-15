@@ -27,6 +27,13 @@ yarn-error.log*
 # migrasyon yedekleri
 /backups/
 
+# test çıktıları
+/test-results/
+/playwright-report/
+/.auth/
+/blob-report/
+/coverage/
+
 # typescript
 *.tsbuildinfo
 

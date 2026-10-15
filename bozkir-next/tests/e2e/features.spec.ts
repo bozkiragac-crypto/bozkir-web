@@ -16,9 +16,15 @@ test.describe('Yeni özellikler', () => {
     expect(res?.status()).toBeLessThan(400);
     await expect(page.locator('h1')).toBeVisible();
     await expect
-      .poll(async () => (await page.locator('script[type="application/ld+json"]').allTextContents()).some((t) => t.includes('FAQPage')), {
-        timeout: 10_000,
-      })
+      .poll(
+        async () =>
+          (await page.locator('script[type="application/ld+json"]').allTextContents()).some((t) =>
+            t.includes('FAQPage'),
+          ),
+        {
+          timeout: 10_000,
+        },
+      )
       .toBe(true);
   });
 
@@ -34,7 +40,9 @@ test.describe('Yeni özellikler', () => {
     }
   });
 
-  test('çerez onay bandı görünür, kabul edilince kaybolur ve tercih kaydedilir', async ({ page }) => {
+  test('çerez onay bandı görünür, kabul edilince kaybolur ve tercih kaydedilir', async ({
+    page,
+  }) => {
     await page.context().clearCookies();
     await page.goto('/tr', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => localStorage.removeItem('bozkir:consent'));
@@ -85,7 +93,7 @@ test.describe('Yeni özellikler', () => {
     expect(res?.status()).toBeLessThan(400);
 
     // Kategori içi arama formu var ve gönderimde `q` parametresi ekler.
-    const search = page.getByRole('textbox', { name: 'Arama' }).first();
+    const search = page.getByRole('searchbox', { name: 'Arama' }).first();
     await expect(search).toBeVisible();
     await search.fill('a');
     await search.press('Enter');
@@ -126,6 +134,11 @@ test.describe('Admin yeni özellikler', () => {
   test('toplu çeviri sayfası açılır', async ({ adminPage }) => {
     await adminPage.goto('/admin/ceviri', { waitUntil: 'domcontentloaded' });
     await expect(adminPage.getByRole('heading', { name: 'Toplu Çeviri' })).toBeVisible();
-    await expect(adminPage.getByText('Eksik çeviri yok', { exact: false }).or(adminPage.getByText('eksik', { exact: false })).first()).toBeVisible();
+    await expect(
+      adminPage
+        .getByText('Eksik çeviri yok', { exact: false })
+        .or(adminPage.getByText('eksik', { exact: false }))
+        .first(),
+    ).toBeVisible();
   });
 });
