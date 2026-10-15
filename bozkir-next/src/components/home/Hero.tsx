@@ -8,7 +8,7 @@ import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
-export function Hero() {
+export function Hero({ image }: { image?: string }) {
   const root = useRef<HTMLElement>(null);
   const { t } = useDictionary();
 
@@ -78,11 +78,10 @@ export function Hero() {
     >
       <div data-hero-parallax className="absolute inset-0 -z-20 will-change-transform">
         <div data-hero-media className="absolute inset-0">
-          {/* Not: Daha yüksek çözünürlüklü bir fotoğraf hazır olduğunda
-              public/images/hero-showroom.jpeg dosyasını ~2560px genişlikle
-              değiştirmek yeterli; kod değişikliği gerekmez. */}
+          {/* Arka plan görseli admin panelinden (Ayarlar → Ana sayfa) değiştirilebilir;
+              boşsa varsayılan görsel kullanılır. */}
           <Image
-            src="/images/hero-showroom.jpeg"
+            src={image || '/images/hero-showroom.jpeg'}
             alt=""
             fill
             priority

@@ -230,6 +230,14 @@ html[data-compare='1'] [data-product-cta] {
     outline-offset: 2px;
   }
 
+  /* Native dropdown seçenekleri her iki temada da okunur olsun. Koyu temada
+     `<select>` arka planı koyu kalırken tarayıcının açılır listesi açık
+     kalabildiği için (açık metin/açık zemin) option'ları açıkça renklendiriyoruz. */
+  select option {
+    background-color: var(--surface);
+    color: var(--fg);
+  }
+
   /* Koyu zeminlerde odak halkası açık renge döner. */
   [data-on-dark] :focus-visible {
     outline-color: var(--bg);

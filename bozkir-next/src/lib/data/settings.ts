@@ -46,6 +46,8 @@ export interface SiteSettings {
   seoDescription: string;
   /** OG görseli: tam URL veya /yol. */
   ogImage: string;
+  /** Ana sayfa (hero) arka plan görseli: tam URL veya /yol. Boşsa varsayılan kullanılır. */
+  heroImage: string;
   /** Public site bakım modunda mı (env MAINTENANCE_MODE yedek). */
   maintenance: boolean;
   /** Google Analytics ölçüm kimliği (G-XXXX). */
@@ -84,6 +86,7 @@ function defaults(): SiteSettings {
     seoTitle: '',
     seoDescription: '',
     ogImage: '',
+    heroImage: '',
     maintenance: false,
     gaMeasurementId: '',
     metaPixelId: '',
@@ -96,7 +99,11 @@ function defaults(): SiteSettings {
 const loadSettings = unstable_cache(
   async (): Promise<Partial<SiteSettings>> => {
     const db = getDb()!;
-    const rows = await db.select().from(siteSettings).where(eq(siteSettings.key, SETTINGS_KEY)).limit(1);
+    const rows = await db
+      .select()
+      .from(siteSettings)
+      .where(eq(siteSettings.key, SETTINGS_KEY))
+      .limit(1);
     return (rows[0]?.value as Partial<SiteSettings>) ?? {};
   },
   ['site-settings'],
@@ -135,7 +142,11 @@ export async function getSiteSettingsFresh(): Promise<SiteSettings> {
   if (!hasDb()) return base;
   try {
     const db = getDb()!;
-    const rows = await db.select().from(siteSettings).where(eq(siteSettings.key, SETTINGS_KEY)).limit(1);
+    const rows = await db
+      .select()
+      .from(siteSettings)
+      .where(eq(siteSettings.key, SETTINGS_KEY))
+      .limit(1);
     return merge(base, (rows[0]?.value as Partial<SiteSettings>) ?? {});
   } catch {
     return base;

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Save, ArrowUp, ArrowDown } from 'lucide-react';
 import { saveSiteSettings } from '@/lib/admin/safe-actions';
 import { useToast } from '@/components/ui/ToastProvider';
+import { ImageManager } from '@/components/admin/ImageManager';
 import type { SiteSettings } from '@/lib/data/settings';
 
 const field =
@@ -311,6 +312,23 @@ export function SettingsForm({
                 placeholder="/images/og-home.jpg"
               />
             </Label>
+          </div>
+        </div>
+
+        <div className={`${section} lg:col-span-2`}>
+          <p className="font-medium">Ana sayfa arka planı (hero)</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Sayfanın en üstündeki büyük arka plan görseli. Boş bırakılırsa varsayılan görsel
+            kullanılır. Ara sıra değiştirmek için yükleyin veya kaldırın.
+          </p>
+          <div className="mt-5">
+            <ImageManager
+              images={form.heroImage ? [form.heroImage] : []}
+              onChange={(next) => setForm({ ...form, heroImage: next[0] ?? '' })}
+              folder="content"
+              multiple={false}
+              label="Arka plan görseli"
+            />
           </div>
         </div>
 

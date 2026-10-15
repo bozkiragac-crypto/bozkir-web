@@ -1,7 +1,5 @@
 import type { ContentBlock } from '@/types/content';
-import { Container } from '@/components/ui/Container';
-import { SectionHeading } from '@/components/ui/SectionHeading';
-import { GalleryShowcase } from '@/components/home/GalleryShowcase';
+import { MaterialShowcase } from '@/components/home/MaterialShowcase';
 import { getProductsIndex, localizedCategoryName } from '@/lib/data/catalog';
 import { publicUrl } from '@/lib/storage/s3';
 import { fallbackCategories, primaryCategorySlugs } from '@/data/categories';
@@ -116,15 +114,12 @@ export async function MaterialGallery({ block, locale }: { block: ContentBlock; 
 
   return (
     <section id="vitrin" className="py-24 md:py-32" aria-label={h.galleryAria}>
-      <Container>
-        <SectionHeading
-          eyebrow={block.subtitle || h.showcase}
-          title={block.title}
-          body={block.body}
-        />
-      </Container>
-
-      <GalleryShowcase items={items} />
+      <MaterialShowcase
+        items={items}
+        eyebrow={block.subtitle || h.showcase}
+        title={block.title}
+        body={block.body}
+      />
 
       <script
         type="application/ld+json"

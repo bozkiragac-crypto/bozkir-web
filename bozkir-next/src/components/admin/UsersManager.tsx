@@ -157,7 +157,7 @@ function CreateForm({
         <label className="grid gap-1">
           <span className="text-xs uppercase tracking-[0.14em] text-muted">Rol</span>
           <select
-            className={field}
+            className={`${field} text-foreground`}
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value as 'owner' | 'editor' })}
           >
@@ -237,7 +237,7 @@ function UserRow({
         </td>
         <td className="p-4">
           <select
-            className={field}
+            className={`${field} text-foreground`}
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value as 'owner' | 'editor' })}
           >

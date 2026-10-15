@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Expand, ArrowUpRight } from 'lucide-react';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { ImageLightbox, type LightboxItem } from '@/components/ui/ImageLightbox';
@@ -26,25 +26,22 @@ const RATIOS = ['aspect-[4/5]', 'aspect-square', 'aspect-square', 'aspect-[3/4]'
 
 /**
  * "Malzeme Vitrini" — editoryal mozaik (CSS columns).
- * Değişken oranlı tile'lar, hover'da zoom + beliren caption, kategori çipleriyle
- * filtreleme, lightbox ve "tümünü gör" CTA'sı.
+ * Değişken oranlı tile'lar, hover'da zoom + beliren caption, lightbox ve
+ * "tümünü gör" CTA'sı. Kategori filtresi (dropdown) başlık hizasında,
+ * `MaterialShowcase` tarafından yönetilir.
  */
 export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) {
   const items = allItems.slice(0, MAX_ITEMS);
   const count = items.length;
   const { t } = useDictionary();
   const [lightbox, setLightbox] = useState<number | null>(null);
-  const [filter, setFilter] = useState('');
-
-  const tags = useMemo(() => Array.from(new Set(items.map((i) => i.tag).filter(Boolean))), [items]);
-  const shown = filter ? items.filter((i) => i.tag === filter) : items;
 
   if (count === 0) return null;
 
   const hrefOf = (item: ShowcaseItem) =>
     item.href ?? (item.tag ? `/urunler?q=${encodeURIComponent(item.tag)}` : '/urunler');
 
-  const lightboxItems: LightboxItem[] = shown.map((item) => ({
+  const lightboxItems: LightboxItem[] = items.map((item) => ({
     url: item.url,
     alt: item.title,
     title: item.title,
@@ -52,36 +49,10 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
     href: hrefOf(item),
   }));
 
-  const chipClass = (active: boolean) =>
-    cn(
-      'rounded-full border px-4 py-2.5 text-xs font-medium transition-colors',
-      active
-        ? 'border-transparent bg-foreground text-background'
-        : 'border-border text-muted-strong hover:border-foreground hover:text-foreground',
-    );
-
   return (
     <>
-      {tags.length > 1 && (
-        <Container className="mt-10 flex flex-wrap items-center gap-2">
-          <button type="button" onClick={() => setFilter('')} className={chipClass(!filter)}>
-            {t('catalog.all')}
-          </button>
-          {tags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => setFilter(tag)}
-              className={chipClass(filter === tag)}
-            >
-              {tag}
-            </button>
-          ))}
-        </Container>
-      )}
-
       <ul className="mt-6 columns-2 gap-3 md:mt-8 md:columns-3 md:gap-4 lg:columns-4">
-        {shown.map((item, i) => (
+        {items.map((item, i) => (
           <Reveal
             as="li"
             key={item.id}

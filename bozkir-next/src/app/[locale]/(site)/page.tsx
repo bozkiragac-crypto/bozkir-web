@@ -116,7 +116,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           }}
         />
       )}
-      <Hero />
+      <Hero image={settings.heroImage || undefined} />
       <CampaignSlider campaigns={campaigns} />
       <MaterialStory categories={categories} />
       <ProductShowcase categories={categories} locale={lang} />

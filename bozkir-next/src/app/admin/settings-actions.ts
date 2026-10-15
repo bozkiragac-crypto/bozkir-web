@@ -50,6 +50,7 @@ export async function saveSiteSettings(
     seoTitle: (input.seoTitle ?? '').trim(),
     seoDescription: (input.seoDescription ?? '').trim(),
     ogImage: (input.ogImage ?? '').trim(),
+    heroImage: (input.heroImage ?? '').trim(),
     maintenance: !!input.maintenance,
     gaMeasurementId: (input.gaMeasurementId ?? '').trim(),
     metaPixelId: (input.metaPixelId ?? '').trim(),
