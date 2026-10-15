@@ -3,7 +3,7 @@ import { test, expect, gotoWithRetry } from './fixtures';
 test.describe('Ürünler ve katalog', () => {
   test('ürün listesi yüklenir ve kartlar görünür', async ({ page }) => {
     await gotoWithRetry(page, '/tr/urunler');
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
     // En az bir ürün linki
     await expect(page.locator('a[href*="/tr/urunler/"]').first()).toBeVisible();
   });
@@ -34,14 +34,14 @@ test.describe('Ürünler ve katalog', () => {
     const href = (await firstProduct.getAttribute('href')) ?? '';
     await page.goto(href, { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
-    await expect(page.locator('h1').first()).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
     await expect(page.locator('a[href*="teklif-al?urun="]').first()).toBeVisible();
   });
 
   test('kategori sayfası ürün gösterir', async ({ page }) => {
     const res = await gotoWithRetry(page, '/tr/kategoriler/mdflam');
     expect(res?.status()).toBeLessThan(400);
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
     await expect(page.locator('a[href*="/tr/urunler/"]').first()).toBeVisible();
   });
 

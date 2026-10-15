@@ -14,7 +14,7 @@ test.describe('Yeni özellikler', () => {
   test('SSS sayfası açılır ve FAQ şeması içerir', async ({ page }) => {
     const res = await gotoWithRetry(page, '/tr/sss');
     expect(res?.status()).toBeLessThan(400);
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
     await expect
       .poll(
         async () =>

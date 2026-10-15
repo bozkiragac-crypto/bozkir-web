@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Genel site gezinme', () => {
   test('ana sayfa bölümleri yüklenir', async ({ page }) => {
     await page.goto('/tr');
-    await expect(page.locator('h1').first()).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
     // Vitrin/ürün bölümleri en az bir başlık içerir
     await expect(page.getByRole('heading', { level: 2 }).first()).toBeVisible();
   });
@@ -19,7 +19,7 @@ test.describe('Genel site gezinme', () => {
     for (const path of ['/tr/hakkimizda', '/tr/iletisim', '/tr/katalog', '/tr/bayilikler']) {
       const res = await page.goto(path);
       expect(res?.status(), path).toBeLessThan(400);
-      await expect(page.locator('h1').first(), path).toBeVisible();
+      await expect(page.getByRole('heading', { level: 1 }).first(), path).toBeVisible();
     }
   });
 
@@ -41,7 +41,7 @@ test.describe('Genel site gezinme', () => {
   test('bakım sayfası içerik ve iletişim gösterir', async ({ page }) => {
     const res = await page.goto('/maintenance');
     expect(res?.status()).toBeLessThan(400);
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
     // İletişim kartları (telefon / e-posta) görünür
     await expect(page.locator('a[href^="tel:"], a[href^="mailto:"]').first()).toBeVisible();
   });

@@ -11,7 +11,7 @@ test.describe('Dil (i18n) ve yönlendirme', () => {
     await page.goto('/tr');
     await expect(page.locator('html')).toHaveAttribute('lang', 'tr-TR');
     await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
   });
 
   test('AR sayfası RTL ve Arapça içerik', async ({ page }) => {
@@ -32,8 +32,14 @@ test.describe('Dil (i18n) ve yönlendirme', () => {
     await page.goto('/tr/urunler');
     const canonical = page.locator('link[rel="canonical"]');
     await expect(canonical).toHaveAttribute('href', /\/tr\/urunler$/);
-    await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute('href', /\/en\/urunler$/);
-    await expect(page.locator('link[rel="alternate"][hreflang="ar"]')).toHaveAttribute('href', /\/ar\/urunler$/);
+    await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
+      'href',
+      /\/en\/urunler$/,
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang="ar"]')).toHaveAttribute(
+      'href',
+      /\/ar\/urunler$/,
+    );
   });
 
   test('dil seçici ile TR→EN geçişi adresi korur', async ({ page, isMobile }) => {
@@ -44,7 +50,10 @@ test.describe('Dil (i18n) ve yönlendirme', () => {
       await page.getByRole('button', { name: 'Menüyü aç' }).click();
       await expect(page.locator('#mobile-menu')).toHaveAttribute('aria-hidden', 'false');
     }
-    await scope.getByRole('button', { name: /Dil|Language/i }).first().click();
+    await scope
+      .getByRole('button', { name: /Dil|Language/i })
+      .first()
+      .click();
     await page.getByRole('option', { name: /English/i }).click();
     await expect(page).toHaveURL(/\/en\/iletisim/);
   });

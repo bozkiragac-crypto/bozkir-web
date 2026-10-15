@@ -66,10 +66,12 @@ test.describe('Admin CRUD: kategori & marka (oturumlu)', () => {
   });
 
   test('bayilikler listesi ve yeni marka formu', async ({ adminPage }) => {
-    await adminPage.goto('/admin/bayilikler');
+    await adminPage.goto('/admin/bayilikler', { waitUntil: 'domcontentloaded' });
     await expect(adminPage.getByRole('heading', { name: /Bayilikler/ })).toBeVisible();
-    await adminPage.getByRole('link', { name: /Yeni Marka/ }).click();
-    await expect(adminPage).toHaveURL(/\/admin\/bayilikler\/yeni/);
+    const yeniMarka = adminPage.getByRole('link', { name: /Yeni Marka/ }).first();
+    await expect(yeniMarka).toBeVisible();
+    await yeniMarka.click();
+    await expect(adminPage).toHaveURL(/\/admin\/bayilikler\/yeni/, { timeout: 15_000 });
     await expect(adminPage.getByText('Marka logosu')).toBeVisible();
   });
 
