@@ -32,7 +32,7 @@ export function Select({
       <select
         {...rest}
         className={cn(
-          'w-full appearance-none border border-border bg-transparent text-foreground outline-none transition-colors focus-visible:border-foreground disabled:opacity-50',
+          'w-full appearance-none border border-border text-foreground outline-none transition-colors focus-visible:border-foreground disabled:opacity-50',
           sm ? 'h-9 pe-8 ps-3 text-xs' : 'h-11 pe-10 ps-4 text-sm',
           shape === 'pill' ? 'rounded-full' : 'rounded-md',
           selectClassName,

@@ -37,7 +37,7 @@ const nextConfig = {
   // Kökte ikinci bir lockfile olduğu için workspace kökünü sabitler.
   outputFileTracingRoot: __dirname,
   images: {
-    formats: ['image/avif', 'image/webp'],
+    formats: ['image/webp'],
     // İzinli kalite değerleri (varsayılan 75 dahil; hero için 80 kullanılır).
     qualities: [75, 80],
     // Gerçek grid/hero genişliklerine göre daraltıldı (gereksiz varyant üretimini azaltır).

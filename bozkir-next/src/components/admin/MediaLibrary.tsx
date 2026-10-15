@@ -7,6 +7,7 @@ import { Trash2, Upload, Search, CheckCircle2 } from 'lucide-react';
 import { deleteMediaKey, uploadMedia } from '@/lib/admin/safe-actions';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Select } from '@/components/ui/Select';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 export interface MediaItem {
   key: string;
@@ -109,17 +110,14 @@ export function MediaLibrary({
           <p className="mt-1 text-sm text-muted-strong">{total} görsel · depolama: SeaweedFS</p>
         </div>
         <div className="flex items-center gap-2">
-          <Select
+          <Dropdown
+            className="min-w-[9rem]"
+            ariaLabel="Yükleme klasörü"
+            align="end"
             value={uploadFolder}
-            onChange={(e) => setUploadFolder(e.target.value as MediaFolder)}
-            aria-label="Yükleme klasörü"
-          >
-            {folders.map((f) => (
-              <option key={f} value={f}>
-                {folderLabel(f)}
-              </option>
-            ))}
-          </Select>
+            onChange={(v) => setUploadFolder(v as MediaFolder)}
+            options={folders.map((f) => ({ value: f, label: folderLabel(f) }))}
+          />
           <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90">
             <Upload className="h-4 w-4" />
             {busy ? 'Yükleniyor...' : 'Yükle'}

@@ -13,9 +13,9 @@ export interface DropdownOption {
  * Yumuşak köşeli, özel açılır seçici (native `<select>` yerine).
  *
  * Native select'in işletim sistemi popup'ı keskin köşeli ve tema dışı
- * kalabildiği için vitrin filtresi gibi ince alanlarda bu bileşen kullanılır.
- * Trigger ve liste `rounded-full`/`rounded-2xl`; klavye (ok/Enter/Esc) ve
- * dış tıklama ile kapanma desteklenir.
+ * kalabildiği için (özellikle Windows'ta metin okunmuyor), bu bileşen kendi
+ * `<ul>`'unu `bg-surface text-foreground` ile render eder. Klavye (ok/Enter/Esc)
+ * ve dış tıklama ile kapanma desteklenir.
  */
 export function Dropdown({
   value,
@@ -24,6 +24,9 @@ export function Dropdown({
   ariaLabel,
   className,
   align = 'end',
+  size = 'md',
+  triggerClassName,
+  disabled = false,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -31,11 +34,15 @@ export function Dropdown({
   ariaLabel: string;
   className?: string;
   align?: 'start' | 'end';
+  size?: 'sm' | 'md';
+  triggerClassName?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const listId = useId();
+  const sm = size === 'sm';
 
   const selectedIndex = options.findIndex((o) => o.value === value);
   const selected = options[selectedIndex < 0 ? 0 : selectedIndex];
@@ -90,16 +97,22 @@ export function Dropdown({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
         aria-label={ariaLabel}
-        className="flex h-11 w-full items-center justify-between gap-3 rounded-full border border-border bg-transparent ps-4 pe-3 text-sm text-foreground transition-colors hover:bg-surface-2 focus-visible:border-foreground"
+        className={cn(
+          'flex w-full items-center justify-between gap-3 rounded-full border border-border text-foreground transition-colors hover:bg-surface-2 focus-visible:border-foreground disabled:opacity-50',
+          sm ? 'h-9 ps-3 pe-2.5 text-xs' : 'h-11 ps-4 pe-3 text-sm',
+          triggerClassName,
+        )}
       >
         <span className="truncate">{selected?.label}</span>
         <ChevronDown
           className={cn(
-            'h-4 w-4 flex-none text-muted transition-transform duration-200',
+            'flex-none text-muted transition-transform duration-200',
+            sm ? 'h-3.5 w-3.5' : 'h-4 w-4',
             open && 'rotate-180',
           )}
           aria-hidden
@@ -128,7 +141,8 @@ export function Dropdown({
                   onMouseEnter={() => setActive(i)}
                   onClick={() => choose(i)}
                   className={cn(
-                    'flex w-full items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-start text-sm transition-colors',
+                    'flex w-full items-center justify-between gap-3 rounded-xl text-start transition-colors',
+                    sm ? 'px-3 py-2 text-xs' : 'px-3.5 py-2.5 text-sm',
                     i === active ? 'bg-surface-2' : 'hover:bg-surface-2',
                   )}
                 >

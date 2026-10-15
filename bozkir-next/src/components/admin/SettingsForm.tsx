@@ -7,6 +7,7 @@ import { saveSiteSettings } from '@/lib/admin/safe-actions';
 import { useToast } from '@/components/ui/ToastProvider';
 import { ImageManager } from '@/components/admin/ImageManager';
 import { Select } from '@/components/ui/Select';
+import { Dropdown } from '@/components/ui/Dropdown';
 import type { SiteSettings } from '@/lib/data/settings';
 
 const field =
@@ -262,19 +263,18 @@ export function SettingsForm({
               <span className="text-sm">Popup&apos;ı etkinleştir</span>
             </label>
             <Label t="Gösterilecek kampanya" full>
-              <Select
-                shape="rounded"
-                selectClassName="h-11 bg-surface"
+              <Dropdown
+                className="w-full"
+                ariaLabel="Gösterilecek kampanya"
+                align="start"
+                triggerClassName="bg-surface"
                 value={form.popupCampaignId}
-                onChange={(e) => setForm({ ...form, popupCampaignId: e.target.value })}
-              >
-                <option value="">İlk aktif kampanya</option>
-                {campaigns.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </Select>
+                onChange={(v) => setForm({ ...form, popupCampaignId: v })}
+                options={[
+                  { value: '', label: 'İlk aktif kampanya' },
+                  ...campaigns.map((c) => ({ value: c.id, label: c.title })),
+                ]}
+              />
             </Label>
           </div>
         </div>
