@@ -28,7 +28,7 @@ test.describe('Genel site gezinme', () => {
     await expect(page.getByText('İş yeri konumu').first()).toBeVisible();
     await expect(page.getByText('Depo konumu').first()).toBeVisible();
     const maps = page.locator('iframe[title*="konum"]');
-    await expect(maps).toHaveCount(3);
+    await expect(maps).toHaveCount(2);
     await expect(page.getByRole('link', { name: /Yol tarifi al/ }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: /Haritada aç/ }).first()).toBeVisible();
   });

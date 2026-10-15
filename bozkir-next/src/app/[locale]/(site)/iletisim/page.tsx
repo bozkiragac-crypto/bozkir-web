@@ -10,6 +10,7 @@ import { isLocale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { pickLocaleText } from '@/lib/data/catalog';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
+import { cn } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -28,9 +29,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
-/** Bir konum bölümü: bilgi kartı (adres/koordinat/yol tarifi) + gömülü harita. */
+/** Bir konum bölümü: numaralı başlık + adres/koordinat + zengin harita. */
 function LocationSection({
   id,
+  index,
   eyebrow,
   title,
   description,
@@ -38,8 +40,10 @@ function LocationSection({
   coords,
   mapTitle,
   labels,
+  reverse = false,
 }: {
   id: string;
+  index: number;
   eyebrow: string;
   title: string;
   description?: string;
@@ -47,64 +51,71 @@ function LocationSection({
   coords: string;
   mapTitle: string;
   labels: { coordinates: string; directions: string; openInMaps: string };
+  reverse?: boolean;
 }) {
   if (!coords) return null;
   return (
-    <section id={id} className="mt-20">
-      <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-stretch">
-        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface p-8 md:p-10">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[color:var(--color-accent-soft)]/20 blur-3xl"
-          />
-          <div className="relative">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-background">
-              <MapPin className="h-5 w-5" />
+    <section id={id} className="mt-16 md:mt-24">
+      <div
+        className={cn(
+          'grid items-center gap-8 lg:grid-cols-2 lg:gap-12',
+          reverse && 'lg:[&>*:first-child]:order-2',
+        )}
+      >
+        <div className="relative">
+          <div className="flex items-center gap-4">
+            <span className="numerals text-xs tracking-[0.2em] text-muted">
+              {String(index).padStart(2, '0')}
             </span>
-            <p className="text-eyebrow mt-6">{eyebrow}</p>
-            <h2 className="text-headline mt-3 text-3xl md:text-4xl">{title}</h2>
-            {description && (
-              <p className="mt-4 max-w-md leading-relaxed text-muted-strong">{description}</p>
-            )}
-            {address && (
-              <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-muted-strong">
-                <MapPin className="mt-0.5 h-4 w-4 flex-none" />
-                {address}
-              </p>
-            )}
+            <span className="h-px w-10 bg-border" aria-hidden />
+            <span className="text-eyebrow">{eyebrow}</span>
           </div>
 
-          <div className="relative mt-8 border-t border-border pt-6">
-            <p className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">
-              {labels.coordinates}
+          <h2 className="text-headline mt-5 text-3xl md:text-4xl">{title}</h2>
+          {description && (
+            <p className="mt-4 max-w-md leading-relaxed text-muted-strong">{description}</p>
+          )}
+          {address && (
+            <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-muted-strong">
+              <MapPin className="mt-0.5 h-4 w-4 flex-none" aria-hidden />
+              {address}
             </p>
-            <p className="numerals mt-1 text-sm font-medium">{coords}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
+          )}
+
+          <div className="mt-7 inline-flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-surface px-5 py-4 shadow-[0_20px_50px_-40px_rgba(0,0,0,0.5)]">
+            <div>
+              <p className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">
+                {labels.coordinates}
+              </p>
+              <p className="numerals mt-0.5 text-sm font-medium">{coords}</p>
+            </div>
+            <span className="mx-1 hidden h-9 w-px bg-border sm:block" aria-hidden />
+            <div className="flex flex-wrap gap-2">
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(coords)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-foreground px-4 text-sm font-medium text-background transition-opacity hover:opacity-90"
               >
-                <Navigation className="h-4 w-4" /> {labels.directions}
+                <Navigation className="h-4 w-4" aria-hidden /> {labels.directions}
               </a>
               <a
                 href={`https://www.google.com/maps?q=${encodeURIComponent(coords)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium transition-colors hover:bg-surface-2"
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium transition-colors hover:bg-surface-2"
               >
-                <ExternalLink className="h-4 w-4" /> {labels.openInMaps}
+                <ExternalLink className="h-4 w-4" aria-hidden /> {labels.openInMaps}
               </a>
             </div>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border">
+        <div className="relative overflow-hidden rounded-3xl border border-border shadow-[var(--card-shadow)]">
           <iframe
             title={mapTitle}
             src={`https://www.google.com/maps?q=${encodeURIComponent(coords)}&output=embed`}
-            className="h-[320px] w-full lg:h-full"
+            className="h-[320px] w-full sm:h-[400px] lg:h-[460px]"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />
@@ -218,20 +229,9 @@ export default async function ContactPage({ params }: PageProps) {
           </TrackedLink>
         </div>
 
-        <div className="mt-16 overflow-hidden rounded-lg border border-border">
-          <iframe
-            title={c.mapTitle}
-            src={`https://www.google.com/maps?q=${encodeURIComponent(
-              officeCoords || depotCoords || officeAddress,
-            )}&output=embed`}
-            className="h-[320px] w-full sm:h-[420px]"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </div>
-
         <LocationSection
           id="is-yeri"
+          index={1}
           eyebrow={c.address}
           title={c.officeTitle}
           description={c.officeDescription}
@@ -243,6 +243,8 @@ export default async function ContactPage({ params }: PageProps) {
 
         <LocationSection
           id="depo"
+          index={2}
+          reverse
           eyebrow={c.warehouse}
           title={c.depotTitle}
           description={c.depotDescription}
