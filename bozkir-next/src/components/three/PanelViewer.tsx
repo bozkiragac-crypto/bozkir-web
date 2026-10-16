@@ -44,13 +44,22 @@ interface PanelViewerProps {
   dprMax?: number;
 }
 
-const CAMERA_POS: [number, number, number] = [0, 0.25, 5.2];
-const SURFACE_POS: [number, number, number] = [0, 0.1, 4.2];
 const WIDTH = 3;
 const HEIGHT = 1.95;
 const THICKNESS = 0.16;
 const SURFACE_T = 0.022;
 const EDGE_COLOR = '#3a2f22';
+
+/** Kamera ve model yönelimi: kesit (yandan açılı) vs yüzey (tam cephe). */
+const VIEW_CAM: Record<PanelView, [number, number, number]> = {
+  section: [-3.15, 0.85, 3.1],
+  surface: [0, 0.05, 3.9],
+};
+const VIEW_ROT: Record<PanelView, [number, number, number]> = {
+  section: [-0.05, -0.62, 0],
+  surface: [0, 0, 0],
+};
+const ZERO = new THREE.Vector3(0, 0, 0);
 
 /** Prosedürel doku (dosyasız): renk ve mikro pürüzlülük haritası. */
 function makeTexture(
@@ -81,7 +90,6 @@ function drawFiberCore(ctx: CanvasRenderingContext2D, size: number) {
     ctx.fillStyle = `rgba(${v},${v - 8},${v - 22},0.5)`;
     ctx.fillRect(Math.random() * size, Math.random() * size, 1, 1);
   }
-  // Hafif kısa lif kırıntıları (yönsüz).
   for (let i = 0; i < size * 0.6; i++) {
     const x = Math.random() * size;
     const y = Math.random() * size;
@@ -205,8 +213,8 @@ function usePanelResources(): PanelResources {
   return res;
 }
 
-/** Katmanlı panel: kaplama + öz + kaplama. Öz/yüzey bitişe göre değişir. */
-function PanelModel({ finish }: { finish: PanelFinish }) {
+/** Katmanlı panel: kaplama + öz + kaplama. Öz/yüzey ve yönelim bitiş/görünüme göre değişir. */
+function PanelModel({ finish, view }: { finish: PanelFinish; view: PanelView }) {
   const { surfaceSmooth, surfaceRaw, coreMdf, coreParticle } = usePanelResources();
   const targetColor = useMemo(() => new THREE.Color(finish.color), [finish.color]);
   const group = useRef<THREE.Group>(null);
@@ -234,8 +242,13 @@ function PanelModel({ finish }: { finish: PanelFinish }) {
       );
     }
     if (group.current) {
-      group.current.position.y = Math.sin(state.clock.elapsedTime * 0.7) * 0.025;
-      group.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.4) * 0.012;
+      const t = state.clock.elapsedTime;
+      const rot = VIEW_ROT[view];
+      const g = group.current;
+      g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, rot[0], 0.1) + Math.sin(t * 0.4) * 0.004;
+      g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, rot[1], 0.1);
+      g.rotation.z = THREE.MathUtils.lerp(g.rotation.z, rot[2], 0.1) + Math.sin(t * 0.4) * 0.01;
+      g.position.y = Math.sin(t * 0.7) * 0.02;
     }
   });
 
@@ -243,7 +256,7 @@ function PanelModel({ finish }: { finish: PanelFinish }) {
   const coreDepth = THICKNESS - SURFACE_T * 2;
 
   return (
-    <group ref={group} rotation={[0.05, -0.5, 0]}>
+    <group ref={group} rotation={VIEW_ROT.section}>
       <RoundedBox
         args={[WIDTH, HEIGHT, SURFACE_T]}
         radius={0.008}
@@ -274,22 +287,28 @@ function PanelModel({ finish }: { finish: PanelFinish }) {
   );
 }
 
-/** Kamera ön ayarı + sıfırlama sinyali. */
-function CameraController({ view, signal }: { view: PanelView; signal: number }) {
+/** Kamera ön ayarı: görünüme göre hedefe yumuşak geçiş + sıfırlama. */
+function CameraRig({ view, signal }: { view: PanelView; signal: number }) {
   const camera = useThree((s) => s.camera);
   const controls = useThree((s) => s.controls) as {
     target: THREE.Vector3;
     update: () => void;
   } | null;
+  const target = useRef(new THREE.Vector3(...VIEW_CAM[view]));
 
   useEffect(() => {
-    const target = view === 'surface' ? SURFACE_POS : CAMERA_POS;
-    camera.position.set(...target);
-    if (controls) {
-      controls.target.set(0, 0, 0);
-      controls.update();
+    target.current.set(...VIEW_CAM[view]);
+  }, [view, signal]);
+
+  useFrame(() => {
+    if (camera.position.distanceToSquared(target.current) > 1e-4) {
+      camera.position.lerp(target.current, 0.12);
+      if (controls) {
+        controls.target.lerp(ZERO, 0.12);
+        controls.update();
+      }
     }
-  }, [view, signal, camera, controls]);
+  });
 
   return null;
 }
@@ -332,7 +351,7 @@ export function PanelViewer({
       <Canvas
         dpr={[1, dprMax]}
         frameloop={active ? 'always' : 'never'}
-        camera={{ position: CAMERA_POS, fov: 32 }}
+        camera={{ position: VIEW_CAM.section, fov: 32 }}
         performance={{ min: 0.6 }}
         gl={{
           antialias: true,
@@ -347,7 +366,7 @@ export function PanelViewer({
         <directionalLight position={[3, 4, 5]} intensity={1.6} />
         <directionalLight position={[-4, -2, -3]} intensity={0.45} color="#b3a98f" />
 
-        <PanelModel finish={finish} />
+        <PanelModel finish={finish} view={view} />
 
         <ContactShadows
           position={[0, -1.35, 0]}
@@ -394,17 +413,17 @@ export function PanelViewer({
           enableDamping
           dampingFactor={0.08}
           enablePan={false}
-          minDistance={3}
+          minDistance={2.6}
           maxDistance={7.5}
-          minPolarAngle={Math.PI / 3.1}
-          maxPolarAngle={Math.PI / 1.7}
-          autoRotate={autoRotate}
+          minPolarAngle={Math.PI / 3.4}
+          maxPolarAngle={Math.PI / 1.75}
+          autoRotate={autoRotate && view === 'section'}
           autoRotateSpeed={0.6}
           rotateSpeed={0.55}
           zoomSpeed={0.6}
         />
 
-        <CameraController view={view} signal={localReset + resetSignal} />
+        <CameraRig view={view} signal={localReset + resetSignal} />
       </Canvas>
     </div>
   );
