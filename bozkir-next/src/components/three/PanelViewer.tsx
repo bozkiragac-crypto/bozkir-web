@@ -287,7 +287,8 @@ function PanelModel({ finish, view }: { finish: PanelFinish; view: PanelView }) 
   );
 }
 
-/** Kamera ön ayarı: görünüme göre hedefe yumuşak geçiş + sıfırlama. */
+/** Kamera ön ayarı: görünüm/sıfırlama değişiminde TEK ATIŞ geçiş yapar,
+    sonra kamerayı OrbitControls'a bırakır (sürükle-döndür + autoRotate serbest). */
 function CameraRig({ view, signal }: { view: PanelView; signal: number }) {
   const camera = useThree((s) => s.camera);
   const controls = useThree((s) => s.controls) as {
@@ -295,18 +296,23 @@ function CameraRig({ view, signal }: { view: PanelView; signal: number }) {
     update: () => void;
   } | null;
   const target = useRef(new THREE.Vector3(...VIEW_CAM[view]));
+  const animating = useRef(false);
 
   useEffect(() => {
     target.current.set(...VIEW_CAM[view]);
+    animating.current = true;
   }, [view, signal]);
 
   useFrame(() => {
-    if (camera.position.distanceToSquared(target.current) > 1e-4) {
-      camera.position.lerp(target.current, 0.12);
-      if (controls) {
-        controls.target.lerp(ZERO, 0.12);
-        controls.update();
-      }
+    if (!animating.current) return;
+    camera.position.lerp(target.current, 0.15);
+    if (controls) {
+      controls.target.lerp(ZERO, 0.15);
+      controls.update();
+    }
+    if (camera.position.distanceToSquared(target.current) < 1e-3) {
+      camera.position.copy(target.current);
+      animating.current = false;
     }
   });
 
