@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { ContactShadows, Environment, Lightformer, OrbitControls, RoundedBox } from '@react-three/drei';
+import {
+  ContactShadows,
+  Environment,
+  Lightformer,
+  OrbitControls,
+  RoundedBox,
+} from '@react-three/drei';
 import * as THREE from 'three';
 
 export interface PanelFinish {
@@ -17,6 +23,10 @@ interface PanelViewerProps {
   finish: PanelFinish;
   /** Görünür değilken render döngüsünü durdurur (performans). */
   active?: boolean;
+  /** Otomatik döndürme açık mı. */
+  autoRotate?: boolean;
+  /** Dışarıdan artırıldığında kamerayı başlangıca döndürür. */
+  resetSignal?: number;
   /** Cihaz başına piksel oranı üst sınırı (mobilde düşürülür). */
   dprMax?: number;
 }
@@ -28,7 +38,11 @@ const THICKNESS = 0.16;
 const SURFACE = 0.022;
 
 /** Prosedürel doku (dosyasız): renk ve mikro pürüzlülük haritası. */
-function makeTexture(size: number, draw: (ctx: CanvasRenderingContext2D, s: number) => void, srgb: boolean) {
+function makeTexture(
+  size: number,
+  draw: (ctx: CanvasRenderingContext2D, s: number) => void,
+  srgb: boolean,
+) {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -89,7 +103,12 @@ function usePanelResources(): PanelResources {
     microMap.repeat.set(5, 5);
     resources.current = {
       surface: new THREE.MeshStandardMaterial({ roughnessMap: microMap, envMapIntensity: 1.1 }),
-      core: new THREE.MeshStandardMaterial({ color: '#c7b28d', map: coreMap, roughness: 0.95, metalness: 0 }),
+      core: new THREE.MeshStandardMaterial({
+        color: '#c7b28d',
+        map: coreMap,
+        roughness: 0.95,
+        metalness: 0,
+      }),
       coreMap,
       microMap,
     };
@@ -113,22 +132,49 @@ function usePanelResources(): PanelResources {
 function PanelModel({ finish }: { finish: PanelFinish }) {
   const { surface, core } = usePanelResources();
   const targetColor = useMemo(() => new THREE.Color(finish.color), [finish.color]);
+  const group = useRef<THREE.Group>(null);
 
-  useFrame(() => {
+  useFrame((state) => {
     surface.color.lerp(targetColor, 0.12);
     surface.roughness = THREE.MathUtils.lerp(surface.roughness, finish.roughness, 0.12);
     surface.metalness = THREE.MathUtils.lerp(surface.metalness, finish.metalness, 0.12);
-    surface.envMapIntensity = THREE.MathUtils.lerp(surface.envMapIntensity, finish.roughness > 0.5 ? 0.75 : 1.5, 0.1);
+    surface.envMapIntensity = THREE.MathUtils.lerp(
+      surface.envMapIntensity,
+      finish.roughness > 0.5 ? 0.75 : 1.5,
+      0.1,
+    );
+    // Hafif canlılık: çok yavaş dikey salınım + eğim (idle).
+    if (group.current) {
+      group.current.position.y = Math.sin(state.clock.elapsedTime * 0.7) * 0.025;
+      group.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.4) * 0.012;
+    }
   });
 
   const surfaceZ = THICKNESS / 2 - SURFACE / 2;
   const coreDepth = THICKNESS - SURFACE * 2;
 
   return (
-    <group rotation={[0.05, -0.5, 0]}>
-      <RoundedBox args={[WIDTH, HEIGHT, SURFACE]} radius={0.008} smoothness={2} position={[0, 0, surfaceZ]} material={surface} />
-      <RoundedBox args={[WIDTH, HEIGHT, SURFACE]} radius={0.008} smoothness={2} position={[0, 0, -surfaceZ]} material={surface} />
-      <RoundedBox args={[WIDTH - 0.004, HEIGHT - 0.004, coreDepth]} radius={0.005} smoothness={2} material={core} />
+    <group ref={group} rotation={[0.05, -0.5, 0]}>
+      <RoundedBox
+        args={[WIDTH, HEIGHT, SURFACE]}
+        radius={0.008}
+        smoothness={2}
+        position={[0, 0, surfaceZ]}
+        material={surface}
+      />
+      <RoundedBox
+        args={[WIDTH, HEIGHT, SURFACE]}
+        radius={0.008}
+        smoothness={2}
+        position={[0, 0, -surfaceZ]}
+        material={surface}
+      />
+      <RoundedBox
+        args={[WIDTH - 0.004, HEIGHT - 0.004, coreDepth]}
+        radius={0.005}
+        smoothness={2}
+        material={core}
+      />
     </group>
   );
 }
@@ -136,7 +182,10 @@ function PanelModel({ finish }: { finish: PanelFinish }) {
 /** Çift tıklamada kamerayı başlangıç konumuna döndürür. */
 function ResetOnSignal({ signal }: { signal: number }) {
   const camera = useThree((s) => s.camera);
-  const controls = useThree((s) => s.controls) as { target: THREE.Vector3; update: () => void } | null;
+  const controls = useThree((s) => s.controls) as {
+    target: THREE.Vector3;
+    update: () => void;
+  } | null;
 
   useEffect(() => {
     camera.position.set(...CAMERA_POS);
@@ -153,8 +202,14 @@ function ResetOnSignal({ signal }: { signal: number }) {
  * Premium 3D panel kesiti: katmanlı model, studyo yansımaları (Lightformer),
  * damping'li döndürme, sınırlı zoom ve çift tıkla sıfırlama.
  */
-export function PanelViewer({ finish, active = true, dprMax = 1.75 }: PanelViewerProps) {
-  const [reset, setReset] = useState(0);
+export function PanelViewer({
+  finish,
+  active = true,
+  autoRotate = true,
+  resetSignal = 0,
+  dprMax = 1.75,
+}: PanelViewerProps) {
+  const [localReset, setLocalReset] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   // Sahne üzerinde tekerlek/pinch sayfayı kaydırmasın (Lenis + native scroll engellenir).
@@ -175,7 +230,7 @@ export function PanelViewer({ finish, active = true, dprMax = 1.75 }: PanelViewe
       data-lenis-prevent
       className="h-full w-full overscroll-contain"
       style={{ touchAction: 'none' }}
-      onDoubleClick={() => setReset((n) => n + 1)}
+      onDoubleClick={() => setLocalReset((n) => n + 1)}
     >
       <Canvas
         dpr={[1, dprMax]}
@@ -197,13 +252,33 @@ export function PanelViewer({ finish, active = true, dprMax = 1.75 }: PanelViewe
 
         <PanelModel finish={finish} />
 
-        <ContactShadows position={[0, -1.35, 0]} opacity={0.4} scale={8} blur={2.6} far={3.5} resolution={256} color="#000000" />
+        <ContactShadows
+          position={[0, -1.35, 0]}
+          opacity={0.4}
+          scale={8}
+          blur={2.6}
+          far={3.5}
+          resolution={256}
+          color="#000000"
+        />
 
         {/* Dosyasız studyo ortamı: lake yüzeylerde gerçekçi yansıma verir. */}
         <Environment resolution={64}>
           <Lightformer form="rect" intensity={2.4} position={[0, 3.2, 2.4]} scale={[7, 3, 1]} />
-          <Lightformer form="rect" intensity={1.1} position={[-3.4, 0.8, -2.2]} scale={[4, 4, 1]} color="#ffe9d2" />
-          <Lightformer form="rect" intensity={0.8} position={[3.4, -1, 1.6]} scale={[4, 3, 1]} color="#dfe8ff" />
+          <Lightformer
+            form="rect"
+            intensity={1.1}
+            position={[-3.4, 0.8, -2.2]}
+            scale={[4, 4, 1]}
+            color="#ffe9d2"
+          />
+          <Lightformer
+            form="rect"
+            intensity={0.8}
+            position={[3.4, -1, 1.6]}
+            scale={[4, 3, 1]}
+            color="#dfe8ff"
+          />
         </Environment>
 
         <OrbitControls
@@ -215,13 +290,13 @@ export function PanelViewer({ finish, active = true, dprMax = 1.75 }: PanelViewe
           maxDistance={7.5}
           minPolarAngle={Math.PI / 3.1}
           maxPolarAngle={Math.PI / 1.7}
-          autoRotate
+          autoRotate={autoRotate}
           autoRotateSpeed={0.6}
           rotateSpeed={0.55}
           zoomSpeed={0.6}
         />
 
-        <ResetOnSignal signal={reset} />
+        <ResetOnSignal signal={localReset + resetSignal} />
       </Canvas>
     </div>
   );

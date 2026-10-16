@@ -74,7 +74,10 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
   test('seri kodu paylaşan mevcut ürün düzenlenebilir', async ({ adminPage }) => {
     // "PVC" kodlu ürünlere git (liste araması hem ad hem kod alanında arar).
     await adminPage.goto('/admin/urunler?q=PVC', { waitUntil: 'domcontentloaded' });
-    await adminPage.getByRole('link', { name: 'Düzenle' }).first().click();
+    const editLink = adminPage.getByRole('link', { name: 'Düzenle' }).first();
+    await expect(editLink).toBeVisible({ timeout: 15_000 });
+    await editLink.click();
+    await adminPage.waitForURL(/\/admin\/urunler\/[^/]+$/, { timeout: 15_000 });
 
     await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({
       timeout: 15_000,
@@ -93,7 +96,10 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
   test('aynı kategori + kod + ad ile ikinci kayıt açılamaz', async ({ adminPage }) => {
     // Var olan bir ürünün kategori/kod/ad üçlüsünü oku.
     await adminPage.goto('/admin/urunler?q=PVC', { waitUntil: 'domcontentloaded' });
-    await adminPage.getByRole('link', { name: 'Düzenle' }).first().click();
+    const editLink2 = adminPage.getByRole('link', { name: 'Düzenle' }).first();
+    await expect(editLink2).toBeVisible({ timeout: 15_000 });
+    await editLink2.click();
+    await adminPage.waitForURL(/\/admin\/urunler\/[^/]+$/, { timeout: 15_000 });
     await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({
       timeout: 15_000,
     });

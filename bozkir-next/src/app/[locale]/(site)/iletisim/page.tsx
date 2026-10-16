@@ -196,7 +196,6 @@ export default async function ContactPage({ params }: PageProps) {
         eyebrow={c.heroEyebrow}
         title={c.heroTitle}
         description={c.heroDescription}
-        image="/images/hero-showroom.jpeg"
         crumbs={[{ label: c.crumbHome, href: '/' }, { label: c.crumb }]}
       />
 

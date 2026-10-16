@@ -17,8 +17,14 @@ export async function Material3D({ locale }: { locale: Locale }) {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="h-[460px] overflow-hidden rounded-xl border border-border bg-surface sm:h-[520px]">
-            <Panel3D />
+          <div className="relative">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-[color:var(--color-accent-soft)]/12 blur-2xl"
+            />
+            <div className="h-[480px] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] sm:h-[560px]">
+              <Panel3D />
+            </div>
           </div>
         </Reveal>
       </div>

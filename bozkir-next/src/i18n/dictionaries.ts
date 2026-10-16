@@ -175,6 +175,9 @@ export const dictionaries = {
         collectionCta: 'Koleksiyonu gör',
       },
       material3d: {
+        autoRotate: 'Otomatik döndür',
+        resetView: 'Sıfırla',
+        finishLabel: 'Yüzey bitişi',
         eyebrow: 'Panel Kesiti',
         title: 'Malzemenin katmanlarını keşfedin.',
         body: 'Paneli sürükleyerek döndürün, yakınlaştırın ve farklı yüzey bitişleri arasında geçiş yapın. Kesit; melamin yüzey, MDF öz ve karşı yüzey katmanlarını gösterir.',
@@ -847,6 +850,9 @@ export const dictionaries = {
         collectionCta: 'View collection',
       },
       material3d: {
+        autoRotate: 'Auto-rotate',
+        resetView: 'Reset',
+        finishLabel: 'Surface finish',
         eyebrow: 'Panel Section',
         title: 'Explore the layers of the material.',
         body: 'Drag the panel to rotate, zoom and switch between different surface finishes. The section shows the melamine surface, MDF core and backing layers.',
@@ -1517,6 +1523,9 @@ export const dictionaries = {
         collectionCta: 'عرض المجموعة',
       },
       material3d: {
+        autoRotate: 'تدوير تلقائي',
+        resetView: 'إعادة الضبط',
+        finishLabel: 'تشطيب السطح',
         eyebrow: 'مقطع اللوح',
         title: 'استكشف طبقات المادة.',
         body: 'اسحب اللوح لتدويره وتكبيره والتبديل بين تشطيبات الأسطح المختلفة. يُظهر المقطع سطح الميلامين وقلب MDF والطبقات الخلفية.',
