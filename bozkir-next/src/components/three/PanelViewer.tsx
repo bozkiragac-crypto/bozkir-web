@@ -50,15 +50,13 @@ const THICKNESS = 0.16;
 const SURFACE_T = 0.022;
 const EDGE_COLOR = '#3a2f22';
 
-/** Kamera ve model yönelimi: kesit (yandan açılı) vs yüzey (tam cephe). */
+/** Kamera ön ayarı: kesit (yandan açılı → katmanlar) vs yüzey (cephe). */
 const VIEW_CAM: Record<PanelView, [number, number, number]> = {
-  section: [-3.15, 0.85, 3.1],
-  surface: [0, 0.05, 3.9],
+  section: [-3.4, 0.9, 2.6],
+  surface: [0, 0.05, 3.4],
 };
-const VIEW_ROT: Record<PanelView, [number, number, number]> = {
-  section: [-0.05, -0.62, 0],
-  surface: [0, 0, 0],
-};
+/** Model dönüşü sabittir (görünüme göre değişmez) — fark yalnız kamera açısıdır. */
+const BASE_ROT: [number, number, number] = [0, 0, 0];
 const ZERO = new THREE.Vector3(0, 0, 0);
 
 /** Prosedürel doku (dosyasız): renk ve mikro pürüzlülük haritası. */
@@ -214,7 +212,7 @@ function usePanelResources(): PanelResources {
 }
 
 /** Katmanlı panel: kaplama + öz + kaplama. Öz/yüzey ve yönelim bitiş/görünüme göre değişir. */
-function PanelModel({ finish, view }: { finish: PanelFinish; view: PanelView }) {
+function PanelModel({ finish }: { finish: PanelFinish }) {
   const { surfaceSmooth, surfaceRaw, coreMdf, coreParticle } = usePanelResources();
   const targetColor = useMemo(() => new THREE.Color(finish.color), [finish.color]);
   const group = useRef<THREE.Group>(null);
@@ -243,11 +241,12 @@ function PanelModel({ finish, view }: { finish: PanelFinish; view: PanelView }) 
     }
     if (group.current) {
       const t = state.clock.elapsedTime;
-      const rot = VIEW_ROT[view];
       const g = group.current;
-      g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, rot[0], 0.1) + Math.sin(t * 0.4) * 0.004;
-      g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, rot[1], 0.1);
-      g.rotation.z = THREE.MathUtils.lerp(g.rotation.z, rot[2], 0.1) + Math.sin(t * 0.4) * 0.01;
+      g.rotation.x =
+        THREE.MathUtils.lerp(g.rotation.x, BASE_ROT[0], 0.1) + Math.sin(t * 0.4) * 0.004;
+      g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, BASE_ROT[1], 0.1);
+      g.rotation.z =
+        THREE.MathUtils.lerp(g.rotation.z, BASE_ROT[2], 0.1) + Math.sin(t * 0.4) * 0.01;
       g.position.y = Math.sin(t * 0.7) * 0.02;
     }
   });
@@ -256,7 +255,7 @@ function PanelModel({ finish, view }: { finish: PanelFinish; view: PanelView }) 
   const coreDepth = THICKNESS - SURFACE_T * 2;
 
   return (
-    <group ref={group} rotation={VIEW_ROT.section}>
+    <group ref={group} rotation={BASE_ROT}>
       <RoundedBox
         args={[WIDTH, HEIGHT, SURFACE_T]}
         radius={0.008}
@@ -372,7 +371,7 @@ export function PanelViewer({
         <directionalLight position={[3, 4, 5]} intensity={1.6} />
         <directionalLight position={[-4, -2, -3]} intensity={0.45} color="#b3a98f" />
 
-        <PanelModel finish={finish} view={view} />
+        <PanelModel finish={finish} />
 
         <ContactShadows
           position={[0, -1.35, 0]}

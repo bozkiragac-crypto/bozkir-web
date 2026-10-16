@@ -86,7 +86,7 @@ export function Panel3D() {
   const [seeded, setSeeded] = useState(false);
   const [inView, setInView] = useState(false);
   const [finish, setFinish] = useState(finishes[0]!);
-  const [autoRotate, setAutoRotate] = useState(true);
+  const [autoRotate, setAutoRotate] = useState(false);
   const [view, setView] = useState<PanelView>('section');
   const [resetSignal, setResetSignal] = useState(0);
 
