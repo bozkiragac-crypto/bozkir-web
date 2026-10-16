@@ -67,6 +67,8 @@ export interface SiteSettings {
   };
   /** Çerez politikası metni (boşsa sözlük içeriği kullanılır). */
   cookiePolicyText: string;
+  /** Yapılandırılmış açılış saatleri (0=Pazar … 6=Cumartesi). null = kapalı. */
+  openHours: ({ open: string; close: string } | null)[];
 }
 
 function defaults(): SiteSettings {
@@ -95,6 +97,7 @@ function defaults(): SiteSettings {
     notifyEmail: '',
     smtp: { host: '', port: '587', user: '', pass: '', from: '' },
     cookiePolicyText: '',
+    openHours: siteConfig.openHours.map((d) => (d ? { open: d.open, close: d.close } : null)),
   };
 }
 

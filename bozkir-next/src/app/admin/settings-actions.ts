@@ -7,6 +7,7 @@ import { requireOwner, logActivity } from '@/lib/admin/guard';
 import { SETTINGS_TAG, getSiteSettingsFresh, type SiteSettings } from '@/lib/data/settings';
 import { locales } from '@/i18n/config';
 import { parseCoords, formatLatLng } from '@/lib/geo';
+import { normalizeWeeklyHours } from '@/lib/open-hours';
 
 export async function saveSiteSettings(
   input: SiteSettings,
@@ -65,6 +66,7 @@ export async function saveSiteSettings(
       from: (input.smtp?.from ?? '').trim(),
     },
     cookiePolicyText: (input.cookiePolicyText ?? '').trim(),
+    openHours: normalizeWeeklyHours(input.openHours),
   };
 
   // Koordinatlar ondalık ya da DMS girilebilir; kaydederken "lat,lng"e normalize et.

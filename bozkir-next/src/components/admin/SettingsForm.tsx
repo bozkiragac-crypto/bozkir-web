@@ -8,7 +8,11 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { ImageManager } from '@/components/admin/ImageManager';
 import { Select } from '@/components/ui/Select';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { normalizeWeeklyHours } from '@/lib/open-hours';
 import type { SiteSettings } from '@/lib/data/settings';
+
+/** 0=Pazar … 6=Cumartesi (JS getDay ile uyumlu). */
+const DAY_LABELS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
 
 const field =
   'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-foreground';
@@ -53,6 +57,12 @@ export function SettingsForm({
     if (target < 0 || target >= next.length) return;
     [next[index], next[target]] = [next[target]!, next[index]!];
     setOrder(next);
+  }
+
+  function setOpenHoursDay(idx: number, value: { open: string; close: string } | null) {
+    const next = normalizeWeeklyHours(form.openHours);
+    next[idx] = value;
+    setForm({ ...form, openHours: next });
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -259,6 +269,59 @@ export function SettingsForm({
                 placeholder="36.250556,36.181472"
               />
             </Label>
+          </div>
+        </div>
+
+        <div className={`${section} lg:col-span-2`}>
+          <p className="font-medium">Açılış saatleri</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            İletişim sayfasındaki &quot;şu an açık/kapalı&quot; rozeti bu çizelgeye göre hesaplanır
+            (Europe/Istanbul).
+          </p>
+          <div className="mt-5 grid gap-3">
+            {DAY_LABELS_TR.map((dayName, idx) => {
+              const day = form.openHours[idx] ?? null;
+              return (
+                <div
+                  key={dayName}
+                  className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-surface px-4 py-2.5"
+                >
+                  <span className="w-24 text-sm font-medium">{dayName}</span>
+                  <label className="inline-flex items-center gap-2 text-xs text-muted-strong">
+                    <input
+                      type="checkbox"
+                      checked={!day}
+                      onChange={(e) =>
+                        setOpenHoursDay(
+                          idx,
+                          e.target.checked ? null : { open: '09:00', close: '18:00' },
+                        )
+                      }
+                    />
+                    Kapalı
+                  </label>
+                  <input
+                    type="time"
+                    value={day?.open ?? ''}
+                    disabled={!day}
+                    onChange={(e) => day && setOpenHoursDay(idx, { ...day, open: e.target.value })}
+                    aria-label={`${dayName} açılış`}
+                    className="h-9 rounded-md border border-border bg-surface px-3 text-sm outline-none disabled:opacity-40"
+                  />
+                  <span className="text-muted" aria-hidden>
+                    –
+                  </span>
+                  <input
+                    type="time"
+                    value={day?.close ?? ''}
+                    disabled={!day}
+                    onChange={(e) => day && setOpenHoursDay(idx, { ...day, close: e.target.value })}
+                    aria-label={`${dayName} kapanış`}
+                    className="h-9 rounded-md border border-border bg-surface px-3 text-sm outline-none disabled:opacity-40"
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 

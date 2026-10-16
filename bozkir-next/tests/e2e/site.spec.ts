@@ -27,10 +27,12 @@ test.describe('Genel site gezinme', () => {
     await page.goto('/tr/iletisim');
     await expect(page.getByText('İş yeri konumu').first()).toBeVisible();
     await expect(page.getByText('Depo konumu').first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Konumlar' })).toBeVisible();
     const maps = page.locator('iframe[title*="konum"]');
     await expect(maps).toHaveCount(2);
     await expect(page.getByRole('link', { name: /Yol tarifi al/ }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: /Haritada aç/ }).first()).toBeVisible();
+    await expect(page.getByText(/Şu an (açık|kapalı)/).first()).toBeVisible();
   });
 
   test('footerda dil seçici yok', async ({ page }) => {

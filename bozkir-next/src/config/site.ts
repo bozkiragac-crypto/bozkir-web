@@ -26,6 +26,16 @@ export const siteConfig = {
   hours: 'Pazartesi – Cuma: 08:00 – 18:00 · Cumartesi: 08:00 – 14:00',
   hoursEn: 'Monday – Friday: 08:00 – 18:00 · Saturday: 08:00 – 14:00',
   hoursAr: 'الاثنين – الجمعة: 08:00 – 18:00 · السبت: 08:00 – 14:00',
+  /** Yapılandırılmış açılış saatleri (0=Pazar … 6=Cumartesi). null = kapalı. */
+  openHours: [
+    null,
+    { open: '08:00', close: '18:00' },
+    { open: '08:00', close: '18:00' },
+    { open: '08:00', close: '18:00' },
+    { open: '08:00', close: '18:00' },
+    { open: '08:00', close: '18:00' },
+    { open: '08:00', close: '14:00' },
+  ],
   social: {
     facebook: 'https://www.facebook.com/bozkiragac/',
     instagram: 'https://www.instagram.com/bozkiragac/',

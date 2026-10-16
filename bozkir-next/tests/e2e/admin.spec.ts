@@ -48,6 +48,7 @@ test.describe('Admin CRUD (oturumlu)', () => {
     await expect(adminPage.getByText('Depo konumu')).toBeVisible();
     await expect(adminPage.getByText('İş yeri koordinatları (enlem,boylam)')).toBeVisible();
     await expect(adminPage.getByText('Depo koordinatları (enlem,boylam)')).toBeVisible();
+    await expect(adminPage.getByText('Açılış saatleri')).toBeVisible();
   });
 
   test('içerik blokları düzenlenebilir', async ({ adminPage }) => {
