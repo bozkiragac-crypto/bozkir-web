@@ -4,12 +4,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   ContactShadows,
+  Edges,
   Environment,
+  Html,
   Lightformer,
   OrbitControls,
   RoundedBox,
 } from '@react-three/drei';
 import * as THREE from 'three';
+
+export type PanelCore = 'mdf' | 'particle';
+export type PanelSurface = 'melamin' | 'raw';
 
 export interface PanelFinish {
   id: string;
@@ -17,7 +22,13 @@ export interface PanelFinish {
   color: string;
   roughness: number;
   metalness: number;
+  /** İç malzeme (kesitte görünür). */
+  core: PanelCore;
+  /** Yüzey tipi: kaplamalı (melamin) ya da ham (sunta). */
+  surface: PanelSurface;
 }
+
+export type PanelView = 'section' | 'surface';
 
 interface PanelViewerProps {
   finish: PanelFinish;
@@ -27,15 +38,19 @@ interface PanelViewerProps {
   autoRotate?: boolean;
   /** Dışarıdan artırıldığında kamerayı başlangıca döndürür. */
   resetSignal?: number;
+  /** Kamera ön ayarı: kesit (açılı) veya yüzey (cepheden). */
+  view?: PanelView;
   /** Cihaz başına piksel oranı üst sınırı (mobilde düşürülür). */
   dprMax?: number;
 }
 
 const CAMERA_POS: [number, number, number] = [0, 0.25, 5.2];
+const SURFACE_POS: [number, number, number] = [0, 0.1, 4.2];
 const WIDTH = 3;
 const HEIGHT = 1.95;
 const THICKNESS = 0.16;
-const SURFACE = 0.022;
+const SURFACE_T = 0.022;
+const EDGE_COLOR = '#3a2f22';
 
 /** Prosedürel doku (dosyasız): renk ve mikro pürüzlülük haritası. */
 function makeTexture(
@@ -56,24 +71,75 @@ function makeTexture(
   return tex;
 }
 
-function drawWood(ctx: CanvasRenderingContext2D, size: number) {
-  ctx.fillStyle = '#c7b28d';
+/** MDF öz: homojen, yönsüz lif yapısı (ince benek + hafif lif kırıntıları). */
+function drawFiberCore(ctx: CanvasRenderingContext2D, size: number) {
+  ctx.fillStyle = '#cfbfa2';
   ctx.fillRect(0, 0, size, size);
-  for (let y = 0; y < size; y += 5) {
-    ctx.strokeStyle = `rgba(122,92,60,${0.05 + Math.random() * 0.09})`;
-    ctx.lineWidth = 1 + Math.random();
-    ctx.beginPath();
-    for (let x = 0; x <= size; x += 12) {
-      const yy = y + Math.sin(x * 0.07 + y * 0.15) * 2.2;
-      if (x === 0) ctx.moveTo(x, yy);
-      else ctx.lineTo(x, yy);
-    }
-    ctx.stroke();
-  }
-  for (let i = 0; i < 2200; i++) {
-    ctx.fillStyle = `rgba(80,58,36,${Math.random() * 0.06})`;
+  const dots = Math.round(size * size * 0.5);
+  for (let i = 0; i < dots; i++) {
+    const v = 196 + Math.round(Math.random() * 34);
+    ctx.fillStyle = `rgba(${v},${v - 8},${v - 22},0.5)`;
     ctx.fillRect(Math.random() * size, Math.random() * size, 1, 1);
   }
+  // Hafif kısa lif kırıntıları (yönsüz).
+  for (let i = 0; i < size * 0.6; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const len = 2 + Math.random() * 4;
+    const a = Math.random() * Math.PI;
+    ctx.strokeStyle = `rgba(150,128,96,${0.05 + Math.random() * 0.07})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+    ctx.stroke();
+  }
+}
+
+/** Yonga levha öz: rastgele iri/uzun yonga pulları (sunta/suntalam içi). */
+function drawChipCore(ctx: CanvasRenderingContext2D, size: number, contrast = 1) {
+  ctx.fillStyle = '#b3946a';
+  ctx.fillRect(0, 0, size, size);
+  const palette = ['#8a6a44', '#a9855a', '#6f5636', '#8f7250', '#c2a97f', '#5f4a2e', '#9c7b52'];
+  const chips = Math.round(size * 4.5);
+  for (let i = 0; i < chips; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const w = 7 + Math.random() * 13;
+    const h = 2 + Math.random() * 3;
+    const a = Math.random() * Math.PI;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a);
+    ctx.globalAlpha = (0.45 + Math.random() * 0.45) * contrast;
+    ctx.fillStyle = palette[Math.floor(Math.random() * palette.length)]!;
+    ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/** Ham sunta yüzeyi: daha büyük, düşük kontrastlı yonga dokusu. */
+function drawChipSurface(ctx: CanvasRenderingContext2D, size: number) {
+  ctx.fillStyle = '#c6ac83';
+  ctx.fillRect(0, 0, size, size);
+  const palette = ['#a9855a', '#b89768', '#8f7250', '#c2a97f', '#9c7b52'];
+  const chips = Math.round(size * 3);
+  for (let i = 0; i < chips; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const w = 12 + Math.random() * 20;
+    const h = 3 + Math.random() * 5;
+    const a = Math.random() * Math.PI;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a);
+    ctx.globalAlpha = 0.3 + Math.random() * 0.35;
+    ctx.fillStyle = palette[Math.floor(Math.random() * palette.length)]!;
+    ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
 }
 
 function drawMicro(ctx: CanvasRenderingContext2D, size: number) {
@@ -88,29 +154,39 @@ function drawMicro(ctx: CanvasRenderingContext2D, size: number) {
 }
 
 interface PanelResources {
-  surface: THREE.MeshStandardMaterial;
-  core: THREE.MeshStandardMaterial;
-  coreMap: THREE.CanvasTexture;
-  microMap: THREE.CanvasTexture;
+  surfaceSmooth: THREE.MeshStandardMaterial;
+  surfaceRaw: THREE.MeshStandardMaterial;
+  coreMdf: THREE.MeshStandardMaterial;
+  coreParticle: THREE.MeshStandardMaterial;
+  disposable: { dispose: () => void }[];
 }
 
 function usePanelResources(): PanelResources {
   const resources = useRef<PanelResources | null>(null);
 
   if (!resources.current) {
-    const coreMap = makeTexture(256, drawWood, true);
+    const fiberMap = makeTexture(256, drawFiberCore, true);
+    const chipMap = makeTexture(256, drawChipCore, true);
+    chipMap.repeat.set(3, 2);
+    const chipSurfaceMap = makeTexture(256, drawChipSurface, true);
+    chipSurfaceMap.repeat.set(2, 2);
     const microMap = makeTexture(192, drawMicro, false);
     microMap.repeat.set(5, 5);
+
     resources.current = {
-      surface: new THREE.MeshStandardMaterial({ roughnessMap: microMap, envMapIntensity: 1.1 }),
-      core: new THREE.MeshStandardMaterial({
-        color: '#c7b28d',
-        map: coreMap,
+      surfaceSmooth: new THREE.MeshStandardMaterial({
+        roughnessMap: microMap,
+        envMapIntensity: 1.1,
+      }),
+      surfaceRaw: new THREE.MeshStandardMaterial({
+        map: chipSurfaceMap,
         roughness: 0.95,
         metalness: 0,
+        envMapIntensity: 0.5,
       }),
-      coreMap,
-      microMap,
+      coreMdf: new THREE.MeshStandardMaterial({ map: fiberMap, roughness: 0.9, metalness: 0 }),
+      coreParticle: new THREE.MeshStandardMaterial({ map: chipMap, roughness: 0.95, metalness: 0 }),
+      disposable: [microMap, fiberMap, chipMap, chipSurfaceMap],
     };
   }
 
@@ -118,69 +194,88 @@ function usePanelResources(): PanelResources {
 
   useEffect(() => {
     return () => {
-      res.surface.dispose();
-      res.core.dispose();
-      res.coreMap.dispose();
-      res.microMap.dispose();
+      res.surfaceSmooth.dispose();
+      res.surfaceRaw.dispose();
+      res.coreMdf.dispose();
+      res.coreParticle.dispose();
+      for (const d of res.disposable) d.dispose();
     };
   }, [res]);
 
   return res;
 }
 
-/** Katmanlı panel: melamin yüzey + MDF öz + melamin yüzey. Bitişler yumuşak geçer. */
+/** Katmanlı panel: kaplama + öz + kaplama. Öz/yüzey bitişe göre değişir. */
 function PanelModel({ finish }: { finish: PanelFinish }) {
-  const { surface, core } = usePanelResources();
+  const { surfaceSmooth, surfaceRaw, coreMdf, coreParticle } = usePanelResources();
   const targetColor = useMemo(() => new THREE.Color(finish.color), [finish.color]);
   const group = useRef<THREE.Group>(null);
 
+  const surface = finish.surface === 'raw' ? surfaceRaw : surfaceSmooth;
+  const core = finish.core === 'particle' ? coreParticle : coreMdf;
+
   useFrame((state) => {
-    surface.color.lerp(targetColor, 0.12);
-    surface.roughness = THREE.MathUtils.lerp(surface.roughness, finish.roughness, 0.12);
-    surface.metalness = THREE.MathUtils.lerp(surface.metalness, finish.metalness, 0.12);
-    surface.envMapIntensity = THREE.MathUtils.lerp(
-      surface.envMapIntensity,
-      finish.roughness > 0.5 ? 0.75 : 1.5,
-      0.1,
-    );
-    // Hafif canlılık: çok yavaş dikey salınım + eğim (idle).
+    if (finish.surface !== 'raw') {
+      surfaceSmooth.color.lerp(targetColor, 0.12);
+      surfaceSmooth.roughness = THREE.MathUtils.lerp(
+        surfaceSmooth.roughness,
+        finish.roughness,
+        0.12,
+      );
+      surfaceSmooth.metalness = THREE.MathUtils.lerp(
+        surfaceSmooth.metalness,
+        finish.metalness,
+        0.12,
+      );
+      surfaceSmooth.envMapIntensity = THREE.MathUtils.lerp(
+        surfaceSmooth.envMapIntensity,
+        finish.roughness > 0.5 ? 0.75 : 1.5,
+        0.1,
+      );
+    }
     if (group.current) {
       group.current.position.y = Math.sin(state.clock.elapsedTime * 0.7) * 0.025;
       group.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.4) * 0.012;
     }
   });
 
-  const surfaceZ = THICKNESS / 2 - SURFACE / 2;
-  const coreDepth = THICKNESS - SURFACE * 2;
+  const surfaceZ = THICKNESS / 2 - SURFACE_T / 2;
+  const coreDepth = THICKNESS - SURFACE_T * 2;
 
   return (
     <group ref={group} rotation={[0.05, -0.5, 0]}>
       <RoundedBox
-        args={[WIDTH, HEIGHT, SURFACE]}
+        args={[WIDTH, HEIGHT, SURFACE_T]}
         radius={0.008}
         smoothness={2}
         position={[0, 0, surfaceZ]}
         material={surface}
-      />
+      >
+        <Edges color={EDGE_COLOR} threshold={40} />
+      </RoundedBox>
       <RoundedBox
-        args={[WIDTH, HEIGHT, SURFACE]}
+        args={[WIDTH, HEIGHT, SURFACE_T]}
         radius={0.008}
         smoothness={2}
         position={[0, 0, -surfaceZ]}
         material={surface}
-      />
+      >
+        <Edges color={EDGE_COLOR} threshold={40} />
+      </RoundedBox>
       <RoundedBox
         args={[WIDTH - 0.004, HEIGHT - 0.004, coreDepth]}
         radius={0.005}
         smoothness={2}
         material={core}
-      />
+      >
+        <Edges color={EDGE_COLOR} threshold={40} />
+      </RoundedBox>
     </group>
   );
 }
 
-/** Çift tıklamada kamerayı başlangıç konumuna döndürür. */
-function ResetOnSignal({ signal }: { signal: number }) {
+/** Kamera ön ayarı + sıfırlama sinyali. */
+function CameraController({ view, signal }: { view: PanelView; signal: number }) {
   const camera = useThree((s) => s.camera);
   const controls = useThree((s) => s.controls) as {
     target: THREE.Vector3;
@@ -188,25 +283,27 @@ function ResetOnSignal({ signal }: { signal: number }) {
   } | null;
 
   useEffect(() => {
-    camera.position.set(...CAMERA_POS);
+    const target = view === 'surface' ? SURFACE_POS : CAMERA_POS;
+    camera.position.set(...target);
     if (controls) {
       controls.target.set(0, 0, 0);
       controls.update();
     }
-  }, [signal, camera, controls]);
+  }, [view, signal, camera, controls]);
 
   return null;
 }
 
 /**
- * Premium 3D panel kesiti: katmanlı model, studyo yansımaları (Lightformer),
- * damping'li döndürme, sınırlı zoom ve çift tıkla sıfırlama.
+ * Premium 3D panel kesiti: katmanlı model (bitişe göre öz/yüzey), studyo
+ * yansımaları, damping'li döndürme, sınırlı zoom, kamera ön ayarı ve etiket.
  */
 export function PanelViewer({
   finish,
   active = true,
   autoRotate = true,
   resetSignal = 0,
+  view = 'section',
   dprMax = 1.75,
 }: PanelViewerProps) {
   const [localReset, setLocalReset] = useState(0);
@@ -262,7 +359,7 @@ export function PanelViewer({
           color="#000000"
         />
 
-        {/* Dosyasız studyo ortamı: lake yüzeylerde gerçekçi yansıma verir. */}
+        {/* Dosyasız studyo ortamı: yansımalar. */}
         <Environment resolution={64}>
           <Lightformer form="rect" intensity={2.4} position={[0, 3.2, 2.4]} scale={[7, 3, 1]} />
           <Lightformer
@@ -281,6 +378,17 @@ export function PanelViewer({
           />
         </Environment>
 
+        <Html
+          position={[0, -HEIGHT / 2 - 0.32, 0]}
+          center
+          className="pointer-events-none select-none"
+          zIndexRange={[10, 0]}
+        >
+          <span className="whitespace-nowrap rounded-full border border-border bg-background/85 px-2.5 py-1 text-[0.6rem] font-medium tracking-[0.08em] text-foreground uppercase backdrop-blur">
+            {finish.label}
+          </span>
+        </Html>
+
         <OrbitControls
           makeDefault
           enableDamping
@@ -296,7 +404,7 @@ export function PanelViewer({
           zoomSpeed={0.6}
         />
 
-        <ResetOnSignal signal={localReset + resetSignal} />
+        <CameraController view={view} signal={localReset + resetSignal} />
       </Canvas>
     </div>
   );

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useDictionary } from '@/i18n/DictionaryProvider';
-import type { PanelFinish } from './PanelViewer';
+import type { PanelFinish, PanelView } from './PanelViewer';
 
 // WebGL sahnesi yalnızca görünür alana girince indirilir (code-split + lazy).
 const PanelViewer = dynamic(() => import('./PanelViewer').then((m) => m.PanelViewer), {
@@ -21,13 +21,42 @@ const PanelAR = dynamic(() => import('./PanelAR').then((m) => m.PanelAR), { ssr:
 
 /** NOT: Bu yüzeyler temsili bitiş görünümleridir; gerçek ürün rengi değildir. */
 const finishDefs: Omit<PanelFinish, 'label'>[] = [
-  { id: 'mdf', color: '#d9cdb4', roughness: 0.85, metalness: 0.02 },
-  { id: 'lak', color: '#cfd6d8', roughness: 0.12, metalness: 0.06 },
-  { id: 'suntalam', color: '#c8b291', roughness: 0.7, metalness: 0.03 },
-  { id: 'sunta', color: '#b9a98c', roughness: 0.95, metalness: 0.0 },
+  {
+    id: 'mdf',
+    color: '#d9cdb4',
+    roughness: 0.85,
+    metalness: 0.02,
+    core: 'mdf',
+    surface: 'melamin',
+  },
+  {
+    id: 'lak',
+    color: '#cfd6d8',
+    roughness: 0.12,
+    metalness: 0.06,
+    core: 'mdf',
+    surface: 'melamin',
+  },
+  {
+    id: 'suntalam',
+    color: '#c8b291',
+    roughness: 0.7,
+    metalness: 0.03,
+    core: 'particle',
+    surface: 'melamin',
+  },
+  {
+    id: 'sunta',
+    color: '#b9a98c',
+    roughness: 0.95,
+    metalness: 0.0,
+    core: 'particle',
+    surface: 'raw',
+  },
 ];
 
-const MDF_CORE_COLOR = '#c7b28d';
+const MDF_CORE_COLOR = '#cfbfa2';
+const CHIP_CORE_COLOR = '#b3946a';
 
 function PanelFallback({ alt = '' }: { alt?: string }) {
   return (
@@ -57,6 +86,7 @@ export function Panel3D() {
   const [inView, setInView] = useState(false);
   const [finish, setFinish] = useState(finishes[0]!);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [view, setView] = useState<PanelView>('section');
   const [resetSignal, setResetSignal] = useState(0);
 
   // WebGL yalnızca ekrana girince başlar; ekrandan çıkınca render durur.
@@ -75,11 +105,17 @@ export function Panel3D() {
     return () => io.disconnect();
   }, []);
 
-  const layers = h.layers
+  const layerWords = h.layers
     .split('·')
     .map((s) => s.trim())
     .filter(Boolean);
-  const layerColors = [finish.color, MDF_CORE_COLOR, finish.color];
+  const coreLabel = finish.core === 'particle' ? h.coreParticle : h.coreMdf;
+  const legend = [layerWords[0] ?? '', coreLabel, layerWords[2] ?? layerWords[0] ?? ''];
+  const legendColors = [
+    finish.color,
+    finish.core === 'particle' ? CHIP_CORE_COLOR : MDF_CORE_COLOR,
+    finish.color,
+  ];
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -92,6 +128,7 @@ export function Panel3D() {
             active={inView}
             autoRotate={autoRotate}
             resetSignal={resetSignal}
+            view={view}
             dprMax={isMobile ? 1.25 : 1.5}
           />
         )}
@@ -105,7 +142,35 @@ export function Panel3D() {
           <span className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">
             {h.finishLabel}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex overflow-hidden rounded-full border border-border">
+              <button
+                type="button"
+                onClick={() => setView('section')}
+                aria-pressed={view === 'section'}
+                className={cn(
+                  'px-3 py-1.5 text-xs font-medium transition-colors',
+                  view === 'section'
+                    ? 'bg-foreground text-background'
+                    : 'text-muted-strong hover:text-foreground',
+                )}
+              >
+                {h.sectionView}
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('surface')}
+                aria-pressed={view === 'surface'}
+                className={cn(
+                  'px-3 py-1.5 text-xs font-medium transition-colors',
+                  view === 'surface'
+                    ? 'bg-foreground text-background'
+                    : 'text-muted-strong hover:text-foreground',
+                )}
+              >
+                {h.surfaceView}
+              </button>
+            </div>
             <button
               type="button"
               onClick={() => setAutoRotate((v) => !v)}
@@ -158,11 +223,11 @@ export function Panel3D() {
         </div>
 
         <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.65rem] text-muted">
-          {layers.map((layer, i) => (
+          {legend.map((layer, i) => (
             <li key={`${layer}-${i}`} className="flex items-center gap-1.5">
               <span
                 className="h-2 w-2 rounded-full border border-black/10"
-                style={{ backgroundColor: layerColors[i] ?? finish.color }}
+                style={{ backgroundColor: legendColors[i] ?? finish.color }}
                 aria-hidden
               />
               {layer}
