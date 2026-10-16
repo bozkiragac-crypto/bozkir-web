@@ -303,11 +303,13 @@ export const dictionaries = {
       maintenance: {
         title: 'Kısa bir bakımdayız',
         body: 'Siteyi sizin için güncelliyoruz. Kısa süre içinde yeniden hizmetinizde olacağız.',
-        contactTitle: 'Bize ulaşın',
+        retry: 'Yeniden dene',
+        contactLine: 'Bize ulaşın',
         phone: 'Telefon',
         whatsapp: 'WhatsApp',
         email: 'E-posta',
         hours: 'Çalışma Saatleri',
+        auto: 'Sayfa 30 saniyede bir otomatik yenilenir.',
       },
       about: {
         metaTitle: 'Hakkımızda | Bozkır Ağaç Ürünleri',
@@ -981,11 +983,13 @@ export const dictionaries = {
       maintenance: {
         title: 'We are briefly under maintenance',
         body: 'We are updating the site for you. We will be back in service shortly.',
-        contactTitle: 'Reach us',
+        retry: 'Try again',
+        contactLine: 'Reach us',
         phone: 'Phone',
         whatsapp: 'WhatsApp',
         email: 'Email',
         hours: 'Working Hours',
+        auto: 'This page refreshes automatically every 30 seconds.',
       },
       about: {
         metaTitle: 'About | Bozkır Wood Products',
@@ -1654,11 +1658,13 @@ export const dictionaries = {
       maintenance: {
         title: 'نحن في صيانة قصيرة',
         body: 'نعمل على تحديث الموقع من أجلكم. سنعود للخدمة قريباً.',
-        contactTitle: 'تواصل معنا',
+        retry: 'حاول مرة أخرى',
+        contactLine: 'تواصل معنا',
         phone: 'الهاتف',
         whatsapp: 'واتساب',
         email: 'البريد الإلكتروني',
         hours: 'ساعات العمل',
+        auto: 'تُحدَّث هذه الصفحة تلقائياً كل 30 ثانية.',
       },
       about: {
         metaTitle: 'من نحن | منتجات بوزكير الخشبية',

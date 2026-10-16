@@ -50,6 +50,14 @@ S3_PUBLIC_BASE_URL=/media
 APP_TIME_ZONE=Europe/Istanbul
 TRUSTED_PROXY=1
 MAINTENANCE_MODE=0
+# Bakım sayfası (nginx 502/504) iletişim bilgileri — konteyner başlarken enjekte edilir.
+MAINT_PHONE=+90 535 527 16 12
+MAINT_TEL=+905355271612
+MAINT_WHATSAPP=https://wa.me/905355271612
+MAINT_EMAIL=info@bozkiragac.com
+MAINT_HOURS_TR=Pazartesi – Cuma: 08:00 – 18:00 · Cumartesi: 08:00 – 14:00
+MAINT_HOURS_EN=Monday – Friday: 08:00 – 18:00 · Saturday: 08:00 – 14:00
+MAINT_HOURS_AR=الاثنين – الجمعة: 08:00 – 18:00 · السبت: 08:00 – 14:00
 EOF
   chmod 600 .env
   echo "  .env yazıldı (POSTGRES_PASSWORD rastgele üretildi)."

@@ -371,6 +371,12 @@ durur; değiştirmeden siteyi yayına almayın. Ardından aynı sayfadan **2FA (
 - **SEO**: title/description, OG görseli, `siteConfig.url` = `https://bozkiragac.com`.
 - **Sosyal**: Instagram/Facebook/WhatsApp bağlantıları.
 - **Bakım modu**: `MAINTENANCE_MODE=0` (kapalı) olmalı; açıkken site 503 döner.
+  İki bakım sayfası vardır: **(1) planlı bakım** → Next `/maintenance` (503, iletişim
+  bilgileri ayarlardan dinamik); **(2) uygulama çöktüğünde** → nginx statik sayfası
+  (502/504). Statik sayfa `deploy/maintenance.html.template`ten konteyner başlarken
+  `.env` içindeki `MAINT_*` değerleriyle (envsubst) üretilir; telefon/e-posta/çalışma
+  saatleri değişince `.env`'i güncelleyip `docker compose up -d --force-recreate nginx`
+  yeterlidir (uygulama kapalıyken de geçerlidir).
 - **Popup kampanyası**: gerçek kampanya + görsel ekleyin; kayıt yoksa popup gizlidir.
 
 ### 10.3 Teklif ve güvenlik limitleri

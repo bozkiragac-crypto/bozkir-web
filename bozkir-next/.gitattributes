@@ -3,3 +3,5 @@
 *.sh text eol=lf
 Dockerfile text eol=lf
 docker/entrypoint.sh text eol=lf
+# nginx envsubst bakım şablonu: konteynerde LF olarak okunmalı.
+*.html.template text eol=lf

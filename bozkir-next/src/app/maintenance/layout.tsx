@@ -19,7 +19,7 @@ export default async function MaintenanceLayout({ children }: { children: React.
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* Bakım bitince sayfa kendini yeniler. */}
-        <meta httpEquiv="refresh" content="60" />
+        <meta httpEquiv="refresh" content="30" />
       </head>
       <body className="antialiased">{children}</body>
     </html>

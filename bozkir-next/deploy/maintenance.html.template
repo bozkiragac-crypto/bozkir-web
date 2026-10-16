@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="refresh" content="30" />
+    <title>Kısa bir bakım — Bozkır Ağaç Ürünleri</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f7f7f5;
+        --surface: #ffffff;
+        --fg: #111111;
+        --muted: #5c5c66;
+        --muted-strong: #3f3f47;
+        --border: #e2e2e0;
+        --accent: #8d8474;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0e0e10;
+          --surface: #16161a;
+          --fg: #f2f2f0;
+          --muted: #b4b4bc;
+          --muted-strong: #c9c9d0;
+          --border: rgba(255, 255, 255, 0.14);
+          --accent: #b3a98f;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100svh; display: grid; place-items: center;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg); color: var(--fg); padding: 1.5rem; text-align: center;
+      }
+      .box {
+        border: 1px solid var(--border); background: var(--surface);
+        padding: 3rem 2rem; border-radius: 1.25rem; max-width: 36rem; width: 100%;
+      }
+      .eyebrow {
+        letter-spacing: .18em; text-transform: uppercase; font-size: .72rem;
+        color: var(--accent); margin: 0; font-weight: 600;
+      }
+      h1 {
+        font-family: Georgia, "Times New Roman", serif; font-weight: 500;
+        font-size: clamp(1.8rem, 5vw, 3rem); margin: 1.25rem 0 0; line-height: 1.1;
+      }
+      .body { max-width: 34rem; margin: 1.25rem auto 0; color: var(--muted-strong); line-height: 1.65; }
+      .actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; margin-top: 2rem; }
+      a.btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+        padding: .8rem 1.5rem; border-radius: 999px; text-decoration: none;
+        font-size: .9rem; font-weight: 500; border: 1px solid transparent; color: var(--fg);
+      }
+      a.btn svg { width: 1rem; height: 1rem; flex: none; }
+      a.primary { background: var(--fg); color: var(--bg); }
+      a.whatsapp { background: #25d366; color: #fff; }
+      a.ghost { border-color: var(--border); }
+      .contact {
+        margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border);
+        display: flex; flex-direction: column; align-items: center; gap: 1rem;
+        font-size: .9rem; color: var(--muted-strong);
+      }
+      .contact p { margin: 0; }
+      .line { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .4rem .75rem; }
+      .line a { color: var(--fg); text-decoration: underline; text-underline-offset: 4px; }
+      .line a:hover { color: var(--accent); }
+      .hours { display: inline-flex; align-items: center; gap: .5rem; }
+      .hours svg { width: 1rem; height: 1rem; flex: none; color: var(--muted); }
+      .note { margin: 2rem 0 0; font-size: .75rem; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <main class="box">
+      <p class="eyebrow">Bozkır Ağaç Ürünleri</p>
+      <h1 data-i18n="title">Kısa bir bakımdayız</h1>
+      <p class="body" data-i18n="body">Siteyi sizin için güncelliyoruz. Kısa süre içinde yeniden hizmetinizde olacağız.</p>
+
+      <div class="actions">
+        <a class="btn primary" href="/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" /><path d="M3 21v-5h5" /></svg>
+          <span data-i18n="retry">Yeniden dene</span>
+        </a>
+        <a class="btn whatsapp" href="${MAINT_WHATSAPP}" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm5.8 14.04c-.24.68-1.42 1.31-1.96 1.36-.5.05-.5.4-3.15-.66-2.65-1.06-4.3-3.78-4.43-3.95-.13-.17-1.06-1.41-1.06-2.69 0-1.28.67-1.91.91-2.17.24-.26.52-.33.7-.33.17 0 .35.01.5.01.16 0 .38-.06.58.44.2.5.69 1.72.75 1.85.06.13.1.28.01.45-.09.17-.13.28-.26.43-.13.15-.27.34-.39.45-.13.13-.26.27-.11.53.15.26.66 1.09 1.42 1.77.97.87 1.79 1.14 2.05 1.27.26.13.41.11.56-.07.15-.17.64-.75.81-1.01.17-.26.35-.21.58-.13.24.09 1.5.71 1.76.84.26.13.43.19.5.3.06.11.06.63-.18 1.31Z" /></svg>
+          <span data-i18n="contact-wa">WhatsApp</span>
+        </a>
+        <a class="btn ghost" href="tel:${MAINT_TEL}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.94.36 1.86.7 2.73a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.35-1.35a2 2 0 0 1 2.11-.45c.87.34 1.79.57 2.73.7A2 2 0 0 1 22 16.92Z" /></svg>
+          <span>${MAINT_PHONE}</span>
+        </a>
+      </div>
+
+      <div class="contact">
+        <p class="eyebrow" data-i18n="contact">Bize ulaşın</p>
+        <p class="line">
+          <a href="tel:${MAINT_TEL}">${MAINT_PHONE}</a>
+          <span aria-hidden="true">·</span>
+          <a href="mailto:${MAINT_EMAIL}">${MAINT_EMAIL}</a>
+          <span aria-hidden="true">·</span>
+          <a href="${MAINT_WHATSAPP}" target="_blank" rel="noopener noreferrer" data-i18n="contact-wa">WhatsApp</a>
+        </p>
+        <p class="hours">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+          <span id="hours"></span>
+        </p>
+      </div>
+
+      <p class="note" data-i18n="auto">Sayfa 30 saniyede bir otomatik yenilenir.</p>
+    </main>
+    <script>
+      (function () {
+        var messages = {
+          tr: {
+            title: 'Kısa bir bakımdayız',
+            body: 'Siteyi sizin için güncelliyoruz. Kısa süre içinde yeniden hizmetinizde olacağız.',
+            retry: 'Yeniden dene',
+            contact: 'Bize ulaşın',
+            'contact-wa': 'WhatsApp',
+            auto: 'Sayfa 30 saniyede bir otomatik yenilenir.',
+          },
+          en: {
+            title: 'We are briefly under maintenance',
+            body: 'We are updating the site for you. We will be back in service shortly.',
+            retry: 'Try again',
+            contact: 'Reach us',
+            'contact-wa': 'WhatsApp',
+            auto: 'This page refreshes automatically every 30 seconds.',
+          },
+          ar: {
+            title: 'نحن في صيانة قصيرة',
+            body: 'نعمل على تحديث الموقع من أجلكم. سنعود للخدمة قريباً.',
+            retry: 'حاول مرة أخرى',
+            contact: 'تواصل معنا',
+            'contact-wa': 'واتساب',
+            auto: 'تُحدَّث هذه الصفحة تلقائياً كل 30 ثانية.',
+          },
+        };
+        var hours = {
+          tr: '${MAINT_HOURS_TR}',
+          en: '${MAINT_HOURS_EN}',
+          ar: '${MAINT_HOURS_AR}',
+        };
+        var lang = (navigator.language || 'tr').slice(0, 2).toLowerCase();
+        if (!messages[lang]) lang = 'en';
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        var dict = messages[lang];
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+          var key = el.getAttribute('data-i18n');
+          if (dict[key]) el.textContent = dict[key];
+        });
+        var hoursEl = document.getElementById('hours');
+        if (hoursEl) hoursEl.textContent = hours[lang] || hours.tr;
+      })();
+    </script>
+  </body>
+</html>

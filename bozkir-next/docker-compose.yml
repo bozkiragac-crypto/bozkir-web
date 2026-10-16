@@ -128,12 +128,23 @@ services:
     image: nginx:alpine
     ports:
       - '80:80'
+    environment:
+      # Bakım sayfası (uygulama çöktüğünde 502/504): şablon konteyner başlarken
+      # envsubst ile iletişim bilgileriyle üretilir → app down olsa da güncel kalır.
+      NGINX_ENVSUBST_OUTPUT_DIR: /usr/share/nginx/html
+      MAINT_PHONE: "${MAINT_PHONE:-+90 535 527 16 12}"
+      MAINT_TEL: "${MAINT_TEL:-+905355271612}"
+      MAINT_WHATSAPP: "${MAINT_WHATSAPP:-https://wa.me/905355271612}"
+      MAINT_EMAIL: "${MAINT_EMAIL:-info@bozkiragac.com}"
+      MAINT_HOURS_TR: "${MAINT_HOURS_TR:-Pazartesi – Cuma: 08:00 – 18:00 · Cumartesi: 08:00 – 14:00}"
+      MAINT_HOURS_EN: "${MAINT_HOURS_EN:-Monday – Friday: 08:00 – 18:00 · Saturday: 08:00 – 14:00}"
+      MAINT_HOURS_AR: "${MAINT_HOURS_AR:-الاثنين – الجمعة: 08:00 – 18:00 · السبت: 08:00 – 14:00}"
     volumes:
       - ./deploy/nginx.docker.conf:/etc/nginx/conf.d/default.conf:ro
       - ./deploy/nginx-security-headers.conf:/etc/nginx/snippets/security-headers.conf:ro
       - ./deploy/nginx-cache.conf:/etc/nginx/conf.d/00-cache.conf:ro
       - ./deploy/nginx-image-cache.conf:/etc/nginx/snippets/image-cache.conf:ro
-      - ./deploy/maintenance.html:/usr/share/nginx/html/maintenance.html:ro
+      - ./deploy/maintenance.html.template:/etc/nginx/templates/maintenance.html.template:ro
       - nginx-cache:/var/cache/nginx
     depends_on:
       app:

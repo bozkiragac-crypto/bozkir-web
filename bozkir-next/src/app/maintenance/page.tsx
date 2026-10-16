@@ -1,4 +1,5 @@
-import { Phone, MessageCircle, Mail, Clock } from 'lucide-react';
+import Link from 'next/link';
+import { Phone, MessageCircle, Clock, RefreshCw } from 'lucide-react';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
 import { pickLocaleText } from '@/lib/locale-text';
 import { dictFor } from '@/i18n/server';
@@ -17,21 +18,18 @@ export default async function MaintenancePage() {
     s = null;
   }
 
+  const phone = s?.phone ?? '';
+  const whatsapp = s?.whatsapp ?? '';
+  const email = s?.email ?? '';
   const hours = s ? pickLocaleText(s.hours, locale, s.hoursEn, s.hoursAr) : '';
-  // Saat metnini '·' ayracından satırlara böl: tamamı görünsün, kesilmesin.
-  const hoursLines = hours
+  // Saat metnini '·' ayracından parçalara böl: tamamı görünsün, kesilmesin.
+  const hoursParts = hours
     .split('·')
     .map((part) => part.trim())
-    .filter(Boolean)
-    .join('\n');
-  const contacts = s
-    ? [
-        { icon: Phone, label: m.phone, value: s.phone, href: telHref(s.phone), wide: false },
-        { icon: MessageCircle, label: m.whatsapp, value: m.whatsapp, href: s.whatsapp, wide: false },
-        { icon: Mail, label: m.email, value: s.email, href: `mailto:${s.email}`, wide: false },
-        ...(hours ? [{ icon: Clock, label: m.hours, value: hoursLines, href: undefined, wide: true }] : []),
-      ]
-    : [];
+    .filter(Boolean);
+
+  const btn =
+    'inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors';
 
   return (
     <main className="grid min-h-svh place-items-center bg-background p-6">
@@ -40,51 +38,80 @@ export default async function MaintenancePage() {
         <h1 className="text-headline mt-5">{m.title}</h1>
         <p className="mx-auto mt-5 max-w-md leading-relaxed text-muted-strong">{m.body}</p>
 
-        {contacts.length > 0 && (
-          <div className="mt-10 border-t border-border pt-8 text-start">
-            <p className="text-eyebrow">{m.contactTitle}</p>
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-              {contacts.map((c) => {
-                const Icon = c.icon;
-                const inner = (
-                  <>
-                    <Icon className="h-4 w-4 flex-none text-muted-strong" />
-                    <span className="min-w-0">
-                      <span className="block text-[0.65rem] tracking-[0.14em] text-muted uppercase">{c.label}</span>
-                      <span
-                        className={
-                          c.wide
-                            ? 'block whitespace-pre-line text-sm font-medium'
-                            : 'block truncate text-sm font-medium'
-                        }
-                      >
-                        {c.value}
-                      </span>
-                    </span>
-                  </>
-                );
-                return (
-                  <li key={c.label} className={c.wide ? 'sm:col-span-2' : undefined}>
-                    {c.href ? (
-                      <a
-                        href={c.href}
-                        target={c.href.startsWith('http') ? '_blank' : undefined}
-                        rel={c.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                        className="flex items-center gap-3 rounded-lg border border-border bg-background p-4 transition-colors hover:bg-surface-2"
-                      >
-                        {inner}
-                      </a>
-                    ) : (
-                      <div className={`flex gap-3 rounded-lg border border-border bg-background p-4 ${c.wide ? 'items-start' : 'items-center'}`}>
-                        {inner}
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/" className={`${btn} bg-foreground text-background hover:opacity-90`}>
+            <RefreshCw className="h-4 w-4" />
+            {m.retry}
+          </Link>
+          {whatsapp && (
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${btn} bg-[#25d366] text-white hover:brightness-95`}
+            >
+              <MessageCircle className="h-4 w-4" />
+              {m.whatsapp}
+            </a>
+          )}
+          {phone && (
+            <a
+              href={telHref(phone)}
+              className={`${btn} border border-border hover:bg-surface-2`}
+            >
+              <Phone className="h-4 w-4" />
+              {phone}
+            </a>
+          )}
+        </div>
+
+        {(phone || email || whatsapp || hours) && (
+          <div className="mt-10 border-t border-border pt-8">
+            <p className="text-eyebrow">{m.contactLine}</p>
+            <div className="mt-4 flex flex-col items-center gap-3 text-sm text-muted-strong">
+              {(phone || email || whatsapp) && (
+                <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+                  {phone && (
+                    <a
+                      href={telHref(phone)}
+                      className="text-foreground underline underline-offset-4 hover:text-accent"
+                    >
+                      {phone}
+                    </a>
+                  )}
+                  {phone && (email || whatsapp) && <span aria-hidden>·</span>}
+                  {email && (
+                    <a
+                      href={`mailto:${email}`}
+                      className="text-foreground underline underline-offset-4 hover:text-accent"
+                    >
+                      {email}
+                    </a>
+                  )}
+                  {email && whatsapp && <span aria-hidden>·</span>}
+                  {whatsapp && (
+                    <a
+                      href={whatsapp}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-foreground underline underline-offset-4 hover:text-accent"
+                    >
+                      {m.whatsapp}
+                    </a>
+                  )}
+                </p>
+              )}
+              {hours && (
+                <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                  <Clock className="h-4 w-4 flex-none text-muted" />
+                  <span>{hoursParts.join(' · ')}</span>
+                </p>
+              )}
+            </div>
           </div>
         )}
+
+        <p className="mt-8 text-xs text-muted">{m.auto}</p>
       </div>
     </main>
   );
