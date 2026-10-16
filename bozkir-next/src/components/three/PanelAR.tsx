@@ -117,9 +117,12 @@ export function PanelAR({ color = '#d9cdb4' }: { color?: string }) {
           setActive(true);
           void startAR();
         }}
+        aria-label={t('product.viewAR')}
+        title={t('product.viewAR')}
         className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-surface-2"
       >
-        <Scan className="h-3.5 w-3.5" aria-hidden /> {t('product.viewAR')}
+        <Scan className="h-3.5 w-3.5" aria-hidden />
+        <span className="hidden sm:inline">{t('product.viewAR')}</span>
       </button>
 
       {active && (

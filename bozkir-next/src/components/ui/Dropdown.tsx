@@ -11,6 +11,8 @@ const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : use
 export interface DropdownOption {
   value: string;
   label: string;
+  /** Opsiyonel renk noktası (ör. yüzey bitiş rengi). */
+  dot?: string;
 }
 
 /**
@@ -148,7 +150,16 @@ export function Dropdown({
           triggerClassName,
         )}
       >
-        <span className="truncate">{selected?.label}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          {selected?.dot && (
+            <span
+              className="h-3 w-3 flex-none rounded-full border border-black/10"
+              style={{ backgroundColor: selected.dot }}
+              aria-hidden
+            />
+          )}
+          <span className="truncate">{selected?.label}</span>
+        </span>
         <ChevronDown
           className={cn(
             'flex-none text-muted transition-transform duration-200',
@@ -187,7 +198,16 @@ export function Dropdown({
                       i === active ? 'bg-surface-2' : 'hover:bg-surface-2',
                     )}
                   >
-                    <span className="truncate">{opt.label}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      {opt.dot && (
+                        <span
+                          className="h-3 w-3 flex-none rounded-full border border-black/10"
+                          style={{ backgroundColor: opt.dot }}
+                          aria-hidden
+                        />
+                      )}
+                      <span className="truncate">{opt.label}</span>
+                    </span>
                     {isSelected && <Check className="h-4 w-4 flex-none" aria-hidden />}
                   </button>
                 </li>

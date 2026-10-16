@@ -3,11 +3,12 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { RotateCcw, RotateCw } from 'lucide-react';
+import { RotateCcw, RotateCw, Layers, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { Dropdown } from '@/components/ui/Dropdown';
 import type { PanelFinish, PanelView } from './PanelViewer';
 
 // WebGL sahnesi yalnızca görünür alana girince indirilir (code-split + lazy).
@@ -117,6 +118,19 @@ export function Panel3D() {
     finish.color,
   ];
 
+  const segBtn = (active: boolean) =>
+    cn(
+      'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors',
+      active ? 'bg-foreground text-background' : 'text-muted-strong hover:text-foreground',
+    );
+  const iconBtn = (active: boolean) =>
+    cn(
+      'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+      active
+        ? 'border-foreground bg-foreground text-background'
+        : 'border-border text-muted-strong hover:border-border-strong hover:text-foreground',
+    );
+
   return (
     <div className="flex h-full w-full flex-col">
       <div ref={hostRef} className="relative min-h-0 flex-1">
@@ -132,73 +146,101 @@ export function Panel3D() {
             dprMax={isMobile ? 1.25 : 1.5}
           />
         )}
-        <span className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1.5 text-[0.65rem] tracking-[0.14em] text-muted uppercase backdrop-blur">
-          <RotateCcw className="h-3.5 w-3.5" /> {h.hint}
+        <span
+          title={h.hint}
+          className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1.5 text-[0.65rem] tracking-[0.14em] text-muted uppercase backdrop-blur"
+        >
+          <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+          <span className="hidden sm:inline">{h.hint}</span>
         </span>
       </div>
 
       <div className="border-t border-border p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Mobil: bitiş seçimi tek dropdown */}
+        <div className="sm:hidden">
           <span className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">
             {h.finishLabel}
           </span>
-          <div className="flex flex-wrap items-center gap-2">
+          <Dropdown
+            className="mt-2 w-full"
+            ariaLabel={h.finishLabel}
+            align="start"
+            triggerClassName="bg-surface"
+            value={finish.id}
+            onChange={(v) => {
+              const f = finishes.find((x) => x.id === v);
+              if (f) setFinish(f);
+            }}
+            options={finishes.map((f) => ({ value: f.id, label: f.label, dot: f.color }))}
+          />
+        </div>
+
+        {/* Kontroller: mobilde ikon-only */}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 sm:mt-0">
+          <span className="hidden text-[0.65rem] tracking-[0.14em] text-muted uppercase sm:inline">
+            {h.finishLabel}
+          </span>
+          <div className="flex flex-1 flex-wrap items-center justify-between gap-2 sm:flex-none sm:justify-end">
             <div className="inline-flex overflow-hidden rounded-full border border-border">
               <button
                 type="button"
                 onClick={() => setView('section')}
                 aria-pressed={view === 'section'}
-                className={cn(
-                  'px-3 py-1.5 text-xs font-medium transition-colors',
-                  view === 'section'
-                    ? 'bg-foreground text-background'
-                    : 'text-muted-strong hover:text-foreground',
-                )}
+                aria-label={h.sectionView}
+                title={h.sectionView}
+                className={segBtn(view === 'section')}
               >
-                {h.sectionView}
+                <Layers className="h-3.5 w-3.5" aria-hidden />
+                <span className="hidden sm:inline">{h.sectionView}</span>
               </button>
               <button
                 type="button"
                 onClick={() => setView('surface')}
                 aria-pressed={view === 'surface'}
-                className={cn(
-                  'px-3 py-1.5 text-xs font-medium transition-colors',
-                  view === 'surface'
-                    ? 'bg-foreground text-background'
-                    : 'text-muted-strong hover:text-foreground',
-                )}
+                aria-label={h.surfaceView}
+                title={h.surfaceView}
+                className={segBtn(view === 'surface')}
               >
-                {h.surfaceView}
+                <Square className="h-3.5 w-3.5" aria-hidden />
+                <span className="hidden sm:inline">{h.surfaceView}</span>
               </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setAutoRotate((v) => !v)}
-              aria-pressed={autoRotate}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                autoRotate
-                  ? 'border-foreground bg-foreground text-background'
-                  : 'border-border text-muted-strong hover:border-border-strong hover:text-foreground',
-              )}
-            >
-              <RotateCw
-                className={cn('h-3.5 w-3.5', autoRotate && 'animate-spin [animation-duration:3s]')}
-              />
-              {h.autoRotate}
-            </button>
-            <button
-              type="button"
-              onClick={() => setResetSignal((n) => n + 1)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-strong transition-colors hover:border-foreground hover:text-foreground"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              {h.resetView}
-            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setAutoRotate((v) => !v)}
+                aria-pressed={autoRotate}
+                aria-label={h.autoRotate}
+                title={h.autoRotate}
+                className={iconBtn(autoRotate)}
+              >
+                <RotateCw
+                  className={cn(
+                    'h-3.5 w-3.5',
+                    autoRotate && 'animate-spin [animation-duration:3s]',
+                  )}
+                  aria-hidden
+                />
+                <span className="hidden sm:inline">{h.autoRotate}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setResetSignal((n) => n + 1)}
+                aria-label={h.resetView}
+                title={h.resetView}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-strong transition-colors hover:border-foreground hover:text-foreground"
+              >
+                <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+                <span className="hidden sm:inline">{h.resetView}</span>
+              </button>
+              <PanelAR color={finish.color} />
+            </div>
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        {/* Masaüstü: bitiş çipleri */}
+        <div className="mt-3 hidden flex-wrap items-center gap-2 sm:flex">
           {finishes.map((f) => (
             <button
               key={f.id}
@@ -219,10 +261,10 @@ export function Panel3D() {
               {f.label}
             </button>
           ))}
-          <PanelAR color={finish.color} />
         </div>
 
-        <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.65rem] text-muted">
+        {/* Masaüstü: katman lejantı */}
+        <ul className="mt-3 hidden flex-wrap items-center gap-x-4 gap-y-1 text-[0.65rem] text-muted sm:flex">
           {legend.map((layer, i) => (
             <li key={`${layer}-${i}`} className="flex items-center gap-1.5">
               <span

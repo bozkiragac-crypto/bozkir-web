@@ -22,7 +22,7 @@ export async function Material3D({ locale }: { locale: Locale }) {
               aria-hidden
               className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-[color:var(--color-accent-soft)]/12 blur-2xl"
             />
-            <div className="h-[480px] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] sm:h-[560px]">
+            <div className="h-[380px] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] sm:h-[480px] lg:h-[560px]">
               <Panel3D />
             </div>
           </div>
