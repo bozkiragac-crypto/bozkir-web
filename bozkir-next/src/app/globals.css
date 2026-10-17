@@ -263,6 +263,15 @@ html[data-compare='1'] [data-product-cta] {
   *::-webkit-scrollbar-track {
     background: transparent;
   }
+
+  /* Yerleşik arama temizleme "×"i kendi butonumuzla çift görünmesin
+     (SearchDialog/ProductFilter/CategorySearch kendi ×'ini gösterir). */
+  input[type='search'],
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
 }
 
 @layer utilities {
