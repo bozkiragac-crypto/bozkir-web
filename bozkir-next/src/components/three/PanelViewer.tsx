@@ -28,18 +28,12 @@ export interface PanelFinish {
   surface: PanelSurface;
 }
 
-export type PanelView = 'section' | 'surface';
-
 interface PanelViewerProps {
   finish: PanelFinish;
   /** Görünür değilken render döngüsünü durdurur (performans). */
   active?: boolean;
-  /** Otomatik döndürme açık mı. */
-  autoRotate?: boolean;
   /** Dışarıdan artırıldığında kamerayı başlangıca döndürür. */
   resetSignal?: number;
-  /** Kamera ön ayarı: kesit (açılı) veya yüzey (cepheden). */
-  view?: PanelView;
   /** Cihaz başına piksel oranı üst sınırı (mobilde düşürülür). */
   dprMax?: number;
 }
@@ -50,12 +44,9 @@ const THICKNESS = 0.16;
 const SURFACE_T = 0.022;
 const EDGE_COLOR = '#3a2f22';
 
-/** Kamera ön ayarı: kesit (yandan açılı → katmanlar) vs yüzey (cephe). */
-const VIEW_CAM: Record<PanelView, [number, number, number]> = {
-  section: [-3.4, 0.9, 2.6],
-  surface: [0, 0.05, 3.4],
-};
-/** Model dönüşü sabittir (görünüme göre değişmez) — fark yalnız kamera açısıdır. */
+/** Tek sabit kamera: hafif açılı ama göz hizası → panel level durur, katman kenarı görünür. */
+const CAM: [number, number, number] = [-1.9, 0.12, 3.5];
+/** Model yönelimi sabittir (level) — idle sallanma yok. */
 const BASE_ROT: [number, number, number] = [0, 0, 0];
 const ZERO = new THREE.Vector3(0, 0, 0);
 
@@ -211,16 +202,15 @@ function usePanelResources(): PanelResources {
   return res;
 }
 
-/** Katmanlı panel: kaplama + öz + kaplama. Öz/yüzey ve yönelim bitiş/görünüme göre değişir. */
+/** Katmanlı panel: kaplama + öz + kaplama. Yalnız yüzey/öz bitişe göre değişir; model level durur. */
 function PanelModel({ finish }: { finish: PanelFinish }) {
   const { surfaceSmooth, surfaceRaw, coreMdf, coreParticle } = usePanelResources();
   const targetColor = useMemo(() => new THREE.Color(finish.color), [finish.color]);
-  const group = useRef<THREE.Group>(null);
 
   const surface = finish.surface === 'raw' ? surfaceRaw : surfaceSmooth;
   const core = finish.core === 'particle' ? coreParticle : coreMdf;
 
-  useFrame((state) => {
+  useFrame(() => {
     if (finish.surface !== 'raw') {
       surfaceSmooth.color.lerp(targetColor, 0.12);
       surfaceSmooth.roughness = THREE.MathUtils.lerp(
@@ -239,23 +229,13 @@ function PanelModel({ finish }: { finish: PanelFinish }) {
         0.1,
       );
     }
-    if (group.current) {
-      const t = state.clock.elapsedTime;
-      const g = group.current;
-      g.rotation.x =
-        THREE.MathUtils.lerp(g.rotation.x, BASE_ROT[0], 0.1) + Math.sin(t * 0.4) * 0.004;
-      g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, BASE_ROT[1], 0.1);
-      g.rotation.z =
-        THREE.MathUtils.lerp(g.rotation.z, BASE_ROT[2], 0.1) + Math.sin(t * 0.4) * 0.01;
-      g.position.y = Math.sin(t * 0.7) * 0.02;
-    }
   });
 
   const surfaceZ = THICKNESS / 2 - SURFACE_T / 2;
   const coreDepth = THICKNESS - SURFACE_T * 2;
 
   return (
-    <group ref={group} rotation={BASE_ROT}>
+    <group rotation={BASE_ROT}>
       <RoundedBox
         args={[WIDTH, HEIGHT, SURFACE_T]}
         radius={0.008}
@@ -286,21 +266,20 @@ function PanelModel({ finish }: { finish: PanelFinish }) {
   );
 }
 
-/** Kamera ön ayarı: görünüm/sıfırlama değişiminde TEK ATIŞ geçiş yapar,
-    sonra kamerayı OrbitControls'a bırakır (sürükle-döndür + autoRotate serbest). */
-function CameraRig({ view, signal }: { view: PanelView; signal: number }) {
+/** Sıfırlama: TEK ATIŞ kamerayı başlangıca döndürür, sonra OrbitControls'a bırakır. */
+function CameraRig({ signal }: { signal: number }) {
   const camera = useThree((s) => s.camera);
   const controls = useThree((s) => s.controls) as {
     target: THREE.Vector3;
     update: () => void;
   } | null;
-  const target = useRef(new THREE.Vector3(...VIEW_CAM[view]));
+  const target = useRef(new THREE.Vector3(...CAM));
   const animating = useRef(false);
 
   useEffect(() => {
-    target.current.set(...VIEW_CAM[view]);
+    target.current.set(...CAM);
     animating.current = true;
-  }, [view, signal]);
+  }, [signal]);
 
   useFrame(() => {
     if (!animating.current) return;
@@ -320,14 +299,13 @@ function CameraRig({ view, signal }: { view: PanelView; signal: number }) {
 
 /**
  * Premium 3D panel kesiti: katmanlı model (bitişe göre öz/yüzey), studyo
- * yansımaları, damping'li döndürme, sınırlı zoom, kamera ön ayarı ve etiket.
+ * yansımaları, damping'li döndürme, sınırlı zoom ve etiket. Panel level durur
+ * ve her zaman kendi kendine döner.
  */
 export function PanelViewer({
   finish,
   active = true,
-  autoRotate = true,
   resetSignal = 0,
-  view = 'section',
   dprMax = 1.75,
 }: PanelViewerProps) {
   const [localReset, setLocalReset] = useState(0);
@@ -356,7 +334,7 @@ export function PanelViewer({
       <Canvas
         dpr={[1, dprMax]}
         frameloop={active ? 'always' : 'never'}
-        camera={{ position: VIEW_CAM.section, fov: 32 }}
+        camera={{ position: CAM, fov: 32 }}
         performance={{ min: 0.6 }}
         gl={{
           antialias: true,
@@ -422,13 +400,13 @@ export function PanelViewer({
           maxDistance={7.5}
           minPolarAngle={Math.PI / 3.4}
           maxPolarAngle={Math.PI / 1.75}
-          autoRotate={autoRotate && view === 'section'}
-          autoRotateSpeed={0.6}
+          autoRotate
+          autoRotateSpeed={0.8}
           rotateSpeed={0.55}
           zoomSpeed={0.6}
         />
 
-        <CameraRig view={view} signal={localReset + resetSignal} />
+        <CameraRig signal={localReset + resetSignal} />
       </Canvas>
     </div>
   );

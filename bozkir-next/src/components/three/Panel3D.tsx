@@ -3,13 +3,13 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { RotateCcw, RotateCw, Layers, Square } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { Dropdown } from '@/components/ui/Dropdown';
-import type { PanelFinish, PanelView } from './PanelViewer';
+import type { PanelFinish } from './PanelViewer';
 
 // WebGL sahnesi yalnızca görünür alana girince indirilir (code-split + lazy).
 const PanelViewer = dynamic(() => import('./PanelViewer').then((m) => m.PanelViewer), {
@@ -86,8 +86,6 @@ export function Panel3D() {
   const [seeded, setSeeded] = useState(false);
   const [inView, setInView] = useState(false);
   const [finish, setFinish] = useState(finishes[0]!);
-  const [autoRotate, setAutoRotate] = useState(false);
-  const [view, setView] = useState<PanelView>('section');
   const [resetSignal, setResetSignal] = useState(0);
 
   // WebGL yalnızca ekrana girince başlar; ekrandan çıkınca render durur.
@@ -118,19 +116,6 @@ export function Panel3D() {
     finish.color,
   ];
 
-  const segBtn = (active: boolean) =>
-    cn(
-      'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors',
-      active ? 'bg-foreground text-background' : 'text-muted-strong hover:text-foreground',
-    );
-  const iconBtn = (active: boolean) =>
-    cn(
-      'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-      active
-        ? 'border-foreground bg-foreground text-background'
-        : 'border-border text-muted-strong hover:border-border-strong hover:text-foreground',
-    );
-
   return (
     <div className="flex h-full w-full flex-col">
       <div ref={hostRef} className="relative min-h-0 flex-1">
@@ -140,9 +125,7 @@ export function Panel3D() {
           <PanelViewer
             finish={finish}
             active={inView}
-            autoRotate={autoRotate}
             resetSignal={resetSignal}
-            view={view}
             dprMax={isMobile ? 1.25 : 1.5}
           />
         )}
@@ -181,49 +164,7 @@ export function Panel3D() {
             {h.finishLabel}
           </span>
           <div className="flex flex-1 flex-wrap items-center justify-between gap-2 sm:flex-none sm:justify-end">
-            <div className="inline-flex overflow-hidden rounded-full border border-border">
-              <button
-                type="button"
-                onClick={() => setView('section')}
-                aria-pressed={view === 'section'}
-                aria-label={h.sectionView}
-                title={h.sectionView}
-                className={segBtn(view === 'section')}
-              >
-                <Layers className="h-3.5 w-3.5" aria-hidden />
-                <span className="hidden sm:inline">{h.sectionView}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setView('surface')}
-                aria-pressed={view === 'surface'}
-                aria-label={h.surfaceView}
-                title={h.surfaceView}
-                className={segBtn(view === 'surface')}
-              >
-                <Square className="h-3.5 w-3.5" aria-hidden />
-                <span className="hidden sm:inline">{h.surfaceView}</span>
-              </button>
-            </div>
-
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setAutoRotate((v) => !v)}
-                aria-pressed={autoRotate}
-                aria-label={h.autoRotate}
-                title={h.autoRotate}
-                className={iconBtn(autoRotate)}
-              >
-                <RotateCw
-                  className={cn(
-                    'h-3.5 w-3.5',
-                    autoRotate && 'animate-spin [animation-duration:3s]',
-                  )}
-                  aria-hidden
-                />
-                <span className="hidden sm:inline">{h.autoRotate}</span>
-              </button>
               <button
                 type="button"
                 onClick={() => setResetSignal((n) => n + 1)}
