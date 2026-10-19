@@ -26,6 +26,7 @@ import {
   ALLOWED_PDF_MIME,
 } from '@/lib/media';
 import { optimizeImage } from '@/lib/image-optimize';
+import { safeHref } from '@/lib/safe-url';
 import { DATA_TAGS } from '@/lib/data/tags';
 import {
   deleteObject,
@@ -546,8 +547,23 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.', created: 0, updated: 0 };
 
+  // Kötüye kullanımı önle: sınırsız CSV tek çağrıda DB'yi kilitleyemesin.
+  const MAX_CSV_BYTES = 5 * 1024 * 1024;
+  const MAX_CSV_ROWS = 5000;
+  if (csv.length > MAX_CSV_BYTES) {
+    return { ok: false, error: 'CSV çok büyük (en fazla 5 MB).', created: 0, updated: 0 };
+  }
+
   const rows = parseCsv(csv);
   if (rows.length === 0) return { ok: false, error: 'Dosya boş.', created: 0, updated: 0 };
+  if (rows.length - 1 > MAX_CSV_ROWS) {
+    return {
+      ok: false,
+      error: `En fazla ${MAX_CSV_ROWS} satır içe aktarılabilir.`,
+      created: 0,
+      updated: 0,
+    };
+  }
 
   const header = rows[0]!.map((h) => h.trim().toLowerCase());
   const idx = (name: string) => header.indexOf(name);
@@ -669,7 +685,7 @@ export async function saveCampaign(
     title,
     description: input.description.trim() || null,
     imageUrl: imageInput ? (objectKeyFromUrl(imageInput) ?? imageInput) : null,
-    linkUrl: input.linkUrl.trim() || null,
+    linkUrl: safeHref(input.linkUrl) || null,
     linkLabel: input.linkLabel.trim() || 'İncele',
     sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
     isActive: input.isActive,
@@ -1035,7 +1051,7 @@ export async function saveBrand(
   const payload = {
     name,
     logo: logo ? (objectKeyFromUrl(logo) ?? logo) : null,
-    url: input.url.trim() || null,
+    url: safeHref(input.url) || null,
     category: input.category.trim() || null,
     categoryEn: input.categoryEn?.trim() || null,
     categoryAr: input.categoryAr?.trim() || null,
@@ -1159,7 +1175,7 @@ export async function saveContentItem(
     title: input.title.trim() || null,
     description: input.description.trim() || null,
     imageUrl: imageInput ? (objectKeyFromUrl(imageInput) ?? imageInput) : null,
-    linkUrl: input.linkUrl.trim() || null,
+    linkUrl: safeHref(input.linkUrl) || null,
     tag: input.tag.trim() || null,
     sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
     isActive: input.isActive,

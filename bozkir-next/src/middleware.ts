@@ -83,7 +83,11 @@ export async function middleware(request: NextRequest) {
     if (isLogin && authorized) {
       return NextResponse.redirect(new URL('/admin', request.url));
     }
-    return NextResponse.next();
+    // admin layout'ın oturum iptalini (DB: pasif/silinmiş kullanıcı) doğrulaması
+    // ve giriş sayfasını ayırt etmesi için yolu başlığa yaz.
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-pathname', pathname);
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // 2) Dil yönlendirmesi: /x → /tr/x (dizinde geçerli dil yoksa).

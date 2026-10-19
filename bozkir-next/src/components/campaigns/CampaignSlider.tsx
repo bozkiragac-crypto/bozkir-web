@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { Campaign } from '@/types/campaign';
 import { cn } from '@/lib/utils';
+import { safeHref } from '@/lib/safe-url';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
@@ -113,9 +114,9 @@ export function CampaignSlider({ campaigns }: { campaigns: Campaign[] }) {
                   {c.description && (
                     <p className="mt-3 max-w-xl text-sm text-white/80 md:text-base">{c.description}</p>
                   )}
-                  {c.linkUrl && (
+                  {safeHref(c.linkUrl) && (
                     <Link
-                      href={c.linkUrl}
+                      href={safeHref(c.linkUrl)}
                       className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-medium text-[#111] transition-transform hover:-translate-y-0.5"
                     >
                       {c.linkLabel || t('home.campaign.readMore')} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />

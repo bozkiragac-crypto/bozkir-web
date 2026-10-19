@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { X, ArrowRight, Megaphone } from 'lucide-react';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { safeHref } from '@/lib/safe-url';
 
 const STORAGE_KEY = 'bozkir:popup:seen';
 
@@ -153,9 +154,9 @@ export function CampaignPopup({
               {campaign.description}
             </p>
           )}
-          {campaign.linkUrl && (
+          {safeHref(campaign.linkUrl) && (
             <Link
-              href={campaign.linkUrl}
+              href={safeHref(campaign.linkUrl)}
               onClick={close}
               className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 text-sm font-medium text-background transition-opacity hover:opacity-90 sm:w-auto"
             >

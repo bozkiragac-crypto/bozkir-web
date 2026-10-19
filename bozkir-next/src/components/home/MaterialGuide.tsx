@@ -4,6 +4,7 @@ import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal } from '@/components/animations/Reveal';
 import { Panel, PanelGrid, PanelLink } from '@/components/ui/Panel';
+import { safeHref } from '@/lib/safe-url';
 import { dictFor } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
@@ -20,6 +21,7 @@ export async function MaterialGuide({ block, locale }: { block: ContentBlock; lo
       <Reveal className="mt-12">
         <PanelGrid className="sm:grid-cols-2 lg:grid-cols-3">
           {block.items.map((item) => {
+            const link = safeHref(item.linkUrl);
             const inner = (
               <>
                 {item.tag && (
@@ -31,7 +33,7 @@ export async function MaterialGuide({ block, locale }: { block: ContentBlock; lo
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-strong">
                   {item.description}
                 </p>
-                {item.linkUrl && (
+                {link && (
                   <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium">
                     {h.collectionCta} <ArrowUpRight className="h-4 w-4" />
                   </span>
@@ -39,10 +41,10 @@ export async function MaterialGuide({ block, locale }: { block: ContentBlock; lo
               </>
             );
 
-            return item.linkUrl ? (
+            return link ? (
               <PanelLink
                 key={item.id}
-                href={item.linkUrl}
+                href={link}
                 className="group p-8 transition-colors hover:bg-surface-2"
               >
                 {inner}

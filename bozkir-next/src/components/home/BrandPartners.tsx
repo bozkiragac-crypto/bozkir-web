@@ -3,6 +3,7 @@ import type { Brand } from '@/types/brand';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { cn } from '@/lib/utils';
+import { safeHref } from '@/lib/safe-url';
 import { dictFor } from '@/i18n/server';
 import type { CSSProperties } from 'react';
 import type { Locale } from '@/i18n/config';
@@ -41,9 +42,9 @@ export async function BrandPartners({ brands, locale }: { brands: Brand[]; local
     <ul className="flex" aria-hidden={hidden || undefined}>
       {brands.map((brand) => (
         <li key={brand.id}>
-          {brand.url ? (
+          {safeHref(brand.url) ? (
             <a
-              href={brand.url}
+              href={safeHref(brand.url)}
               target="_blank"
               rel="noopener noreferrer"
               className={cn('group', cell)}
