@@ -523,14 +523,16 @@ git log --oneline -5
 APP_TAG=<önceki-commit-sha> docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d app
 ```
 
-**Veritabanı geri alma:**
+**Veritabanı + medya geri alma:**
 
 ```bash
-ls -lt backups/ | head                 # yedek klasörünü seçin
-docker cp bozkir-next-db-1:/tmp/db.dump /tmp/db.dump
-cat backups/<TARIH>/db.dump | docker exec -i bozkir-next-db-1 psql -U bozkir -d bozkir -c 'DROP DATABASE bozkir WITH (FORCE);' >/dev/null
-# Sıfırdan kurulum gerektiğinde: yeni volume ile postgres'i başlatıp dump'u yükleyin
+ls -lt backups/ | head                 # yedek klasörünü seçin (db.sql + storage.tar.gz)
+./scripts/restore.sh ./backups/<TARIH> # onay sorar; DB'yi ve medyayı geri yükler
+docker compose restart app
 ```
+
+`restore.sh` mevcut veritabanını ve medyayı siler; emin değilseniz önce
+`./scripts/verify-backup.sh` ile yedeğin sağlamlığını doğrulayın.
 
 **Tüm yığını geri alma:** `docker compose -f docker-compose.yml -f docker-compose.prod.yml down`
 (veri volume'ları silinmez; `down -v` kullanmayın — yedekleri de siler).

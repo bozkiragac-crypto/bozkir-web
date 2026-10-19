@@ -33,12 +33,20 @@ jobs:
             set -eo pipefail
             cd ${{ secrets.VPS_PATH }}
             git fetch --all
+            git checkout --force main
             git reset --hard origin/main
             cd bozkir-next
 
+            # Prod override (TLS/443 + sertifika mount) HER komutta uygulanır;
+            # aksi halde nginx HTTP'ye düşer ve TLS kaybolur.
+            DC="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+
+            # Compose değişkenleri (POSTGRES_* vb.) shell'e alınır (pg_dump için).
+            if [ -f .env ]; then set -a; . ./.env; set +a; fi
+
             # 0) Migrasyon öncesi hızlı yedek (başarısızsa deploy durur).
             mkdir -p backups/pre-deploy
-            docker compose exec -T db pg_dump -U "${POSTGRES_USER:-bozkir}" "${POSTGRES_DB:-bozkir}" \
+            $DC exec -T db pg_dump -U "${POSTGRES_USER:-bozkir}" "${POSTGRES_DB:-bozkir}" \
               | gzip > "backups/pre-deploy/pre-$(date +%Y%m%d_%H%M%S).sql.gz"
             # Son 10 pre-deploy yedeği kalsın.
             ls -1t backups/pre-deploy/*.sql.gz 2>/dev/null | tail -n +11 | xargs -r rm -f || true
@@ -47,30 +55,33 @@ jobs:
             PREV_TAG="$(cat .last-good-tag 2>/dev/null || true)"
             TAG="$(git rev-parse --short HEAD)"
             echo "Dağıtılan sürüm: $TAG (önceki: ${PREV_TAG:-yok})"
-            APP_TAG="$TAG" docker compose build app
-            APP_TAG="$TAG" docker compose up -d
+            APP_TAG="$TAG" $DC build app
+            APP_TAG="$TAG" $DC up -d
             # App IP'si değişti; nginx upstream DNS'ini yeniden çöz.
-            docker compose restart nginx >/dev/null
+            $DC restart nginx >/dev/null
 
             # 2) Şema migrasyonu (idempotent) + tohumlama (mevcut veriyi ezmez).
-            docker compose exec -T app node scripts/db-migrate.mjs
-            docker compose exec -T app node scripts/seed-catalog-meta.mjs || true
-            docker compose exec -T app node scripts/seed-content-i18n.mjs || true
+            $DC exec -T app node scripts/db-migrate.mjs
+            $DC exec -T app node scripts/seed-catalog-meta.mjs || true
+            $DC exec -T app node scripts/seed-content-i18n.mjs || true
 
-            # 3) Sağlık kontrolü; başarısızsa önceki sürüme otomatik dön.
+            # 3) Sağlık kontrolü: nginx yönlendirmesinden bağımsız, uygulamaya
+            #    doğrudan sorulur (HTTP:301'i başarı saymamak için).
             OK=0
             for i in $(seq 1 20); do
-              if curl -fsS "http://localhost/api/health?deep=1" >/dev/null; then OK=1; break; fi
+              if $DC exec -T app wget -qO- "http://127.0.0.1:3000/api/health?deep=1" >/dev/null 2>&1; then
+                OK=1; break
+              fi
               sleep 3
             done
             if [ "$OK" != "1" ]; then
               echo "Sağlık kontrolü başarısız; önceki sürüme dönülüyor..." >&2
               if [ -n "$PREV_TAG" ]; then
-                APP_TAG="$PREV_TAG" docker compose up -d
-                docker compose restart nginx >/dev/null
+                APP_TAG="$PREV_TAG" $DC up -d
+                $DC restart nginx >/dev/null
                 echo "Rollback tamam: $PREV_TAG" >&2
               fi
-              docker compose logs --tail=80 app
+              $DC logs --tail=80 app
               exit 1
             fi
 

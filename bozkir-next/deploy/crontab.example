@@ -7,5 +7,7 @@
 # Ayda bir (1. gün 04:30) — restore tatbikatı (geçici DB'ye geri yükleme)
 30 4 1 * * cd /opt/bozkir-web/bozkir-next && ./scripts/verify-backup.sh >> backups/logs/verify.log 2>&1
 
-# Günlük 09:00 — sağlık kontrolü başarısızsa bildirim (Uptime Kuma yoksa)
-0 9 * * * curl -fsS http://localhost/api/health?deep=1 >/dev/null || curl -fsS -m 10 -H 'Content-Type: application/json' -d '{"text":"❌ Bozkır Ağaç sağlık kontrolü başarısız"}' "$ALERT_WEBHOOK_URL" >/dev/null 2>&1
+# Günlük 09:00 — sağlık kontrolü başarısızsa bildirim (Uptime Kuma yoksa).
+# Not: /etc/bozkir-backup.env (ALERT_WEBHOOK_URL) burada kaynak edilir; -L ile
+# TLS yönlendirmesi izlenir (301 başarı sayılmaz).
+0 9 * * * . /etc/bozkir-backup.env 2>/dev/null; curl -fsSL -m 15 https://localhost/api/health?deep=1 >/dev/null || curl -fsS -m 10 -H 'Content-Type: application/json' -d '{"text":"❌ Bozkır Ağaç sağlık kontrolü başarısız"}' "$ALERT_WEBHOOK_URL" >/dev/null 2>&1

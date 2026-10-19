@@ -19,7 +19,14 @@ for (const file of ['.env.local', '.env']) {
   }
 }
 
-const username = (process.argv[2] ?? process.env.ADMIN_USERNAME ?? 'bozkir').trim().toLowerCase();
+const username = (
+  process.argv[2] ??
+  process.env.ADMIN_SEED_USERNAME ??
+  process.env.ADMIN_USERNAME ??
+  'bozkir'
+)
+  .trim()
+  .toLowerCase();
 const password = process.argv[3] ?? process.env.ADMIN_SEED_PASSWORD;
 const name = process.argv[4] ?? username;
 
