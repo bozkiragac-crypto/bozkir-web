@@ -1728,7 +1728,7 @@ export const dictionaries = {
         depotMapTitle: 'موقع مستودع منتجات بوزكير الخشبية',
         depotDescription: 'يمكنكم زيارة مستودعنا للشحن والمخزون.',
         officeTitle: 'موقع المكتب',
-        officeMapTitle: 'موقع مكتب Bozkır Ağaç Ürünleri',
+        officeMapTitle: 'موقع مكتب منتجات بوزكير الخشبية',
         officeDescription: 'يمكنكم زيارة مكتبنا الرئيسي.',
         directions: 'احصل على الاتجاهات',
         openInMaps: 'افتح في الخرائط',

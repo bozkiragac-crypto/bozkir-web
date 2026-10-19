@@ -229,6 +229,7 @@ function UserRow({
         <td className="p-4">
           <input
             className={field}
+            aria-label="Kullanıcı adı"
             value={form.username}
             onChange={(e) => setForm({ ...form, username: e.target.value })}
           />
@@ -236,6 +237,7 @@ function UserRow({
         <td className="p-4">
           <input
             className={field}
+            aria-label="Ad"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
@@ -268,6 +270,7 @@ function UserRow({
         <td className="p-4">
           <input
             className={field}
+            aria-label="Yeni şifre"
             placeholder="Yeni şifre (ops.)"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}

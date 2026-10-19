@@ -51,7 +51,8 @@ export async function fetchAllCategoryMeta(locale?: Locale): Promise<Category[]>
   try {
     const all = await getAllCategoriesCached();
     return all.map((c) => localize(c, locale));
-  } catch {
+  } catch (err) {
+    console.error('[data:categories] okuma hatası:', err);
     return [];
   }
 }

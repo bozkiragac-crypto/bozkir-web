@@ -89,9 +89,9 @@ export function ProductCard({
                 {product.code}
               </p>
             )}
-            <h3 className="link-underline-group mt-1 inline-block text-sm font-medium tracking-tight sm:text-base">
+            <h2 className="link-underline-group mt-1 inline-block text-sm font-medium tracking-tight sm:text-base">
               {product.name}
-            </h3>
+            </h2>
             <p
               className={cn(
                 'mt-1 text-xs text-muted-strong sm:text-sm',

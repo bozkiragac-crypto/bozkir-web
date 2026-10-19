@@ -72,8 +72,9 @@ export async function putObject(
 export async function deleteObject(key: string): Promise<void> {
   try {
     await getClient().send(new DeleteObjectCommand({ Bucket: MEDIA_BUCKET, Key: key }));
-  } catch {
-    // yok say
+  } catch (err) {
+    // Silme başarısızsa nesne yetim kalır; sessizce yutma, logla.
+    console.error(`[storage:s3] deleteObject başarısız (yetim nesne): ${key}`, err);
   }
 }
 

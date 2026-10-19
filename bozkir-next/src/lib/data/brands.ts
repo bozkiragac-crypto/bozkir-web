@@ -32,7 +32,8 @@ export async function fetchBrands(): Promise<Brand[]> {
   try {
     const rows = await getBrandsCached();
     return rows.length ? rows : fallbackBrands;
-  } catch {
+  } catch (err) {
+    console.error('[data:brands] okuma hatası, statik fallback kullanılıyor:', err);
     return fallbackBrands;
   }
 }

@@ -212,7 +212,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
         )}
 
         {query.length >= 2 && (
-          <div>
+          <div role="status" aria-live="polite">
             <p className="text-eyebrow px-5 pt-4">{t('search.suggestions')}</p>
             <ul className="mt-2 max-h-[46vh] overflow-y-auto pb-2">
               {loading && results.length === 0 ? (

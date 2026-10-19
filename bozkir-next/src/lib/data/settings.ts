@@ -132,7 +132,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     const saved = await loadSettings();
     return merge(base, saved);
-  } catch {
+  } catch (err) {
+    console.error('[data:settings] getSiteSettings okuma hatası:', err);
     return base;
   }
 }
@@ -153,7 +154,8 @@ export async function getSiteSettingsFresh(): Promise<SiteSettings> {
       .where(eq(siteSettings.key, SETTINGS_KEY))
       .limit(1);
     return merge(base, (rows[0]?.value as Partial<SiteSettings>) ?? {});
-  } catch {
+  } catch (err) {
+    console.error('[data:settings] getSiteSettingsFresh okuma hatası:', err);
     return base;
   }
 }

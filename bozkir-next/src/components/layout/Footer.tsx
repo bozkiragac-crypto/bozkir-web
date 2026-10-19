@@ -33,24 +33,28 @@ function Social({ s }: { s: SiteSettings }) {
     'inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-strong transition-colors hover:bg-surface-2 hover:text-foreground';
   return (
     <div className="flex items-center gap-1">
-      <a
-        href={s.social.instagram}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Instagram"
-        className={item}
-      >
-        <Instagram className="h-5 w-5" />
-      </a>
-      <a
-        href={s.social.facebook}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Facebook"
-        className={item}
-      >
-        <Facebook className="h-5 w-5" />
-      </a>
+      {s.social.instagram && (
+        <a
+          href={s.social.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram"
+          className={item}
+        >
+          <Instagram className="h-5 w-5" />
+        </a>
+      )}
+      {s.social.facebook && (
+        <a
+          href={s.social.facebook}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Facebook"
+          className={item}
+        >
+          <Facebook className="h-5 w-5" />
+        </a>
+      )}
       {s.social.youtube && (
         <a
           href={s.social.youtube}
@@ -84,16 +88,18 @@ function Social({ s }: { s: SiteSettings }) {
           <Twitter className="h-5 w-5" />
         </a>
       )}
-      <a
-        href={s.whatsapp}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="WhatsApp"
-        onClick={() => track('whatsapp_click', { source: 'footer' })}
-        className={item}
-      >
-        <MessageCircle className="h-5 w-5" />
-      </a>
+      {s.whatsapp && (
+        <a
+          href={s.whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp"
+          onClick={() => track('whatsapp_click', { source: 'footer' })}
+          className={item}
+        >
+          <MessageCircle className="h-5 w-5" />
+        </a>
+      )}
     </div>
   );
 }

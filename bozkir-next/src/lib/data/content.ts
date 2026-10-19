@@ -76,7 +76,8 @@ export async function fetchContentBlocks(locale?: Locale): Promise<ContentBlock[
         sortOrder: it.sortOrder,
       })),
     }));
-  } catch {
+  } catch (err) {
+    console.error('[data:content] okuma hatası:', err);
     return [];
   }
 }

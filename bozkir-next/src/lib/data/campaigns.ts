@@ -58,7 +58,8 @@ export async function fetchCampaigns(locale?: Locale): Promise<Campaign[]> {
       linkLabel: pickLocaleText(c.linkLabel, locale, c.linkLabelEn, c.linkLabelAr),
       sortOrder: c.sortOrder,
     }));
-  } catch {
+  } catch (err) {
+    console.error('[data:campaigns] okuma hatası:', err);
     return [];
   }
 }

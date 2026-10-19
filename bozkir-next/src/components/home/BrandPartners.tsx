@@ -47,6 +47,7 @@ export async function BrandPartners({ brands, locale }: { brands: Brand[]; local
               href={safeHref(brand.url)}
               target="_blank"
               rel="noopener noreferrer"
+              tabIndex={hidden ? -1 : undefined}
               className={cn('group', cell)}
             >
               {content(brand)}

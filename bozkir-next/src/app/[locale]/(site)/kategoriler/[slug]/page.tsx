@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     });
   }
   return buildMetadata({
-    title: category.seoTitle ?? `${category.name} | Bozkır Ağaç Ürünleri`,
+    title: category.seoTitle ?? `${category.name} | ${dict.meta.brand}`,
     description: category.seoDescription ?? category.description,
     path: `/kategoriler/${category.slug}`,
     // Dinamik OG görseli: opengraph-image.tsx dosya-convention ile üretilir.

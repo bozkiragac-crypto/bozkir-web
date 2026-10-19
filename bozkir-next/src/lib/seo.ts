@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 import { defaultLocale, locales, switchLocaleInPath, type Locale } from '@/i18n/config';
+import { getDictionary } from '@/i18n/dictionaries';
 import { getSiteSettings } from '@/lib/data/settings';
 
 interface BuildMetadataInput {
@@ -52,8 +53,8 @@ export async function siteMetadata(locale?: Locale): Promise<Metadata> {
     // DB yoksa varsayılanlar
   }
   return buildMetadata({
-    title: seoTitle || `${siteConfig.name} | Malzemenin Yeni Formu`,
-    description: seoDescription || siteConfig.description,
+    title: seoTitle || getDictionary(locale ?? 'tr').meta.home,
+    description: seoDescription || getDictionary(locale ?? 'tr').meta.homeDescription,
     image: ogImage || '/images/og-home.jpg',
     path: '/',
     locale,

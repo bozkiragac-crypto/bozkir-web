@@ -50,7 +50,8 @@ export async function fetchCatalogs(locale?: Locale): Promise<Catalog[]> {
       pdfUrl: c.pdfUrl,
       pageCount: c.pageCount,
     }));
-  } catch {
+  } catch (err) {
+    console.error('[data:catalogs] okuma hatası:', err);
     return [];
   }
 }
