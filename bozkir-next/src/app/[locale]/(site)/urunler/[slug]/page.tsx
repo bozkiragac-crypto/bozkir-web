@@ -138,7 +138,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <PageHero
           eyebrow={product.category}
           title={product.name}
-          leading={<BrandLogo className="mb-6 h-14" priority />}
+          leading={<BrandLogo className="mb-6 h-14" priority alt={dict.meta.brand} />}
           crumbs={[
             { label: dict.common.home, href: '/' },
             { label: dict.nav.products, href: '/urunler' },

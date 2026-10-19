@@ -257,7 +257,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
                             .map((slug) => (
                               <a
                                 key={slug}
-                                href={`/urunler/${slug}`}
+                                href={`/tr/urunler/${slug}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="rounded-full border border-border px-2 py-0.5 text-xs underline underline-offset-2 hover:border-foreground"

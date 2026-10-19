@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
 import { DATA_TAGS } from '@/lib/data/tags';
 import type { Locale } from '@/i18n/config';
@@ -314,7 +314,7 @@ export async function fetchProductImageRaw(id: string): Promise<string> {
     const rows = await db
       .select({ img: productsTable.img })
       .from(productsTable)
-      .where(eq(productsTable.id, id))
+      .where(and(eq(productsTable.id, id), eq(productsTable.isActive, true)))
       .limit(1);
     return rows[0]?.img ? String(rows[0].img) : '';
   } catch {

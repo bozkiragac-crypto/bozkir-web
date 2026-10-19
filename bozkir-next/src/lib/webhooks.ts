@@ -1,4 +1,6 @@
 import { createHmac } from 'node:crypto';
+import { lookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
 import { getSiteSettings } from '@/lib/data/settings';
 
 export interface WebhookEvent {
@@ -6,20 +8,37 @@ export interface WebhookEvent {
   data: Record<string, unknown>;
 }
 
+/** Özel/ayrılmış IPv4/IPv6 adreslerini reddeder (SSRF guard). */
+export function isDisallowedIp(ip: string): boolean {
+  const version = isIP(ip);
+  if (version === 4) {
+    const [a, b] = ip.split('.').map(Number);
+    if (a === 0 || a === 10 || a === 127) return true;
+    if (a === 169 && b === 254) return true; // link-local / metadata
+    if (a === 172 && b! >= 16 && b! <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a! >= 224) return true; // multicast / reserved
+    return false;
+  }
+  if (version === 6) {
+    const v = ip.toLowerCase();
+    if (v === '::1' || v === '::') return true;
+    if (v.startsWith('fc') || v.startsWith('fd')) return true; // unique local
+    if (v.startsWith('fe80')) return true; // link-local
+    const mapped = /::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(v);
+    if (mapped) return isDisallowedIp(mapped[1]!);
+    return false;
+  }
+  return false;
+}
+
 /** Özel/ayrılmış adresleri (SSRF guard) reddeder. */
-function isDisallowedHost(hostname: string): boolean {
+export function isDisallowedHost(hostname: string): boolean {
   const h = hostname.toLowerCase().replace(/^\[|\]$/g, '');
   if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local')) return true;
   if (h === 'metadata.google.internal') return true;
-  if (h.includes(':')) return true; // IPv6 literal — güvenli değil, geç
-  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);
-  if (m) {
-    const [a, b] = [Number(m[1]), Number(m[2])];
-    if (a === 0 || a === 10 || a === 127) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-  }
+  if (/^\d+$/.test(h)) return true; // ondalık tam sayı IP (ör. 2130706433) — reddet
+  if (isIP(h)) return isDisallowedIp(h);
   return false;
 }
 
@@ -45,6 +64,17 @@ export async function sendWebhook(event: string, data: Record<string, unknown>):
     return;
   }
   if (isDisallowedHost(parsed.hostname)) return;
+
+  // DNS rebinding koruması: çözülen tüm adresler de genel olmalı.
+  try {
+    const addrs = await Promise.race([
+      lookup(parsed.hostname, { all: true }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('dns timeout')), 3000)),
+    ]);
+    if (addrs.some((a) => isDisallowedIp(a.address))) return;
+  } catch {
+    return; // çözülemiyorsa gönderme
+  }
 
   const payload: WebhookEvent = { event, data };
   const body = JSON.stringify({ ...payload, ts: new Date().toISOString() });

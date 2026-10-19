@@ -13,6 +13,9 @@ export const dictionaries = {
       brand: 'Bozkır Ağaç Ürünleri',
       brandTagline: 'Bozkır Ağaç Ürünleri güvencesiyle.',
     },
+    a11y: {
+      primaryNav: 'Ana menü',
+    },
     nav: {
       products: 'Ürünler',
       categories: 'Kategoriler',
@@ -690,6 +693,9 @@ export const dictionaries = {
         'Bozkır Wood products offer quality interior and facade solutions with MDF laminate, melamine panels, solid wood panels and chipboard.',
       brand: 'Bozkır Wood Products',
       brandTagline: 'with the assurance of Bozkır Wood Products.',
+    },
+    a11y: {
+      primaryNav: 'Main menu',
     },
     nav: {
       products: 'Products',
@@ -1369,6 +1375,9 @@ export const dictionaries = {
         'توفّر منتجات بوزكير للأخشاب حلولاً داخلية وخارجية عالية الجودة من MDF المبطّن والألواح Melamine والألواح الخشبية الصلبة والرقائق الخشبية.',
       brand: 'منتجات بوزكير الخشبية',
       brandTagline: 'بضمان منتجات بوزكير الخشبية.',
+    },
+    a11y: {
+      primaryNav: 'القائمة الرئيسية',
     },
     nav: {
       products: 'المنتجات',

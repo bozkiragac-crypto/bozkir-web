@@ -177,6 +177,9 @@ const statements = [
   `CREATE INDEX IF NOT EXISTS campaigns_active_window_idx ON campaigns (is_active, starts_at, ends_at)`,
   `CREATE INDEX IF NOT EXISTS categories_slug_idx ON categories (slug)`,
   `CREATE INDEX IF NOT EXISTS catalogs_slug_idx ON catalogs (slug)`,
+  // Slug'lar public URL kimliği: benzersiz olmalı (rota gölgelemesini önler).
+  `CREATE UNIQUE INDEX IF NOT EXISTS categories_slug_key ON categories (slug)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS catalogs_slug_key ON catalogs (slug)`,
   `CREATE INDEX IF NOT EXISTS content_blocks_active_sort_idx ON content_blocks (is_active, sort_order)`,
 ];
 

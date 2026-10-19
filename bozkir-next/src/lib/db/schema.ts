@@ -76,7 +76,7 @@ export const categories = pgTable(
   'categories',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    slug: text('slug').notNull(),
+    slug: text('slug').notNull().unique(),
     name: text('name').notNull(),
     nameEn: text('name_en'),
     nameAr: text('name_ar'),
@@ -120,7 +120,7 @@ export const catalogs = pgTable(
   'catalogs',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    slug: text('slug').notNull(),
+    slug: text('slug').notNull().unique(),
     title: text('title').notNull(),
     description: text('description'),
     year: integer('year'),

@@ -85,7 +85,7 @@ CREATE INDEX IF NOT EXISTS content_items_block_idx ON content_items (block_key, 
 -- Kataloglar (admin CRUD)
 CREATE TABLE IF NOT EXISTS catalogs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    slug TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
     title TEXT NOT NULL,
     description TEXT,
     year INT,
@@ -105,7 +105,7 @@ CREATE INDEX IF NOT EXISTS catalogs_sort_idx ON catalogs (sort_order);
 -- Kategoriler (admin CRUD)
 CREATE TABLE IF NOT EXISTS categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    slug TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     name_en TEXT,
     name_ar TEXT,

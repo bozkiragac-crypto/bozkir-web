@@ -80,7 +80,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
       />
       <Container className="grid gap-10 pb-24 md:pb-32 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
         <div>
-          <BrandLogo className="mb-6 h-12" />
+          <BrandLogo className="mb-6 h-12" alt={dict.meta.brand} />
           <QuoteForm products={products} turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ''} />
         </div>
         <aside className="space-y-6">

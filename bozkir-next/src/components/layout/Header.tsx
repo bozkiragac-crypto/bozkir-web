@@ -127,7 +127,7 @@ export function Header({ categories }: HeaderProps) {
           <Link
             href="/"
             className="min-w-0 flex-1 truncate text-[0.66rem] font-semibold tracking-[0.01em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"
-            aria-label={`${siteConfig.name} ana sayfa`}
+            aria-label={`${siteConfig.name} — ${t('common.home')}`}
           >
             <span
               className={cn(
@@ -141,7 +141,7 @@ export function Header({ categories }: HeaderProps) {
 
           <nav
             className="hidden items-center gap-6 xl:flex xl:gap-8"
-            aria-label={t('nav.products')}
+            aria-label={t('a11y.primaryNav')}
           >
             {siteConfig.nav.map((item) => {
               const isProducts = item.key === 'products';

@@ -108,7 +108,7 @@ function Brand({ s }: { s: SiteSettings }) {
   const { t } = useDictionary();
   return (
     <div>
-      <BrandLogo className="h-16" />
+      <BrandLogo className="h-16" alt={t('meta.brand')} />
       <p className="mt-5 text-sm font-semibold tracking-[0.16em] uppercase">{t('footer.madeIn')}</p>
       <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-strong">
         {t('footer.tagline')}

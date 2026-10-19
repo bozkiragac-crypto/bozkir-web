@@ -45,8 +45,12 @@ export async function deleteMedia(
 }
 
 function errorMessage(e: unknown): string {
-  if (e instanceof Error && e.message) return e.message;
-  return 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
+  const msg = e instanceof Error && e.message ? e.message : '';
+  // Yetki hatalarını genelleştir (rol/hesap varlığını sızdırmasın).
+  if (/yetkisiz|yalnızca sahip|oturum|giriş yapın/i.test(msg)) {
+    return 'Bu işlem için yetkiniz yok.';
+  }
+  return msg || 'İşlem tamamlanamadı. Lütfen tekrar deneyin.';
 }
 
 async function safe<A extends unknown[], R extends { ok: boolean; error?: string }>(
