@@ -23,6 +23,11 @@ const statements = [
   // products.is_active
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE`,
 
+  // ürün bazlı WhatsApp mesajı (boşsa genel şablon)
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS whatsapp_message TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS whatsapp_message_en TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS whatsapp_message_ar TEXT`,
+
   // ürün SEO alanları (admin'den düzenlenebilir)
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_title TEXT`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS seo_description TEXT`,

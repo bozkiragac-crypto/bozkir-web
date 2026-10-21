@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Container } from './Container';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 export async function LegalPage({
@@ -14,7 +14,7 @@ export async function LegalPage({
   locale: Locale;
   children: ReactNode;
 }) {
-  const l = dictFor(locale).pages.legal;
+  const l = (await dictForRequest(locale)).pages.legal;
   return (
     <Container className="pt-[calc(var(--header-height)+80px)] pb-24 md:pb-32">
       <p className="text-eyebrow">{l.eyebrow}</p>

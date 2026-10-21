@@ -31,6 +31,10 @@ export const products = pgTable(
     catAr: text('cat_ar'),
     seoTitle: text('seo_title'),
     seoDescription: text('seo_description'),
+    /** Ürün bazlı WhatsApp mesajı; boşsa genel ürün şablonu kullanılır. */
+    whatsappMessage: text('whatsapp_message'),
+    whatsappMessageEn: text('whatsapp_message_en'),
+    whatsappMessageAr: text('whatsapp_message_ar'),
   },
   (t) => [index('products_cat_idx').on(t.cat), index('products_created_idx').on(t.createdAt)],
 );

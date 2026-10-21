@@ -4,7 +4,7 @@ import { buildMetadata } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { CategoryStrip } from '@/components/home/CategoryStrip';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale: localeParam } = await params;
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
-  const dict = getDictionary(locale ?? 'tr');
+  const dict = await dictForRequest(locale ?? 'tr');
   return buildMetadata({
     title: dict.categories.metaTitle,
     description: dict.categories.metaDescription,
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CategoriesPage({ params }: PageProps) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   const categories = await getCategories(lang);
 
   return (

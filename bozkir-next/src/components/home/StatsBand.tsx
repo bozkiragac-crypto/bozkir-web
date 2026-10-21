@@ -6,10 +6,18 @@ import { DUR } from '@/lib/motion';
 import { Panel, PanelGrid } from '@/components/ui/Panel';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
+interface StatItem {
+  value: string;
+  label: string;
+}
+
 /** Yalnızca doğrulanabilir sayılar: kuruluş, kurumsallaşma, ürün grubu, yetkili marka. */
-export function StatsBand() {
+export function StatsBand({ stats }: { stats?: StatItem[] }) {
   const { dict } = useDictionary();
-  const stats = dict.pages.about.stats;
+  const items =
+    stats && stats.length > 0
+      ? stats
+      : dict.pages.about.stats.map((s) => ({ value: String(s.value), label: s.label }));
   const root = useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -40,19 +48,22 @@ export function StatsBand() {
   return (
     <div ref={root}>
       <PanelGrid className="grid-cols-2 md:grid-cols-4">
-        {stats.map((s) => (
-          <Panel key={s.label} className="p-6 md:p-8">
-            <span
-              data-count={s.value}
-              className="numerals block text-4xl font-medium tracking-tight md:text-5xl"
-            >
-              {s.value}
-            </span>
-            <span className="mt-3 block text-xs tracking-[0.14em] text-muted uppercase">
-              {s.label}
-            </span>
-          </Panel>
-        ))}
+        {items.map((s) => {
+          const numeric = /^\d+$/.test(s.value.trim());
+          return (
+            <Panel key={s.label} className="p-6 md:p-8">
+              <span
+                data-count={numeric ? Number(s.value) : undefined}
+                className="numerals block text-4xl font-medium tracking-tight md:text-5xl"
+              >
+                {s.value}
+              </span>
+              <span className="mt-3 block text-xs tracking-[0.14em] text-muted uppercase">
+                {s.label}
+              </span>
+            </Panel>
+          );
+        })}
       </PanelGrid>
     </div>
   );

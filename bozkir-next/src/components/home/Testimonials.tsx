@@ -5,14 +5,14 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Panel } from '@/components/ui/Panel';
 import { SmartImage as Image } from '@/components/ui/SmartImage';
 import { Reveal } from '@/components/animations/Reveal';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Müşteri referansları — yalnızca admin içerik eklediğinde görünür. */
 export async function Testimonials({ block, locale }: { block: ContentBlock; locale: Locale }) {
   const items = block.items;
   if (items.length === 0) return null;
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.block;
 
   return (

@@ -1,16 +1,21 @@
-import { Phone, MessageCircle, ArrowRight } from 'lucide-react';
+import { Phone, ArrowRight } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
-import { dictFor } from '@/i18n/server';
+import { resolveWhatsAppTemplate, whatsappHref } from '@/lib/whatsapp';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 export async function QuoteCTA({ locale }: { locale: Locale }) {
   const s = await getSiteSettings();
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.quoteCta;
+  const whatsappMessage = resolveWhatsAppTemplate(s.whatsappMessages, locale, 'general');
+  const whatsappLink =
+    whatsappHref(s.whatsapp || s.phone, whatsappMessage, s.phone) || s.whatsapp;
   return (
     <Container className="pb-24 md:pb-32">
       <div
@@ -44,12 +49,12 @@ export async function QuoteCTA({ locale }: { locale: Locale }) {
               <Phone className="h-4 w-4" /> {s.phone}
             </TrackedLink>
             <TrackedLink
-              href={s.whatsapp}
+              href={whatsappLink}
               event="whatsapp_click"
               source="quote_cta"
               className="inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-background/80 transition-colors hover:text-background sm:py-0"
             >
-              <MessageCircle className="h-4 w-4" /> {h.whatsapp}
+              <WhatsAppIcon className="h-4 w-4" /> {h.whatsapp}
             </TrackedLink>
           </div>
         </div>

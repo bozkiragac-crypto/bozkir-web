@@ -7,7 +7,6 @@ import {
   Youtube,
   Linkedin,
   Twitter,
-  MessageCircle,
   ChevronDown,
   Clock,
 } from 'lucide-react';
@@ -16,17 +15,9 @@ import type { SiteSettings } from '@/lib/data/settings';
 import { telHref } from '@/lib/phone';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { track } from '@/lib/analytics';
 import type { Category } from '@/types/category';
-
-const corporateLinkKeys = [
-  { key: 'nav.about', href: '/hakkimizda' },
-  { key: 'nav.dealers', href: '/bayilikler' },
-  { key: 'nav.catalogs', href: '/katalog' },
-  { key: 'nav.faq', href: '/sss' },
-  { key: 'nav.contact', href: '/iletisim' },
-  { key: 'nav.quote', href: '/teklif-al' },
-];
 
 function Social({ s }: { s: SiteSettings }) {
   const item =
@@ -97,7 +88,7 @@ function Social({ s }: { s: SiteSettings }) {
           onClick={() => track('whatsapp_click', { source: 'footer' })}
           className={item}
         >
-          <MessageCircle className="h-5 w-5" />
+          <WhatsAppIcon className="h-5 w-5" />
         </a>
       )}
     </div>
@@ -108,7 +99,7 @@ function Brand({ s }: { s: SiteSettings }) {
   const { t } = useDictionary();
   return (
     <div>
-      <BrandLogo className="h-16" alt={t('meta.brand')} />
+      <BrandLogo className="h-16" alt={s.identity.brandName} src={s.identity.logo} />
       <p className="mt-5 text-sm font-semibold tracking-[0.16em] uppercase">{t('footer.madeIn')}</p>
       <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-strong">
         {t('footer.tagline')}
@@ -174,12 +165,13 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
     href: `/kategoriler/${c.slug}`,
   }));
 
+  const corporateLinks = s.footerNav
+    .filter((item) => item.visible)
+    .map((item) => ({ label: t(`nav.${item.key}`), href: item.href }));
+
   const columns = [
     { title: t('footer.productsColumn'), links: productLinks },
-    {
-      title: t('footer.corporateColumn'),
-      links: corporateLinkKeys.map((l) => ({ label: t(l.key), href: l.href })),
-    },
+    { title: t('footer.corporateColumn'), links: corporateLinks },
   ];
 
   return (

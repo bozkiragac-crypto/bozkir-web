@@ -1,5 +1,6 @@
 import { getSiteSettings } from '@/lib/data/settings';
-import { dictFor } from '@/i18n/server';
+import { resolveWhatsAppTemplate, whatsappHref } from '@/lib/whatsapp';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 import { WhatsAppFabLink } from './WhatsAppFabLink';
 
@@ -9,16 +10,14 @@ import { WhatsAppFabLink } from './WhatsAppFabLink';
  */
 export async function WhatsAppFab({ locale }: { locale: Locale }) {
   const settings = await getSiteSettings();
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const w = dict.pages.whatsapp;
   const raw = settings.whatsapp || settings.phone;
   if (!raw) return null;
 
-  const url = raw.startsWith('http')
-    ? raw
-    : `https://wa.me/${(settings.phone || raw).replace(/[^\d]/g, '')}`;
-  const message = encodeURIComponent(w.message);
-  const href = `${url}${url.includes('?') ? '&' : '?'}text=${message}`;
+  const message = resolveWhatsAppTemplate(settings.whatsappMessages, locale, 'general');
+  const href = whatsappHref(raw, message, settings.phone);
+  if (!href) return null;
 
   return (
     <WhatsAppFabLink

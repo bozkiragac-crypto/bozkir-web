@@ -3,14 +3,14 @@ import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { SmartImage as Image } from '@/components/ui/SmartImage';
 import { Reveal } from '@/components/animations/Reveal';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Tesis / depo / operasyon görselleri — admin içerik ekleyene kadar gizli. */
 export async function Facilities({ block, locale }: { block: ContentBlock; locale: Locale }) {
   const items = block.items;
   if (items.length === 0) return null;
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.block;
 
   return (

@@ -61,6 +61,9 @@ export default async function EditProductPage({ params }: PageProps) {
             catAr: product.catAr ?? '',
             seoTitle: product.seoTitle ?? '',
             seoDescription: product.seoDescription ?? '',
+            whatsappMessage: product.whatsappMessage ?? '',
+            whatsappMessageEn: product.whatsappMessageEn ?? '',
+            whatsappMessageAr: product.whatsappMessageAr ?? '',
           }}
         />
       </div>

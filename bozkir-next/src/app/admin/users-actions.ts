@@ -102,6 +102,10 @@ export async function updateUser(
   if (input.password) {
     if (input.password.length < 8) return { ok: false, error: 'Şifre en az 8 karakter olmalı.' };
     patch.passwordHash = await bcrypt.hash(input.password, 10);
+    // Şifre değişince kilit/deneme sayacı da sıfırlansın; aksi halde kullanıcı
+    // yeni şifreyle bile kilit süresi dolana kadar giriş yapamaz.
+    patch.failedAttempts = 0;
+    patch.lockedUntil = null;
   }
 
   await db.update(adminUsers).set(patch).where(eq(adminUsers.id, input.id));

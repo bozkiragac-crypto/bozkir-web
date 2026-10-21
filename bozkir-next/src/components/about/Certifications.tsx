@@ -2,14 +2,14 @@ import type { ContentBlock } from '@/types/content';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { SmartImage as Image } from '@/components/ui/SmartImage';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Belgeler & sertifikalar — admin içerik ekleyene kadar gizli. */
 export async function Certifications({ block, locale }: { block: ContentBlock; locale: Locale }) {
   const items = block.items;
   if (items.length === 0) return null;
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.block;
 
   return (

@@ -202,6 +202,16 @@ export async function saveSiteSettings(...args: Parameters<typeof settingsAction
   return safe(settingsActions.saveSiteSettings, args);
 }
 
+export async function saveFeaturedProducts(
+  ...args: Parameters<typeof settingsActions.saveFeaturedProducts>
+) {
+  return safe(settingsActions.saveFeaturedProducts, args);
+}
+
+export async function saveSiteTexts(...args: Parameters<typeof settingsActions.saveSiteTexts>) {
+  return safe(settingsActions.saveSiteTexts, args);
+}
+
 /* ---------------- Aktivite ---------------- */
 
 export async function clearActivityLog(...args: Parameters<typeof activityActions.clearActivityLog>) {

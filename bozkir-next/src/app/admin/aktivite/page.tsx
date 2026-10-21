@@ -94,7 +94,10 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
         method="get"
         className="mt-6 flex flex-wrap items-center gap-3"
       >
-        <div className="flex min-w-0 flex-1 items-center gap-3 rounded-full border border-border px-4 sm:max-w-sm">
+        <div
+          data-search-shell
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-full border border-border px-4 sm:max-w-sm"
+        >
           <Search className="h-4 w-4 flex-none text-muted" />
           <input
             type="search"
@@ -102,6 +105,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
             name="q"
             defaultValue={filters.q}
             placeholder="Kullanıcı veya açıklama ara..."
+            data-search-input
             className="h-11 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
           />
         </div>

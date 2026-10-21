@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Menu, Search, ChevronDown } from 'lucide-react';
 import type { Category } from '@/types/category';
+import type { NavSettingItem } from '@/lib/data/settings';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { MagneticButton } from '@/components/ui/MagneticButton';
@@ -20,9 +21,19 @@ interface HeaderProps {
   categories: Category[];
 }
 
-export function Header({ categories }: HeaderProps) {
+export function Header({
+  categories,
+  brandName = siteConfig.name,
+  nav,
+  logoUrl,
+}: HeaderProps & { brandName?: string; nav?: NavSettingItem[]; logoUrl?: string }) {
   const pathname = usePathname();
   const { t, navLabel, locale } = useDictionary();
+  const navItems: NavSettingItem[] = (
+    nav?.length
+      ? nav
+      : siteConfig.nav.map((item) => ({ key: item.key, href: item.href, visible: true }))
+  ).filter((item) => item.visible);
   // Aktiflik kontrolü için dil öneği çıkarılmış yol.
   const path = pathname.replace(new RegExp(`^/${locale}(?=/|$)`), '') || '/';
   const isHome = path === '/';
@@ -127,7 +138,7 @@ export function Header({ categories }: HeaderProps) {
           <Link
             href="/"
             className="min-w-0 flex-1 truncate text-[0.66rem] font-semibold tracking-[0.01em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"
-            aria-label={`${siteConfig.name} — ${t('common.home')}`}
+            aria-label={`${brandName} — ${t('common.home')}`}
           >
             <span
               className={cn(
@@ -135,7 +146,7 @@ export function Header({ categories }: HeaderProps) {
                 onDark ? 'text-white' : 'text-foreground',
               )}
             >
-              {siteConfig.name}
+              {brandName}
             </span>
           </Link>
 
@@ -143,7 +154,7 @@ export function Header({ categories }: HeaderProps) {
             className="hidden items-center gap-6 xl:flex xl:gap-8"
             aria-label={t('a11y.primaryNav')}
           >
-            {siteConfig.nav.map((item) => {
+            {navItems.map((item) => {
               const isProducts = item.key === 'products';
               const active = path.startsWith(item.href);
               const linkClass = cn(
@@ -243,6 +254,7 @@ export function Header({ categories }: HeaderProps) {
 
         <MegaMenu
           categories={categories}
+          logoUrl={logoUrl}
           open={megaOpen}
           onClose={() => setMegaOpen(false)}
           onPointerEnter={openMega}
@@ -250,7 +262,13 @@ export function Header({ categories }: HeaderProps) {
         />
       </header>
 
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} categories={categories} />
+      <MobileMenu
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        categories={categories}
+        brandName={brandName}
+        nav={nav}
+      />
       <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

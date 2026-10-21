@@ -43,8 +43,8 @@ Ayrıntılı kurulum, mimari ve deployment: [`docs/README.md`](docs/README.md), 
 | `npm test` | Birim testleri (Vitest) |
 | `npm run test:e2e` | Uçtan uca testler (Playwright, Chromium + mobil) |
 | `npm run db:migrate` | Şema değişikliklerini uygular |
-| `npm run db:seed` | Yönetici hesabını oluşturur/günceller |
-| `npm run admin:reset -- <kullanıcı> <parola>` | Yönetici parolasını sıfırlar |
+| `npm run db:seed` | Yönetici hesabını yoksa oluşturur; varsa dokunmaz (`--update` ile günceller) |
+| `npm run admin:reset -- --user <kullanıcı> --password <parola> --yes` | Hedef yönetici parolasını sıfırlar; diğer hesaplara dokunmaz |
 | `npm run media:audit` | Tüm görsel referanslarını depoya karşı doğrular |
 
 ## Testler ve kalite

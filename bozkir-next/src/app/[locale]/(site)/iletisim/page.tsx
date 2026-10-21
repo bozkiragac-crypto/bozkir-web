@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
-import { Phone, Mail, MapPin, Clock, MessageCircle, Navigation, ExternalLink } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Navigation, ExternalLink } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildMetadata } from '@/lib/seo';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
+import { resolveWhatsAppTemplate, whatsappHref } from '@/lib/whatsapp';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
@@ -11,7 +13,7 @@ import { Reveal } from '@/components/animations/Reveal';
 import { CopyButton } from '@/components/contact/CopyButton';
 import { OpenStatus } from '@/components/contact/OpenStatus';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 import { pickLocaleText } from '@/lib/data/catalog';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
 import { cn } from '@/lib/utils';
@@ -23,7 +25,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   return buildMetadata({
     title: dict.pages.contact.metaTitle,
     description: dict.pages.contact.metaDescription,
@@ -146,7 +148,7 @@ function LocationSection({
 export default async function ContactPage({ params }: PageProps) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   const c = dict.pages.contact;
   const s = await getSiteSettings();
   const hours = pickLocaleText(s.hours, lang, s.hoursEn, s.hoursAr);
@@ -154,6 +156,9 @@ export default async function ContactPage({ params }: PageProps) {
   const officeCoords = s.address.coords.trim();
   const depotCoords = s.warehouse.coords.trim();
   const officeAddress = `${s.address.street}, ${s.address.postalCode} ${s.address.locality} / ${s.address.region}`;
+  const whatsappMessage = resolveWhatsAppTemplate(s.whatsappMessages, lang, 'general');
+  const whatsappLink =
+    whatsappHref(s.whatsapp || s.phone, whatsappMessage, s.phone) || s.whatsapp;
   const mapLabels = {
     coordinates: c.coordinates,
     directions: c.directions,
@@ -172,11 +177,11 @@ export default async function ContactPage({ params }: PageProps) {
       copy: s.phone2,
     },
     {
-      icon: MessageCircle,
+      icon: WhatsAppIcon,
       label: c.whatsapp,
       value: c.whatsappValue,
-      href: s.whatsapp,
-      copy: s.whatsapp,
+      href: whatsappLink,
+      copy: whatsappLink,
     },
     { icon: Mail, label: c.email, value: s.email, href: `mailto:${s.email}`, copy: s.email },
     { icon: MapPin, label: c.address, value: officeAddress, href: undefined, copy: '' },
@@ -267,7 +272,7 @@ export default async function ContactPage({ params }: PageProps) {
             {c.ctaQuote}
           </ButtonLink>
           <TrackedLink
-            href={s.whatsapp}
+            href={whatsappLink}
             event="whatsapp_click"
             source="contact_cta"
             className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full border border-border-strong px-7 text-[0.95rem] font-medium tracking-tight text-foreground transition-[transform,background-color,color,border-color] duration-300 ease-[var(--ease-out-expo)] hover:-translate-y-0.5 hover:bg-foreground hover:text-background active:scale-[0.985] sm:w-auto"

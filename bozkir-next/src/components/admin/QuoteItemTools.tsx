@@ -9,9 +9,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, MessageCircle, Loader2 } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 import { updateQuoteStatus, updateQuoteNote } from '@/lib/admin/safe-actions';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import {
   QUOTE_STATUSES,
   QUOTE_STATUS_CLASS,
@@ -110,7 +111,7 @@ export function QuoteItemTools({
           className="inline-flex items-center gap-1.5 rounded-md border border-emerald-300 px-3 py-1.5 text-xs text-emerald-700 transition-colors hover:bg-emerald-50"
           title={`${fullName} ile WhatsApp'ta yazış`}
         >
-          <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+          <WhatsAppIcon className="h-3.5 w-3.5" /> WhatsApp
         </a>
         {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted" />}
       </div>

@@ -4,6 +4,7 @@ import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import type { ReactNode } from 'react';
 import { Container } from './Container';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { cn } from '@/lib/utils';
 
 interface Crumb {
   label: string;
@@ -18,6 +19,8 @@ interface PageHeroProps {
   /** Başlıktan önce gösterilecek ek öğe (ör. logo). */
   leading?: ReactNode;
   children?: ReactNode;
+  className?: string;
+  eyebrowClassName?: string;
 }
 
 export function PageHero({
@@ -27,10 +30,17 @@ export function PageHero({
   crumbs,
   leading,
   children,
+  className,
+  eyebrowClassName,
 }: PageHeroProps) {
   const { dict } = useDictionary();
   return (
-    <section className="pt-[calc(var(--header-height)+clamp(40px,7vw,96px))] pb-12 md:pb-16">
+    <section
+      className={cn(
+        'pt-[calc(var(--header-height)+clamp(40px,7vw,96px))] pb-12 md:pb-16',
+        className,
+      )}
+    >
       <Container>
         {crumbs && crumbs.length > 0 && (
           <nav
@@ -55,7 +65,7 @@ export function PageHero({
           </nav>
         )}
         {leading}
-        {eyebrow && <p className="text-eyebrow">{eyebrow}</p>}
+        {eyebrow && <p className={cn('text-eyebrow', eyebrowClassName)}>{eyebrow}</p>}
         <h1 className="text-headline mt-5 max-w-4xl break-words">{title}</h1>
         {description && (
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-strong">{description}</p>

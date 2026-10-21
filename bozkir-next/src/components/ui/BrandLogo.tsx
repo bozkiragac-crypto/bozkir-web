@@ -10,19 +10,23 @@ export function BrandLogo({
   priority = false,
   onDark = false,
   alt = 'Bozkır Ağaç Ürünleri',
+  src = '/images/bozkir-agac-logo.png',
 }: {
   className?: string;
   priority?: boolean;
   onDark?: boolean;
   alt?: string;
+  /** Admin'den yüklenen logo URL'si. */
+  src?: string;
 }) {
   return (
     <Image
-      src="/images/bozkir-agac-logo.png"
+      src={src}
       alt={alt}
       width={1062}
       height={920}
       priority={priority}
+      unoptimized={src.startsWith('http')}
       sizes="(max-width: 768px) 160px, 260px"
       className={cn(
         'w-auto object-contain',

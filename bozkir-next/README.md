@@ -32,7 +32,7 @@ docker compose up -d --build
 npm run db:push                     # şema (alternatif: docker/initdb otomatik çalışır)
 npm run storage:init                # medya bucket'ı
 npm run db:migrate                  # mevcut DB'yi güncel şemaya taşır (idempotent)
-npm run admin:reset -- bozkir "Sifre"   # tek yönetici hesabı (diğerlerini siler)
+npm run admin:reset -- --user bozkir --password "Sifre" --yes   # hedefli sıfırlama
 ```
 
 ## Yerel geliştirme (Docker olmadan)
@@ -57,8 +57,8 @@ npm run dev                       # http://localhost:3000
 | `npm run db:seed-meta` | Kategori ve marka tohumlaması (fallback verisinden, idempotent) |
 | `npm run test` | Vitest birim testleri |
 | `npm run test:e2e` | Playwright uçtan uca testleri (BASE_URL veya webServer) |
-| `npm run admin:reset -- <kullanıcı> <şifre>` | Tüm yönetici hesaplarını siler, verilen hesabı `owner` olarak oluşturur |
-| `npm run db:seed -- <kullanıcı> <şifre>` | Var olan yöneticiyi günceller / oluşturur |
+| `npm run admin:reset -- --user <kullanıcı> --password <şifre> --yes` | Hedef kullanıcının şifresini sıfırlar; kilit/deneme sayacını temizler, diğer hesaplara dokunmaz. `--reset-2fa` ve `--create` destekler. |
+| `npm run db:seed -- <kullanıcı> <şifre>` | Hesap yoksa oluşturur; varsa **dokunmaz**. Güncellemek için `--update --yes` ekleyin. |
 | `npm run storage:init` | Medya bucket'ını oluştur |
 | `npm run media:normalize` | DB görsel URL'lerini anahtara indir (tek seferlik) |
 | `npm run import:missing-images -- <klasör>` | Görseli olmayan ürünlerin kapaklarını eşleştirip yükler |
@@ -94,6 +94,10 @@ Frontend `lib/api/*` üzerinden konuşur; arkasındaki kaynak değişebilir (mim
   **toplu seçim ile silme**, **aktif/pasif** anahtarı, **CSV dışa/içe aktarma** (önizleme destekli).
 - **Medya kütüphanesi:** SeaweedFS'i klasör klasör gezin, önizle, yükle, sil; silinen anahtarlar
   ürünlerde kullanılıyorsa uyarır.
+- **Öne çıkan ürünler:** ana sayfada gösterilecek ürünleri seçme, sıralama (`/admin/one-cikan-urunler`).
+- **Site metinleri:** içerik odaklı — ana sayfa bölümleri, sayfa başlıkları, yasal etiketler ve sayfa SEO'ları TR/EN/AR (`/admin/site-metinleri`); buton/form/status etiketleri varsayılan sözlükten gelir. KVKK/gizlilik/çerez gövdeleri Ayarlar → Yasal metinler.
+- **Kimlik & navigasyon:** logo, favicon, ana menü ve footer bağlantı sırası/görünürlüğü Ayarlar'dan; Hakkımızda istatistikleri ana sayfa sayı bandına yansır.
+- **WhatsApp:** genel ve ürün bazlı mesaj şablonları; ürün formunda özel mesaj alanı.
 - **Kullanıcılar:** ekle/düzenle/sil, rol (`owner` / `editor`), aktiflik, şifre değiştirme, son giriş.
   Son `owner` hesabı ve kendi hesabınız silinemez.
 - **Site ayarları:** telefon, WhatsApp, e-posta, çalışma saatleri, adres, sosyal hesaplar ve

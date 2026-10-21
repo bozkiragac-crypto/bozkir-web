@@ -173,6 +173,8 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
             name="q"
             defaultValue={q}
             placeholder="Ad, firma, telefon, e-posta veya ürün ara…"
+            data-search-shell
+            data-search-input
             className="w-full rounded-md border border-border bg-surface py-2 pr-3 pl-9 text-base text-foreground sm:text-sm"
           />
         </div>

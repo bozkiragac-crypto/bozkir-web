@@ -78,6 +78,7 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
     <div className="flex flex-col gap-3 border-y border-border py-5 lg:flex-row lg:items-center lg:justify-between">
       <form
         role="search"
+        data-search-shell
         onSubmit={(e) => {
           e.preventDefault();
           track('search', { query });
@@ -92,6 +93,7 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('catalog.searchPlaceholder')}
           aria-label={t('catalog.search')}
+          data-search-input
           className="h-11 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
         />
         {query && (

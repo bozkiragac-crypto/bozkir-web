@@ -3,11 +3,37 @@ import { eq } from 'drizzle-orm';
 import { getDb, hasDb } from '@/lib/db/client';
 import { siteSettings } from '@/lib/db/schema';
 import { siteConfig } from '@/config/site';
+import {
+  DEFAULT_WHATSAPP_MESSAGES,
+  type WhatsAppMessageSettings,
+} from '@/lib/whatsapp';
+import type { SiteTexts } from '@/i18n/overrides';
 
 export const SETTINGS_TAG = 'settings';
 const SETTINGS_KEY = 'site';
 
+export interface NavSettingItem {
+  key: string;
+  href: string;
+  visible: boolean;
+}
+
 export interface SiteSettings {
+  /** Görünen marka kimliği (siteConfig fallback). */
+  identity: {
+    brandName: string;
+    legalName: string;
+    tagline: string;
+    description: string;
+    logo: string;
+    favicon: string;
+  };
+  /** Ana menü sırası/görünürlüğü. */
+  nav: NavSettingItem[];
+  /** Footer kurumsal bağlantı sırası/görünürlüğü. */
+  footerNav: NavSettingItem[];
+  /** Admin'den düzenlenen sözlük metinleri (dil bazlı path → değer). */
+  texts: SiteTexts;
   phone: string;
   phone2: string;
   whatsapp: string;
@@ -43,6 +69,8 @@ export interface SiteSettings {
   webhookUrl: string;
   /** Vitrinde gösterilecek kategori slug sırası (boşsa varsayılan). */
   featuredOrder: string[];
+  /** Ana sayfada öne çıkarılacak ürün ID'leri (sıralı). */
+  featuredProducts: string[];
   /** Site geneli SEO başlığı (boşsa siteConfig). */
   seoTitle: string;
   seoDescription: string;
@@ -65,14 +93,50 @@ export interface SiteSettings {
     pass: string;
     from: string;
   };
+  /** WhatsApp genel ve ürün mesaj şablonları (TR/EN/AR). */
+  whatsappMessages: WhatsAppMessageSettings;
+  /** KVKK aydınlatma metni (boşsa sözlük içeriği kullanılır). */
+  kvkkText: string;
+  /** Gizlilik politikası metni (boşsa sözlük içeriği kullanılır). */
+  privacyText: string;
   /** Çerez politikası metni (boşsa sözlük içeriği kullanılır). */
   cookiePolicyText: string;
   /** Yapılandırılmış açılış saatleri (0=Pazar … 6=Cumartesi). null = kapalı. */
   openHours: ({ open: string; close: string } | null)[];
 }
 
+const DEFAULT_NAV: NavSettingItem[] = siteConfig.nav.map((item) => ({
+  key: item.key,
+  href: item.href,
+  visible: true,
+}));
+
+const DEFAULT_FOOTER_NAV: NavSettingItem[] = [
+  { key: 'about', href: '/hakkimizda', visible: true },
+  { key: 'dealers', href: '/bayilikler', visible: true },
+  { key: 'catalogs', href: '/katalog', visible: true },
+  { key: 'faq', href: '/sss', visible: true },
+  { key: 'contact', href: '/iletisim', visible: true },
+  { key: 'quote', href: '/teklif-al', visible: true },
+];
+
+function cloneNav(items: NavSettingItem[]): NavSettingItem[] {
+  return items.map((item) => ({ ...item }));
+}
+
 function defaults(): SiteSettings {
   return {
+    identity: {
+      brandName: siteConfig.name,
+      legalName: siteConfig.legalName,
+      tagline: siteConfig.description,
+      description: siteConfig.description,
+      logo: '/images/bozkir-agac-logo.png',
+      favicon: '/favicon.ico',
+    },
+    nav: cloneNav(DEFAULT_NAV),
+    footerNav: cloneNav(DEFAULT_FOOTER_NAV),
+    texts: { tr: {}, en: {}, ar: {} },
     phone: siteConfig.phone,
     phone2: siteConfig.phone2,
     whatsapp: siteConfig.whatsapp,
@@ -87,6 +151,7 @@ function defaults(): SiteSettings {
     popupCampaignId: '',
     webhookUrl: '',
     featuredOrder: [],
+    featuredProducts: [],
     seoTitle: '',
     seoDescription: '',
     ogImage: '',
@@ -96,6 +161,12 @@ function defaults(): SiteSettings {
     metaPixelId: '',
     notifyEmail: '',
     smtp: { host: '', port: '587', user: '', pass: '', from: '' },
+    whatsappMessages: {
+      general: { ...DEFAULT_WHATSAPP_MESSAGES.general },
+      product: { ...DEFAULT_WHATSAPP_MESSAGES.product },
+    },
+    kvkkText: '',
+    privacyText: '',
     cookiePolicyText: '',
     openHours: siteConfig.openHours.map((d) => (d ? { open: d.open, close: d.close } : null)),
   };
@@ -119,10 +190,22 @@ function merge(base: SiteSettings, saved: Partial<SiteSettings>): SiteSettings {
   return {
     ...base,
     ...saved,
+    identity: { ...base.identity, ...(saved.identity ?? {}) },
+    nav: saved.nav?.length ? cloneNav(saved.nav) : cloneNav(base.nav),
+    footerNav: saved.footerNav?.length ? cloneNav(saved.footerNav) : cloneNav(base.footerNav),
+    texts: {
+      tr: { ...base.texts.tr, ...(saved.texts?.tr ?? {}) },
+      en: { ...base.texts.en, ...(saved.texts?.en ?? {}) },
+      ar: { ...base.texts.ar, ...(saved.texts?.ar ?? {}) },
+    },
     address: { ...base.address, ...(saved.address ?? {}) },
     warehouse: { ...base.warehouse, ...(saved.warehouse ?? {}) },
     social: { ...base.social, ...(saved.social ?? {}) },
     smtp: { ...base.smtp, ...(saved.smtp ?? {}) },
+    whatsappMessages: {
+      general: { ...base.whatsappMessages.general, ...(saved.whatsappMessages?.general ?? {}) },
+      product: { ...base.whatsappMessages.product, ...(saved.whatsappMessages?.product ?? {}) },
+    },
   };
 }
 

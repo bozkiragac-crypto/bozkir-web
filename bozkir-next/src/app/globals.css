@@ -232,6 +232,15 @@ html[data-compare='1'] [data-product-cta] {
     outline-offset: 2px;
   }
 
+  /* Arama kutuları: input'un kalın çerçevesi yerine kapsayıcıda yumuşak odak. */
+  input[data-search-input]:focus-visible {
+    outline: none !important;
+    outline-offset: 0 !important;
+  }
+  [data-search-shell]:focus-within {
+    border-color: var(--border-strong) !important;
+  }
+
   /* Native dropdown seçenekleri her iki temada da okunur olsun. Koyu temada
      `<select>` arka planı koyu kalırken tarayıcının açılır listesi açık
      kalabildiği için (açık metin/açık zemin) option'ları açıkça renklendiriyoruz. */
@@ -503,8 +512,21 @@ li {
   footer,
   [data-compare-bar],
   [data-product-cta],
+  [data-cookie-banner],
+  [data-whatsapp-fab],
   .no-print {
     display: none !important;
+  }
+  /* Ürün yazdırmasında yalnızca özet alanı; kategori etiketi çıktıya girmez. */
+  [data-print-area] .text-eyebrow {
+    display: none !important;
+  }
+  [data-print-area] {
+    break-inside: avoid;
+  }
+  [data-print-area] > .container-x,
+  [data-print-area] [class*='pb-40'] {
+    padding-bottom: 0 !important;
   }
   /* Yalnızca ürün özeti yazdırılır; diğer sayfa içerikleri tamamen kaldırılır. */
   body {
@@ -533,7 +555,8 @@ li {
 }
 
 @page {
-  margin: 1.4cm;
+  size: A4 portrait;
+  margin: 1.2cm;
 }
 
 /* Ürün detayda mobil sabit CTA çubuğu varken WhatsApp FAB onun üstüne kaysın. */

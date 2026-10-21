@@ -8,7 +8,7 @@ import { Certifications } from '@/components/about/Certifications';
 import { Facilities } from '@/components/about/Facilities';
 import { QuoteCTA } from '@/components/home/QuoteCTA';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
 import { fetchAboutContent } from '@/lib/data/content';
 import { getContentBlock } from '@/lib/api/content';
@@ -20,7 +20,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   return buildMetadata({
     title: dict.pages.about.metaTitle,
     description: dict.pages.about.metaDescription,
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function AboutPage({ params }: PageProps) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   const a = dict.pages.about;
   const about = await fetchAboutContent(lang);
   const values = about.values.length ? about.values : a.values;
@@ -59,7 +59,7 @@ export default async function AboutPage({ params }: PageProps) {
       />
 
       <Container className="pb-8">
-        <StatsBand />
+        <StatsBand stats={about.stats} />
       </Container>
 
       <AboutTimeline items={about.timeline.length ? about.timeline : undefined} />

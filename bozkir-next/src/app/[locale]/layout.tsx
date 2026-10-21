@@ -4,6 +4,7 @@ import '../globals.css';
 import { isLocale, localeDir, localeHtmlLang, locales, type Locale } from '@/i18n/config';
 import { fontVariables } from '@/lib/fonts';
 import { getDictionary } from '@/i18n/dictionaries';
+import { applyTextOverrides } from '@/i18n/overrides';
 import { getPrimaryCategories } from '@/lib/api/categories';
 import { getSiteSettings } from '@/lib/data/settings';
 import { Header } from '@/components/layout/Header';
@@ -69,11 +70,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   if (!isLocale(locale)) notFound();
 
   const typed = locale as Locale;
-  const dict = getDictionary(typed);
   const [categories, settings] = await Promise.all([
     getPrimaryCategories(typed),
     getSiteSettings(),
   ]);
+  const dict = applyTextOverrides(getDictionary(typed), typed, settings.texts);
 
   return (
     <html
@@ -93,13 +94,25 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: jsonLdString(
-              organizationJsonLd(Object.values(settings.social).filter(Boolean)),
+              organizationJsonLd(
+                Object.values(settings.social).filter(Boolean),
+                settings.identity.legalName,
+                settings.identity.logo,
+                {
+                  phone: settings.phone,
+                  email: settings.email,
+                  address: settings.address,
+                  warehouse: settings.warehouse,
+                },
+              ),
             ),
           }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLdString(websiteJsonLd(typed)) }}
+          dangerouslySetInnerHTML={{
+            __html: jsonLdString(websiteJsonLd(typed, settings.identity.legalName)),
+          }}
         />
       </head>
       <body className="antialiased">
@@ -117,7 +130,12 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     >
                       {dict.nav.skipToContent}
                     </a>
-                    <Header categories={categories} />
+                    <Header
+                      categories={categories}
+                      brandName={settings.identity.brandName}
+                      nav={settings.nav}
+                      logoUrl={settings.identity.logo}
+                    />
                     <main id="main">{children}</main>
                     <Footer s={settings} categories={categories} />
                     <WhatsAppFab locale={typed} />

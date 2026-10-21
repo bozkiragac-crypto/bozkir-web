@@ -24,11 +24,16 @@ interface ProductFormProps {
     catAr?: string | null;
     seoTitle?: string | null;
     seoDescription?: string | null;
+    whatsappMessage?: string | null;
+    whatsappMessageEn?: string | null;
+    whatsappMessageAr?: string | null;
   };
 }
 
 const field =
   'h-12 w-full rounded-md border border-border bg-surface px-4 text-sm outline-none transition-colors focus:border-foreground';
+const area =
+  'w-full rounded-md border border-border bg-surface px-4 py-3 text-sm outline-none transition-colors focus:border-foreground';
 const label = 'text-xs tracking-[0.14em] text-muted uppercase';
 
 export function ProductForm({ categories, initial }: ProductFormProps) {
@@ -46,6 +51,9 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
   const [catAr, setCatAr] = useState(initial?.catAr ?? '');
   const [seoTitle, setSeoTitle] = useState(initial?.seoTitle ?? '');
   const [seoDescription, setSeoDescription] = useState(initial?.seoDescription ?? '');
+  const [whatsappMessage, setWhatsappMessage] = useState(initial?.whatsappMessage ?? '');
+  const [whatsappMessageEn, setWhatsappMessageEn] = useState(initial?.whatsappMessageEn ?? '');
+  const [whatsappMessageAr, setWhatsappMessageAr] = useState(initial?.whatsappMessageAr ?? '');
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +78,9 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       catAr,
       seoTitle,
       seoDescription,
+      whatsappMessage,
+      whatsappMessageEn,
+      whatsappMessageAr,
     });
     setBusy(false);
     if (!res.ok) {
@@ -85,6 +96,9 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       setFace('');
       setColors('');
       setThicknesses('');
+      setWhatsappMessage('');
+      setWhatsappMessageEn('');
+      setWhatsappMessageAr('');
       setImages([]);
       setError(null);
       router.refresh();
@@ -235,6 +249,36 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
                 placeholder="Arama sonuçlarında görünecek kısa açıklama"
               />
             </label>
+          </fieldset>
+
+          <fieldset className="grid gap-5 rounded-md border border-border p-5">
+            <legend className={`px-2 ${label}`}>WhatsApp mesajı (opsiyonel)</legend>
+            <p className="text-xs text-muted">
+              Boş bırakılırsa Ayarlar → WhatsApp mesaj şablonları kullanılır. Yer tutucular:{' '}
+              <code>{'{product}'}</code>, <code>{'{code}'}</code>, <code>{'{category}'}</code>,{' '}
+              <code>{'{url}'}</code>.
+            </p>
+            <textarea
+              value={whatsappMessage}
+              onChange={(e) => setWhatsappMessage(e.target.value)}
+              rows={2}
+              className={area}
+              placeholder="Merhaba, {product} ({code}) ürünü hakkında bilgi almak istiyorum."
+            />
+            <textarea
+              value={whatsappMessageEn}
+              onChange={(e) => setWhatsappMessageEn(e.target.value)}
+              rows={2}
+              className={area}
+              placeholder="Hello, I would like information about {product} ({code})."
+            />
+            <textarea
+              value={whatsappMessageAr}
+              onChange={(e) => setWhatsappMessageAr(e.target.value)}
+              rows={2}
+              className={area}
+              dir="rtl"
+            />
           </fieldset>
         </div>
       </details>

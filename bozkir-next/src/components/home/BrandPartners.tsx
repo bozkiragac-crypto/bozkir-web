@@ -4,7 +4,7 @@ import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { cn } from '@/lib/utils';
 import { safeHref } from '@/lib/safe-url';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { CSSProperties } from 'react';
 import type { Locale } from '@/i18n/config';
 
@@ -12,7 +12,7 @@ const cell =
   'flex w-52 flex-none flex-col items-center justify-center gap-4 border-s border-border px-8 py-6 text-center transition-colors hover:bg-surface-2';
 
 export async function BrandPartners({ brands, locale }: { brands: Brand[]; locale: Locale }) {
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   if (brands.length === 0) return null;
 
   const categoryOf = (brand: Brand) =>

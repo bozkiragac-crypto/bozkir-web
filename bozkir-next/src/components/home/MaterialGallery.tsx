@@ -3,7 +3,7 @@ import { MaterialShowcase } from '@/components/home/MaterialShowcase';
 import { getProductsIndex, localizedCategoryName } from '@/lib/data/catalog';
 import { publicUrl } from '@/lib/storage/s3';
 import { fallbackCategories, primaryCategorySlugs } from '@/data/categories';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 import { jsonLdString, localeUrl } from '@/lib/seo';
 
@@ -75,7 +75,7 @@ function curatedFromProducts(products: IndexItem[], locale: Locale): ShowcaseIte
  * aksi halde gerçek ürün kapaklarından kategori başına dengeli bir seçim yapılır.
  */
 export async function MaterialGallery({ block, locale }: { block: ContentBlock; locale: Locale }) {
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.block;
   let products: IndexItem[] = [];
   try {

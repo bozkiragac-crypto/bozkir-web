@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 import { defaultLocale, locales, switchLocaleInPath, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
+import { applyTextOverrides } from '@/i18n/overrides';
 import { getSiteSettings } from '@/lib/data/settings';
 
 interface BuildMetadataInput {
@@ -15,6 +16,8 @@ interface BuildMetadataInput {
   noIndex?: boolean;
   /** Aktif dil; verilirse canonical ve hreflang dil önekli üretilir. */
   locale?: Locale;
+  /** OpenGraph site adı; boşsa siteConfig.legalName. */
+  siteName?: string;
 }
 
 export function absoluteUrl(path = '/') {
@@ -44,21 +47,32 @@ export async function siteMetadata(locale?: Locale): Promise<Metadata> {
   let seoTitle = '';
   let seoDescription = '';
   let ogImage = '';
+  let siteName: string = siteConfig.legalName;
+  let favicon = '/favicon.ico';
+  const lang = locale ?? 'tr';
+  let dict = getDictionary(lang);
   try {
     const s = await getSiteSettings();
     seoTitle = s.seoTitle;
     seoDescription = s.seoDescription;
     ogImage = s.ogImage;
+    siteName = s.identity.legalName || siteName;
+    favicon = s.identity.favicon || favicon;
+    dict = applyTextOverrides(dict, lang, s.texts);
   } catch {
     // DB yoksa varsayılanlar
   }
-  return buildMetadata({
-    title: seoTitle || getDictionary(locale ?? 'tr').meta.home,
-    description: seoDescription || getDictionary(locale ?? 'tr').meta.homeDescription,
-    image: ogImage || '/images/og-home.jpg',
-    path: '/',
-    locale,
-  });
+  return {
+    ...buildMetadata({
+      title: seoTitle || dict.meta.home,
+      description: seoDescription || dict.meta.homeDescription,
+      image: ogImage || '/images/og-home.jpg',
+      path: '/',
+      locale,
+      siteName,
+    }),
+    icons: { icon: favicon },
+  };
 }
 
 /** Dil önekli mutlak URL (JSON-LD ve paylaşım bağlantıları için). */
@@ -75,6 +89,7 @@ export function buildMetadata({
   type = 'website',
   noIndex = false,
   locale,
+  siteName = siteConfig.legalName as string,
 }: BuildMetadataInput): Metadata {
   const withLocale = locale ? `/${locale}${path === '/' ? '' : path}` : path;
   const url = absoluteUrl(withLocale);
@@ -98,7 +113,7 @@ export function buildMetadata({
       title,
       description,
       url,
-      siteName: siteConfig.legalName,
+      siteName,
       locale: locale === 'en' ? 'en_US' : locale === 'ar' ? 'ar_AR' : 'tr_TR',
       type,
       ...(imageUrl ? { images: [{ url: imageUrl, width: 1200, height: 630, alt: title }] } : {}),
@@ -112,9 +127,32 @@ export function buildMetadata({
   };
 }
 
+export interface OrganizationContact {
+  phone: string;
+  email: string;
+  address: {
+    street: string;
+    locality: string;
+    region: string;
+    postalCode: string;
+    country: string;
+    coords?: string;
+  };
+  warehouse: { coords: string };
+}
+
 /** Organization + WebSite + SearchAction şeması (site geneli). */
-export function organizationJsonLd(social?: string[]) {
-  const [lat, lng] = siteConfig.warehouse.coords.split(',').map((v) => Number(v.trim()));
+export function organizationJsonLd(
+  social?: string[],
+  siteName: string = siteConfig.legalName,
+  logo: string = '/icon-512.png',
+  contact?: OrganizationContact,
+) {
+  const phone = contact?.phone || siteConfig.phone;
+  const email = contact?.email || siteConfig.email;
+  const address = contact?.address ?? siteConfig.address;
+  const warehouse = contact?.warehouse ?? siteConfig.warehouse;
+  const [lat, lng] = warehouse.coords.split(',').map((v) => Number(v.trim()));
   const sameAs = (social && social.length > 0
     ? social
     : [siteConfig.social.instagram, siteConfig.social.facebook]
@@ -123,12 +161,12 @@ export function organizationJsonLd(social?: string[]) {
     '@context': 'https://schema.org',
     '@type': ['Organization', 'Store'],
     '@id': absoluteUrl('/#store'),
-    name: siteConfig.legalName,
+    name: siteName,
     url: siteConfig.url,
-    logo: absoluteUrl('/icon-512.png'),
+    logo: absoluteUrl(logo),
     image: absoluteUrl('/images/og-home.jpg'),
-    telephone: siteConfig.phone,
-    email: siteConfig.email,
+    telephone: phone,
+    email,
     priceRange: '$$',
     currenciesAccepted: 'TRY',
     paymentAccepted: 'Nakit, Kredi Kartı, Havale',
@@ -136,7 +174,7 @@ export function organizationJsonLd(social?: string[]) {
     contactPoint: [
       {
         '@type': 'ContactPoint',
-        telephone: siteConfig.phone,
+        telephone: phone,
         contactType: 'customer service',
         areaServed: 'TR',
         availableLanguage: ['Turkish', 'English', 'Arabic'],
@@ -144,16 +182,16 @@ export function organizationJsonLd(social?: string[]) {
     ],
     address: {
       '@type': 'PostalAddress',
-      streetAddress: siteConfig.address.street,
-      addressLocality: siteConfig.address.locality,
-      addressRegion: siteConfig.address.region,
-      postalCode: siteConfig.address.postalCode,
-      addressCountry: siteConfig.address.country,
+      streetAddress: address.street,
+      addressLocality: address.locality,
+      addressRegion: address.region,
+      postalCode: address.postalCode,
+      addressCountry: address.country,
     },
     ...(Number.isFinite(lat) && Number.isFinite(lng)
       ? {
           geo: { '@type': 'GeoCoordinates', latitude: lat, longitude: lng },
-          hasMap: `https://www.google.com/maps?q=${encodeURIComponent(siteConfig.warehouse.coords)}`,
+          hasMap: `https://www.google.com/maps?q=${encodeURIComponent(warehouse.coords)}`,
         }
       : {}),
     openingHoursSpecification: [
@@ -174,11 +212,14 @@ export function organizationJsonLd(social?: string[]) {
 }
 
 /** WebSite + SearchAction (Sitelinks search box) — ana sayfada basılır. */
-export function websiteJsonLd(locale: Locale = defaultLocale) {
+export function websiteJsonLd(
+  locale: Locale = defaultLocale,
+  siteName: string = siteConfig.legalName,
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: siteConfig.legalName,
+    name: siteName,
     url: absoluteUrl(`/${locale}`),
     inLanguage: locale,
     potentialAction: {

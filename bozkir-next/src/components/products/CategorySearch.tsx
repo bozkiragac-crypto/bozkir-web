@@ -36,6 +36,7 @@ export function CategorySearch() {
         track('search', { query, scope: 'category' });
         submit(query.trim());
       }}
+      data-search-shell
       className="flex items-center gap-3 rounded-full border border-border px-4 md:w-80"
     >
       <Search className="h-4 w-4 text-muted" />
@@ -45,6 +46,7 @@ export function CategorySearch() {
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t('catalog.searchPlaceholder')}
         aria-label={t('catalog.search')}
+        data-search-input
         className="h-11 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
       />
       {query && (

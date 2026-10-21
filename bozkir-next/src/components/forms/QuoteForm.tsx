@@ -11,8 +11,9 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, MessageCircle, Phone, Paperclip, CheckCircle2 } from 'lucide-react';
+import { X, Phone, Paperclip, CheckCircle2 } from 'lucide-react';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { track } from '@/lib/analytics';
 import { submitQuote } from '@/lib/api/quote';
 import { Button } from '@/components/ui/Button';
@@ -50,9 +51,12 @@ const fieldClass =
 export function QuoteForm({
   products,
   turnstileSiteKey = '',
+  whatsappLink,
 }: {
   products?: QuoteProduct[];
   turnstileSiteKey?: string;
+  /** Ayarlardaki genel WhatsApp şablonuyla hazırlanmış bağlantı. */
+  whatsappLink?: string;
 }) {
   const list = products && products.length > 0 ? products : [];
   const [file, setFile] = useState<File | null>(null);
@@ -175,7 +179,8 @@ export function QuoteForm({
     setResult({ ok: false, message });
   }
 
-  const waHref = `${siteConfig.whatsapp}?text=${encodeURIComponent(t('pages.whatsapp.message'))}`;
+  const waHref =
+    whatsappLink || `${siteConfig.whatsapp}?text=${encodeURIComponent(t('pages.whatsapp.message'))}`;
 
   if (sent) {
     return (
@@ -209,7 +214,7 @@ export function QuoteForm({
             onClick={() => track('whatsapp_click', { source: 'quote_success' })}
             className="inline-flex h-12 items-center gap-2 rounded-full bg-[#25D366] px-6 text-sm font-medium text-white"
           >
-            <MessageCircle className="h-4 w-4" /> WhatsApp
+            <WhatsAppIcon className="h-4 w-4" /> WhatsApp
           </a>
           <a
             href={siteConfig.phoneHref}

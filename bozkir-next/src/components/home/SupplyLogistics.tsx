@@ -6,13 +6,13 @@ import { Panel, PanelGrid } from '@/components/ui/Panel';
 import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { siteConfig } from '@/config/site';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 const icons = [Boxes, Truck, Warehouse, CreditCard];
 
 export async function SupplyLogistics({ locale }: { locale: Locale }) {
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.supply;
   const [contactBefore, contactAfter] = h.contactNote.split('{phone}');
   return (

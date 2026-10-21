@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS products (
     name_en TEXT,
     name_ar TEXT,
     cat_en TEXT,
-    cat_ar TEXT
+    cat_ar TEXT,
+    whatsapp_message TEXT,
+    whatsapp_message_en TEXT,
+    whatsapp_message_ar TEXT
 );
 CREATE INDEX IF NOT EXISTS products_cat_idx ON products (cat);
 CREATE INDEX IF NOT EXISTS products_created_idx ON products (created_at DESC);

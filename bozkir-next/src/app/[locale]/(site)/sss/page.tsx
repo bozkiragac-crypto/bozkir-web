@@ -6,7 +6,7 @@ import { Container } from '@/components/ui/Container';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
 import { getContentBlock } from '@/lib/api/content';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -15,7 +15,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   return buildMetadata({
     title: `${dict.nav.faq} | ${dict.meta.brand}`,
     description: dict.home.block.faq,
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function FaqPage({ params }: PageProps) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   const block = await getContentBlock('faq', lang);
   const items = block?.items ?? [];
 

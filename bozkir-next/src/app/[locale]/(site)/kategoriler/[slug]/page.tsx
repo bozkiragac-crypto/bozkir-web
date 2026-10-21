@@ -14,7 +14,7 @@ import { SortSelect } from '@/components/products/SortSelect';
 import { SmartImage } from '@/components/ui/SmartImage';
 import { Reveal } from '@/components/animations/Reveal';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 
 const PAGE_SIZE = 24;
 
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug, locale: localeParam } = await params;
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
-  const dict = getDictionary(locale ?? 'tr');
+  const dict = await dictForRequest(locale ?? 'tr');
   const category = await getCategoryBySlug(slug, locale);
   if (!category) {
     return buildMetadata({
@@ -58,7 +58,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const [{ slug, locale: localeParam }, sp] = await Promise.all([params, searchParams]);
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
-  const dict = getDictionary(locale ?? 'tr');
+  const dict = await dictForRequest(locale ?? 'tr');
   const q = str(sp.q);
   const page = Math.max(1, parseInt(str(sp.sayfa) ?? '1', 10) || 1);
   const sortParam = str(sp.sirala);

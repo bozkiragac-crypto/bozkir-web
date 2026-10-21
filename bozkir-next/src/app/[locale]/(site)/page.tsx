@@ -3,14 +3,16 @@ import { getPrimaryCategories } from '@/lib/api/categories';
 import { getActiveCampaigns } from '@/lib/api/campaigns';
 import { getContentBlock } from '@/lib/api/content';
 import { getSiteSettings } from '@/lib/data/settings';
+import { fetchAboutContent } from '@/lib/data/content';
 import { fallbackBrands } from '@/data/brands';
 import { buildMetadata, jsonLdString } from '@/lib/seo';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 import { Hero } from '@/components/home/Hero';
 import { CampaignSlider } from '@/components/campaigns/CampaignSlider';
 import { MaterialStory } from '@/components/home/MaterialStory';
 import { ProductShowcase } from '@/components/home/ProductShowcase';
+import { FeaturedProducts } from '@/components/home/FeaturedProducts';
 import { Manifesto } from '@/components/home/Manifesto';
 import { MaterialGallery } from '@/components/home/MaterialGallery';
 import { MaterialGuide } from '@/components/home/MaterialGuide';
@@ -35,7 +37,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   // Admin panelindeki SEO ayarları varsa site başlığı/açıklamasını onlar belirler.
   const seo = await getSiteSettings();
   return buildMetadata({
@@ -50,7 +52,7 @@ export async function generateMetadata({
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   const [
     allCategories,
     campaigns,
@@ -61,6 +63,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     faq,
     testimonials,
     settings,
+    aboutStats,
   ] = await Promise.all([
     getPrimaryCategories(lang),
     getActiveCampaigns(lang),
@@ -71,6 +74,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getContentBlock('faq', lang),
     getContentBlock('testimonials', lang),
     getSiteSettings(),
+    fetchAboutContent(lang),
   ]);
 
   // Admin'de tanımlı vitrin sırası varsa uygula.
@@ -120,6 +124,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <CampaignSlider campaigns={campaigns} />
       <MaterialStory categories={categories} />
       <ProductShowcase categories={categories} locale={lang} />
+      <FeaturedProducts locale={lang} />
       <Manifesto locale={lang} />
       {gallery && <MaterialGallery block={gallery} locale={lang} />}
       {guide && <MaterialGuide block={guide} locale={lang} />}
@@ -128,7 +133,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {process && <ProcessSteps block={process} locale={lang} />}
       <BrandPartners brands={fallbackBrands} locale={lang} />
       <Container className="pb-24 md:pb-32">
-        <StatsBand />
+        <StatsBand stats={aboutStats.stats} />
       </Container>
       {faq && <FaqAccordion block={faq} locale={lang} />}
       <SupplyLogistics locale={lang} />

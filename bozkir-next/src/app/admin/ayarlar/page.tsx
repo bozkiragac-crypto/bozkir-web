@@ -3,6 +3,7 @@ import { getCurrentAdmin } from '@/lib/admin/guard';
 import { getSiteSettings } from '@/lib/data/settings';
 import { getCategories } from '@/lib/api/categories';
 import { getActiveCampaigns } from '@/lib/api/campaigns';
+import { dictForRequest } from '@/i18n/server';
 import { SettingsForm } from '@/components/admin/SettingsForm';
 import { TotpSettings } from '@/components/admin/TotpSettings';
 
@@ -27,6 +28,17 @@ export default async function AdminSettingsPage() {
     getActiveCampaigns('tr'),
     getCurrentAdmin(),
   ]);
+  const nav = (await dictForRequest('tr')).nav;
+  const navLabels = {
+    products: nav.products,
+    collections: nav.collections,
+    catalogs: nav.catalogs,
+    about: nav.about,
+    contact: nav.contact,
+    dealers: nav.dealers,
+    faq: nav.faq,
+    quote: nav.quote,
+  };
 
   return (
     <div className="grid gap-6">
@@ -36,6 +48,7 @@ export default async function AdminSettingsPage() {
         smtpPassSet={Boolean(settings.smtp.pass)}
         categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
         campaigns={campaigns.map((c) => ({ id: c.id, title: c.title }))}
+        navLabels={navLabels}
       />
     </div>
   );

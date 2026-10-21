@@ -11,9 +11,12 @@
 ## Deploy
 
 1. `main` branch'e push → GitHub Actions **CI** (lint, typecheck, unit, build, E2E).
-2. CI yeşil olunca **Deploy (VPS)** otomatik çalışır (`workflow_run`). Manuel tetik: `workflow_dispatch`.
+2. **Deploy (VPS)** şu an **manuel** (`workflow_dispatch`). VPS ve secret'lar hazır olduğunda
+   `workflow_run` bloğu açılarak otomatik tetikleme etkinleştirilebilir.
 3. Deploy sırası: **migrasyon öncesi yedek** → sürümlü imaj (`bozkir-app:<sha>`) → `up -d` → migrate + seed → derin healthcheck.
 4. Sağlık kontrolü başarısız olursa **önceki sürüme otomatik rollback** yapılır ve iş kırmızı biter.
+5. Deploy `git reset --hard origin/main` yapar; domain özelleştirmesi `deploy/nginx.docker.tls.conf`
+   içinde commit edilmemişse kaybolur. Domain değişikliğini commit'leyin veya varsayılan domaini kullanın.
 
 Gerekli GitHub Actions secret'ları:
 - `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PATH` (ör. `/opt/bozkir-web`), opsiyonel `VPS_PORT`.
@@ -105,11 +108,12 @@ Acil durumda siteyi kapatmak için `MAINTENANCE_MODE=1 docker compose up -d app`
 | Değişken | Nerede | Kaybında |
 | --- | --- | --- |
 | `AUTH_SECRET` | `/opt/bozkir-web/bozkir-next/.env.local` + parola yöneticisi | Yeniden üret (≥32 karakter); tüm oturumlar geçersiz olur |
+| `TOTP_ENCRYPTION_KEY` | `.env.local` + parola yöneticisi | **Kaybında mevcut 2FA secret'ları açılamaz**; kullanıcıların 2FA'sı sıfırlanmalı. Boşsa `AUTH_SECRET`tan türetilir. |
 | `POSTGRES_PASSWORD` | `.env` (compose) + parola yöneticisi | DB şifresini değiştir; `DATABASE_URL` güncelle |
 | `S3_ACCESS_KEY` / `S3_SECRET_KEY` | `.env` | SeaweedFS ayarlarından yeniden üret |
 | `RESTIC_PASSWORD` | `/etc/bozkir-backup.env` + parola yöneticisi | **Kaybında off-site yedekler açılamaz** — mutlaka yedekleyin |
 | `VPS_SSH_KEY` | GitHub Secrets + parola yöneticisi | Yeni anahtar üret, GitHub'a ekle |
-| Admin parolası | DB `admin_users` | `npm run admin:reset -- <kullanıcı> <yeni-şifre>` |
+| Admin parolası | DB `admin_users` | `npm run admin:reset -- --user <kullanıcı> --password-stdin --yes` |
 
 > `.env.local` ve `.env` **git'e girmez**. Kurulumdan sonra parola yöneticisine kopyalayın.
 
@@ -162,5 +166,7 @@ Test: `docker stop bozkir-next-app-1 && curl -i http://localhost/tr && docker st
 ## Bakım
 
 - `npm run db:migrate` — şema güncellemeleri (idempotent).
-- `npm run admin:reset -- <kullanıcı> <şifre>` — yönetici hesabı sıfırla.
+- `npm run admin:reset -- --user <kullanıcı> --password-stdin --yes` — hedefli yönetici şifresi sıfırla; kilit/deneme sayacını temizler, diğer hesaplara dokunmaz.
+- `--reset-2fa` — 2FA cihazı kaybolduysa; `--create` — kullanıcı yoksa owner oluştur.
+- `npm run totp:encrypt` — eski düz metin TOTP secret'larını tek seferlik şifreler (idempotent).
 - `npm run media:normalize` — görsel URL'lerini anahtara indir (tek seferlik).

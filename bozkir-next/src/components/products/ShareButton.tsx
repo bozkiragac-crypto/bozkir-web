@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Share2, MessageCircle, Link2, Check, Smartphone } from 'lucide-react';
+import { Share2, Link2, Check, Smartphone } from 'lucide-react';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { useToast } from '@/components/ui/ToastProvider';
 import { cn } from '@/lib/utils';
 import { track } from '@/lib/analytics';
@@ -16,11 +17,14 @@ export function ShareButton({
   url,
   imageUrl,
   className,
+  message,
 }: {
   name: string;
   url: string;
   imageUrl?: string;
   className?: string;
+  /** Ürün bazlı WhatsApp metni; boşsa sözlükteki genel ürün şablonu. */
+  message?: string;
 }) {
   const { dict } = useDictionary();
   const c = dict.common;
@@ -34,11 +38,13 @@ export function ShareButton({
     setCanNative(typeof navigator !== 'undefined' && !!navigator.share);
   }, []);
 
-  const text = dict.pages.whatsapp.productMessage
-    .replace('{product}', name)
-    .replace('{url}', url)
-    .replace(/\s+/g, ' ')
-    .trim();
+  const text =
+    message?.trim() ||
+    dict.pages.whatsapp.productMessage
+      .replace('{product}', name)
+      .replace('{url}', url)
+      .replace(/\s+/g, ' ')
+      .trim();
   const waHref = `https://wa.me/?text=${encodeURIComponent(text)}`;
 
   useEffect(() => {
@@ -133,7 +139,7 @@ export function ShareButton({
             }}
             className={item}
           >
-            <MessageCircle className="h-4 w-4 text-[#25D366]" /> {c.shareWhatsapp}
+            <WhatsAppIcon className="h-4 w-4 text-[#25D366]" /> {c.shareWhatsapp}
           </a>
 
           {canNative && (

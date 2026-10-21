@@ -3,13 +3,13 @@ import type { ContentBlock } from '@/types/content';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { jsonLdString } from '@/lib/seo';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** SSS — JS'siz, erişilebilir yerleşik <details> ile + FAQPage schema. */
 export async function FaqAccordion({ block, locale }: { block: ContentBlock; locale: Locale }) {
   if (block.items.length === 0) return null;
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
 
   return (
     <Container id="sss" className="py-24 md:py-32">

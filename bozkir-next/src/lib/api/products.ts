@@ -4,6 +4,7 @@ import {
   fetchProductBySlug,
   fetchProductFacets,
   fetchProducts,
+  fetchProductsByIds,
   fetchRelatedProducts,
 } from '@/lib/data/catalog';
 import { apiGet, hasRemoteApi } from './client';
@@ -46,6 +47,11 @@ export async function getProducts(
 /** Filtre paneli facet'leri (yüzey). */
 export async function getProductFacets(): Promise<{ surfaces: string[] }> {
   return fetchProductFacets();
+}
+
+/** Admin'de seçilen öne çıkan ürünler; sıra korunur. */
+export async function getProductsByIds(ids: string[], locale?: Locale): Promise<Product[]> {
+  return fetchProductsByIds(ids, locale);
 }
 
 export async function getProductBySlug(slug: string, locale?: Locale): Promise<Product | null> {

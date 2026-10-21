@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import './globals.css';
 import { fontVariables } from '@/lib/fonts';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 
 const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t!=='dark')t='light';document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}catch(e){}})();`;
 
@@ -17,9 +17,9 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, view
  * Dil öneği tutmayan (örn. eski) adresler için uygulama düzeyi 404.
  * Statik kalabilmesi için `headers()` kullanılmaz; varsayılan dil (TR) sözlüğü kullanılır.
  */
-export default function NotFound() {
+export default async function NotFound() {
   const locale = 'tr';
-  const nf = dictFor(locale).pages.notFound;
+  const nf = (await dictForRequest(locale)).pages.notFound;
 
   return (
     <html lang={locale} className={fontVariables}>

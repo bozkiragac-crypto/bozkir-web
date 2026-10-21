@@ -9,29 +9,34 @@ import { ImageManager } from '@/components/admin/ImageManager';
 import { Select } from '@/components/ui/Select';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { normalizeWeeklyHours } from '@/lib/open-hours';
-import type { SiteSettings } from '@/lib/data/settings';
+import type { NavSettingItem, SiteSettings } from '@/lib/data/settings';
 
 /** 0=Pazar … 6=Cumartesi (JS getDay ile uyumlu). */
 const DAY_LABELS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
 
 const field =
   'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-foreground';
+const area =
+  'w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-foreground';
 
 export function SettingsForm({
   initial,
   categories,
   campaigns = [],
   smtpPassSet = false,
+  navLabels = {},
 }: {
   initial: SiteSettings;
   categories: { slug: string; name: string }[];
   campaigns?: { id: string; title: string }[];
   smtpPassSet?: boolean;
+  navLabels?: Record<string, string>;
 }) {
   const router = useRouter();
   const [form, setForm] = useState<SiteSettings>(initial);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [tab, setTab] = useState('general');
   const toast = useToast();
 
   // Kayıtlı sırayı mevcut kategorilerle uzlaştır: artık var olmayan (ürünleri/
@@ -81,6 +86,14 @@ export function SettingsForm({
   }
 
   const section = 'rounded-xl border border-border bg-surface p-6';
+  const tabs = [
+    { id: 'general', label: 'Genel' },
+    { id: 'contact', label: 'İletişim' },
+    { id: 'content', label: 'İçerik & SEO' },
+    { id: 'email', label: 'E-posta' },
+    { id: 'legal', label: 'Yasal' },
+  ];
+  const hide = (id: string) => (tab === id ? '' : 'hidden');
 
   return (
     <form onSubmit={onSubmit}>
@@ -89,8 +102,126 @@ export function SettingsForm({
         İletişim bilgileri ve vitrin kategori sırası.
       </p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <div className={section}>
+      <div
+        role="tablist"
+        aria-label="Site ayarları bölümleri"
+        className="mt-6 flex flex-wrap gap-2 border-b border-border pb-3"
+      >
+        {tabs.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === item.id}
+            onClick={() => setTab(item.id)}
+            className={
+              tab === item.id
+                ? 'rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background'
+                : 'rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-strong hover:bg-surface-2'
+            }
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      <div className={`${section} mt-8 ${hide('general')}`}>
+        <p className="font-medium">Site kimliği</p>
+        <p className="mt-1 text-sm text-muted-strong">
+          Başlık, footer ve yönetim panelinde görünen marka bilgileri. Boş bırakılan alan varsayılana
+          döner.
+        </p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <Label t="Marka adı">
+            <input
+              className={field}
+              value={form.identity.brandName}
+              onChange={(e) =>
+                setForm({ ...form, identity: { ...form.identity, brandName: e.target.value } })
+              }
+            />
+          </Label>
+          <Label t="Ticari / yasal ad">
+            <input
+              className={field}
+              value={form.identity.legalName}
+              onChange={(e) =>
+                setForm({ ...form, identity: { ...form.identity, legalName: e.target.value } })
+              }
+            />
+          </Label>
+          <Label t="Slogan" full>
+            <input
+              className={field}
+              value={form.identity.tagline}
+              onChange={(e) =>
+                setForm({ ...form, identity: { ...form.identity, tagline: e.target.value } })
+              }
+            />
+          </Label>
+          <Label t="Kısa açıklama" full>
+            <textarea
+              className={`${area} h-20`}
+              value={form.identity.description}
+              onChange={(e) =>
+                setForm({ ...form, identity: { ...form.identity, description: e.target.value } })
+              }
+            />
+          </Label>
+          <div className="sm:col-span-2">
+            <ImageManager
+              images={form.identity.logo ? [form.identity.logo] : []}
+              onChange={(next) =>
+                setForm({ ...form, identity: { ...form.identity, logo: next[0] ?? '' } })
+              }
+              folder="content"
+              multiple={false}
+              label="Marka logosu"
+            />
+          </div>
+          <Label t="Favicon URL (PNG/ICO)" full>
+            <input
+              className={field}
+              value={form.identity.favicon}
+              onChange={(e) =>
+                setForm({ ...form, identity: { ...form.identity, favicon: e.target.value } })
+              }
+              placeholder="/favicon.ico"
+            />
+            {form.identity.favicon && (
+              <span className="mt-2 flex items-center gap-2 text-xs text-muted">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={form.identity.favicon}
+                  alt=""
+                  className="h-6 w-6 rounded border border-border object-contain"
+                />
+                Favicon önizlemesi
+              </span>
+            )}
+          </Label>
+        </div>
+      </div>
+
+      <div className={`mt-6 grid gap-6 lg:grid-cols-2 ${hide('general')}`}>
+        <NavOrderEditor
+          title="Navigasyon"
+          hint="Ana menü sırası ve görünürlüğü. Etiketleri Site Metinleri → Nav bölümünden düzenleyin."
+          items={form.nav}
+          labels={navLabels}
+          onChange={(nav) => setForm({ ...form, nav })}
+        />
+        <NavOrderEditor
+          title="Footer bağlantıları"
+          hint="Footer'daki kurumsal bağlantıların sırası ve görünürlüğü."
+          items={form.footerNav}
+          labels={navLabels}
+          onChange={(footerNav) => setForm({ ...form, footerNav })}
+        />
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <div className={`${section} ${hide('contact')}`}>
           <p className="font-medium">İletişim</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Label t="Telefon *">
@@ -146,7 +277,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={section}>
+        <div className={`${section} ${hide('contact')}`}>
           <p className="font-medium">Adres & Sosyal</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Label t="Adres satırı" full>
@@ -247,7 +378,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={`${section} lg:col-span-2`}>
+        <div className={`${section} lg:col-span-2 ${hide('contact')}`}>
           <p className="font-medium">Depo konumu</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Label t="Depo adresi (opsiyonel)" full>
@@ -272,7 +403,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={`${section} lg:col-span-2`}>
+        <div className={`${section} lg:col-span-2 ${hide('contact')}`}>
           <p className="font-medium">Açılış saatleri</p>
           <p className="mt-1 text-sm text-muted-strong">
             İletişim sayfasındaki &quot;şu an açık/kapalı&quot; rozeti bu çizelgeye göre hesaplanır
@@ -325,7 +456,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={`${section} lg:col-span-2`}>
+        <div className={`${section} lg:col-span-2 ${hide('content')}`}>
           <p className="font-medium">Kampanya popup</p>
           <p className="mt-1 text-sm text-muted-strong">
             Siteye girişte bir kez gösterilen kampanya modalı (günde 1 kez).
@@ -356,7 +487,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={`${section} lg:col-span-2`}>
+        <div className={`${section} lg:col-span-2 ${hide('content')}`}>
           <p className="font-medium">Webhook</p>
           <p className="mt-1 text-sm text-muted-strong">
             Tanımlanırsa olaylarda (ör. yeni teklif) JSON POST atılır. Slack/CRM/e-posta
@@ -374,7 +505,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={`${section} lg:col-span-2`}>
+        <div className={`${section} lg:col-span-2 ${hide('content')}`}>
           <p className="font-medium">SEO / Meta</p>
           <p className="mt-1 text-sm text-muted-strong">
             Boş bırakılırsa site varsayılanları kullanılır. OG görseli tam URL veya /yol olabilir.
@@ -389,7 +520,7 @@ export function SettingsForm({
             </Label>
             <Label t="Site açıklaması (meta description)" full>
               <textarea
-                className={`${field} h-20 py-2`}
+                className={`${area} h-20`}
                 value={form.seoDescription}
                 onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
               />
@@ -405,7 +536,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={`${section} lg:col-span-2`}>
+        <div className={`${section} lg:col-span-2 ${hide('content')}`}>
           <p className="font-medium">Ana sayfa arka planı (hero)</p>
           <p className="mt-1 text-sm text-muted-strong">
             Sayfanın en üstündeki büyük arka plan görseli. Boş bırakılırsa varsayılan görsel
@@ -422,7 +553,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={section}>
+        <div className={`${section} ${hide('content')}`}>
           <p className="font-medium">Analitik</p>
           <p className="mt-1 text-sm text-muted-strong">
             Yalnızca çerez onayı verildiğinde yüklenir.
@@ -447,7 +578,7 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={section}>
+        <div className={`${section} ${hide('general')}`}>
           <p className="font-medium">Bakım modu</p>
           <p className="mt-1 text-sm text-muted-strong">
             Açıkken public site bakım sayfasına yönlenir. Admin ve API etkilenmez.
@@ -462,7 +593,7 @@ export function SettingsForm({
           </label>
         </div>
 
-        <div className={`${section} lg:col-span-2`}>
+        <div className={`${section} lg:col-span-2 ${hide('email')}`}>
           <p className="font-medium">SMTP / teklif bildirimi</p>
           <p className="mt-1 text-sm text-muted-strong">
             Yeni teklif geldiğinde bildirim e-postası gönderilir. Gönderim başarısız olsa da teklif
@@ -521,16 +652,79 @@ export function SettingsForm({
           </div>
         </div>
 
-        <div className={`${section} lg:col-span-2`}>
-          <p className="font-medium">Çerez politikası metni</p>
+        <div className={`${section} lg:col-span-2 ${hide('email')}`}>
+          <p className="font-medium">WhatsApp mesaj şablonları</p>
           <p className="mt-1 text-sm text-muted-strong">
-            Doldurulursa /cerez-politikasi sayfası bu metni gösterir (paragraflar boş satırla
-            ayrılır).
+            Genel mesaj ve ürün mesajı. Yer tutucular: <code>{'{product}'}</code>,{' '}
+            <code>{'{code}'}</code>, <code>{'{category}'}</code>, <code>{'{url}'}</code>. Ürün
+            bazlı mesaj boşsa ürün şablonu, o da boşsa genel şablon kullanılır.
           </p>
-          <div className="mt-5">
-            <Label t="Metin" full>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {(['tr', 'en', 'ar'] as const).map((lang) => (
+              <Label key={`wa-general-${lang}`} t={`Genel mesaj (${lang.toUpperCase()})`} full>
+                <textarea
+                  className={`${area} h-24`}
+                  dir={lang === 'ar' ? 'rtl' : undefined}
+                  value={form.whatsappMessages.general[lang]}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      whatsappMessages: {
+                        ...form.whatsappMessages,
+                        general: { ...form.whatsappMessages.general, [lang]: e.target.value },
+                      },
+                    })
+                  }
+                />
+              </Label>
+            ))}
+            {(['tr', 'en', 'ar'] as const).map((lang) => (
+              <Label key={`wa-product-${lang}`} t={`Ürün mesajı (${lang.toUpperCase()})`} full>
+                <textarea
+                  className={`${area} h-24`}
+                  dir={lang === 'ar' ? 'rtl' : undefined}
+                  value={form.whatsappMessages.product[lang]}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      whatsappMessages: {
+                        ...form.whatsappMessages,
+                        product: { ...form.whatsappMessages.product, [lang]: e.target.value },
+                      },
+                    })
+                  }
+                />
+              </Label>
+            ))}
+          </div>
+        </div>
+
+        <div className={`${section} lg:col-span-2 ${hide('legal')}`}>
+          <p className="font-medium">Yasal metinler</p>
+          <p className="mt-1 text-sm text-muted-strong">
+            Doldurulursa ilgili yasal sayfa sözlük yerine bu metni gösterir. Paragraflar boş
+            satırla ayrılır. Boş bırakılan sayfalar varsayılan metni kullanır.
+          </p>
+          <div className="mt-5 grid gap-5">
+            <Label t="KVKK aydınlatma metni" full>
               <textarea
-                className={`${field} h-40 py-2`}
+                className={`${area} h-32`}
+                value={form.kvkkText}
+                onChange={(e) => setForm({ ...form, kvkkText: e.target.value })}
+                placeholder="6698 sayılı KVKK kapsamında aydınlatma metni..."
+              />
+            </Label>
+            <Label t="Gizlilik politikası metni" full>
+              <textarea
+                className={`${area} h-32`}
+                value={form.privacyText}
+                onChange={(e) => setForm({ ...form, privacyText: e.target.value })}
+                placeholder="Gizlilik politikası..."
+              />
+            </Label>
+            <Label t="Çerez politikası metni" full>
+              <textarea
+                className={`${area} h-32`}
                 value={form.cookiePolicyText}
                 onChange={(e) => setForm({ ...form, cookiePolicyText: e.target.value })}
                 placeholder="Bu sitede ... çerezler kullanılmaktadır.&#10;&#10;..."
@@ -540,7 +734,7 @@ export function SettingsForm({
         </div>
       </div>
 
-      <div className={`${section} mt-6`}>
+      <div className={`${section} mt-6 ${hide('content')}`}>
         <p className="font-medium">Vitrin kategori sırası</p>
         <p className="mt-1 text-sm text-muted-strong">
           Anasayfadaki &quot;Malzeme koleksiyonu&quot; ve &quot;Malzemeyi Keşfet&quot; bölümlerinin
@@ -634,6 +828,75 @@ export function SettingsForm({
         )}
       </div>
     </form>
+  );
+}
+
+function NavOrderEditor({
+  title,
+  hint,
+  items,
+  labels,
+  onChange,
+}: {
+  title: string;
+  hint: string;
+  items: NavSettingItem[];
+  labels: Record<string, string>;
+  onChange: (items: NavSettingItem[]) => void;
+}) {
+  function move(index: number, dir: -1 | 1) {
+    const target = index + dir;
+    if (target < 0 || target >= items.length) return;
+    const next = [...items];
+    [next[index], next[target]] = [next[target]!, next[index]!];
+    onChange(next);
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-surface p-6">
+      <p className="font-medium">{title}</p>
+      <p className="mt-1 text-sm text-muted-strong">{hint}</p>
+      <ul className="mt-5 divide-y divide-border">
+        {items.map((item, i) => (
+          <li key={item.key} className="flex items-center gap-3 py-2.5 text-sm">
+            <input
+              type="checkbox"
+              checked={item.visible}
+              onChange={(e) =>
+                onChange(
+                  items.map((x, j) => (j === i ? { ...x, visible: e.target.checked } : x)),
+                )
+              }
+              aria-label={`${labels[item.key] ?? item.key} görünür`}
+            />
+            <span className={item.visible ? 'flex-1' : 'flex-1 text-muted'}>
+              <span className="block">{labels[item.key] ?? item.key}</span>
+              <span className="block text-xs text-muted">{item.href}</span>
+            </span>
+            <span className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => move(i, -1)}
+                disabled={i === 0}
+                aria-label="Yukarı"
+                className="rounded-md border border-border p-1.5 disabled:opacity-30"
+              >
+                <ArrowUp className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => move(i, 1)}
+                disabled={i === items.length - 1}
+                aria-label="Aşağı"
+                className="rounded-md border border-border p-1.5 disabled:opacity-30"
+              >
+                <ArrowDown className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

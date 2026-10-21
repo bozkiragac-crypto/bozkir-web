@@ -28,6 +28,8 @@ export interface Product {
   /** Admin'den düzenlenebilir SEO başlığı/açıklaması (boşsa otomatik üretilir). */
   seoTitle?: string;
   seoDescription?: string;
+  /** Ürün bazlı WhatsApp mesajı (locale'e göre çözülür; boşsa genel şablon). */
+  whatsappMessage?: string;
 }
 
 export interface ProductFilters {

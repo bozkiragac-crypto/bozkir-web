@@ -4,7 +4,7 @@ import { getCatalogs } from '@/lib/api/catalogs';
 import { Container } from '@/components/ui/Container';
 import { Reveal } from '@/components/animations/Reveal';
 import { CatalogActions } from '@/components/catalog/CatalogActions';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 import type { Catalog } from '@/types/catalog';
 
@@ -27,7 +27,7 @@ function Cover({ catalog, placeholder }: { catalog: Catalog; placeholder: string
 }
 
 export async function CatalogSection({ locale }: { locale: Locale }) {
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.catalog;
   const catalogs = await getCatalogs(locale);
 

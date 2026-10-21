@@ -1,8 +1,10 @@
 import { LoginForm } from '@/components/admin/LoginForm';
 import { hasDb } from '@/lib/db/client';
+import { getSiteSettings } from '@/lib/data/settings';
 
-export default function AdminLoginPage() {
+export default async function AdminLoginPage() {
   const configured = hasDb() && !!process.env.AUTH_SECRET;
+  const settings = configured ? await getSiteSettings() : null;
   return (
     <main className="flex min-h-svh items-center justify-center px-5">
       <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-8">
@@ -14,7 +16,7 @@ export default function AdminLoginPage() {
 
         <div className="mt-8">
           {configured ? (
-            <LoginForm />
+            <LoginForm logoUrl={settings?.identity.logo} />
           ) : (
             <p className="rounded-md border border-border bg-surface-2 p-4 text-sm text-muted-strong">
               Yapılandırma eksik. <code>DATABASE_URL</code> ve <code>AUTH_SECRET</code> ortam

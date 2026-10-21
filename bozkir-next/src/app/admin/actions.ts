@@ -37,6 +37,7 @@ import {
 } from '@/lib/storage/s3';
 import { logActivity, requireAdminUser, requireOwner } from '@/lib/admin/guard';
 import { createTotpSecret, totpKeyUri, verifyTotp } from '@/lib/auth/totp';
+import { decryptTotpSecret, encryptTotpSecret } from '@/lib/auth/totp-crypto';
 import { parseCsv } from '@/lib/csv';
 import { categorySlugOf } from '@/lib/data/category-key';
 import { isQuoteStatus, type QuoteStatus } from '@/lib/quotes/status';
@@ -153,7 +154,13 @@ export async function signIn(
   // 2FA etkinse kod doğrulanmadan oturum açılmaz.
   if (user.totpEnabled && user.totpSecret) {
     if (!totp) return { ok: false, requiresTotp: true };
-    const codeOk = await verifyTotp(user.totpSecret, totp);
+    let secret: string;
+    try {
+      secret = decryptTotpSecret(user.totpSecret);
+    } catch {
+      return { ok: false, requiresTotp: true, error: '2FA doğrulanamadı. Yöneticiye başvurun.' };
+    }
+    const codeOk = await verifyTotp(secret, totp);
     if (!codeOk) return { ok: false, requiresTotp: true, error: 'Doğrulama kodu hatalı.' };
   }
 
@@ -234,7 +241,7 @@ export async function enableTotp(
   if (!ok) return { ok: false, error: 'Kod doğrulanamadı.' };
   await db
     .update(adminUsers)
-    .set({ totpSecret: secret, totpEnabled: true })
+    .set({ totpSecret: encryptTotpSecret(secret), totpEnabled: true })
     .where(eq(adminUsers.id, admin.id));
   await logActivity(admin, 'update', 'auth', admin.id, '2FA etkinleştirildi');
   return { ok: true };
@@ -246,7 +253,13 @@ export async function disableTotp(code: string): Promise<{ ok: boolean; error?: 
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
   if (!admin.totpSecret || !admin.totpEnabled) return { ok: false, error: '2FA zaten kapalı.' };
-  const ok = await verifyTotp(admin.totpSecret, code);
+  let secret: string;
+  try {
+    secret = decryptTotpSecret(admin.totpSecret);
+  } catch {
+    return { ok: false, error: '2FA secret okunamadı. Yöneticiye başvurun.' };
+  }
+  const ok = await verifyTotp(secret, code);
   if (!ok) return { ok: false, error: 'Kod doğrulanamadı.' };
   await db
     .update(adminUsers)
@@ -360,6 +373,9 @@ export interface ProductInput {
   catAr?: string;
   seoTitle?: string;
   seoDescription?: string;
+  whatsappMessage?: string;
+  whatsappMessageEn?: string;
+  whatsappMessageAr?: string;
 }
 
 export async function saveProduct(
@@ -405,6 +421,9 @@ export async function saveProduct(
   const catAr = input.catAr?.trim() || null;
   const seoTitle = input.seoTitle?.trim() || null;
   const seoDescription = input.seoDescription?.trim() || null;
+  const whatsappMessage = input.whatsappMessage?.trim() || null;
+  const whatsappMessageEn = input.whatsappMessageEn?.trim() || null;
+  const whatsappMessageAr = input.whatsappMessageAr?.trim() || null;
   const colors = input.colors?.trim() || null;
   const thicknesses = input.thicknesses?.trim() || null;
 
@@ -436,6 +455,9 @@ export async function saveProduct(
         catAr,
         seoTitle,
         seoDescription,
+        whatsappMessage,
+        whatsappMessageEn,
+        whatsappMessageAr,
       })
       .where(eq(products.id, input.id));
 
@@ -464,6 +486,9 @@ export async function saveProduct(
       catAr,
       seoTitle,
       seoDescription,
+      whatsappMessage,
+      whatsappMessageEn,
+      whatsappMessageAr,
     })
     .returning({ id: products.id });
 

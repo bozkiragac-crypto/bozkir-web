@@ -136,6 +136,7 @@ export function MediaLibrary({
         <form
           action="/admin/medya"
           method="get"
+          data-search-shell
           className="flex items-center gap-3 rounded-full border border-border px-4"
         >
           {folder !== 'all' && <input type="hidden" name="klasor" value={folder} />}
@@ -146,6 +147,7 @@ export function MediaLibrary({
             name="q"
             defaultValue={q}
             placeholder="Dosya ara..."
+            data-search-input
             className="h-11 w-48 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm sm:w-64"
           />
         </form>

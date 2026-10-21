@@ -3,8 +3,11 @@ import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getProductBySlug, getRelatedProducts } from '@/lib/api/products';
+import { getSiteSettings } from '@/lib/data/settings';
 import { siteConfig } from '@/config/site';
 import { telHref } from '@/lib/phone';
+import { buildProductWhatsAppMessage, whatsappHref } from '@/lib/whatsapp';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { buildMetadata, breadcrumbJsonLd, absoluteUrl, localeUrl, jsonLdString } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
@@ -21,7 +24,8 @@ import { ProductViewTracker } from '@/components/analytics/ProductViewTracker';
 import { RecentlyViewed } from '@/components/products/RecentlyViewed';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
+import { cn } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>;
@@ -34,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug, locale: localeParam } = await params;
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
-  const dict = getDictionary(locale ?? 'tr');
+  const dict = await dictForRequest(locale ?? 'tr');
   const product = await getProductBySlug(slug, locale);
   if (!product) {
     return buildMetadata({
@@ -61,14 +65,29 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const { slug, locale: localeParam } = await params;
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
-  const dict = getDictionary(locale ?? 'tr');
-  const [product] = await Promise.all([getProductBySlug(slug, locale)]);
+  const dict = await dictForRequest(locale ?? 'tr');
+  const [product, siteSettings] = await Promise.all([
+    getProductBySlug(slug, locale),
+    getSiteSettings(),
+  ]);
   if (!product) notFound();
 
   const settings = siteConfig;
   const related = await getRelatedProducts(product.slug, locale, 4);
 
   const image = product.images[0] ?? product.thumbnail;
+  const productUrl = localeUrl(locale, `/urunler/${product.slug}`);
+  const whatsappMessage = buildProductWhatsAppMessage(
+    product,
+    siteSettings.whatsappMessages,
+    locale ?? 'tr',
+    productUrl,
+  );
+  const whatsappLink = whatsappHref(
+    siteSettings.whatsapp || siteSettings.phone,
+    whatsappMessage,
+    siteSettings.phone,
+  );
 
   const ref = {
     id: product.id,
@@ -137,17 +156,26 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <div data-print-area>
         <PageHero
           eyebrow={product.category}
+          eyebrowClassName="print:hidden"
           title={product.name}
-          leading={<BrandLogo className="mb-6 h-14" priority alt={dict.meta.brand} />}
+          leading={
+            <BrandLogo
+              className="mb-6 h-14"
+              priority
+              alt={dict.meta.brand}
+              src={siteSettings.identity.logo}
+            />
+          }
           crumbs={[
             { label: dict.common.home, href: '/' },
             { label: dict.nav.products, href: '/urunler' },
             { label: product.name },
           ]}
+          className="print:pt-0 print:pb-4"
         />
 
-        <Container className="pb-40 md:pb-32">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
+        <Container className="pb-40 md:pb-32 print:pb-0">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-20 print:grid-cols-2 print:items-start print:gap-8">
             <ProductGallery images={product.images} alt={product.name} />
 
             <div className="lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:self-start">
@@ -155,7 +183,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 {specs.map((spec) => (
                   <div
                     key={spec.label}
-                    className="-mx-3 flex justify-between gap-4 rounded-md border-b border-border px-3 py-4 text-sm transition-colors hover:bg-surface-2"
+                    className={cn(
+                      '-mx-3 flex justify-between gap-4 rounded-md border-b border-border px-3 py-4 text-sm transition-colors hover:bg-surface-2',
+                      spec.label === dict.compare.category && 'print:hidden',
+                    )}
                   >
                     <dt className="flex-none text-muted-strong">{spec.label}</dt>
                     <dd className="min-w-0 break-words text-end">{spec.value}</dd>
@@ -187,10 +218,23 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   <CompareButton product={ref} className="h-11 w-11" />
                   <ShareButton
                     name={product.name}
-                    url={localeUrl(locale, `/urunler/${product.slug}`)}
+                    url={productUrl}
                     imageUrl={image}
+                    message={whatsappMessage}
                     className="h-11 w-11"
                   />
+                  {whatsappLink && (
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={dict.pages.whatsapp.aria}
+                      title={dict.pages.whatsapp.aria}
+                      className="no-print flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 text-[#25D366] backdrop-blur transition active:scale-95 hover:border-foreground"
+                    >
+                      <WhatsAppIcon className="h-4 w-4" />
+                    </a>
+                  )}
                   <PrintButton className="no-print" />
                 </div>
               </div>

@@ -1,14 +1,15 @@
 import Link from 'next/link';
-import { Phone, MessageCircle, Clock, RefreshCw } from 'lucide-react';
+import { Phone, Clock, RefreshCw } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
 import { pickLocaleText } from '@/lib/locale-text';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import { resolveLocaleFromRequest } from '@/i18n/request';
 
 /** MAINTENANCE_MODE=1 iken middleware tüm public trafiği buraya yönlendirir. */
 export default async function MaintenancePage() {
   const locale = await resolveLocaleFromRequest();
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const m = dict.pages.maintenance;
 
   let s: Awaited<ReturnType<typeof getSiteSettings>> | null = null;
@@ -50,7 +51,7 @@ export default async function MaintenancePage() {
               rel="noopener noreferrer"
               className={`${btn} bg-[#25d366] text-white hover:brightness-95`}
             >
-              <MessageCircle className="h-4 w-4" />
+              <WhatsAppIcon className="h-4 w-4" />
               {m.whatsapp}
             </a>
           )}

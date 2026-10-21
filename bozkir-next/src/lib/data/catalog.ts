@@ -59,6 +59,9 @@ interface IndexItem {
   catAr: string;
   seoTitle: string;
   seoDescription: string;
+  whatsappMessage: string;
+  whatsappMessageEn: string;
+  whatsappMessageAr: string;
 }
 
 interface RawRow {
@@ -77,6 +80,9 @@ interface RawRow {
   catAr?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  whatsappMessage?: string | null;
+  whatsappMessageEn?: string | null;
+  whatsappMessageAr?: string | null;
 }
 
 function buildIndex(rows: RawRow[]): IndexItem[] {
@@ -123,6 +129,9 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       catAr: String(row.catAr ?? '').trim(),
       seoTitle: String(row.seoTitle ?? '').trim(),
       seoDescription: String(row.seoDescription ?? '').trim(),
+      whatsappMessage: String(row.whatsappMessage ?? '').trim(),
+      whatsappMessageEn: String(row.whatsappMessageEn ?? '').trim(),
+      whatsappMessageAr: String(row.whatsappMessageAr ?? '').trim(),
     });
   }
   return out;
@@ -172,7 +181,26 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
     thumbnail: images[0],
     seoTitle: item.seoTitle || undefined,
     seoDescription: item.seoDescription || undefined,
+    whatsappMessage:
+      pickLocaleText(
+        item.whatsappMessage,
+        locale,
+        item.whatsappMessageEn,
+        item.whatsappMessageAr,
+      ) || undefined,
   };
+}
+
+/** Verilen ID'leri istenen sırada döndürür; bulunmayan/pasif ürünler atlanır. */
+export async function fetchProductsByIds(ids: string[], locale?: Locale): Promise<Product[]> {
+  const wanted = ids.map((id) => String(id).trim()).filter(Boolean);
+  if (wanted.length === 0) return [];
+  const index = await getProductsIndex();
+  const byId = new Map(index.map((item) => [item.id, item]));
+  return wanted
+    .map((id) => byId.get(id))
+    .filter((item): item is IndexItem => !!item)
+    .map((item) => toProduct(item, locale));
 }
 
 /** Arama için sadeleştirme: aksan düşür, boşluk/noktalama ayıkl. */

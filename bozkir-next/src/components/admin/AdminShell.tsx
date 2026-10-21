@@ -9,6 +9,7 @@ import {
   Package,
   FolderTree,
   LayoutGrid,
+  Star,
   Handshake,
   Megaphone,
   BookOpen,
@@ -23,6 +24,7 @@ import {
   X,
   Info,
   Languages,
+  Type,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
@@ -34,10 +36,12 @@ const items = [
   { href: '/admin/urunler', label: 'Ürünler', icon: Package },
   { href: '/admin/kategoriler', label: 'Kategoriler', icon: FolderTree },
   { href: '/admin/vitrin', label: 'Malzeme Vitrini', icon: LayoutGrid },
+  { href: '/admin/one-cikan-urunler', label: 'Öne Çıkan Ürünler', icon: Star },
   { href: '/admin/bayilikler', label: 'Bayilikler', icon: Handshake },
   { href: '/admin/kampanyalar', label: 'Kampanyalar', icon: Megaphone },
   { href: '/admin/kataloglar', label: 'Kataloglar', icon: BookOpen },
   { href: '/admin/icerik', label: 'İçerik', icon: FileText },
+  { href: '/admin/site-metinleri', label: 'Site Metinleri', icon: Type, ownerOnly: true },
   { href: '/admin/hakkimizda', label: 'Hakkımızda', icon: Info },
   { href: '/admin/ceviri', label: 'Toplu Çeviri', icon: Languages },
   { href: '/admin/teklifler', label: 'Teklifler', icon: Inbox },

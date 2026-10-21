@@ -1,11 +1,11 @@
 import { Container } from '@/components/ui/Container';
 import { Reveal } from '@/components/animations/Reveal';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Editoryal manifesto bandı — bölüm ritmini kırar. */
 export async function Manifesto({ locale }: { locale: Locale }) {
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   return (
     <section className="relative overflow-hidden border-y border-border bg-surface">
       <div
@@ -14,7 +14,7 @@ export async function Manifesto({ locale }: { locale: Locale }) {
       />
       <span
         aria-hidden
-        className="font-display pointer-events-none absolute -top-6 start-2 select-none text-[clamp(8rem,22vw,18rem)] leading-none text-foreground/[0.05] md:start-8"
+        className="font-display pointer-events-none absolute top-4 start-1 select-none text-[clamp(4.5rem,16vw,18rem)] leading-none text-foreground/[0.05] md:-top-6 md:start-8 md:text-[clamp(8rem,22vw,18rem)]"
       >
         &ldquo;
       </span>

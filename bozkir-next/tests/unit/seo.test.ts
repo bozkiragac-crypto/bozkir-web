@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { buildMetadata, breadcrumbJsonLd, localeUrl, absoluteUrl } from '@/lib/seo';
+import {
+  buildMetadata,
+  breadcrumbJsonLd,
+  localeUrl,
+  absoluteUrl,
+  organizationJsonLd,
+} from '@/lib/seo';
 
 describe('seo', () => {
   it('absoluteUrl site köküne göre üretir', () => {
@@ -30,6 +36,24 @@ describe('seo', () => {
   it('noIndex robots ayarı', () => {
     const m = buildMetadata({ title: 'x', path: '/favoriler', noIndex: true });
     expect((m.robots as { index: boolean }).index).toBe(false);
+  });
+
+  it('organizationJsonLd admin iletişim bilgilerini kullanır', () => {
+    const json = organizationJsonLd([], 'Bozkır', '/logo.png', {
+      phone: '+90 555 000 00 00',
+      email: 'test@example.com',
+      address: {
+        street: 'Test Sokak 1',
+        locality: 'Antakya',
+        region: 'Hatay',
+        postalCode: '31000',
+        country: 'TR',
+      },
+      warehouse: { coords: '36.2,36.1' },
+    });
+    expect(json.telephone).toBe('+90 555 000 00 00');
+    expect(json.email).toBe('test@example.com');
+    expect(json.address.streetAddress).toBe('Test Sokak 1');
   });
 
   it('breadcrumbJsonLd dile göre anahtarları kurar', () => {

@@ -15,6 +15,7 @@ interface MegaMenuProps {
   onClose: () => void;
   onPointerEnter?: () => void;
   onPointerLeave?: () => void;
+  logoUrl?: string;
 }
 
 export function MegaMenu({
@@ -23,6 +24,7 @@ export function MegaMenu({
   onClose,
   onPointerEnter,
   onPointerLeave,
+  logoUrl,
 }: MegaMenuProps) {
   const { t } = useDictionary();
   const items = categories.filter((c) => c.featured);
@@ -76,7 +78,7 @@ export function MegaMenu({
         </div>
 
         <div className="relative h-full min-h-[320px] overflow-hidden rounded-lg bg-surface-2">
-          <BrandLogo className="absolute left-4 top-4 z-10 h-9" onDark />
+          <BrandLogo className="absolute left-4 top-4 z-10 h-9" onDark src={logoUrl} />
           {activeCategory?.heroImage ? (
             <Image
               key={activeCategory.id}

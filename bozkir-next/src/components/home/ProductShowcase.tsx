@@ -5,7 +5,7 @@ import type { Category } from '@/types/category';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { HorizontalScroll } from '@/components/animations/HorizontalScroll';
 import { cn } from '@/lib/utils';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Öne çıkan kategori vitrini — yatay kaydırılabilir, editoryal kartlar. */
@@ -16,7 +16,7 @@ export async function ProductShowcase({
   categories: Category[];
   locale: Locale;
 }) {
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.showcase;
   const items = categories.filter((c) => c.featured).slice(0, 9);
   if (items.length === 0) return null;

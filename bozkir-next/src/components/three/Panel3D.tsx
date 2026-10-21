@@ -127,6 +127,7 @@ export function Panel3D() {
             active={inView}
             resetSignal={resetSignal}
             dprMax={isMobile ? 1.25 : 1.5}
+            labels={{ zoomIn: h.zoomIn, zoomOut: h.zoomOut, reset: h.resetView }}
           />
         )}
         <span

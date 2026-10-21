@@ -5,7 +5,7 @@ import type { Category } from '@/types/category';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal } from '@/components/animations/Reveal';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 export async function CategoryStrip({
@@ -15,7 +15,7 @@ export async function CategoryStrip({
   categories: Category[];
   locale: Locale;
 }) {
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.categoryStrip;
   const items = categories.filter((c) => c.featured).slice(0, 8);
   if (items.length === 0) return null;

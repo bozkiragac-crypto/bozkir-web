@@ -11,7 +11,7 @@ import { ProductFilter } from '@/components/products/ProductFilter';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Reveal } from '@/components/animations/Reveal';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
 
 const PAGE_SIZE = 24;
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale: localeParam } = await params;
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
-  const dict = getDictionary(locale ?? 'tr');
+  const dict = await dictForRequest(locale ?? 'tr');
   return buildMetadata({
     title: dict.productsPage.metaTitle,
     description: dict.productsPage.metaDescription,
@@ -42,7 +42,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
   const [{ locale: localeParam }, sp] = await Promise.all([params, searchParams]);
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
-  const dict = getDictionary(locale ?? 'tr');
+  const dict = await dictForRequest(locale ?? 'tr');
   const kategori = str(sp.kategori);
   const yuzey = str(sp.yuzey);
   const q = str(sp.q);

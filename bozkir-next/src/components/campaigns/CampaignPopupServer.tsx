@@ -1,6 +1,6 @@
 import { getActiveCampaigns } from '@/lib/api/campaigns';
 import { getSiteSettings } from '@/lib/data/settings';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 import { CampaignPopup } from './CampaignPopup';
 
@@ -21,7 +21,7 @@ export async function CampaignPopupServer({ locale }: { locale: Locale }) {
   if (campaigns.length === 0) return null;
   const chosen = campaigns.find((c) => c.id === campaignId) ?? campaigns[0]!;
 
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   return (
     <CampaignPopup
       readMore={dict.home.campaign.readMore}

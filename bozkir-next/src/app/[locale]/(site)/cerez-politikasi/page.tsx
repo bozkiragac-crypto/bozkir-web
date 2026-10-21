@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { buildMetadata } from '@/lib/seo';
 import { LegalPage, LegalSection } from '@/components/ui/LegalPage';
-import { siteConfig } from '@/config/site';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 import { getSiteSettingsFresh } from '@/lib/data/settings';
 
 interface PageProps {
@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   return buildMetadata({
     title: dict.pages.cookies.metaTitle,
     description: dict.pages.cookies.metaDescription,
@@ -25,13 +25,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function CookiePage({ params }: PageProps) {
+  await headers();
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const [dict, settings] = await Promise.all([dictForRequest(lang), getSiteSettingsFresh()]);
   const ck = dict.pages.cookies;
-  const settings = await getSiteSettingsFresh();
 
-  const fill = (text: string) => text.replace('{email}', siteConfig.email);
+  const fill = (text: string) => text.replace('{email}', settings.email);
 
   // Admin panelinden özel metin girildiyse sözlük içeriği yerine onu göster.
   const custom = settings.cookiePolicyText.trim();

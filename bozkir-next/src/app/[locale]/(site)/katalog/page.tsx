@@ -4,7 +4,7 @@ import { PageHero } from '@/components/ui/PageHero';
 import { CatalogSection } from '@/components/home/CatalogSection';
 import { QuoteCTA } from '@/components/home/QuoteCTA';
 import { isLocale } from '@/i18n/config';
-import { getDictionary } from '@/i18n/dictionaries';
+import { dictForRequest } from '@/i18n/server';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
 
 interface PageProps {
@@ -14,7 +14,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   return buildMetadata({
     title: dict.pages.catalog.metaTitle,
     description: dict.pages.catalog.metaDescription,
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CatalogPage({ params }: PageProps) {
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
-  const dict = getDictionary(lang);
+  const dict = await dictForRequest(lang);
   const c = dict.pages.catalog;
 
   return (

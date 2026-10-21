@@ -131,7 +131,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
       <div className="hidden lg:block print:block">
         <div
           ref={stageRef}
-          className="group relative aspect-square overflow-hidden rounded-lg bg-surface-2"
+          className="group relative aspect-square overflow-hidden rounded-lg bg-surface-2 print:aspect-auto print:h-[7cm]"
           onMouseEnter={zoomEnter}
           onMouseMove={zoomMove}
           onMouseLeave={zoomLeave}

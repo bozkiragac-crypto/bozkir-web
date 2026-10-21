@@ -226,6 +226,8 @@ chmod 600 .env.local
 > **Admin hesabı:** Taze kurulumda varsayılan bir kullanıcı **yoktur**.
 > `ADMIN_SEED_PASSWORD` boş bırakılırsa admin oluşmaz; o durumda elle:
 > `docker compose exec app node scripts/seed-admin.mjs bozkir "GucluParola!"`.
+> Entrypoint yalnızca hesap **yoksa** oluşturur; mevcut hesabın şifresini restart'ta
+> değiştirmez. Bilinçli güncelleme için `--update --yes` kullanın.
 > İlk girişten hemen sonra §10.1'i uygulayın (parola değişimi + 2FA).
 
 > **Turnstile anahtarlarını `.env.local`'e ekleyip uygulamayı yeniden başlatmadan

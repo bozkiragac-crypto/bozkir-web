@@ -146,13 +146,17 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
       </div>
 
       <form className="mt-6 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-3 rounded-full border border-border px-4">
+        <div
+          data-search-shell
+          className="flex items-center gap-3 rounded-full border border-border px-4"
+        >
           <Search className="h-4 w-4 text-muted" />
           <input
             name="q"
             defaultValue={filters.q}
             placeholder="Ad veya kod ara..."
             aria-label="Ürün ara"
+            data-search-input
             className="h-11 w-44 bg-transparent text-base outline-none placeholder:text-muted sm:w-56 sm:text-sm"
           />
         </div>

@@ -2,13 +2,13 @@ import type { ContentBlock } from '@/types/content';
 import { Container } from '@/components/ui/Container';
 import { Reveal } from '@/components/animations/Reveal';
 import { STAGGER } from '@/lib/motion';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Talepten teslimata 4 adım. */
 export async function ProcessSteps({ block, locale }: { block: ContentBlock; locale: Locale }) {
   if (block.items.length === 0) return null;
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
 
   return (
     <section

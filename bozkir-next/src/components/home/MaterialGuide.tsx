@@ -5,13 +5,13 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal } from '@/components/animations/Reveal';
 import { Panel, PanelGrid, PanelLink } from '@/components/ui/Panel';
 import { safeHref } from '@/lib/safe-url';
-import { dictFor } from '@/i18n/server';
+import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** "Hangi iş için hangi panel?" — niteliksel karşılaştırma kartları. */
 export async function MaterialGuide({ block, locale }: { block: ContentBlock; locale: Locale }) {
   if (block.items.length === 0) return null;
-  const dict = dictFor(locale);
+  const dict = await dictForRequest(locale);
   const h = dict.home.block;
 
   return (

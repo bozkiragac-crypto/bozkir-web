@@ -30,10 +30,12 @@ idempotent şema migrasyonu (`db-migrate.mjs`) → depolama bucket'ı (`init-sto
 → Next sunucusu. İlk açılışta admin oluşturmak için `.env`'e bir kez
 `ADMIN_SEED_PASSWORD=<güçlü-parola>` ekleyin ve açılıştan sonra kaldırın.
 
-## 3. Otomatik dağıtım (GitHub Actions)
+## 3. Dağıtım (GitHub Actions)
 1. `main`'e push → **CI** (lint, typecheck, unit, build, E2E).
-2. CI yeşilse **Deploy (VPS)** çalışır: migrasyon öncesi yedek → sürümlü imaj (`bozkir-app:<sha>`) → migrate + seed → derin healthcheck.
-3. Sağlık kontrolü başarısızsa **önceki sürüme otomatik rollback**.
+2. **Deploy (VPS)** şu an manuel (`workflow_dispatch`). CI yeşil olduğunda otomatik tetikleme
+   `deploy.yml` içindeki `workflow_run` bloğu açılarak etkinleştirilebilir.
+3. Manuel deploy: migrasyon öncesi yedek → sürümlü imaj (`bozkir-app:<sha>`) → migrate + seed → derin healthcheck.
+4. Sağlık kontrolü başarısızsa **önceki sürüme otomatik rollback**.
 
 GitHub Secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PATH` (ör. `/opt/bozkir-web`), opsiyonel `VPS_PORT`.
 

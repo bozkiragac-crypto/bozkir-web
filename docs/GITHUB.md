@@ -42,7 +42,7 @@ CI, `services.postgres` ile geçici bir veritabanı kullanır; test verisi izole
 1. Docker + Compose kurulu.
 2. Repo bir kez klonlu: `git clone git@github.com:bozkiragac-crypto/bozkir-web.git /opt/bozkir-web`
 3. `bozkir-next/.env` ve `bozkir-next/.env.local` doldurulmuş (git dışı).
-4. İlk kurulum: `docker compose up -d --build` + `npm run db:migrate` + `npm run storage:init` + `npm run admin:reset -- <kullanıcı> <şifre>`.
+4. İlk kurulum: `docker compose up -d --build` + `npm run db:migrate` + `npm run storage:init` + `npm run admin:reset -- --user <kullanıcı> --password-stdin --yes`.
 
 ### Deploy kullanıcısı için SSH anahtarı
 GitHub Actions'ın kullandığı anahtarın VPS'te yetkili olması gerekir:

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   ContactShadows,
@@ -11,6 +11,7 @@ import {
   OrbitControls,
   RoundedBox,
 } from '@react-three/drei';
+import { Minus, Plus, RotateCcw } from 'lucide-react';
 import * as THREE from 'three';
 
 export type PanelCore = 'mdf' | 'particle';
@@ -36,6 +37,8 @@ interface PanelViewerProps {
   resetSignal?: number;
   /** Cihaz başına piksel oranı üst sınırı (mobilde düşürülür). */
   dprMax?: number;
+  /** Zoom/sıfırlama düğmelerinin erişilebilir etiketleri. */
+  labels?: { zoomIn: string; zoomOut: string; reset: string };
 }
 
 const WIDTH = 3;
@@ -45,10 +48,12 @@ const SURFACE_T = 0.022;
 const EDGE_COLOR = '#3a2f22';
 
 /** Tek sabit kamera: hafif açılı ama göz hizası → panel level durur, katman kenarı görünür. */
-const CAM: [number, number, number] = [-1.9, 0.12, 3.5];
+const CAM: [number, number, number] = [-2.4, 0.12, 5.2];
 /** Model yönelimi sabittir (level) — idle sallanma yok. */
 const BASE_ROT: [number, number, number] = [0, 0, 0];
 const ZERO = new THREE.Vector3(0, 0, 0);
+const MIN_DISTANCE = 2.2;
+const MAX_DISTANCE = 12;
 
 /** Prosedürel doku (dosyasız): renk ve mikro pürüzlülük haritası. */
 function makeTexture(
@@ -297,6 +302,40 @@ function CameraRig({ signal }: { signal: number }) {
   return null;
 }
 
+interface ZoomApi {
+  zoomIn: () => void;
+  zoomOut: () => void;
+}
+
+/** OrbitControls kamerasını hedefe göre ölçekler; +/- düğmeleri için. */
+function ZoomRig({ api }: { api: MutableRefObject<ZoomApi | null> }) {
+  const camera = useThree((s) => s.camera);
+  const controls = useThree((s) => s.controls) as {
+    target: THREE.Vector3;
+    update: () => void;
+  } | null;
+
+  useEffect(() => {
+    if (!controls) return;
+    const zoom = (factor: number) => {
+      const offset = camera.position.clone().sub(controls.target);
+      const distance = THREE.MathUtils.clamp(offset.length() * factor, MIN_DISTANCE, MAX_DISTANCE);
+      offset.setLength(distance);
+      camera.position.copy(controls.target).add(offset);
+      controls.update();
+    };
+    api.current = {
+      zoomIn: () => zoom(0.9),
+      zoomOut: () => zoom(1.12),
+    };
+    return () => {
+      api.current = null;
+    };
+  }, [api, camera, controls]);
+
+  return null;
+}
+
 /**
  * Premium 3D panel kesiti: katmanlı model (bitişe göre öz/yüzey), studyo
  * yansımaları, damping'li döndürme, sınırlı zoom ve etiket. Panel level durur
@@ -307,9 +346,11 @@ export function PanelViewer({
   active = true,
   resetSignal = 0,
   dprMax = 1.75,
+  labels,
 }: PanelViewerProps) {
   const [localReset, setLocalReset] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const zoomApi = useRef<ZoomApi | null>(null);
 
   // Sahne üzerinde tekerlek/pinch sayfayı kaydırmasın (Lenis + native scroll engellenir).
   useEffect(() => {
@@ -327,14 +368,49 @@ export function PanelViewer({
     <div
       ref={wrapRef}
       data-lenis-prevent
-      className="h-full w-full overscroll-contain"
+      className="relative h-full w-full overscroll-contain"
       style={{ touchAction: 'none' }}
       onDoubleClick={() => setLocalReset((n) => n + 1)}
     >
+      {labels && (
+        <div
+          className="pointer-events-none absolute end-3 top-3 z-10 flex flex-col gap-1.5"
+          onDoubleClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => zoomApi.current?.zoomIn()}
+            aria-label={labels.zoomIn}
+            title={labels.zoomIn}
+            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => zoomApi.current?.zoomOut()}
+            aria-label={labels.zoomOut}
+            title={labels.zoomOut}
+            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground"
+          >
+            <Minus className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocalReset((n) => n + 1)}
+            aria-label={labels.reset}
+            title={labels.reset}
+            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
       <Canvas
         dpr={[1, dprMax]}
         frameloop={active ? 'always' : 'never'}
-        camera={{ position: CAM, fov: 32 }}
+        camera={{ position: CAM, fov: 30 }}
         performance={{ min: 0.6 }}
         gl={{
           antialias: true,
@@ -396,16 +472,18 @@ export function PanelViewer({
           enableDamping
           dampingFactor={0.08}
           enablePan={false}
-          minDistance={2.6}
-          maxDistance={7.5}
+          enableZoom
+          minDistance={MIN_DISTANCE}
+          maxDistance={MAX_DISTANCE}
           minPolarAngle={Math.PI / 3.4}
           maxPolarAngle={Math.PI / 1.75}
           autoRotate
           autoRotateSpeed={0.8}
-          rotateSpeed={0.55}
-          zoomSpeed={0.6}
+          rotateSpeed={0.5}
+          zoomSpeed={0.8}
         />
 
+        <ZoomRig api={zoomApi} />
         <CameraRig signal={localReset + resetSignal} />
       </Canvas>
     </div>

@@ -14,7 +14,7 @@ echo "[entrypoint] depolama bucket'ı hazırlanıyor..."
 node scripts/init-storage.mjs || echo "[entrypoint] UYARI: storage init başarısız (devam ediliyor)"
 
 if [ -n "${ADMIN_SEED_PASSWORD:-}" ]; then
-  echo "[entrypoint] admin kullanıcısı oluşturuluyor/güncelleniyor..."
+  echo "[entrypoint] admin kullanıcısı kontrol ediliyor (varsa korunur)..."
   node scripts/seed-admin.mjs || echo "[entrypoint] UYARI: admin seed başarısız (devam ediliyor)"
 fi
 

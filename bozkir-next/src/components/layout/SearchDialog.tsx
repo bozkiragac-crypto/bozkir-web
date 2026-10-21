@@ -160,6 +160,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     >
       <form
         onSubmit={submit}
+        data-search-shell
         className="w-full max-w-xl overflow-hidden rounded-lg border border-border bg-background shadow-2xl"
       >
         <div className="flex items-center gap-3 border-b border-border px-5">
@@ -170,6 +171,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={t('search.placeholder')}
+            data-search-input
             className="h-16 flex-1 bg-transparent text-lg outline-none placeholder:text-muted"
             aria-label={t('search.label')}
             autoComplete="off"
