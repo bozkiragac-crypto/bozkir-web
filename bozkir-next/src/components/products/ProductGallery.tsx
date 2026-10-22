@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Expand } from 'lucide-react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { ChevronLeft, ChevronRight, Expand } from 'lucide-react';
 import { SmartImage } from '@/components/ui/SmartImage';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
 import { ImageLightbox, type LightboxItem } from '@/components/ui/ImageLightbox';
@@ -61,6 +61,28 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
     el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
   };
 
+  // Sağ/sol düğmeleri: aktif görseli değiştirir, mobilde kaydırmayı da eşitler.
+  const goTo = (i: number) => {
+    if (images.length < 2) return;
+    const next = (i + images.length) % images.length;
+    setActive(next);
+    const el = mobileRef.current;
+    if (el && el.clientWidth > 0) {
+      el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' });
+    }
+  };
+
+  // Odak oklardayken klavye ile gezinme.
+  const onKeyNav = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goTo(active - 1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      goTo(active + 1);
+    }
+  };
+
   if (!images.length) {
     return (
       <div className="aspect-square overflow-hidden rounded-lg">
@@ -75,34 +97,58 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
     <div>
       {/* Mobil: yatay kaydırmalı galeri + nokta göstergesi */}
       <div className="no-print lg:hidden">
-        <div
-          ref={mobileRef}
-          onScroll={onMobileScroll}
-          className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {images.map((url, i) => (
-            <button
-              key={`${url}-${i}`}
-              type="button"
-              onClick={() => setLightbox(i)}
-              aria-label={`${i + 1} / ${images.length} — ${t('home.gallery.expand')}`}
-              className="relative aspect-square w-full flex-none snap-center overflow-hidden rounded-lg bg-surface-2"
-            >
-              {!broken[i] ? (
-                <SmartImage
-                  src={url}
-                  alt={`${alt} — ${i + 1}`}
-                  fill
-                  priority={i === 0}
-                  sizes="100vw"
-                  onError={() => setBroken((b) => ({ ...b, [i]: true }))}
-                  className="object-contain"
-                />
-              ) : (
-                <ImagePlaceholder label={t('catalog.imagePreparing')} />
-              )}
-            </button>
-          ))}
+        <div className="relative">
+          <div
+            ref={mobileRef}
+            onScroll={onMobileScroll}
+            className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {images.map((url, i) => (
+              <button
+                key={`${url}-${i}`}
+                type="button"
+                onClick={() => setLightbox(i)}
+                aria-label={`${i + 1} / ${images.length} — ${t('home.gallery.expand')}`}
+                className="relative aspect-square w-full flex-none snap-center overflow-hidden rounded-lg bg-surface-2"
+              >
+                {!broken[i] ? (
+                  <SmartImage
+                    src={url}
+                    alt={`${alt} — ${i + 1}`}
+                    fill
+                    priority={i === 0}
+                    sizes="100vw"
+                    onError={() => setBroken((b) => ({ ...b, [i]: true }))}
+                    className="object-contain"
+                  />
+                ) : (
+                  <ImagePlaceholder label={t('catalog.imagePreparing')} />
+                )}
+              </button>
+            ))}
+          </div>
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => goTo(active - 1)}
+                onKeyDown={onKeyNav}
+                aria-label={t('home.gallery.prevImage')}
+                className="absolute start-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur"
+              >
+                <ChevronLeft className="h-5 w-5 rtl:-scale-x-100" />
+              </button>
+              <button
+                type="button"
+                onClick={() => goTo(active + 1)}
+                onKeyDown={onKeyNav}
+                aria-label={t('home.gallery.nextImage')}
+                className="absolute end-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur"
+              >
+                <ChevronRight className="h-5 w-5 rtl:-scale-x-100" />
+              </button>
+            </>
+          )}
         </div>
         {images.length > 1 && (
           <div className="mt-1 flex justify-center gap-0.5">
@@ -159,6 +205,29 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
             </>
           ) : (
             <ImagePlaceholder label={t('catalog.imagePreparing')} />
+          )}
+
+          {images.length > 1 && !showPlaceholder && (
+            <>
+              <button
+                type="button"
+                onClick={() => goTo(active - 1)}
+                onKeyDown={onKeyNav}
+                aria-label={t('home.gallery.prevImage')}
+                className="no-print absolute start-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition hover:border-foreground"
+              >
+                <ChevronLeft className="h-5 w-5 rtl:-scale-x-100" />
+              </button>
+              <button
+                type="button"
+                onClick={() => goTo(active + 1)}
+                onKeyDown={onKeyNav}
+                aria-label={t('home.gallery.nextImage')}
+                className="no-print absolute end-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition hover:border-foreground"
+              >
+                <ChevronRight className="h-5 w-5 rtl:-scale-x-100" />
+              </button>
+            </>
           )}
         </div>
 

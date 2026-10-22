@@ -15,6 +15,7 @@ import { SmartImage } from '@/components/ui/SmartImage';
 import { Reveal } from '@/components/animations/Reveal';
 import { isLocale } from '@/i18n/config';
 import { dictForRequest } from '@/i18n/server';
+import { ScrollOnPageChange } from '@/components/providers/ScrollOnPageChange';
 
 const PAGE_SIZE = 24;
 
@@ -93,6 +94,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   return (
     <>
+      <ScrollOnPageChange page={page} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

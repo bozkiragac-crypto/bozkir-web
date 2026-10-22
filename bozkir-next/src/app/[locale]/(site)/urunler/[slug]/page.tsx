@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { notFound } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { getProductBySlug, getRelatedProducts } from '@/lib/api/products';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { getAdjacentProducts, getProductBySlug, getRelatedProducts } from '@/lib/api/products';
 import { getSiteSettings } from '@/lib/data/settings';
 import { siteConfig } from '@/config/site';
 import { telHref } from '@/lib/phone';
@@ -73,7 +73,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
   if (!product) notFound();
 
   const settings = siteConfig;
-  const related = await getRelatedProducts(product.slug, locale, 4);
+  const [related, adjacent] = await Promise.all([
+    getRelatedProducts(product.slug, locale, 4),
+    getAdjacentProducts(product, locale),
+  ]);
 
   const image = product.images[0] ?? product.thumbnail;
   const productUrl = localeUrl(locale, `/urunler/${product.slug}`);
@@ -249,6 +252,48 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
         </Container>
       </div>
+
+      {(adjacent.prev || adjacent.next) && (
+        <Container className="pb-16 md:pb-20">
+          <nav
+            aria-label={dict.nav.products}
+            className="flex items-center justify-between gap-4 border-y border-border py-5"
+          >
+            {adjacent.prev ? (
+              <Link
+                href={`/urunler/${adjacent.prev.slug}`}
+                className="group flex min-w-0 items-center gap-3 text-sm text-muted-strong transition-colors hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4 flex-none rtl:-scale-x-100" />
+                <span className="min-w-0">
+                  <span className="block text-[0.65rem] tracking-[0.14em] text-muted uppercase">
+                    {dict.common.prev}
+                  </span>
+                  <span className="block truncate font-medium">{adjacent.prev.name}</span>
+                </span>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {adjacent.next ? (
+              <Link
+                href={`/urunler/${adjacent.next.slug}`}
+                className="group flex min-w-0 items-center gap-3 text-end text-sm text-muted-strong transition-colors hover:text-foreground"
+              >
+                <span className="min-w-0">
+                  <span className="block text-[0.65rem] tracking-[0.14em] text-muted uppercase">
+                    {dict.common.next}
+                  </span>
+                  <span className="block truncate font-medium">{adjacent.next.name}</span>
+                </span>
+                <ArrowRight className="h-4 w-4 flex-none rtl:-scale-x-100" />
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        </Container>
+      )}
 
       {related.length > 0 && (
         <Container className="pb-40 md:pb-32">

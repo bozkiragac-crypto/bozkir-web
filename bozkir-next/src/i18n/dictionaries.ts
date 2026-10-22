@@ -440,9 +440,9 @@ export const dictionaries = {
       },
       whatsapp: {
         message:
-          'Merhaba, Bozkır Ağaç Ürünleri hakkında bilgi ve fiyat teklifi almak istiyorum. Yardımcı olabilir misiniz?',
+          'Merhaba, ürünleriniz hakkında bilgi ve fiyat teklifi almak istiyorum. Yardımcı olabilir misiniz?',
         productMessage:
-          'Merhaba, {product} ürünü için bilgi ve fiyat teklifi almak istiyorum. {url}',
+          'Merhaba, {product} ürününüz hakkında bilgi ve fiyat teklifi almak istiyorum. {url}',
         aria: 'WhatsApp ile yazın',
         label: "WhatsApp'tan yaz",
         cursor: 'Yaz',
@@ -1129,8 +1129,8 @@ export const dictionaries = {
       },
       whatsapp: {
         message:
-          'Hello, I would like information and a price quote for Bozkır Wood Products. Could you help me?',
-        productMessage: 'Hello, I would like information and a price quote for {product}. {url}',
+          'Hello, I would like information and a price quote about your products. Could you help me?',
+        productMessage: 'Hello, I would like information and a price quote about {product}. {url}',
         aria: 'Message on WhatsApp',
         label: 'Message on WhatsApp',
         cursor: 'Chat',
@@ -1804,9 +1804,8 @@ export const dictionaries = {
         metaDescription: 'قارن المنتجات المحددة جنباً إلى جنب واطلب عرض سعر جماعي.',
       },
       whatsapp: {
-        message:
-          'مرحباً، أود الحصول على معلومات وعرض سعر لمنتجات بوزكير الخشبية. هل يمكنكم مساعدتي؟',
-        productMessage: 'مرحباً، أود الحصول على معلومات وعرض سعر لمنتج {product}. {url}',
+        message: 'مرحباً، أرغب في الحصول على معلومات وعرض سعر بشأن منتجاتكم. هل يمكنكم مساعدتي؟',
+        productMessage: 'مرحباً، أرغب في الحصول على معلومات وعرض سعر بشأن منتج {product}. {url}',
         aria: 'راسلنا عبر واتساب',
         label: 'راسلنا عبر واتساب',
         cursor: 'راسلنا',

@@ -94,6 +94,36 @@ export async function getRelatedProducts(
   }
 }
 
+export interface AdjacentProducts {
+  prev: Product | null;
+  next: Product | null;
+}
+
+/**
+ * Aynı kategorideki ürünler içinde bir önceki/sonraki ürün. Liste sırası
+ * ürünler sayfasıyla aynıdır; baş/son ürünlerde döngüsel davranır.
+ */
+export async function getAdjacentProducts(
+  product: Pick<Product, 'slug' | 'categorySlug'>,
+  locale?: Locale,
+): Promise<AdjacentProducts> {
+  const items: Product[] = [];
+  const limit = 100;
+  for (let offset = 0; ; offset += limit) {
+    const page = await getProducts({ category: product.categorySlug, limit, offset }, locale);
+    items.push(...page.items);
+    if (page.items.length < limit || items.length >= page.total) break;
+  }
+
+  const index = items.findIndex((item) => item.slug === product.slug);
+  if (index === -1 || items.length < 2) return { prev: null, next: null };
+
+  return {
+    prev: items[(index - 1 + items.length) % items.length] ?? null,
+    next: items[(index + 1) % items.length] ?? null,
+  };
+}
+
 /** Tüm ürünler (sitemap için) — sayfalama ile toplanır. */
 export async function getAllProducts(max = Number.POSITIVE_INFINITY): Promise<Product[]> {
   const out: Product[] = [];

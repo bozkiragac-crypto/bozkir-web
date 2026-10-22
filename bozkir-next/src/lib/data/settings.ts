@@ -186,6 +186,37 @@ const loadSettings = unstable_cache(
   { tags: [SETTINGS_TAG], revalidate: 300 },
 );
 
+/**
+ * Eski varsayılan WhatsApp metinleri firma adını içeriyordu. Daha önce
+ * kaydedilmiş ayarlar bu metinlerde takılı kalmasın diye marka adı geçen
+ * değerler güncel varsayılana düşürülür.
+ */
+const LEGACY_WHATSAPP_BRANDS = ['Bozkır Ağaç Ürünleri', 'Bozkır Wood Products', 'بوزكير'];
+
+function pickWhatsAppMessage(value: string | undefined, fallback: string): string {
+  const text = value?.trim();
+  if (!text) return fallback;
+  return LEGACY_WHATSAPP_BRANDS.some((brand) => text.includes(brand)) ? fallback : text;
+}
+
+function mergeWhatsAppMessages(
+  base: WhatsAppMessageSettings,
+  saved: Partial<WhatsAppMessageSettings> | undefined,
+): WhatsAppMessageSettings {
+  return {
+    general: {
+      tr: pickWhatsAppMessage(saved?.general?.tr, base.general.tr),
+      en: pickWhatsAppMessage(saved?.general?.en, base.general.en),
+      ar: pickWhatsAppMessage(saved?.general?.ar, base.general.ar),
+    },
+    product: {
+      tr: pickWhatsAppMessage(saved?.product?.tr, base.product.tr),
+      en: pickWhatsAppMessage(saved?.product?.en, base.product.en),
+      ar: pickWhatsAppMessage(saved?.product?.ar, base.product.ar),
+    },
+  };
+}
+
 function merge(base: SiteSettings, saved: Partial<SiteSettings>): SiteSettings {
   return {
     ...base,
@@ -202,10 +233,7 @@ function merge(base: SiteSettings, saved: Partial<SiteSettings>): SiteSettings {
     warehouse: { ...base.warehouse, ...(saved.warehouse ?? {}) },
     social: { ...base.social, ...(saved.social ?? {}) },
     smtp: { ...base.smtp, ...(saved.smtp ?? {}) },
-    whatsappMessages: {
-      general: { ...base.whatsappMessages.general, ...(saved.whatsappMessages?.general ?? {}) },
-      product: { ...base.whatsappMessages.product, ...(saved.whatsappMessages?.product ?? {}) },
-    },
+    whatsappMessages: mergeWhatsAppMessages(base.whatsappMessages, saved.whatsappMessages),
   };
 }
 

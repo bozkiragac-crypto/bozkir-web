@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   ContactShadows,
@@ -302,40 +302,6 @@ function CameraRig({ signal }: { signal: number }) {
   return null;
 }
 
-interface ZoomApi {
-  zoomIn: () => void;
-  zoomOut: () => void;
-}
-
-/** OrbitControls kamerasını hedefe göre ölçekler; +/- düğmeleri için. */
-function ZoomRig({ api }: { api: MutableRefObject<ZoomApi | null> }) {
-  const camera = useThree((s) => s.camera);
-  const controls = useThree((s) => s.controls) as {
-    target: THREE.Vector3;
-    update: () => void;
-  } | null;
-
-  useEffect(() => {
-    if (!controls) return;
-    const zoom = (factor: number) => {
-      const offset = camera.position.clone().sub(controls.target);
-      const distance = THREE.MathUtils.clamp(offset.length() * factor, MIN_DISTANCE, MAX_DISTANCE);
-      offset.setLength(distance);
-      camera.position.copy(controls.target).add(offset);
-      controls.update();
-    };
-    api.current = {
-      zoomIn: () => zoom(0.9),
-      zoomOut: () => zoom(1.12),
-    };
-    return () => {
-      api.current = null;
-    };
-  }, [api, camera, controls]);
-
-  return null;
-}
-
 /**
  * Premium 3D panel kesiti: katmanlı model (bitişe göre öz/yüzey), studyo
  * yansımaları, damping'li döndürme, sınırlı zoom ve etiket. Panel level durur
@@ -350,7 +316,22 @@ export function PanelViewer({
 }: PanelViewerProps) {
   const [localReset, setLocalReset] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const zoomApi = useRef<ZoomApi | null>(null);
+  const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
+
+  // +/- düğmeleri: OrbitControls örneğine doğrudan erişip hedefe göre mesafeyi ölçekler.
+  const zoom = (factor: number) => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+    const offset = controls.object.position.clone().sub(controls.target);
+    const distance = THREE.MathUtils.clamp(
+      offset.length() * factor,
+      MIN_DISTANCE,
+      MAX_DISTANCE,
+    );
+    offset.setLength(distance);
+    controls.object.position.copy(controls.target).add(offset);
+    controls.update();
+  };
 
   // Sahne üzerinde tekerlek/pinch sayfayı kaydırmasın (Lenis + native scroll engellenir).
   useEffect(() => {
@@ -374,13 +355,13 @@ export function PanelViewer({
     >
       {labels && (
         <div
-          className="pointer-events-none absolute end-3 top-3 z-10 flex flex-col gap-1.5"
+          className="pointer-events-none absolute end-3 top-3 z-20 flex flex-col gap-1.5"
           onDoubleClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
           <button
             type="button"
-            onClick={() => zoomApi.current?.zoomIn()}
+            onClick={() => zoom(0.9)}
             aria-label={labels.zoomIn}
             title={labels.zoomIn}
             className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground"
@@ -389,7 +370,7 @@ export function PanelViewer({
           </button>
           <button
             type="button"
-            onClick={() => zoomApi.current?.zoomOut()}
+            onClick={() => zoom(1.12)}
             aria-label={labels.zoomOut}
             title={labels.zoomOut}
             className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground"
@@ -468,6 +449,7 @@ export function PanelViewer({
         </Html>
 
         <OrbitControls
+          ref={controlsRef}
           makeDefault
           enableDamping
           dampingFactor={0.08}
@@ -483,7 +465,6 @@ export function PanelViewer({
           zoomSpeed={0.8}
         />
 
-        <ZoomRig api={zoomApi} />
         <CameraRig signal={localReset + resetSignal} />
       </Canvas>
     </div>

@@ -13,6 +13,7 @@ import { Reveal } from '@/components/animations/Reveal';
 import { isLocale } from '@/i18n/config';
 import { dictForRequest } from '@/i18n/server';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
+import { ScrollOnPageChange } from '@/components/providers/ScrollOnPageChange';
 
 const PAGE_SIZE = 24;
 
@@ -84,6 +85,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
 
   return (
     <>
+      <ScrollOnPageChange page={page} />
       <BreadcrumbScript
         locale={locale ?? 'tr'}
         items={[

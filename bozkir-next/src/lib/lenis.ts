@@ -10,12 +10,15 @@ export function setLenis(lenis: Lenis | null): void {
   instance = lenis;
 }
 
-/** Sayfayı en üste kaydırır (Lenis varsa yumuşak, yoksa anında). */
-export function scrollPageToTop(): void {
+/**
+ * Sayfayı en üste kaydırır. `immediate` rota/sayfa geçişlerinde kullanılır;
+ * yumuşak animasyonun gezinmeyi geciktirmesini engeller.
+ */
+export function scrollPageToTop(immediate = false): void {
   const lenis = instance;
   if (lenis) {
-    lenis.scrollTo(0, { immediate: false });
+    lenis.scrollTo(0, { immediate });
   } else if (typeof window !== 'undefined') {
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    window.scrollTo({ top: 0, behavior: immediate ? 'auto' : 'smooth' });
   }
 }

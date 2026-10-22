@@ -59,7 +59,14 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
             delay={(i % 4) * STAGGER.list}
             className="group relative mb-3 break-inside-avoid md:mb-4"
           >
-            <Link href={hrefOf(item)} className="block" data-cursor-label={t('catalog.inspect')}>
+            <button
+              type="button"
+              onClick={() => setLightbox(i)}
+              aria-label={`${item.title} — ${t('home.gallery.expand')}`}
+              aria-haspopup="dialog"
+              className="block w-full text-start"
+              data-cursor-label={t('catalog.inspect')}
+            >
               <div
                 className={cn(
                   'relative w-full overflow-hidden rounded-md bg-surface-2 ring-1 ring-transparent transition-[box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:ring-border-strong',
@@ -85,7 +92,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
                   </span>
                 </span>
               </div>
-            </Link>
+            </button>
 
             <button
               type="button"

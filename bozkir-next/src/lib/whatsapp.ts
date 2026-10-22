@@ -14,14 +14,14 @@ export interface WhatsAppMessageSettings {
  */
 export const DEFAULT_WHATSAPP_MESSAGES: WhatsAppMessageSettings = {
   general: {
-    tr: 'Merhaba, Bozkır Ağaç Ürünleri hakkında bilgi ve fiyat teklifi almak istiyorum. Yardımcı olabilir misiniz?',
-    en: 'Hello, I would like information and a price quote for Bozkır Wood Products. Could you help me?',
-    ar: 'مرحباً، أود الحصول على معلومات وعرض سعر لمنتجات بوزكير الخشبية. هل يمكنكم مساعدتي؟',
+    tr: 'Merhaba, ürünleriniz hakkında bilgi ve fiyat teklifi almak istiyorum. Yardımcı olabilir misiniz?',
+    en: 'Hello, I would like information and a price quote about your products. Could you help me?',
+    ar: 'مرحباً، أرغب في الحصول على معلومات وعرض سعر بشأن منتجاتكم. هل يمكنكم مساعدتي؟',
   },
   product: {
-    tr: 'Merhaba, {product} ({code}) ürünü hakkında bilgi ve fiyat teklifi almak istiyorum. {url}',
-    en: 'Hello, I would like information and a price quote for {product} ({code}). {url}',
-    ar: 'مرحباً، أود الحصول على معلومات وعرض سعر لمنتج {product} ({code}). {url}',
+    tr: 'Merhaba, {product} ({code}) ürününüz hakkında bilgi ve fiyat teklifi almak istiyorum. {url}',
+    en: 'Hello, I would like information and a price quote about {product} ({code}). {url}',
+    ar: 'مرحباً، أرغب في الحصول على معلومات وعرض سعر بشأن منتج {product} ({code}). {url}',
   },
 };
 
