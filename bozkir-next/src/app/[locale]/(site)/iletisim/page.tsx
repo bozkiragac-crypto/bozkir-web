@@ -217,7 +217,12 @@ export default async function ContactPage({ params }: PageProps) {
               return (
                 <div
                   key={item.label}
-                  className="group relative bg-surface p-7 transition-colors hover:bg-surface-2/60"
+                  className={cn(
+                    'group relative bg-surface p-7 transition-colors hover:bg-surface-2/60',
+                    // Adres, aşağıdaki "Konumlar" bölümünde harita ve kopyalama
+                    // düğmesiyle birlikte gösteriliyor; mobilde tekrar etmesin.
+                    item.label === c.address && 'hidden lg:block',
+                  )}
                 >
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-foreground">
                     <Icon className="h-5 w-5" />
