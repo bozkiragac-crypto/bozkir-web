@@ -57,7 +57,7 @@ export function SectionHeading({ eyebrow, title, body, className, action }: Sect
             {eyebrow}
           </p>
         )}
-        <h2 className="text-headline mt-4" aria-label={title}>
+        <h2 className="text-section mt-4" aria-label={title}>
           {words.map((word, i) => (
             <span
               key={`${word}-${i}`}

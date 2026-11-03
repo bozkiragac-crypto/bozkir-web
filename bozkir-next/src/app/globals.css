@@ -5,7 +5,7 @@
    `.text-eyebrow` açık temada koyu renkle koyu heroların üstünde okunmaz. */
 @layer components {
   .text-eyebrow {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -44,8 +44,8 @@
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 22px;
-  --radius-xl: 34px;
-  --radius-2xl: 26px;
+  --radius-xl: 26px;
+  --radius-2xl: 34px;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -333,6 +333,18 @@ html[data-compare='1'] [data-product-cta] {
     text-wrap: balance;
   }
 
+  /* Bölüm başlığı (H2) — sayfa başlığından (H1) bir kademe küçük.
+     Aynı `.text-headline` sınıfı H1 ve H2'de kullanıldığında hiyerarşi
+     kayboluyordu (ikisi de 67.2px). */
+  .text-section {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3.4vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
   .text-editorial {
     font-family: var(--font-display);
     font-style: italic;
@@ -406,6 +418,22 @@ html[data-compare='1'] [data-product-cta] {
     background-size: 100% 1px;
   }
 
+  /* Görünür boyutu değiştirmeden dokunma alanını en az 44px yüksekliğe
+     çıkarır (WCAG 2.5.8 / Apple HIG). Satır içi linklerde (nav, breadcrumb,
+     footer) kullanılır; pseudo-element olduğu için yerleşimi kaydırmaz. */
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    right: -8px;
+    top: 50%;
+    height: max(100%, 44px);
+    transform: translateY(-50%);
+  }
+
   /* Kart görseli: hover'da başlayan çok hafif tek-geçişli ışık süpürmesi.
      Pseudo-element ile çizilir; tıklamayı engellemez. */
   .sheen::after {
@@ -443,6 +471,7 @@ html[data-compare='1'] [data-product-cta] {
 [dir='rtl'] .font-display,
 [dir='rtl'] .text-display,
 [dir='rtl'] .text-headline,
+[dir='rtl'] .text-section,
 [dir='rtl'] .text-editorial,
 [dir='rtl'] .text-hand {
   font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;

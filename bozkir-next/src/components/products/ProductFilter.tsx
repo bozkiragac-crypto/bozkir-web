@@ -121,7 +121,7 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
         <SlidersHorizontal className="h-4 w-4" aria-hidden />
         {t('catalog.filter')} · {t('catalog.sort')}
         {activeCount > 0 && (
-          <span className="numerals inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-foreground px-1.5 text-[0.65rem] text-background">
+          <span className="numerals inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-foreground px-1.5 text-[0.75rem] text-background">
             {activeCount}
           </span>
         )}

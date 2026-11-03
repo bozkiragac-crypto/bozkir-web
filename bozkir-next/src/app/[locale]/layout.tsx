@@ -23,11 +23,9 @@ import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import { AnalyticsScripts } from '@/components/consent/AnalyticsScripts';
 import { WebVitals } from '@/components/layout/WebVitals';
+import { themeScript } from '@/components/layout/DocumentAssets';
 import { siteConfig } from '@/config/site';
 import { jsonLdString, organizationJsonLd, siteMetadata, websiteJsonLd } from '@/lib/seo';
-
-// Kayıtlı tercih varsa ona uy; yoksa işletim sistemi temasına düş (FOUC yok).
-const themeScript = `(function(){try{var s=localStorage.getItem('theme');var user=s==='dark'||s==='light';var t=user?s:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t;r.dataset.themeSource=user?'user':'system';var m=document.querySelector('meta[name="theme-color"]');if(!m){m=document.createElement('meta');m.setAttribute('name','theme-color');document.head.appendChild(m);}m.setAttribute('content',t==='dark'?'#0e0e10':'#f7f7f5');}catch(e){}})();`;
 
 // DB'ye bağlı içerik (ürün/kategori/içerik blokları) request-time render edilir.
 // Aksi halde Docker imajı derlenirken (DB erişimi yok) statik HTML verisiz kalır
@@ -82,6 +80,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       dir={localeDir[typed]}
       data-locale={typed}
       className={fontVariables}
+      suppressHydrationWarning
     >
       <head>
         {/* Tema, ilk boyamadan önce uygulanır (FOUC yok). */}

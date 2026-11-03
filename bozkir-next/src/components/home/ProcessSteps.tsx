@@ -26,7 +26,7 @@ export async function ProcessSteps({ block, locale }: { block: ContentBlock; loc
             <p className="text-eyebrow text-background/60">
               {block.subtitle || dict.home.block.process}
             </p>
-            <h2 className="text-headline mt-4">{block.title}</h2>
+            <h2 className="text-section mt-4">{block.title}</h2>
             {block.body && <p className="mt-5 leading-relaxed text-background/70">{block.body}</p>}
           </div>
         </Reveal>

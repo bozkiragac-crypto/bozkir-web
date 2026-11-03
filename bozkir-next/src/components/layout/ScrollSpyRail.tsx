@@ -65,11 +65,11 @@ export function ScrollSpyRail({
               <a
                 href={`#${it.id}`}
                 aria-current={isActive ? 'true' : undefined}
-                className="group flex items-center gap-2"
+                className="tap-target group flex items-center gap-2"
               >
                 <span
                   className={cn(
-                    'text-[0.6rem] tracking-[0.14em] uppercase transition-opacity duration-300',
+                    'text-[0.75rem] tracking-[0.14em] uppercase transition-opacity duration-300',
                     isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-70',
                   )}
                 >

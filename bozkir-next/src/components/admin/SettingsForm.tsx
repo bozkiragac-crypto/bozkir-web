@@ -737,8 +737,7 @@ export function SettingsForm({
       <div className={`${section} mt-6 ${hide('content')}`}>
         <p className="font-medium">Vitrin kategori sırası</p>
         <p className="mt-1 text-sm text-muted-strong">
-          Anasayfadaki &quot;Malzeme koleksiyonu&quot; ve &quot;Malzemeyi Keşfet&quot; bölümlerinin
-          sırası.
+          Anasayfadaki &quot;Malzemeyi Keşfet&quot; bölümünün kategori sırası.
         </p>
         <ul className="mt-5 divide-y divide-border">
           {order.map((slug, i) => (

@@ -25,7 +25,7 @@ export async function MaterialGuide({ block, locale }: { block: ContentBlock; lo
             const inner = (
               <>
                 {item.tag && (
-                  <span className="inline-flex w-fit rounded-full border border-border px-3 py-1 text-[0.65rem] tracking-[0.14em] text-muted-strong uppercase">
+                  <span className="inline-flex w-fit rounded-full border border-border px-3 py-1 text-[0.75rem] tracking-[0.14em] text-muted-strong uppercase">
                     {item.tag}
                   </span>
                 )}

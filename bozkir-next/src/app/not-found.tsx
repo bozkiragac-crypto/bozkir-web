@@ -3,8 +3,7 @@ import Link from 'next/link';
 import './globals.css';
 import { fontVariables } from '@/lib/fonts';
 import { dictForRequest } from '@/i18n/server';
-
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t!=='dark')t='light';document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}catch(e){}})();`;
+import { themeScript } from '@/components/layout/DocumentAssets';
 
 export const metadata: Metadata = {
   title: 'Sayfa bulunamadı',
@@ -22,7 +21,7 @@ export default async function NotFound() {
   const nf = (await dictForRequest(locale)).pages.notFound;
 
   return (
-    <html lang={locale} className={fontVariables}>
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

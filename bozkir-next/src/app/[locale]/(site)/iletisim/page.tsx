@@ -11,6 +11,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Reveal } from '@/components/animations/Reveal';
 import { CopyButton } from '@/components/contact/CopyButton';
+import { ContactMapTabs } from '@/components/contact/ContactMapTabs';
 import { OpenStatus } from '@/components/contact/OpenStatus';
 import { isLocale } from '@/i18n/config';
 import { dictForRequest } from '@/i18n/server';
@@ -84,7 +85,7 @@ function LocationSection({
               <span className="text-eyebrow">{eyebrow}</span>
             </div>
 
-            <h2 className="text-headline mt-5 text-3xl md:text-4xl">{title}</h2>
+            <h2 className="text-section mt-5">{title}</h2>
             {description && (
               <p className="mt-4 max-w-md leading-relaxed text-muted-strong">{description}</p>
             )}
@@ -98,9 +99,9 @@ function LocationSection({
               </div>
             )}
 
-            <div className="mt-7 inline-flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-surface px-5 py-4 shadow-[0_20px_50px_-40px_rgba(0,0,0,0.5)]">
+            <div className="mt-7 inline-flex flex-wrap items-center gap-4 rounded-xl border border-border bg-surface px-5 py-4 shadow-[0_20px_50px_-40px_rgba(0,0,0,0.5)]">
               <div>
-                <p className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">
+                <p className="text-[0.75rem] tracking-[0.14em] text-muted uppercase">
                   {labels.coordinates}
                 </p>
                 <p className="numerals mt-0.5 text-sm font-medium">{coords}</p>
@@ -127,7 +128,7 @@ function LocationSection({
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl border border-border shadow-[var(--card-shadow)]">
+          <div className="relative hidden overflow-hidden rounded-xl border border-border shadow-[var(--card-shadow)] lg:block">
             <span className="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/45 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
               <MapPin className="h-3.5 w-3.5" aria-hidden /> {eyebrow}
             </span>
@@ -230,14 +231,14 @@ export default async function ContactPage({ params }: PageProps) {
                         href={item.href}
                         event={item.href.startsWith('tel:') ? 'phone_click' : 'whatsapp_click'}
                         source="contact_info"
-                        className="mt-2 block break-words text-base font-medium hover:underline"
+                        className="tap-target mt-2 block break-words text-base font-medium hover:underline"
                       >
                         {item.value}
                       </TrackedLink>
                     ) : (
                       <a
                         href={item.href}
-                        className="mt-2 block break-words text-base font-medium hover:underline"
+                        className="tap-target mt-2 block break-words text-base font-medium hover:underline"
                       >
                         {item.value}
                       </a>
@@ -282,6 +283,24 @@ export default async function ContactPage({ params }: PageProps) {
         </div>
 
         <SectionHeading title={c.locationsTitle} className="mt-20" />
+
+        <ContactMapTabs
+          ariaLabel={c.locationsTitle}
+          items={[
+            {
+              id: 'is-yeri',
+              label: c.officeTitle,
+              coords: officeCoords,
+              mapTitle: c.officeMapTitle,
+            },
+            {
+              id: 'depo',
+              label: c.depotTitle,
+              coords: depotCoords,
+              mapTitle: c.depotMapTitle,
+            },
+          ]}
+        />
 
         <LocationSection
           id="is-yeri"

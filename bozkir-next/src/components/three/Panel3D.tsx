@@ -132,7 +132,7 @@ export function Panel3D() {
         )}
         <span
           title={h.hint}
-          className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1.5 text-[0.65rem] tracking-[0.14em] text-muted uppercase backdrop-blur"
+          className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1.5 text-[0.75rem] tracking-[0.14em] text-muted uppercase backdrop-blur"
         >
           <RotateCcw className="h-3.5 w-3.5" aria-hidden />
           <span className="hidden sm:inline">{h.hint}</span>
@@ -142,7 +142,7 @@ export function Panel3D() {
       <div className="border-t border-border p-4">
         {/* Mobil: bitiş seçimi tek dropdown */}
         <div className="sm:hidden">
-          <span className="text-[0.65rem] tracking-[0.14em] text-muted uppercase">
+          <span className="text-[0.75rem] tracking-[0.14em] text-muted uppercase">
             {h.finishLabel}
           </span>
           <Dropdown
@@ -161,7 +161,7 @@ export function Panel3D() {
 
         {/* Kontroller: mobilde ikon-only */}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 sm:mt-0">
-          <span className="hidden text-[0.65rem] tracking-[0.14em] text-muted uppercase sm:inline">
+          <span className="hidden text-[0.75rem] tracking-[0.14em] text-muted uppercase sm:inline">
             {h.finishLabel}
           </span>
           <div className="flex flex-1 flex-wrap items-center justify-between gap-2 sm:flex-none sm:justify-end">
@@ -171,7 +171,7 @@ export function Panel3D() {
                 onClick={() => setResetSignal((n) => n + 1)}
                 aria-label={h.resetView}
                 title={h.resetView}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-strong transition-colors hover:border-foreground hover:text-foreground"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-strong transition-colors hover:border-foreground hover:text-foreground sm:min-w-0"
               >
                 <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                 <span className="hidden sm:inline">{h.resetView}</span>
@@ -190,7 +190,7 @@ export function Panel3D() {
               onClick={() => setFinish(f)}
               aria-pressed={finish.id === f.id}
               className={cn(
-                'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                'inline-flex min-h-11 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                 finish.id === f.id
                   ? 'border-foreground bg-foreground text-background'
                   : 'border-border text-muted-strong hover:border-border-strong hover:text-foreground',
@@ -206,7 +206,7 @@ export function Panel3D() {
         </div>
 
         {/* Masaüstü: katman lejantı */}
-        <ul className="mt-3 hidden flex-wrap items-center gap-x-4 gap-y-1 text-[0.65rem] text-muted sm:flex">
+        <ul className="mt-3 hidden flex-wrap items-center gap-x-4 gap-y-1 text-[0.75rem] text-muted sm:flex">
           {legend.map((layer, i) => (
             <li key={`${layer}-${i}`} className="flex items-center gap-1.5">
               <span

@@ -15,7 +15,12 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
 export default async function MaintenanceLayout({ children }: { children: React.ReactNode }) {
   const locale = await resolveLocaleFromRequest();
   return (
-    <html lang={localeHtmlLang[locale]} dir={localeDir[locale]} className={fontVariables}>
+    <html
+      lang={localeHtmlLang[locale]}
+      dir={localeDir[locale]}
+      className={fontVariables}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* Bakım bitince sayfa kendini yeniler. */}

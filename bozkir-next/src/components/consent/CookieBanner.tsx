@@ -26,7 +26,7 @@ export function CookieBanner() {
           {c.consentText}{' '}
           <Link
             href="/cerez-politikasi"
-            className="underline underline-offset-4 hover:text-foreground"
+            className="tap-target underline underline-offset-4 hover:text-foreground"
           >
             {c.consentPolicy}
           </Link>

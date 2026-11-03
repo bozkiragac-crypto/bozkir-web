@@ -19,7 +19,7 @@ export function ImagePlaceholder({
       )}
     >
       <ImageOff className={cn('h-6 w-6', iconClassName)} aria-hidden />
-      {label ? <span className="px-3 text-center text-[0.65rem] tracking-[0.14em] uppercase">{label}</span> : null}
+      {label ? <span className="px-3 text-center text-[0.75rem] tracking-[0.14em] uppercase">{label}</span> : null}
     </div>
   );
 }

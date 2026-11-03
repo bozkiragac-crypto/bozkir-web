@@ -47,7 +47,10 @@ export async function SupplyLogistics({ locale }: { locale: Locale }) {
       <Reveal>
         <p className="mt-8 text-sm text-muted">
           {contactBefore}
-          <a href={siteConfig.phoneHref} className="text-foreground underline underline-offset-4">
+          <a
+            href={siteConfig.phoneHref}
+            className="tap-target text-foreground underline underline-offset-4"
+          >
             {siteConfig.phone}
           </a>
           {contactAfter}

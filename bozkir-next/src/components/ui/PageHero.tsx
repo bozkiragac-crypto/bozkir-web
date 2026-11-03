@@ -52,7 +52,7 @@ export function PageHero({
                 {c.href ? (
                   <Link
                     href={c.href}
-                    className="link-underline transition-colors hover:text-foreground"
+                    className="tap-target link-underline transition-colors hover:text-foreground"
                   >
                     {c.label}
                   </Link>

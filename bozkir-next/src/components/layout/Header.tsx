@@ -137,7 +137,7 @@ export function Header({
         <div className="container-x flex h-full items-center justify-between gap-2 pt-[var(--safe-top)] sm:gap-4 lg:gap-6">
           <Link
             href="/"
-            className="min-w-0 flex-1 truncate text-[0.66rem] font-semibold tracking-[0.01em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"
+            className="tap-target min-w-0 flex-1 truncate text-[0.75rem] font-semibold tracking-[0.01em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"
             aria-label={`${brandName} — ${t('common.home')}`}
           >
             <span
@@ -158,7 +158,7 @@ export function Header({
               const isProducts = item.key === 'products';
               const active = path.startsWith(item.href);
               const linkClass = cn(
-                'link-underline text-sm font-medium tracking-tight transition-colors',
+                'tap-target link-underline text-sm font-medium tracking-tight transition-colors',
                 onDark
                   ? 'text-white/90 hover:text-white'
                   : 'text-muted-strong hover:text-foreground',

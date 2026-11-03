@@ -118,7 +118,7 @@ function Contact({ s }: { s: SiteSettings }) {
         <a
           href={telHref(s.phone)}
           onClick={() => track('phone_click', { source: 'footer' })}
-          className="link-underline transition-colors hover:text-foreground"
+          className="tap-target link-underline transition-colors hover:text-foreground"
         >
           {s.phone}
         </a>
@@ -126,7 +126,7 @@ function Contact({ s }: { s: SiteSettings }) {
       <li>
         <a
           href={`mailto:${s.email}`}
-          className="link-underline transition-colors hover:text-foreground"
+          className="tap-target link-underline transition-colors hover:text-foreground"
         >
           {s.email}
         </a>
@@ -195,7 +195,7 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="link-underline text-sm text-muted-strong transition-colors hover:text-foreground"
+                      className="tap-target link-underline text-sm text-muted-strong transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>
@@ -221,7 +221,7 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
                 <ul className="space-y-3">
                   {col.links.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="text-sm text-muted-strong">
+                      <Link href={link.href} className="tap-target inline-block py-2 text-sm text-muted-strong">
                         {link.label}
                       </Link>
                     </li>
@@ -237,21 +237,21 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
 
         <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted md:mt-16 md:flex-row md:items-center md:justify-between md:pt-8">
           <p>
-            © {new Date().getFullYear()} {t('footer.madeIn')}. {t('footer.rights')}
+            © {new Date().getFullYear()} {s.identity.brandName}. {t('footer.rights')}
           </p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
-            <Link href="/kvkk" className="link-underline transition-colors hover:text-foreground">
+            <Link href="/kvkk" className="tap-target link-underline transition-colors hover:text-foreground">
               {t('footer.kvkk')}
             </Link>
             <Link
               href="/gizlilik"
-              className="link-underline transition-colors hover:text-foreground"
+              className="tap-target link-underline transition-colors hover:text-foreground"
             >
               {t('footer.privacy')}
             </Link>
             <Link
               href="/cerez-politikasi"
-              className="link-underline transition-colors hover:text-foreground"
+              className="tap-target link-underline transition-colors hover:text-foreground"
             >
               {t('footer.cookies')}
             </Link>

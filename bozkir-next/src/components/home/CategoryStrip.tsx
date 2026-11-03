@@ -28,7 +28,7 @@ export async function CategoryStrip({
         action={
           <Link
             href="/urunler"
-            className="group inline-flex items-center gap-2 text-sm font-medium"
+            className="tap-target group inline-flex items-center gap-2 text-sm font-medium"
           >
             {h.allProducts}
             <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -44,7 +44,7 @@ export async function CategoryStrip({
               className="group block"
               data-cursor-label={dict.catalog.inspect}
             >
-              <div className="sheen relative aspect-[4/5] overflow-hidden rounded-md bg-surface-2 ring-1 ring-transparent transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-1 group-hover:shadow-[var(--card-shadow)] group-hover:ring-border-strong">
+              <div className="sheen relative aspect-[4/5] overflow-hidden rounded-lg bg-surface-2 ring-1 ring-transparent transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-1 group-hover:shadow-[var(--card-shadow)] group-hover:ring-border-strong">
                 {category.thumbnail ? (
                   <Image
                     src={category.thumbnail}

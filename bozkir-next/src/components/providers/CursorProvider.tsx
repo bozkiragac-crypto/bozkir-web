@@ -168,7 +168,7 @@ export function CursorProvider() {
       <div
         ref={labelRef}
         aria-hidden
-        className="no-print pointer-events-none fixed left-0 top-0 z-[401] whitespace-nowrap rounded-full bg-black px-3 py-1.5 text-[0.55rem] font-medium tracking-[0.14em] text-white uppercase opacity-0"
+        className="no-print pointer-events-none fixed left-0 top-0 z-[401] whitespace-nowrap rounded-full bg-black px-3 py-1.5 text-[0.75rem] font-medium tracking-[0.14em] text-white uppercase opacity-0"
         style={{ willChange: 'transform, opacity' }}
       />
     </>

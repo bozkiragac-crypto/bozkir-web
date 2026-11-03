@@ -11,7 +11,6 @@ import { dictForRequest } from '@/i18n/server';
 import { Hero } from '@/components/home/Hero';
 import { CampaignSlider } from '@/components/campaigns/CampaignSlider';
 import { MaterialStory } from '@/components/home/MaterialStory';
-import { ProductShowcase } from '@/components/home/ProductShowcase';
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
 import { Manifesto } from '@/components/home/Manifesto';
 import { MaterialGallery } from '@/components/home/MaterialGallery';
@@ -94,7 +93,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   // Sağdaki bölüm göstergesi (yalnızca render edilen bölümler).
   const railItems = [
     { id: 'malzeme', label: dict.home.story.eyebrow },
-    { id: 'koleksiyon', label: dict.home.showcase.eyebrow },
     ...(gallery ? [{ id: 'vitrin', label: dict.home.block.showcase }] : []),
     ...(guide ? [{ id: 'rehber', label: dict.home.block.guide }] : []),
     ...(process ? [{ id: 'surec', label: dict.home.block.process }] : []),
@@ -123,7 +121,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Hero image={settings.heroImage || undefined} />
       <CampaignSlider campaigns={campaigns} />
       <MaterialStory categories={categories} />
-      <ProductShowcase categories={categories} locale={lang} />
       <FeaturedProducts locale={lang} />
       <Manifesto locale={lang} />
       {gallery && <MaterialGallery block={gallery} locale={lang} />}

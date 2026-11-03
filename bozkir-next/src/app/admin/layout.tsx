@@ -30,7 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <html lang="tr" dir="ltr" className={fontVariables}>
+    <html lang="tr" dir="ltr" className={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

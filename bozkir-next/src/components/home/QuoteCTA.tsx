@@ -27,7 +27,7 @@ export async function QuoteCTA({ locale }: { locale: Locale }) {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_100%_0%,rgba(179,169,143,0.18),transparent_55%)]"
         />
         <div className="relative max-w-2xl">
-          <h2 className="text-headline">{h.title}</h2>
+          <h2 className="text-section">{h.title}</h2>
           <p className="mt-5 max-w-lg text-background/70">{h.body}</p>
           <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:flex-wrap sm:items-center">
             <MagneticButton className="[&>a]:w-full sm:[&>a]:w-auto">
@@ -52,7 +52,7 @@ export async function QuoteCTA({ locale }: { locale: Locale }) {
               href={whatsappLink}
               event="whatsapp_click"
               source="quote_cta"
-              className="inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-background/80 transition-colors hover:text-background sm:py-0"
+              className="tap-target inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-background/80 transition-colors hover:text-background sm:py-0"
             >
               <WhatsAppIcon className="h-4 w-4" /> {h.whatsapp}
             </TrackedLink>

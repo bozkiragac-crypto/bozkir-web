@@ -443,7 +443,7 @@ export function PanelViewer({
           className="pointer-events-none select-none"
           zIndexRange={[10, 0]}
         >
-          <span className="whitespace-nowrap rounded-full border border-border bg-background/85 px-2.5 py-1 text-[0.6rem] font-medium tracking-[0.08em] text-foreground uppercase backdrop-blur">
+          <span className="whitespace-nowrap rounded-full border border-border bg-background/85 px-2.5 py-1 text-[0.75rem] font-medium tracking-[0.08em] text-foreground uppercase backdrop-blur">
             {finish.label}
           </span>
         </Html>

@@ -31,7 +31,7 @@ export function AboutTimeline({ items }: { items?: { year: string; title: string
   return (
     <div ref={root} className="container-x py-24 md:py-32">
       <p className="text-eyebrow">{dict.pages.about.timeline.eyebrow}</p>
-      <h2 className="text-headline mt-4 max-w-2xl">{dict.pages.about.timeline.title}</h2>
+      <h2 className="text-section mt-4 max-w-2xl">{dict.pages.about.timeline.title}</h2>
 
       <div className="relative mt-16 pl-8 md:pl-0">
         <div data-line className="absolute left-0 top-0 h-full w-px bg-foreground/20 md:left-[calc(20%_-_1px)]" />

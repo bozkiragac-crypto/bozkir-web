@@ -106,7 +106,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
             <p className="text-eyebrow">{dict.quote.contactTitle}</p>
             <a
               href={telHref(settings.phone)}
-              className="mt-4 flex items-center gap-3 text-lg font-medium"
+              className="tap-target mt-4 flex items-center gap-3 text-lg font-medium"
             >
               <Phone className="h-5 w-5" /> {settings.phone}
             </a>
@@ -114,7 +114,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 flex items-center gap-3 text-lg font-medium"
+              className="tap-target mt-3 flex items-center gap-3 text-lg font-medium"
             >
               <WhatsAppIcon className="h-5 w-5" /> WhatsApp
             </a>

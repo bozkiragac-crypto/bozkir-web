@@ -426,11 +426,11 @@ export function QuoteForm({
             {...register('consent')}
             aria-invalid={errors.consent ? true : undefined}
             aria-describedby={errors.consent ? 'consent-error' : undefined}
-            className="mt-1"
+            className="mt-0.5 h-4 w-4 flex-none accent-foreground"
           />
           <span>
             {t('quote.consent')}{' '}
-            <Link href="/kvkk" className="underline underline-offset-4 hover:text-foreground">
+            <Link href="/kvkk" className="tap-target underline underline-offset-4 hover:text-foreground">
               {t('quote.consentLink')}
             </Link>
           </span>

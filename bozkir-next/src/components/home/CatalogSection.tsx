@@ -19,7 +19,7 @@ function Cover({ catalog, placeholder }: { catalog: Catalog; placeholder: string
           <span className="text-xs tracking-[0.16em] uppercase">{placeholder}</span>
         </div>
       )}
-      <span className="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-[0.65rem] tracking-[0.16em] text-white uppercase">
+      <span className="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-[0.75rem] tracking-[0.16em] text-white uppercase">
         PDF
       </span>
     </div>
@@ -43,7 +43,7 @@ export async function CatalogSection({ locale }: { locale: Locale }) {
             <Cover catalog={featured} placeholder={h.placeholder} />
             <div>
               <p className="text-eyebrow">{h.eyebrow}</p>
-              <h2 className="text-headline mt-4">{featured.title}</h2>
+              <h2 className="text-section mt-4">{featured.title}</h2>
               <p className="mt-5 max-w-lg leading-relaxed text-muted-strong">{featured.description}</p>
               <div className="mt-8">
                 <CatalogActions catalog={featured} />
@@ -64,7 +64,7 @@ export async function CatalogSection({ locale }: { locale: Locale }) {
                   ) : (
                     <div className="flex h-full flex-col items-center justify-center gap-3 text-muted">
                       <FileText className="h-8 w-8" />
-                      <span className="text-[0.65rem] tracking-[0.16em] uppercase">{h.placeholder}</span>
+                      <span className="text-[0.75rem] tracking-[0.16em] uppercase">{h.placeholder}</span>
                     </div>
                   )}
                 </div>

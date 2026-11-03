@@ -47,7 +47,7 @@ export function ProductCard({
         onFocus={() => setHover(true)}
         onBlur={() => setHover(false)}
       >
-        <div className="sheen relative aspect-[4/5] overflow-hidden rounded-md bg-surface-2 ring-1 ring-transparent transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-1 group-hover:shadow-[var(--card-shadow)] group-hover:ring-border-strong">
+        <div className="sheen relative aspect-[4/5] overflow-hidden rounded-lg bg-surface-2 ring-1 ring-transparent transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-1 group-hover:shadow-[var(--card-shadow)] group-hover:ring-border-strong">
           {image && !broken ? (
             <>
               <SmartImage
@@ -89,9 +89,9 @@ export function ProductCard({
                 {product.code}
               </p>
             )}
-            <h2 className="link-underline-group mt-1 inline-block text-sm font-medium tracking-tight sm:text-base">
+            <h3 className="link-underline-group mt-1 inline-block text-sm font-medium tracking-tight sm:text-base">
               {product.name}
-            </h2>
+            </h3>
             <p
               className={cn(
                 'mt-1 text-xs text-muted-strong sm:text-sm',
@@ -106,7 +106,7 @@ export function ProductCard({
                 {product.colors?.slice(0, 5).map((c) => (
                   <span
                     key={c}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-[0.62rem] capitalize text-muted-strong"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-[0.75rem] capitalize text-muted-strong"
                   >
                     {cssColor(c) ? (
                       <span
@@ -121,7 +121,7 @@ export function ProductCard({
                 {product.thicknesses?.slice(0, 4).map((th) => (
                   <span
                     key={th}
-                    className="numerals rounded-full border border-border px-2 py-0.5 text-[0.62rem] text-muted-strong"
+                    className="numerals rounded-full border border-border px-2 py-0.5 text-[0.75rem] text-muted-strong"
                   >
                     {th}
                   </span>

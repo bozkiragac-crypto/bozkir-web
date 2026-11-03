@@ -69,7 +69,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
             >
               <div
                 className={cn(
-                  'relative w-full overflow-hidden rounded-md bg-surface-2 ring-1 ring-transparent transition-[box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:ring-border-strong',
+                  'relative w-full overflow-hidden rounded-lg bg-surface-2 ring-1 ring-transparent transition-[box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:ring-border-strong',
                   RATIOS[i % RATIOS.length],
                 )}
               >
@@ -82,7 +82,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
                 />
                 <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 pt-12 md:translate-y-2 md:opacity-0 md:transition-[opacity,transform] md:duration-500 md:ease-[var(--ease-out-expo)] md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100 md:group-hover:translate-y-0 md:group-hover:opacity-100">
                   {item.tag && (
-                    <span className="text-[0.62rem] tracking-[0.14em] text-white/70 uppercase">
+                    <span className="text-[0.75rem] tracking-[0.14em] text-white/70 uppercase">
                       {item.tag}
                     </span>
                   )}
@@ -107,7 +107,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
       </ul>
 
       <Container className="mt-12">
-        <Link href="/urunler" className="group inline-flex items-center gap-2 text-sm font-medium">
+        <Link href="/urunler" className="tap-target group inline-flex items-center gap-2 text-sm font-medium">
           {t('common.allProducts')}
           <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Link>

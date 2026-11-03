@@ -72,7 +72,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
     <section ref={root} id="malzeme" className="relative bg-background">
       <Container className="pt-24 md:pt-32">
         <p className="text-eyebrow">{t('home.story.eyebrow')}</p>
-        <h2 className="text-headline mt-4 max-w-3xl">{t('home.story.title')}</h2>
+        <h2 className="text-section mt-4 max-w-3xl">{t('home.story.title')}</h2>
       </Container>
 
       {/* Sticky alan: yüksekliği kategori sayısı belirler */}
@@ -134,7 +134,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
 
               <Link
                 href={`/kategoriler/${current?.slug ?? ''}`}
-                className="group mt-5 inline-flex items-center gap-2 text-sm font-medium lg:mt-7"
+                className="tap-target group mt-5 inline-flex items-center gap-2 text-sm font-medium lg:mt-7"
               >
                 {t('home.story.collectionCta')}
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 rtl:-scale-x-100" />
@@ -186,7 +186,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
                   </div>
                 ))}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-                <span className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-black/40 px-4 py-1.5 text-[0.68rem] tracking-[0.14em] text-white/90 uppercase backdrop-blur-sm lg:bottom-5 lg:left-5">
+                <span className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-black/40 px-4 py-1.5 text-[0.75rem] tracking-[0.14em] text-white/90 uppercase backdrop-blur-sm lg:bottom-5 lg:left-5">
                   {current?.name}
                 </span>
               </div>

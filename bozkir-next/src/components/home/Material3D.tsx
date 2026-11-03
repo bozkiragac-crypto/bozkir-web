@@ -12,7 +12,7 @@ export async function Material3D({ locale }: { locale: Locale }) {
       <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
         <Reveal>
           <p className="text-eyebrow">{h.eyebrow}</p>
-          <h2 className="text-headline mt-4">{h.title}</h2>
+          <h2 className="text-section mt-4">{h.title}</h2>
           <p className="mt-6 max-w-lg leading-relaxed text-muted-strong">{h.body}</p>
         </Reveal>
 
@@ -20,7 +20,7 @@ export async function Material3D({ locale }: { locale: Locale }) {
           <div className="relative">
             <div
               aria-hidden
-              className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-[color:var(--color-accent-soft)]/12 blur-2xl"
+              className="pointer-events-none absolute inset-x-0 -inset-y-6 -z-10 rounded-[2.5rem] bg-[color:var(--color-accent-soft)]/12 blur-2xl"
             />
             <div className="h-[420px] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] sm:h-[520px] lg:h-[600px]">
               <Panel3D />

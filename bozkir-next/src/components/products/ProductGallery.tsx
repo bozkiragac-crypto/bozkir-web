@@ -159,7 +159,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                 onClick={() => scrollToSlide(i)}
                 aria-label={`${i + 1} / ${images.length}`}
                 aria-current={i === active}
-                className="flex h-11 items-center justify-center px-1.5"
+                className="flex h-11 min-w-6 items-center justify-center px-1.5"
               >
                 <span
                   className={cn(

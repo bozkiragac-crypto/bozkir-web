@@ -121,7 +121,7 @@ export function CampaignPopup({
               className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,12,0.15)_0%,rgba(10,10,12,0.05)_55%,rgba(10,10,12,0.55)_100%)]"
               aria-hidden
             />
-            <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-foreground backdrop-blur">
+            <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-foreground backdrop-blur">
               <Megaphone className="h-3 w-3" /> {eyebrow}
             </span>
           </div>
@@ -135,7 +135,7 @@ export function CampaignPopup({
               <span className="flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur">
                 <Megaphone className="h-7 w-7" />
               </span>
-              <span className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-white/70">
+              <span className="text-[0.75rem] font-semibold uppercase tracking-[0.24em] text-white/70">
                 {eyebrow}
               </span>
             </div>
