@@ -3,13 +3,15 @@
 import Image from 'next/image';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { Container } from '@/components/ui/Container';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { Category } from '@/types/category';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { cn } from '@/lib/utils';
 import { STORY_STEP_VH } from '@/lib/motion';
 import { track } from '@/lib/analytics';
+import { ChapterMark } from '@/components/ui/ChapterMark';
+import { Panel3D } from '@/components/three/Panel3D';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 interface MaterialStoryProps {
@@ -17,14 +19,15 @@ interface MaterialStoryProps {
 }
 
 /**
- * "Malzemeyi Keşfet" — CSS sticky + ScrollTrigger scrub.
- * Aktif kategori görseli yumuşak bir büyüme (Ken Burns) ile değişir.
- * Mobilde native dikey akış.
+ * "Malzemeyi Keşfet" — masaüstünde CSS sticky + ScrollTrigger scrub,
+ * mobilde yatay kaydırmalı kart akışı (pinning yok).
+ * Bölüm sonunda panel kesiti (3D) yer alır; 3D yalnız masaüstünde yüklenir.
  */
 export function MaterialStory({ categories }: MaterialStoryProps) {
-  const items = categories.filter((c) => c.featured).slice(0, 6);
+  const items = useMemo(() => categories.filter((c) => c.featured).slice(0, 6), [categories]);
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const [show3d, setShow3d] = useState(false);
   const { t } = useDictionary();
 
   useEffect(() => {
@@ -32,10 +35,16 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
       track('product_view', { category: items[active]!.slug, source: 'material_story' });
   }, [active, items]);
 
+  // 3D panel (three.js) yalnız masaüstünde yüklenir: mobil bant genişliği korunur.
+  useEffect(() => {
+    setShow3d(window.matchMedia('(min-width: 1024px)').matches);
+  }, []);
+
   useGSAP(
     () => {
       const el = root.current;
       if (!el) return;
+      if (!window.matchMedia('(min-width: 1024px)').matches) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       const panel = el.querySelector('[data-panel]');
@@ -70,27 +79,51 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
 
   return (
     <section ref={root} id="malzeme" className="relative bg-background">
-      <Container className="pt-24 md:pt-32">
-        <p className="text-eyebrow">{t('home.story.eyebrow')}</p>
+      <Container className="pad-scene pb-0">
+        <ChapterMark index={3} total={14} label={t('home.story.eyebrow')} />
         <h2 className="text-section mt-4 max-w-3xl">{t('home.story.title')}</h2>
       </Container>
 
-      {/* Sticky alan: yüksekliği kategori sayısı belirler */}
-      <div className="relative" style={{ height: `${items.length * STORY_STEP_VH}vh` }}>
+      {/* Mobil: yatay kaydırma — pinning yok, kartlar kısmi görünür (keşfedilebilirlik). */}
+      <div className="mt-10 lg:hidden">
+        <div className="scrollbar-none flex snap-x snap-mandatory gap-3 overflow-x-auto px-[var(--gutter)]">
+          {items.map((c) => (
+            <article key={c.id} className="w-[78vw] max-w-[320px] flex-none snap-start">
+              <Link href={`/kategoriler/${c.slug}`} className="group block">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-border bg-surface-2">
+                  {c.heroImage ? (
+                    <Image
+                      src={c.heroImage}
+                      alt={c.name}
+                      fill
+                      sizes="78vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-muted">
+                      {t('home.story.imageSoon')}
+                    </div>
+                  )}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+                  <span className="absolute bottom-3 start-3 rounded-full bg-black/45 px-3 py-1 text-[0.75rem] tracking-[0.14em] text-white/90 uppercase backdrop-blur-sm">
+                    {c.name}
+                  </span>
+                </div>
+                <h3 className="mt-3 text-base font-medium tracking-tight">{c.name}</h3>
+                <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-strong">
+                  {c.description}
+                </p>
+              </Link>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      {/* Masaüstü: sticky sahne */}
+      <div className="relative hidden lg:block" style={{ height: `${items.length * STORY_STEP_VH}vh` }}>
         <div className="sticky top-0 flex min-h-svh items-center overflow-clip py-12 lg:h-svh lg:py-0">
           <Container className="grid w-full grid-cols-1 items-center gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div className="order-2 lg:order-1">
-              {/* Mobil: kompakt aktif başlık */}
-              <p className="numerals text-xs tracking-[0.2em] text-muted lg:hidden">
-                {String(active + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
-              </p>
-              <h3
-                key={current?.id}
-                className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl lg:hidden"
-              >
-                {current?.name}
-              </h3>
-
               {/* Editoryal indeks (lg+) — aktif satır vurgulanır */}
               <ul className="hidden flex-col lg:flex">
                 {items.map((c, i) => {
@@ -193,6 +226,33 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
             </div>
           </Container>
         </div>
+      </div>
+
+      {/* Panel kesiti — eski ayrı "Material3D" bölümü artık burada yaşıyor. */}
+      <div className="pad-compact border-t border-border">
+        <Container className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+          <div>
+            <p className="text-eyebrow">{t('home.material3d.eyebrow')}</p>
+            <h3 className="text-section mt-4">{t('home.material3d.title')}</h3>
+            <p className="mt-6 max-w-lg leading-relaxed text-muted-strong">
+              {t('home.material3d.body')}
+            </p>
+            <p className="mt-4 text-caption">{t('home.material3d.hint')}</p>
+          </div>
+
+          <div className="relative">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 -inset-y-6 -z-10 rounded-[2.5rem] bg-[color:var(--color-accent-soft)]/12 blur-2xl"
+            />
+            <div className="hidden h-[min(52svh,480px)] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] lg:block">
+              {show3d ? <Panel3D /> : null}
+            </div>
+            <div className="flex h-[200px] items-center justify-center rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 px-8 text-center text-sm leading-relaxed text-muted lg:hidden">
+              {t('home.material3d.hint')}
+            </div>
+          </div>
+        </Container>
       </div>
     </section>
   );

@@ -12,21 +12,16 @@ import { Hero } from '@/components/home/Hero';
 import { CampaignSlider } from '@/components/campaigns/CampaignSlider';
 import { MaterialStory } from '@/components/home/MaterialStory';
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
-import { Manifesto } from '@/components/home/Manifesto';
 import { MaterialGallery } from '@/components/home/MaterialGallery';
-import { MaterialGuide } from '@/components/home/MaterialGuide';
-import { ApplicationAreas } from '@/components/home/ApplicationAreas';
-import { Material3D } from '@/components/home/Material3D';
+import { UsageAndGuide } from '@/components/home/UsageAndGuide';
+import { ManifestoStats } from '@/components/home/ManifestoStats';
 import { ProcessSteps } from '@/components/home/ProcessSteps';
-import { BrandPartners } from '@/components/home/BrandPartners';
-import { StatsBand } from '@/components/home/StatsBand';
+import { SocialProof } from '@/components/home/SocialProof';
 import { FaqAccordion } from '@/components/home/FaqAccordion';
 import { SupplyLogistics } from '@/components/home/SupplyLogistics';
 import { CatalogSection } from '@/components/home/CatalogSection';
-import { Testimonials } from '@/components/home/Testimonials';
 import { RecentlyViewed } from '@/components/products/RecentlyViewed';
 import { QuoteCTA } from '@/components/home/QuoteCTA';
-import { Container } from '@/components/ui/Container';
 import { ScrollSpyRail } from '@/components/layout/ScrollSpyRail';
 
 export async function generateMetadata({
@@ -91,10 +86,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const reviews = (testimonials?.items ?? []).filter((i) => i.description && i.title);
 
   // Sağdaki bölüm göstergesi (yalnızca render edilen bölümler).
+  const hasUsage = (applications?.items.length ?? 0) > 0 || (guide?.items.length ?? 0) > 0;
   const railItems = [
     { id: 'malzeme', label: dict.home.story.eyebrow },
     ...(gallery ? [{ id: 'vitrin', label: dict.home.block.showcase }] : []),
-    ...(guide ? [{ id: 'rehber', label: dict.home.block.guide }] : []),
+    ...(hasUsage ? [{ id: 'uygulama', label: dict.home.block.applications }] : []),
     ...(process ? [{ id: 'surec', label: dict.home.block.process }] : []),
     ...(faq ? [{ id: 'sss', label: dict.home.block.faq }] : []),
   ];
@@ -118,27 +114,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           }}
         />
       )}
-      <Hero image={settings.heroImage || undefined} />
-      <CampaignSlider campaigns={campaigns} />
-      <MaterialStory categories={categories} />
-      <FeaturedProducts locale={lang} />
-      <Manifesto locale={lang} />
-      {gallery && <MaterialGallery block={gallery} locale={lang} />}
-      {guide && <MaterialGuide block={guide} locale={lang} />}
-      {applications && <ApplicationAreas block={applications} locale={lang} />}
-      <Material3D locale={lang} />
-      {process && <ProcessSteps block={process} locale={lang} />}
-      <BrandPartners brands={fallbackBrands} locale={lang} />
-      <Container className="pb-24 md:pb-32">
-        <StatsBand stats={aboutStats.stats} />
-      </Container>
-      {faq && <FaqAccordion block={faq} locale={lang} />}
-      <SupplyLogistics locale={lang} />
-      <CatalogSection locale={lang} />
-      {testimonials && <Testimonials block={testimonials} locale={lang} />}
-      <RecentlyViewed />
-      <QuoteCTA locale={lang} />
-      <ScrollSpyRail items={railItems} ariaLabel={dict.common.sections} />
+      {/* Ana sayfa baştan sona karanlık "showroom" olarak sunulur. */}
+      <div data-night className="bg-background text-foreground">
+        <Hero image={settings.heroImage || undefined} />
+        <CampaignSlider campaigns={campaigns} />
+        <MaterialStory categories={categories} />
+        <FeaturedProducts locale={lang} />
+        {gallery && <MaterialGallery block={gallery} locale={lang} />}
+        <UsageAndGuide areas={applications} guide={guide} locale={lang} />
+        <ManifestoStats locale={lang} stats={aboutStats.stats} />
+        {process && <ProcessSteps block={process} locale={lang} />}
+        <CatalogSection locale={lang} />
+        <SocialProof testimonials={testimonials} brands={fallbackBrands} locale={lang} />
+        <SupplyLogistics locale={lang} />
+        {faq && <FaqAccordion block={faq} locale={lang} />}
+        <RecentlyViewed />
+        <QuoteCTA locale={lang} />
+        <ScrollSpyRail items={railItems} ariaLabel={dict.common.sections} />
+      </div>
     </>
   );
 }

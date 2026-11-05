@@ -2,10 +2,11 @@
 
 import Image from 'next/image';
 import { useRef } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowDown, ArrowRight } from 'lucide-react';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
+import { ChapterMark } from '@/components/ui/ChapterMark';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export function Hero({ image }: { image?: string }) {
@@ -104,10 +105,10 @@ export function Hero({ image }: { image?: string }) {
 
       <div className="container-x relative flex min-h-svh flex-col justify-end pb-20 pt-[var(--header-height)] md:pb-32">
         <div data-hero-copy className="max-w-4xl">
-          <p data-hero-item className="text-eyebrow text-white/75">
-            {t('home.hero.eyebrow')}
-          </p>
-          <h1 data-hero-item className="text-hero mt-6 text-white">
+          <div data-hero-item>
+            <ChapterMark index={1} total={14} label={t('home.hero.eyebrow')} className="text-white/60" />
+          </div>
+          <h1 data-hero-item className="text-hero mt-8 text-white">
             {t('home.hero.titleLead')}{' '}
             <span className="relative inline-block text-[color:var(--color-accent-soft)]">
               <span className="text-hand">{t('home.hero.titleAccent')}</span>
@@ -155,13 +156,15 @@ export function Hero({ image }: { image?: string }) {
           </div>
         </div>
 
-        <div
+        <a
+          href="#malzeme"
           data-hero-item
-          className="mt-16 flex items-center gap-3 text-xs tracking-[0.24em] text-white/60 uppercase"
+          className="tap-target mt-16 inline-flex w-fit items-center gap-3 text-xs tracking-[0.24em] text-white/60 uppercase transition-colors hover:text-white"
         >
           <span className="h-px w-10 bg-white/40" aria-hidden />
           {t('home.hero.scroll')}
-        </div>
+          <ArrowDown className="h-3.5 w-3.5" aria-hidden />
+        </a>
       </div>
     </section>
   );

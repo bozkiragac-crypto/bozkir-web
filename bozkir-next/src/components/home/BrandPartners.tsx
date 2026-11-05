@@ -11,7 +11,15 @@ import type { Locale } from '@/i18n/config';
 const cell =
   'flex w-52 flex-none flex-col items-center justify-center gap-4 border-s border-border px-8 py-6 text-center transition-colors hover:bg-surface-2';
 
-export async function BrandPartners({ brands, locale }: { brands: Brand[]; locale: Locale }) {
+export async function BrandPartners({
+  brands,
+  locale,
+  bare = false,
+}: {
+  brands: Brand[];
+  locale: Locale;
+  bare?: boolean;
+}) {
   const dict = await dictForRequest(locale);
   if (brands.length === 0) return null;
 
@@ -60,20 +68,24 @@ export async function BrandPartners({ brands, locale }: { brands: Brand[]; local
     </ul>
   );
 
-  return (
-    <Container className="py-24 md:py-32">
-      <SectionHeading eyebrow={dict.home.brands.eyebrow} title={dict.home.brands.title} />
-
-      {/* Sonsuz kayan marka şeridi (hover'da durur). */}
-      <div
-        className="marquee mt-14 overflow-hidden"
-        style={{ '--marquee-duration': `${Math.max(24, brands.length * 5)}s` } as CSSProperties}
-      >
-        <div className="marquee-track flex w-max will-change-transform">
-          {copy(false)}
-          {copy(true)}
-        </div>
+  const marquee = (
+    <div
+      className="marquee overflow-hidden"
+      style={{ '--marquee-duration': `${Math.max(24, brands.length * 5)}s` } as CSSProperties}
+    >
+      <div className="marquee-track flex w-max will-change-transform">
+        {copy(false)}
+        {copy(true)}
       </div>
+    </div>
+  );
+
+  if (bare) return <Container className="mt-12">{marquee}</Container>;
+
+  return (
+    <Container className="pad-band">
+      <SectionHeading eyebrow={dict.home.brands.eyebrow} title={dict.home.brands.title} />
+      <div className="mt-14">{marquee}</div>
     </Container>
   );
 }

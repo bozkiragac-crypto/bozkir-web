@@ -1,5 +1,6 @@
 import type { ContentBlock } from '@/types/content';
 import { Container } from '@/components/ui/Container';
+import { ChapterMark } from '@/components/ui/ChapterMark';
 import { Reveal } from '@/components/animations/Reveal';
 import { STAGGER } from '@/lib/motion';
 import { dictForRequest } from '@/i18n/server';
@@ -14,7 +15,7 @@ export async function ProcessSteps({ block, locale }: { block: ContentBlock; loc
     <section
       id="surec"
       data-on-dark
-      className="relative isolate overflow-hidden bg-foreground py-24 text-background md:py-32"
+      className="relative isolate overflow-hidden bg-foreground pad-band text-background"
     >
       <div
         aria-hidden
@@ -23,9 +24,12 @@ export async function ProcessSteps({ block, locale }: { block: ContentBlock; loc
       <Container className="relative">
         <Reveal>
           <div className="max-w-2xl">
-            <p className="text-eyebrow text-background/60">
-              {block.subtitle || dict.home.block.process}
-            </p>
+            <ChapterMark
+              index={8}
+              total={14}
+              label={block.subtitle || dict.home.block.process}
+              className="mb-4 text-background/70"
+            />
             <h2 className="text-section mt-4">{block.title}</h2>
             {block.body && <p className="mt-5 leading-relaxed text-background/70">{block.body}</p>}
           </div>

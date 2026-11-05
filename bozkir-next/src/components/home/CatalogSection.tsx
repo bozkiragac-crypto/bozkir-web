@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { FileText } from 'lucide-react';
 import { getCatalogs } from '@/lib/api/catalogs';
 import { Container } from '@/components/ui/Container';
+import { ChapterMark } from '@/components/ui/ChapterMark';
 import { Reveal } from '@/components/animations/Reveal';
 import { CatalogActions } from '@/components/catalog/CatalogActions';
 import { dictForRequest } from '@/i18n/server';
@@ -36,7 +37,8 @@ export async function CatalogSection({ locale }: { locale: Locale }) {
   const [featured, ...rest] = catalogs;
 
   return (
-    <Container className="py-24 md:py-32">
+    <Container id="katalog" className="pad-compact">
+      <ChapterMark index={9} total={14} label={h.eyebrow} className="mb-6" />
       {featured && (
         <Reveal>
           <div className="grid items-center gap-12 rounded-xl border border-border bg-surface p-8 md:grid-cols-[1fr_1.2fr] md:p-14">

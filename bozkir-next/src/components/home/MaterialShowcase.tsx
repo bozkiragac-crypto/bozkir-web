@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { ChapterMark } from '@/components/ui/ChapterMark';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { GalleryShowcase, type ShowcaseItem } from '@/components/home/GalleryShowcase';
 import { useDictionary } from '@/i18n/DictionaryProvider';
@@ -17,11 +18,13 @@ export function MaterialShowcase({
   eyebrow,
   title,
   body,
+  chapter,
 }: {
   items: ShowcaseItem[];
   eyebrow?: string;
   title: string;
   body?: string;
+  chapter?: number;
 }) {
   const { t } = useDictionary();
   const [filter, setFilter] = useState('');
@@ -32,6 +35,9 @@ export function MaterialShowcase({
   return (
     <>
       <Container>
+        {chapter ? (
+          <ChapterMark index={chapter} total={14} label={t('home.block.showcase')} className="mb-5" />
+        ) : null}
         <SectionHeading
           eyebrow={eyebrow}
           title={title}

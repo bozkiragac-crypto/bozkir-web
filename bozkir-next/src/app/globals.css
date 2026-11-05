@@ -17,6 +17,35 @@
     letter-spacing: 0.02em;
     color: var(--muted-strong);
   }
+
+  /* Bölüm ritmi: her bölüm aynı dikey boşluğu kullanmaz. */
+  .pad-scene {
+    padding-block: clamp(5rem, 12vw, 10rem);
+  }
+  .pad-band {
+    padding-block: clamp(4rem, 9vw, 7.5rem);
+  }
+  .pad-compact {
+    padding-block: clamp(3rem, 6vw, 5rem);
+  }
+
+  /* Sinematik "bölüm" işareti: 01 / 14 — MALZEME */
+  .chapter-mark {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* Yatay kaydırmalı şeritlerde çubuğu gizle (kartlar kısmi görünerek keşfi sağlar). */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* ==========================================================================
@@ -104,7 +133,9 @@ html[data-compare='1'] [data-product-cta] {
   direction: rtl;
 }
 
-[data-theme='dark'] {
+/* Ana sayfa "data-night" ile kapsanmış koyu tema kullanır; token seti ortaktır. */
+[data-theme='dark'],
+[data-night] {
   color-scheme: dark;
   --bg: #0e0e10;
   --surface: #16161a;
@@ -121,6 +152,19 @@ html[data-compare='1'] [data-product-cta] {
 
   --grain-opacity: 0.06;
   --scrollbar-thumb: #3a3a42;
+
+  /* Tailwind @theme alias'ları kök elemandaki değeri miras aldığı için,
+     kapsanmış (scoped) koyu temada burada yeniden bağlanır. */
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
 
   color-scheme: dark;
 }

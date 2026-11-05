@@ -118,17 +118,21 @@ export function Header({
     [],
   );
 
-  // Ana sayfada hero koyu; üstte beyaz yazı, scroll sonrası koyu.
-  const onDark = isHome && !scrolled && !megaOpen;
+  // Ana sayfa baştan sona karanlık (data-night); header orada her zaman beyaz metin.
+  const onDark = isHome;
+  const nightHome = isHome;
 
   return (
     <>
       <header
         data-on-dark={onDark ? '' : undefined}
+        data-night={nightHome ? '' : undefined}
         className={cn(
           'fixed inset-x-0 top-0 z-[80] transition-[background-color,border-color,backdrop-filter] duration-300 ease-[var(--ease-out-expo)]',
           scrolled || megaOpen
-            ? 'border-b border-border bg-background/95 lg:bg-background/80 lg:backdrop-blur-xl'
+            ? nightHome
+              ? 'border-b border-white/10 bg-[#0e0e10]/85 backdrop-blur-xl'
+              : 'border-b border-border bg-background/95 lg:bg-background/80 lg:backdrop-blur-xl'
             : 'border-b border-transparent bg-transparent',
         )}
         style={{ height: 'var(--header-height)' }}

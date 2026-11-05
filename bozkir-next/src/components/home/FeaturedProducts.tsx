@@ -1,11 +1,14 @@
 import { ArrowUpRight } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { ChapterMark } from '@/components/ui/ChapterMark';
 import { Reveal } from '@/components/animations/Reveal';
 import { ProductCard } from '@/components/products/ProductCard';
+import { ProductSpecRail } from '@/components/products/ProductSpecRail';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { getProductsByIds } from '@/lib/api/products';
 import { getSiteSettings } from '@/lib/data/settings';
+import { buildSpecRail } from '@/lib/product-specs';
 import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
@@ -17,12 +20,19 @@ export async function FeaturedProducts({ locale }: { locale: Locale }) {
   const products = await getProductsByIds(settings.featuredProducts, locale);
   if (products.length === 0) return null;
 
-  const h = (await dictForRequest(locale)).home.featuredProducts;
+  const dict = await dictForRequest(locale);
+  const h = dict.home.featuredProducts;
+  const labels = {
+    surface: dict.product.surface,
+    thickness: dict.product.thickness,
+    color: dict.product.colors,
+    code: dict.product.productCode,
+  };
 
   return (
-    <Container className="py-24 md:py-32">
+    <Container id="urunler" className="pad-band">
+      <ChapterMark index={4} total={14} label={h.eyebrow} className="mb-5" />
       <SectionHeading
-        eyebrow={h.eyebrow}
         title={h.title}
         body={h.body}
         action={
@@ -38,7 +48,17 @@ export async function FeaturedProducts({ locale }: { locale: Locale }) {
       <div className="mt-10 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
         {products.map((product, i) => (
           <Reveal key={product.id} delay={(i % 4) * 0.05}>
-            <ProductCard product={product} />
+            <div>
+              <ProductCard product={product} />
+              <ProductSpecRail
+                items={buildSpecRail(product, labels)}
+                quote={{
+                  href: `/teklif-al?urun=${encodeURIComponent(product.slug)}`,
+                  label: dict.home.hero.ctaQuote,
+                }}
+                className="hidden md:flex"
+              />
+            </div>
           </Reveal>
         ))}
       </div>

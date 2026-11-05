@@ -1,6 +1,7 @@
 import { Boxes, Truck, Warehouse, CreditCard, ArrowRight } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { ChapterMark } from '@/components/ui/ChapterMark';
 import { Reveal } from '@/components/animations/Reveal';
 import { Panel, PanelGrid } from '@/components/ui/Panel';
 import { ButtonLink } from '@/components/ui/Button';
@@ -16,7 +17,8 @@ export async function SupplyLogistics({ locale }: { locale: Locale }) {
   const h = dict.home.supply;
   const [contactBefore, contactAfter] = h.contactNote.split('{phone}');
   return (
-    <Container className="py-24 md:py-32">
+    <Container id="lojistik" className="pad-compact">
+      <ChapterMark index={11} total={14} label={h.eyebrow} className="mb-5" />
       <SectionHeading
         eyebrow={h.eyebrow}
         title={h.title}

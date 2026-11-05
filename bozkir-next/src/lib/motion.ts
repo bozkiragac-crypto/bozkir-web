@@ -19,4 +19,4 @@ export const STAGGER = {
 } as const;
 
 /** "Malzemeyi Keşfet" sticky adımı: kategori başına kaydırma yüksekliği (vh). */
-export const STORY_STEP_VH = 90;
+export const STORY_STEP_VH = 30;

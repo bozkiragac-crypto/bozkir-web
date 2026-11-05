@@ -113,12 +113,13 @@ export async function MaterialGallery({ block, locale }: { block: ContentBlock; 
   if (items.length === 0) return null;
 
   return (
-    <section id="vitrin" className="py-24 md:py-32" aria-label={h.galleryAria}>
+    <section id="vitrin" className="pad-compact" aria-label={h.galleryAria}>
       <MaterialShowcase
         items={items}
         eyebrow={block.subtitle || h.showcase}
         title={block.title}
         body={block.body}
+        chapter={5}
       />
 
       <script

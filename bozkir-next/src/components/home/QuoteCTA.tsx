@@ -17,7 +17,7 @@ export async function QuoteCTA({ locale }: { locale: Locale }) {
   const whatsappLink =
     whatsappHref(s.whatsapp || s.phone, whatsappMessage, s.phone) || s.whatsapp;
   return (
-    <Container className="pb-24 md:pb-32">
+    <Container id="teklif" className="pb-12 md:pb-16">
       <div
         data-on-dark
         className="relative overflow-hidden rounded-xl bg-foreground px-8 py-16 text-background md:px-16 md:py-24"

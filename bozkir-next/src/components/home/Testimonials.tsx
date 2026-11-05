@@ -9,43 +9,56 @@ import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Müşteri referansları — yalnızca admin içerik eklediğinde görünür. */
-export async function Testimonials({ block, locale }: { block: ContentBlock; locale: Locale }) {
+export async function Testimonials({
+  block,
+  locale,
+  bare = false,
+}: {
+  block: ContentBlock;
+  locale: Locale;
+  bare?: boolean;
+}) {
   const items = block.items;
   if (items.length === 0) return null;
   const dict = await dictForRequest(locale);
   const h = dict.home.block;
 
+  const grid = (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {items.map((item, i) => (
+        <Reveal key={item.id} delay={(i % 3) * 0.06}>
+          <Panel className="h-full gap-5 rounded-lg p-7">
+            <Quote className="h-5 w-5 text-accent" />
+            {item.description && (
+              <p className="flex-1 leading-relaxed">&ldquo;{item.description}&rdquo;</p>
+            )}
+            <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
+              {item.imageUrl ? (
+                <span className="relative h-10 w-10 flex-none overflow-hidden rounded-full bg-surface-2">
+                  <Image src={item.imageUrl} alt="" fill sizes="40px" className="object-cover" />
+                </span>
+              ) : null}
+              <div>
+                <p className="text-sm font-medium">{item.title}</p>
+                {item.tag && <p className="text-xs text-muted">{item.tag}</p>}
+              </div>
+            </div>
+          </Panel>
+        </Reveal>
+      ))}
+    </div>
+  );
+
+  if (bare) return <Container className="mt-12">{grid}</Container>;
+
   return (
-    <Container className="py-24 md:py-32">
+    <Container className="pad-band">
       <SectionHeading
         eyebrow={block.subtitle || h.testimonials}
         title={block.title}
         body={block.body}
       />
-
-      <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {items.map((item, i) => (
-          <Reveal key={item.id} delay={(i % 3) * 0.06}>
-            <Panel className="h-full gap-5 rounded-lg p-7">
-              <Quote className="h-5 w-5 text-accent" />
-              {item.description && (
-                <p className="flex-1 leading-relaxed">&ldquo;{item.description}&rdquo;</p>
-              )}
-              <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
-                {item.imageUrl ? (
-                  <span className="relative h-10 w-10 flex-none overflow-hidden rounded-full bg-surface-2">
-                    <Image src={item.imageUrl} alt="" fill sizes="40px" className="object-cover" />
-                  </span>
-                ) : null}
-                <div>
-                  <p className="text-sm font-medium">{item.title}</p>
-                  {item.tag && <p className="text-xs text-muted">{item.tag}</p>}
-                </div>
-              </div>
-            </Panel>
-          </Reveal>
-        ))}
-      </div>
+      <div className="mt-12">{grid}</div>
     </Container>
   );
 }

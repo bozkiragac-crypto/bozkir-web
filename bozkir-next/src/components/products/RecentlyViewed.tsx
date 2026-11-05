@@ -7,6 +7,7 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { ChapterMark } from '@/components/ui/ChapterMark';
 
 /** "Son görüntülenen" şeridi — en fazla 4 ürün, tam kart olarak. */
 export function RecentlyViewed({ excludeSlug }: { excludeSlug?: string }) {
@@ -42,7 +43,8 @@ export function RecentlyViewed({ excludeSlug }: { excludeSlug?: string }) {
   if (!ready || products.length === 0) return null;
 
   return (
-    <Container className="py-24 md:py-32">
+    <Container id="son-bakilanlar" className="pad-compact">
+      <ChapterMark index={13} total={14} label={t('product.recent')} className="mb-5" />
       <SectionHeading eyebrow={t('product.recent')} title={t('product.recentTitle')} />
       <div className="mt-10 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
         {products.map((p) => (

@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react';
 import type { ContentBlock } from '@/types/content';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import { ChapterMark } from '@/components/ui/ChapterMark';
 import { jsonLdString } from '@/lib/seo';
 import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
@@ -12,7 +13,8 @@ export async function FaqAccordion({ block, locale }: { block: ContentBlock; loc
   const dict = await dictForRequest(locale);
 
   return (
-    <Container id="sss" className="py-24 md:py-32">
+    <Container id="sss" className="pad-compact">
+      <ChapterMark index={12} total={14} label={block.subtitle || dict.home.block.faq} className="mb-5" />
       <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <SectionHeading
           eyebrow={block.subtitle || dict.home.block.faq}

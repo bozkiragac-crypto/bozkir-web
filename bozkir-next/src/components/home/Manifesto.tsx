@@ -4,8 +4,27 @@ import { dictForRequest } from '@/i18n/server';
 import type { Locale } from '@/i18n/config';
 
 /** Editoryal manifesto bandı — bölüm ritmini kırar. */
-export async function Manifesto({ locale }: { locale: Locale }) {
+export async function Manifesto({ locale, bare = false }: { locale: Locale; bare?: boolean }) {
   const dict = await dictForRequest(locale);
+
+  const inner = (
+    <Reveal>
+      {!bare && <p className="text-eyebrow">{dict.home.manifesto.eyebrow}</p>}
+      <p
+        className={
+          bare
+            ? 'text-editorial max-w-4xl text-[clamp(1.7rem,4.6vw,3.6rem)] leading-[1.14]'
+            : 'text-editorial mt-10 max-w-4xl text-[clamp(1.7rem,4.6vw,3.6rem)] leading-[1.14]'
+        }
+      >
+        {dict.home.manifesto.quote}
+      </p>
+      <p className="mt-10 text-caption">{dict.home.manifesto.signature}</p>
+    </Reveal>
+  );
+
+  if (bare) return inner;
+
   return (
     <section className="relative overflow-hidden border-y border-border bg-surface">
       <div
@@ -18,15 +37,7 @@ export async function Manifesto({ locale }: { locale: Locale }) {
       >
         &ldquo;
       </span>
-      <Container className="relative py-28 md:py-40">
-        <Reveal>
-          <p className="text-eyebrow">{dict.home.manifesto.eyebrow}</p>
-          <p className="text-editorial mt-10 max-w-4xl text-[clamp(1.7rem,4.6vw,3.6rem)] leading-[1.14]">
-            {dict.home.manifesto.quote}
-          </p>
-          <p className="mt-10 text-caption">{dict.home.manifesto.signature}</p>
-        </Reveal>
-      </Container>
+      <Container className="relative py-28 md:py-40">{inner}</Container>
     </section>
   );
 }
