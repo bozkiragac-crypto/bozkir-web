@@ -14,7 +14,7 @@ export async function FaqAccordion({ block, locale }: { block: ContentBlock; loc
 
   return (
     <Container id="sss" className="pad-compact">
-      <ChapterMark index={12} total={14} label={block.subtitle || dict.home.block.faq} className="mb-5" />
+      <ChapterMark label={block.subtitle || dict.home.block.faq} className="mb-5" />
       <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <SectionHeading
           eyebrow={block.subtitle || dict.home.block.faq}
@@ -25,7 +25,7 @@ export async function FaqAccordion({ block, locale }: { block: ContentBlock; loc
         <div className="divide-y divide-border border-y border-border">
           {block.items.map((item) => (
             <details key={item.id} className="group">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-left">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-start">
                 <span className="text-base font-medium tracking-tight md:text-lg">
                   {item.title}
                 </span>

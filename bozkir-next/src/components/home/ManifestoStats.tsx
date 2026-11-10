@@ -32,7 +32,7 @@ export async function ManifestoStats({
       </span>
 
       <Container className="pad-compact relative">
-        <ChapterMark index={7} total={14} label={dict.home.manifesto.eyebrow} className="mb-10" />
+        <ChapterMark label={dict.home.manifesto.eyebrow} className="mb-10" />
         <Manifesto locale={locale} bare />
       </Container>
 

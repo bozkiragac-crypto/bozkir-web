@@ -33,8 +33,8 @@ export function AboutTimeline({ items }: { items?: { year: string; title: string
       <p className="text-eyebrow">{dict.pages.about.timeline.eyebrow}</p>
       <h2 className="text-section mt-4 max-w-2xl">{dict.pages.about.timeline.title}</h2>
 
-      <div className="relative mt-16 pl-8 md:pl-0">
-        <div data-line className="absolute left-0 top-0 h-full w-px bg-foreground/20 md:left-[calc(20%_-_1px)]" />
+      <div className="relative mt-16 ps-8 md:ps-0">
+        <div data-line className="absolute start-0 top-0 h-full w-px bg-foreground/20 md:start-[calc(20%_-_1px)]" />
         <ol className="space-y-16">
           {milestones.map((m) => (
             <li key={m.year} className="md:grid md:grid-cols-[20%_1fr] md:gap-10">

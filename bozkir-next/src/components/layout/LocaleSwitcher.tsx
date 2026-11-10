@@ -48,7 +48,9 @@ export function LocaleSwitcher({
     setOpen(false);
     if (next === locale) return;
     document.cookie = `bozkir_locale=${next};path=/;max-age=31536000;samesite=lax`;
-    router.push(switchLocaleInPath(pathname, next));
+    // Aynı sayfada kalırken filtre/arama ve çapa (#bolum) korunur.
+    const suffix = `${window.location.search}${window.location.hash}`;
+    router.push(`${switchLocaleInPath(pathname, next)}${suffix}`);
     router.refresh();
   }
 

@@ -81,7 +81,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                     color: 'rgba(255,255,255,0.9)',
                   }}
                 >
-                  {count} {dict.catalog.title.toLocaleLowerCase(locale)}
+                  {count} {dict.catalog.countLabel}
                 </span>
               )}
               <span style={{ fontSize: 24, color: 'rgba(255,255,255,0.7)' }}>bozkiragac.com</span>

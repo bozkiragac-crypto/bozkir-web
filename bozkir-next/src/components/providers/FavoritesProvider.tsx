@@ -61,12 +61,20 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    try {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    } catch {
+      // Gizli mod / kota hatası: liste yalnızca bu oturumda tutulur.
+    }
   }, [favorites, ready]);
 
   useEffect(() => {
     if (!ready) return;
-    localStorage.setItem(COMPARE_KEY, JSON.stringify(compare));
+    try {
+      localStorage.setItem(COMPARE_KEY, JSON.stringify(compare));
+    } catch {
+      // Gizli mod / kota hatası: liste yalnızca bu oturumda tutulur.
+    }
     document.documentElement.dataset.compare = compare.length > 0 ? '1' : '0';
   }, [compare, ready]);
 

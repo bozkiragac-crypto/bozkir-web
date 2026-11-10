@@ -7,7 +7,12 @@ import { defaultLocale, locales } from '@/i18n/config';
 export const revalidate = 3600;
 
 /** Her yol için tüm dil varyantlarını `alternates.languages` olarak üretir. */
-function entry(path: string, changeFrequency: 'weekly' | 'monthly', priority: number) {
+function entry(
+  path: string,
+  changeFrequency: 'weekly' | 'monthly',
+  priority: number,
+  lastModified?: string,
+) {
   const clean = path === '/' ? '' : path;
   const base = siteConfig.url.replace(/\/$/, '');
   const languages: Record<string, string> = {
@@ -20,6 +25,8 @@ function entry(path: string, changeFrequency: 'weekly' | 'monthly', priority: nu
     url: languages[defaultLocale]!,
     changeFrequency,
     priority,
+    // Yalnızca gerçek güncelleme tarihi varsa yazılır; uydurma tarih SEO'ya zarar verir.
+    ...(lastModified ? { lastModified } : {}),
     alternates: { languages },
   };
 }
@@ -45,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes.map((r) => entry(r.path, r.freq, r.priority)),
     ...categories.map((c) => entry(`/kategoriler/${c.slug}`, 'weekly', 0.7)),
-    ...products.map((p) => entry(`/urunler/${p.slug}`, 'weekly', 0.65)),
+    ...products.map((p) => entry(`/urunler/${p.slug}`, 'weekly', 0.65, p.updatedAt)),
   ];
 }
 

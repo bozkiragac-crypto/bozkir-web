@@ -9,8 +9,10 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ShareListButton, useImportFromUrl } from '@/components/products/ListImport';
+import { fetchProductBatch } from '@/lib/api/product-batch';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
 import type { Product } from '@/types/product';
+import { MAX_QUOTE_PRODUCTS } from '@/lib/quote-products';
 import { cn } from '@/lib/utils';
 
 export function FavoritesView() {
@@ -25,17 +27,14 @@ export function FavoritesView() {
     let cancelled = false;
     const missing = favorites.filter((f) => !details[f.slug]);
     if (missing.length === 0) return;
-    Promise.all(
-      missing.map((f) =>
-        fetch(`/api/product?slug=${encodeURIComponent(f.slug)}&locale=${locale}`)
-          .then((r) => (r.ok ? r.json() : null))
-          .catch(() => null),
-      ),
+    fetchProductBatch(
+      missing.map((f) => f.slug),
+      locale,
     ).then((results) => {
-      if (cancelled) return;
+      if (cancelled || results.length === 0) return;
       setDetails((prev) => {
         const next = { ...prev };
-        for (const p of results) if (p && typeof p.slug === 'string') next[p.slug] = p as Product;
+        for (const p of results) next[p.slug] = p;
         return next;
       });
     });
@@ -47,7 +46,6 @@ export function FavoritesView() {
 
   const items = favorites.map((f) => ({ ref: f, product: details[f.slug] }));
   const quoteHref = `/teklif-al?urunler=${favorites
-    .slice(0, 4)
     .map((f) => encodeURIComponent(f.slug))
     .join(',')}`;
 
@@ -114,6 +112,11 @@ export function FavoritesView() {
                   <Scale className="h-4 w-4" /> {t('favorites.compare')}
                 </Link>
               </div>
+              {favorites.length > MAX_QUOTE_PRODUCTS && (
+                <p className="basis-full text-xs text-muted-strong">
+                  {t('favorites.quoteLimitHint').replace('{max}', String(MAX_QUOTE_PRODUCTS))}
+                </p>
+              )}
             </div>
 
             <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4">

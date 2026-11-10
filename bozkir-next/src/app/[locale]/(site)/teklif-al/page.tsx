@@ -4,10 +4,11 @@ import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { QuoteForm, type QuoteProduct } from '@/components/forms/QuoteForm';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-import { getProductBySlug } from '@/lib/api/products';
+import { getProductsBySlugs } from '@/lib/api/products';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
 import { resolveWhatsAppTemplate, whatsappHref } from '@/lib/whatsapp';
 import { pickLocaleText } from '@/lib/data/catalog';
+import { MAX_QUOTE_PRODUCTS, parseQuoteSlugs } from '@/lib/quote-products';
 import { Phone } from 'lucide-react';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { isLocale } from '@/i18n/config';
@@ -47,21 +48,15 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
     whatsappHref(settings.whatsapp || settings.phone, whatsappMessage, settings.phone) ||
     settings.whatsapp;
   // `urun` tek ürün, `urunler` karşılaştırmadan gelen çoklu ürün slug'ları.
-  const raw = [sp.urun, sp.urunler].flatMap((v) => (typeof v === 'string' ? v.split(',') : []));
-  const slugs = [...new Set(raw.map((s) => s.trim()).filter(Boolean))].slice(0, 4);
-
-  const found = slugs.length
-    ? await Promise.all(slugs.map((s) => getProductBySlug(s, locale).catch(() => null)))
-    : [];
-  const products: QuoteProduct[] = found
-    .filter((p): p is NonNullable<typeof p> => !!p)
-    .map((product) => ({
-      id: product.id,
-      slug: product.slug,
-      name: product.name,
-      code: product.code || undefined,
-      image: product.thumbnail ?? product.images[0],
-    }));
+  const { slugs, truncated } = parseQuoteSlugs([sp.urun, sp.urunler]);
+  const found = slugs.length ? await getProductsBySlugs(slugs, locale) : [];
+  const products: QuoteProduct[] = found.map((product) => ({
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    code: product.code || undefined,
+    image: product.thumbnail ?? product.images[0],
+  }));
 
   const first = products[0];
 
@@ -95,6 +90,14 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
             alt={dict.meta.brand}
             src={settings.identity.logo}
           />
+          {truncated && (
+            <p
+              role="status"
+              className="mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong"
+            >
+              {dict.quote.limitNote.replace('{max}', String(MAX_QUOTE_PRODUCTS))}
+            </p>
+          )}
           <QuoteForm
             products={products}
             turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ''}

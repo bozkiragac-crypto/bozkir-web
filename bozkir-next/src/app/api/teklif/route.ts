@@ -9,6 +9,7 @@ import { sendWebhook } from '@/lib/webhooks';
 import { sendQuoteNotification, sendAdminAlert } from '@/lib/mailer';
 import { checkQuoteGuard, attachmentQuotaReached } from '@/lib/quote-guard';
 import { verifyTurnstile } from '@/lib/turnstile';
+import { isValidProductSlug } from '@/lib/quote-products';
 
 export const runtime = 'nodejs';
 
@@ -31,9 +32,16 @@ const schema = z.object({
     .max(30)
     .regex(/^[0-9+()\s.\-]+$/, { message: 'Geçersiz telefon.' }),
   email: z.string().email().max(160),
-  product: singleLine(160).optional().default(''),
+  product: singleLine(2000).optional().default(''),
   productId: singleLine(80).optional().default(''),
-  productSlug: singleLine(160).optional().default(''),
+  productSlug: singleLine(2000)
+    .optional()
+    .default('')
+    .refine(
+      (value) =>
+        value === '' || value.split(',').every((slug) => isValidProductSlug(slug.trim())),
+      { message: 'Geçersiz ürün bağlantısı.' },
+    ),
   quantity: singleLine(60).optional().default(''),
   dimensions: singleLine(120).optional().default(''),
   // Not çok satırlı olabilir; yalnızca zararlı kontrol karakterleri atılır.

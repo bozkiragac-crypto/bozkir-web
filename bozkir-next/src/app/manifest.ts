@@ -11,6 +11,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   }
 
   const brandName = settings?.identity.brandName || 'Bozkır Ağaç Ürünleri';
+  // Ana ekran kısayolunda uzun marka adı kesilmesin.
+  const shortName = brandName.split(/\s+/).slice(0, 2).join(' ') || brandName;
   const description =
     settings?.identity.description ||
     'MDF lam, lake panel, suntalam, sunta ve tamamlayıcı panel çözümleri. Antakya / Hatay.';
@@ -25,9 +27,10 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   return {
     id: '/',
     name: brandName,
-    short_name: brandName,
+    short_name: shortName,
     description,
-    start_url: '/tr',
+    // Kök URL, ziyaretçinin dil çerezine göre /tr, /en veya /ar'a yönlenir.
+    start_url: '/',
     scope: '/',
     display: 'standalone',
     background_color: '#f7f7f5',
@@ -36,10 +39,12 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     dir: 'ltr',
     categories: ['business', 'shopping'],
     display_override: ['standalone', 'minimal-ui'],
+    prefer_related_applications: false,
+    // Dil öneki yok: açılışta çerez/Accept-Language ile doğru dile yönlenir.
     shortcuts: [
-      { name: nav.products, url: '/tr/urunler' },
-      { name: nav.quote, url: '/tr/teklif-al' },
-      { name: nav.contact, url: '/tr/iletisim' },
+      { name: nav.products, url: '/urunler' },
+      { name: nav.quote, url: '/teklif-al' },
+      { name: nav.contact, url: '/iletisim' },
     ],
     icons: [
       ...(favicon && favicon !== '/favicon.ico'
@@ -47,7 +52,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
         : []),
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      // Maskable ikon opak zeminli ve güvenli alan içinde üretilir.
+      { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
   };
 }

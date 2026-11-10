@@ -114,8 +114,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           }}
         />
       )}
-      {/* Ana sayfa baştan sona karanlık "showroom" olarak sunulur. */}
-      <div data-night className="bg-background text-foreground">
+      {/* Ana sayfa kullanıcının tema tercihine uyar: açık temada ferah,
+          koyu temada sinematik "showroom" görünümü. */}
+      <div className="bg-background text-foreground">
         <Hero image={settings.heroImage || undefined} />
         <CampaignSlider campaigns={campaigns} />
         <MaterialStory categories={categories} />

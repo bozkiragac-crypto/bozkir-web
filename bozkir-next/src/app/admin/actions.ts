@@ -458,6 +458,7 @@ export async function saveProduct(
         whatsappMessage,
         whatsappMessageEn,
         whatsappMessageAr,
+        updatedAt: new Date(),
       })
       .where(eq(products.id, input.id));
 
@@ -526,7 +527,10 @@ export async function setProductActive(
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
-  await db.update(products).set({ isActive }).where(eq(products.id, id));
+  await db
+    .update(products)
+    .set({ isActive, updatedAt: new Date() })
+    .where(eq(products.id, id));
   await logActivity(
     admin,
     'update',
@@ -647,7 +651,18 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
         if (!dryRun) {
           await tx
             .update(products)
-            .set({ name, cat, face, img, isActive, nameEn, nameAr, catEn, catAr })
+            .set({
+              name,
+              cat,
+              face,
+              img,
+              isActive,
+              nameEn,
+              nameAr,
+              catEn,
+              catAr,
+              updatedAt: new Date(),
+            })
             .where(eq(products.id, existingId));
         }
       } else {

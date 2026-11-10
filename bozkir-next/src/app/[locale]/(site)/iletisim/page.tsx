@@ -129,7 +129,7 @@ function LocationSection({
           </div>
 
           <div className="relative hidden overflow-hidden rounded-xl border border-border shadow-[var(--card-shadow)] lg:block">
-            <span className="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/45 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
+            <span className="pointer-events-none absolute start-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/45 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
               <MapPin className="h-3.5 w-3.5" aria-hidden /> {eyebrow}
             </span>
             <iframe

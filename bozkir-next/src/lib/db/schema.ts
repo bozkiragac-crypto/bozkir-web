@@ -24,6 +24,7 @@ export const products = pgTable(
     img: text('img'),
     isActive: boolean('is_active').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     // Çok dilli altyapı: TR zorunlu, EN/AR çevirileri opsiyonel (yoksa TR'ye düşer).
     nameEn: text('name_en'),
     nameAr: text('name_ar'),

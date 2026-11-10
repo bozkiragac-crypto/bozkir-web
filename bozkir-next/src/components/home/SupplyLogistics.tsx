@@ -18,7 +18,7 @@ export async function SupplyLogistics({ locale }: { locale: Locale }) {
   const [contactBefore, contactAfter] = h.contactNote.split('{phone}');
   return (
     <Container id="lojistik" className="pad-compact">
-      <ChapterMark index={11} total={14} label={h.eyebrow} className="mb-5" />
+      <ChapterMark label={h.eyebrow} className="mb-5" />
       <SectionHeading
         eyebrow={h.eyebrow}
         title={h.title}

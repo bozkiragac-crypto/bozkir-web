@@ -1,7 +1,6 @@
 'use client';
 
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
-import { usePathname } from 'next/navigation';
 import {
   Instagram,
   Facebook,
@@ -160,9 +159,6 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
 
 export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: Category[] }) {
   const { t } = useDictionary();
-  const pathname = usePathname() ?? '';
-  // Ana sayfa baştan sona karanlık; footer da orada koyu kalır (geçiş sarsıntısı yok).
-  const nightHome = /^\/(tr|en|ar)\/?$/.test(pathname);
 
   const productLinks = categories.slice(0, 7).map((c) => ({
     label: c.name,
@@ -179,10 +175,7 @@ export function Footer({ s, categories = [] }: { s: SiteSettings; categories?: C
   ];
 
   return (
-    <footer
-      data-night={nightHome ? '' : undefined}
-      className="border-t border-border bg-surface pb-[var(--safe-bottom)] text-foreground"
-    >
+    <footer className="border-t border-border bg-surface pb-[var(--safe-bottom)] text-foreground">
       <Container className="border-b border-border py-10 md:py-20">
         <p className="font-display text-[clamp(1.6rem,8vw,7rem)] leading-[0.95] tracking-[-0.03em]">
           {t('footer.madeIn')}

@@ -80,7 +80,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
   return (
     <section ref={root} id="malzeme" className="relative bg-background">
       <Container className="pad-scene pb-0">
-        <ChapterMark index={3} total={14} label={t('home.story.eyebrow')} />
+        <ChapterMark label={t('home.story.eyebrow')} />
         <h2 className="text-section mt-4 max-w-3xl">{t('home.story.title')}</h2>
       </Container>
 
@@ -219,7 +219,7 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
                   </div>
                 ))}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-                <span className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-black/40 px-4 py-1.5 text-[0.75rem] tracking-[0.14em] text-white/90 uppercase backdrop-blur-sm lg:bottom-5 lg:left-5">
+                <span className="pointer-events-none absolute bottom-4 start-4 rounded-full bg-black/40 px-4 py-1.5 text-[0.75rem] tracking-[0.14em] text-white/90 uppercase backdrop-blur-sm lg:bottom-5 lg:start-5">
                   {current?.name}
                 </span>
               </div>

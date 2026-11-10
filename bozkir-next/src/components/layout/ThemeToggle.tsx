@@ -16,12 +16,8 @@ function storedPref(): Theme | null {
   }
 }
 
-function systemTheme(): Theme {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 /** Kararlı temayı DOM'a ve adres çubuğu rengine uygular. */
-function applyTheme(theme: Theme, source: 'user' | 'system') {
+function applyTheme(theme: Theme, source: 'user' | 'default') {
   const root = document.documentElement;
   root.setAttribute('data-theme', theme);
   root.style.colorScheme = theme;
@@ -35,7 +31,7 @@ function applyTheme(theme: Theme, source: 'user' | 'system') {
   meta.setAttribute('content', theme === 'dark' ? '#0e0e10' : '#f7f7f5');
 }
 
-/** Tema düğmesi: kayıtlı tercih yoksa işletim sistemi temasını canlı takip eder. */
+/** Tema düğmesi: site varsayılanı açık temadır; kullanıcı isterse koyuya geçer. */
 export function ThemeToggle({
   className,
   onDark = false,
@@ -44,29 +40,14 @@ export function ThemeToggle({
   onDark?: boolean;
 }) {
   const [theme, setTheme] = useState<Theme>('light');
-  // Kayıtlı tercih yokken sistem teması değişimini izle.
-  const [followSystem, setFollowSystem] = useState(false);
   const { t } = useDictionary();
 
   useEffect(() => {
     const pref = storedPref();
-    const initial = pref ?? systemTheme();
+    const initial = pref ?? 'light';
     setTheme(initial);
-    setFollowSystem(pref === null);
-    applyTheme(initial, pref === null ? 'system' : 'user');
+    applyTheme(initial, pref === null ? 'default' : 'user');
   }, []);
-
-  useEffect(() => {
-    if (!followSystem) return;
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => {
-      const next: Theme = mq.matches ? 'dark' : 'light';
-      applyTheme(next, 'system');
-      setTheme(next);
-    };
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, [followSystem]);
 
   function toggle() {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';
@@ -75,7 +56,6 @@ export function ThemeToggle({
     } catch {
       // yok say
     }
-    setFollowSystem(false);
     applyTheme(next, 'user');
     setTheme(next);
   }

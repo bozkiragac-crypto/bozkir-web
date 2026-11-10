@@ -127,7 +127,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
         {result.items.length > 0 ? (
           <>
             <p className="numerals mb-8 text-sm text-muted">
-              {result.total} {dict.catalog.title.toLocaleLowerCase(locale ?? 'tr')}
+              {result.total} {dict.catalog.countLabel}
               {totalPages > 1 ? ` · ${dict.common.page} ${page}/${totalPages}` : ''}
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">

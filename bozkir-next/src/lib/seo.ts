@@ -71,7 +71,16 @@ export async function siteMetadata(locale?: Locale): Promise<Metadata> {
       locale,
       siteName,
     }),
-    icons: { icon: favicon },
+    // `apple` ayrıca verilmezse dosya-convention ikonu `icons` tarafından ezilir.
+    icons: { icon: favicon, apple: '/apple-icon.png' },
+    // PWA / mobil ana ekran deneyimi.
+    manifest: '/manifest.webmanifest',
+    appleWebApp: {
+      capable: true,
+      title: siteName,
+      statusBarStyle: 'default',
+    },
+    formatDetection: { telephone: false },
   };
 }
 

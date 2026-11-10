@@ -51,6 +51,8 @@ interface IndexItem {
   colors: string[];
   thicknesses: string[];
   createdAt: string;
+  /** Son güncelleme (ISO); sitemap `lastModified` için kullanılır. */
+  updatedAt: string;
   images: string[];
   /** Çeviri alanları; boşsa Türkçeye düşer. Slug daima Türkçe isimden üretilir. */
   nameEn: string;
@@ -74,6 +76,7 @@ interface RawRow {
   thicknesses?: string | null;
   img: string | null;
   createdAt: Date | string | null;
+  updatedAt?: Date | string | null;
   nameEn?: string | null;
   nameAr?: string | null;
   catEn?: string | null;
@@ -122,6 +125,7 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       colors: parseImageList(row.colors),
       thicknesses: parseImageList(row.thicknesses),
       createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : '',
+      updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : '',
       images: parseImageList(row.img),
       nameEn: String(row.nameEn ?? '').trim(),
       nameAr: String(row.nameAr ?? '').trim(),
@@ -174,6 +178,7 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
     code: item.code,
     category: pickLocaleText(item.category, locale, item.catEn, item.catAr),
     categorySlug: item.categorySlug,
+    updatedAt: item.updatedAt || undefined,
     face: item.face,
     colors: item.colors,
     thicknesses: item.thicknesses,
@@ -199,6 +204,21 @@ export async function fetchProductsByIds(ids: string[], locale?: Locale): Promis
   const byId = new Map(index.map((item) => [item.id, item]));
   return wanted
     .map((id) => byId.get(id))
+    .filter((item): item is IndexItem => !!item)
+    .map((item) => toProduct(item, locale));
+}
+
+/** Verilen slug'ları istenen sırada döndürür; bulunmayan/pasif ürünler atlanır. */
+export async function fetchProductsBySlugs(
+  slugs: string[],
+  locale?: Locale,
+): Promise<Product[]> {
+  const wanted = slugs.map((slug) => String(slug).trim()).filter(Boolean);
+  if (wanted.length === 0) return [];
+  const index = await getProductsIndex();
+  const bySlug = new Map(index.map((item) => [item.slug, item]));
+  return wanted
+    .map((slug) => bySlug.get(slug))
     .filter((item): item is IndexItem => !!item)
     .map((item) => toProduct(item, locale));
 }

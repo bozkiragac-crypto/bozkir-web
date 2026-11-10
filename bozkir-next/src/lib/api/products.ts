@@ -5,6 +5,7 @@ import {
   fetchProductFacets,
   fetchProducts,
   fetchProductsByIds,
+  fetchProductsBySlugs,
   fetchRelatedProducts,
 } from '@/lib/data/catalog';
 import { apiGet, hasRemoteApi } from './client';
@@ -71,6 +72,24 @@ export async function getProductBySlug(slug: string, locale?: Locale): Promise<P
     // Uzak API düşerse yerel katmana düş.
     return fetchProductBySlug(slug, locale);
   }
+}
+
+/**
+ * Birden fazla ürünü slug ile, verilen sırayı koruyarak getirir.
+ * Yerel veri katmanında tek sorgu; harici API'de sıralı tek tek çözülür.
+ */
+export async function getProductsBySlugs(
+  slugs: string[],
+  locale?: Locale,
+): Promise<Product[]> {
+  const wanted = [...new Set(slugs.map((slug) => slug.trim()).filter(Boolean))];
+  if (wanted.length === 0) return [];
+  if (!hasRemoteApi()) return fetchProductsBySlugs(wanted, locale);
+
+  const results = await Promise.all(
+    wanted.map((slug) => getProductBySlug(slug, locale).catch(() => null)),
+  );
+  return results.filter((product): product is Product => !!product);
 }
 
 /** Aynı kategoriden ilgili ürünler. */

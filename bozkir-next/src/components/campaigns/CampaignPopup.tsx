@@ -103,7 +103,7 @@ export function CampaignPopup({
           type="button"
           onClick={close}
           aria-label={closeLabel}
-          className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-background/85 text-foreground shadow-sm backdrop-blur transition hover:bg-surface-2"
+          className="absolute end-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-background/85 text-foreground shadow-sm backdrop-blur transition hover:bg-surface-2"
         >
           <X className="h-4 w-4" />
         </button>
@@ -121,7 +121,7 @@ export function CampaignPopup({
               className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,12,0.15)_0%,rgba(10,10,12,0.05)_55%,rgba(10,10,12,0.55)_100%)]"
               aria-hidden
             />
-            <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-foreground backdrop-blur">
+            <span className="absolute start-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-foreground backdrop-blur">
               <Megaphone className="h-3 w-3" /> {eyebrow}
             </span>
           </div>

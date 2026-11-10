@@ -33,8 +33,6 @@ export async function SocialProof({
     <section id="referanslar" className="pad-compact border-y border-border bg-surface/40">
       <Container>
         <ChapterMark
-          index={10}
-          total={14}
           label={hasTestimonials ? dict.home.block.testimonials : dict.home.brands.eyebrow}
           className="mb-5"
         />

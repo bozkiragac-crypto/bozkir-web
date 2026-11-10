@@ -23,6 +23,7 @@ import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import { CookieBanner } from '@/components/consent/CookieBanner';
 import { AnalyticsScripts } from '@/components/consent/AnalyticsScripts';
 import { WebVitals } from '@/components/layout/WebVitals';
+import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister';
 import { themeScript } from '@/components/layout/DocumentAssets';
 import { siteConfig } from '@/config/site';
 import { jsonLdString, organizationJsonLd, siteMetadata, websiteJsonLd } from '@/lib/seo';
@@ -83,6 +84,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       suppressHydrationWarning
     >
       <head>
+        {/* iOS ana ekran / standalone modu (Next yalnızca mobil varyantı basıyor). */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         {/* Tema, ilk boyamadan önce uygulanır (FOUC yok). */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* JS varsa reveal başlangıç durumu uygulanır. */}
@@ -142,6 +145,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     <CampaignPopupServer locale={typed} />
                     <CookieBanner />
                     <WebVitals />
+                    <ServiceWorkerRegister />
                     {(settings.gaMeasurementId ||
                       settings.metaPixelId ||
                       process.env.NEXT_PUBLIC_ANALYTICS_ID) && (

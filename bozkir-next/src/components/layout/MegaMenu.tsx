@@ -78,7 +78,7 @@ export function MegaMenu({
         </div>
 
         <div className="relative h-full min-h-[320px] overflow-hidden rounded-lg bg-surface-2">
-          <BrandLogo className="absolute left-4 top-4 z-10 h-9" onDark src={logoUrl} />
+          <BrandLogo className="absolute start-4 top-4 z-10 h-9" onDark src={logoUrl} />
           {activeCategory?.heroImage ? (
             <Image
               key={activeCategory.id}
@@ -93,7 +93,7 @@ export function MegaMenu({
               {t('catalog.imagePreparing')}
             </div>
           )}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-6">
             <p className="text-lg font-medium text-white">{activeCategory?.name}</p>
             <p className="mt-1 max-w-md text-sm text-white/75">{activeCategory?.description}</p>
           </div>

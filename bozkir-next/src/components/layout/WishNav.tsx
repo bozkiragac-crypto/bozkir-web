@@ -18,7 +18,7 @@ export function WishNav({ onDark, className }: { onDark: boolean; className?: st
 
   const badge = (n: number) =>
     ready && n > 0 ? (
-      <span className="numerals absolute top-1 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background">
+      <span className="numerals absolute top-1 end-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background">
         {n}
       </span>
     ) : null;

@@ -7,6 +7,7 @@ import { SmartImage } from '@/components/ui/SmartImage';
 import { track } from '@/lib/analytics';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { cn } from '@/lib/utils';
 
 interface SearchDialogProps {
   open: boolean;
@@ -40,6 +41,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
   const [recents, setRecents] = useState<string[]>([]);
   const [results, setResults] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [active, setActive] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -58,12 +60,14 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     }
     setValue('');
     setResults([]);
+    setActive(-1);
   }, [open]);
 
   // Anlık öneriler: debounce + iptal edilebilir istek.
   useEffect(() => {
     if (!open || query.length < 2) {
       setResults([]);
+      setActive(-1);
       setLoading(false);
       return;
     }
@@ -80,6 +84,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
         if (!res.ok) throw new Error('request failed');
         const data: { items?: Suggestion[] } = await res.json();
         setResults(Array.isArray(data.items) ? data.items.slice(0, 6) : []);
+        setActive(-1);
       } catch (err) {
         if ((err as Error).name !== 'AbortError') setResults([]);
       } finally {
@@ -106,6 +111,12 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     };
   }, [open, onClose]);
 
+  // Klavye ile gezilen öneriyi görünür tut.
+  useEffect(() => {
+    if (active < 0) return;
+    document.getElementById(`search-suggestion-${active}`)?.scrollIntoView({ block: 'nearest' });
+  }, [active]);
+
   if (!open) return null;
 
   function remember(q: string) {
@@ -131,6 +142,37 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     track('search_select', { slug });
     onClose();
     router.push(`/${locale}/urunler/${slug}`);
+  }
+
+  function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (query.length >= 2) {
+      if (results.length === 0) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActive((i) => (i + 1) % results.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActive((i) => (i <= 0 ? results.length - 1 : i - 1));
+      } else if (e.key === 'Enter' && active >= 0) {
+        e.preventDefault();
+        const product = results[active];
+        if (product) openProduct(product.slug);
+      }
+      return;
+    }
+    // Sorgu kısaken son aramalar arasında ok tuşlarıyla gezinme.
+    if (recents.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusRecent(0);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusRecent(recents.length - 1);
+    }
+  }
+
+  function focusRecent(index: number) {
+    document.getElementById(`search-recent-${index}`)?.focus();
   }
 
   function runRecent(q: string) {
@@ -170,10 +212,16 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
             type="search"
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            onKeyDown={onInputKeyDown}
             placeholder={t('search.placeholder')}
             data-search-input
             className="h-16 flex-1 bg-transparent text-lg outline-none placeholder:text-muted"
             aria-label={t('search.label')}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={query.length >= 2}
+            aria-controls="search-suggestions"
+            aria-activedescendant={active >= 0 ? `search-suggestion-${active}` : undefined}
             autoComplete="off"
           />
           <button
@@ -199,12 +247,26 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
               </button>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {recents.map((r) => (
+              {recents.map((r, index) => (
                 <button
                   key={r}
+                  id={`search-recent-${index}`}
                   type="button"
                   onClick={() => runRecent(r)}
-                  className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-strong transition-colors hover:border-foreground hover:text-foreground"
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      if (e.key === 'ArrowUp' && index === 0) {
+                        inputRef.current?.focus();
+                        return;
+                      }
+                      const direction = e.key === 'ArrowDown' ? 1 : -1;
+                      focusRecent((index + direction + recents.length) % recents.length);
+                    } else if (e.key === 'Escape') {
+                      onClose();
+                    }
+                  }}
+                  className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-strong transition-colors hover:border-foreground hover:text-foreground focus-visible:border-foreground focus-visible:text-foreground"
                 >
                   {r}
                 </button>
@@ -216,18 +278,30 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
         {query.length >= 2 && (
           <div role="status" aria-live="polite">
             <p className="text-eyebrow px-5 pt-4">{t('search.suggestions')}</p>
-            <ul className="mt-2 max-h-[46vh] overflow-y-auto pb-2">
+            <ul
+              id="search-suggestions"
+              role="listbox"
+              aria-label={t('search.suggestions')}
+              className="mt-2 max-h-[46vh] overflow-y-auto pb-2"
+            >
               {loading && results.length === 0 ? (
                 <li className="px-5 py-3 text-sm text-muted">{t('common.loading')}</li>
               ) : results.length === 0 ? (
                 <li className="px-5 py-3 text-sm text-muted">{t('search.noResults')}</li>
               ) : (
-                results.map((p) => (
-                  <li key={p.slug}>
+                results.map((p, index) => (
+                  <li key={p.slug} role="presentation">
                     <button
                       type="button"
+                      id={`search-suggestion-${index}`}
+                      role="option"
+                      aria-selected={active === index}
+                      onMouseEnter={() => setActive(index)}
                       onClick={() => openProduct(p.slug)}
-                      className="flex w-full items-center gap-3 px-5 py-2.5 text-start transition-colors hover:bg-surface-2"
+                      className={cn(
+                        'flex w-full items-center gap-3 px-5 py-2.5 text-start transition-colors hover:bg-surface-2',
+                        active === index && 'bg-surface-2',
+                      )}
                     >
                       <span className="relative h-10 w-10 flex-none overflow-hidden rounded-md bg-surface-2">
                         {p.thumbnail ? (

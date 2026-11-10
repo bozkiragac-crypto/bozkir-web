@@ -7,6 +7,7 @@ import { useFavorites, type ProductRef } from '@/components/providers/FavoritesP
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { useToast } from '@/components/ui/ToastProvider';
 import { track } from '@/lib/analytics';
+import { fetchProductBatch } from '@/lib/api/product-batch';
 
 /** URL'deki `?liste=slug,slug` ürünlerini çekip hedef listeye aktarır; sonra parametreyi temizler. */
 export function useImportFromUrl(target: 'favorites' | 'compare'): { imported: number; ready: boolean } {
@@ -28,16 +29,9 @@ export function useImportFromUrl(target: 'favorites' | 'compare'): { imported: n
     const slugs = [...new Set(raw.split(',').map((s) => s.trim()).filter(Boolean))].slice(0, 24);
     if (slugs.length === 0) return;
 
-    Promise.all(
-      slugs.map((slug) =>
-        fetch(`/api/product?slug=${encodeURIComponent(slug)}&locale=${locale}`)
-          .then((r) => (r.ok ? r.json() : null))
-          .catch(() => null),
-      ),
-    ).then((results) => {
+    fetchProductBatch(slugs, locale).then((results) => {
       const refs: ProductRef[] = [];
       for (const p of results) {
-        if (!p || typeof p.slug !== 'string') continue;
         refs.push({
           id: p.id,
           slug: p.slug,
@@ -65,7 +59,7 @@ export function useImportFromUrl(target: 'favorites' | 'compare'): { imported: n
 
 /** Liste paylaşımı: `?liste=slug,...` bağlantısını kopyalar / yerel paylaşır. */
 export function ShareListButton({ slugs }: { slugs: string[] }) {
-  const { t, dict, locale } = useDictionary();
+  const { t, dict } = useDictionary();
   const pathname = usePathname();
   const toast = useToast();
   const [copied, setCopied] = useState(false);
@@ -78,7 +72,8 @@ export function ShareListButton({ slugs }: { slugs: string[] }) {
   const buildUrl = () => {
     const sp = new URLSearchParams();
     if (slugs.length) sp.set('liste', slugs.join(','));
-    return `${window.location.origin}/${locale}${pathname}${sp.toString() ? `?${sp.toString()}` : ''}`;
+    // `usePathname()` dil önekini içerir (/tr/favoriler); burada tekrar eklenmez.
+    return `${window.location.origin}${pathname}${sp.toString() ? `?${sp.toString()}` : ''}`;
   };
 
   async function share() {

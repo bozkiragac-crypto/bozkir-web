@@ -132,7 +132,7 @@ export function Panel3D() {
         )}
         <span
           title={h.hint}
-          className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1.5 text-[0.75rem] tracking-[0.14em] text-muted uppercase backdrop-blur"
+          className="pointer-events-none absolute bottom-4 start-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1.5 text-[0.75rem] tracking-[0.14em] text-muted uppercase backdrop-blur"
         >
           <RotateCcw className="h-3.5 w-3.5" aria-hidden />
           <span className="hidden sm:inline">{h.hint}</span>

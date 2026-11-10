@@ -1,6 +1,6 @@
 /**
  * Ana sayfa ölçümü: bölüm sayısı, toplam yükseklik, yatay taşma, H2 ve bölüm id'leri.
- * Kullanım: node scripts/measure-home.mjs [--base http://localhost:3000] [--width 390]
+ * Kullanım: node scripts/measure-home.mjs [--base http://localhost:3000] [--width 390] [--theme light|dark]
  */
 import { chromium } from 'playwright';
 
@@ -14,12 +14,26 @@ const base = arg('base', 'http://localhost:3000').replace(/\/$/, '');
 const only = arg('width', null);
 const widths = only ? [Number(only)] : [390, 768, 1440];
 const path = arg('path', '/tr');
+const theme = arg('theme', null);
 
 const browser = await chromium.launch();
 const out = [];
 
 for (const width of widths) {
-  const page = await browser.newPage({ viewport: { width, height: 900 } });
+  const context = await browser.newContext({
+    viewport: { width, height: 900 },
+    colorScheme: theme === 'dark' ? 'dark' : theme === 'light' ? 'light' : undefined,
+  });
+  if (theme) {
+    await context.addInitScript((t) => {
+      try {
+        localStorage.setItem('theme', t);
+      } catch {
+        // yok say
+      }
+    }, theme);
+  }
+  const page = await context.newPage();
   const consoleErrors = [];
   page.on('console', (msg) => {
     if (msg.type() === 'error') consoleErrors.push(msg.text().slice(0, 200));

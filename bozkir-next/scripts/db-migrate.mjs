@@ -23,6 +23,12 @@ const statements = [
   // products.is_active
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE`,
 
+  // ürün son güncelleme zamanı (sitemap lastModified)
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ`,
+  `UPDATE products SET updated_at = created_at WHERE updated_at IS NULL`,
+  `ALTER TABLE products ALTER COLUMN updated_at SET DEFAULT now()`,
+  `ALTER TABLE products ALTER COLUMN updated_at SET NOT NULL`,
+
   // ürün bazlı WhatsApp mesajı (boşsa genel şablon)
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS whatsapp_message TEXT`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS whatsapp_message_en TEXT`,

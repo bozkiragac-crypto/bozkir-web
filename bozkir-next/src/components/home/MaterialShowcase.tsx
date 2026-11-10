@@ -18,13 +18,11 @@ export function MaterialShowcase({
   eyebrow,
   title,
   body,
-  chapter,
 }: {
   items: ShowcaseItem[];
   eyebrow?: string;
   title: string;
   body?: string;
-  chapter?: number;
 }) {
   const { t } = useDictionary();
   const [filter, setFilter] = useState('');
@@ -35,9 +33,7 @@ export function MaterialShowcase({
   return (
     <>
       <Container>
-        {chapter ? (
-          <ChapterMark index={chapter} total={14} label={t('home.block.showcase')} className="mb-5" />
-        ) : null}
+        <ChapterMark label={t('home.block.showcase')} className="mb-5" />
         <SectionHeading
           eyebrow={eyebrow}
           title={title}

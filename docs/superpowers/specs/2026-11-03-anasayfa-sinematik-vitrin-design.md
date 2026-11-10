@@ -4,7 +4,7 @@
 - Durum: **Taslak — onay bekliyor**
 - Kapsam: `bozkir-next` ana sayfası (`src/app/[locale]/(site)/page.tsx`)
 - Yön: A (Sinematik Sahne) + C (Vitrin + Teknik Ray) melezi
-- Onaylanan kısıtlar: mevcut görseller yeterli · GSAP kalır · admin düzenlenebilirliği korunur · SEO ve URL yapısı bozulmaz · karanlık tema yalnızca ana sayfada
+- Onaylanan kısıtlar: mevcut görseller yeterli · GSAP kalır · admin düzenlenebilirliği korunur · SEO ve URL yapısı bozulmaz · ana sayfa kullanıcının açık/koyu tema tercihine uyar
 
 ---
 
@@ -41,22 +41,22 @@ karanlık, sinematik bir "showroom" olarak yeniden kurmak. İçerik kaybı olmad
 
 ## 2. Tasarım dili
 
-### 2.1 Karanlık kapsamı
+### 2.1 Tema kapsamı
 
-Ana sayfa `data-night` özniteliğiyle sarılır. `globals.css` içindeki mevcut koyu tema
-token bloğu paylaşılır:
+Ana sayfa, kullanıcının tema tercihine uyar (`<html data-theme="light|dark">`).
+`globals.css` içindeki mevcut koyu tema token bloğu tek kaynak olarak kullanılır:
 
 ```css
-/* önce: [data-theme='dark'] { ... } */
-[data-theme='dark'],
-[data-night] { ... }   /* aynı değişken seti */
+[data-theme='dark'] { ... }
 ```
 
 Böylece:
 
 - Renk paleti **tek yerden** yönetilir (kopya token yok).
-- Site geneli açık kalır; kullanıcı teması `data-theme` ile ayrıca çalışmaya devam eder.
-- Ana sayfa, kullanıcı "açık tema" seçse bile sinematik karanlık kalır (bilinçli marka kararı).
+- Açık temada ana sayfa ferah/editoryal, koyu temada sinematik "showroom" görünür.
+- Header, hero üzerinde her iki temada da beyaz metin kullanır; sayfa kaydırıldığında
+  aktif temanın yüzey/metin renklerine döner.
+- Tema tercihi `localStorage` ile kalıcıdır; kayıt yoksa işletim sistemi teması izlenir.
 
 Kullanılan değerler (mevcut koyu tema):
 

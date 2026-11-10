@@ -29,7 +29,7 @@
     padding-block: clamp(3rem, 6vw, 5rem);
   }
 
-  /* Sinematik "bölüm" işareti: 01 / 14 — MALZEME */
+  /* Sinematik "bölüm" işareti: — MALZEME */
   .chapter-mark {
     font-variant-numeric: tabular-nums;
     font-size: 0.75rem;
@@ -133,9 +133,8 @@ html[data-compare='1'] [data-product-cta] {
   direction: rtl;
 }
 
-/* Ana sayfa "data-night" ile kapsanmış koyu tema kullanır; token seti ortaktır. */
-[data-theme='dark'],
-[data-night] {
+/* Koyu tema: kullanıcı tercihi `<html data-theme="dark">` üzerinden uygulanır. */
+[data-theme='dark'] {
   color-scheme: dark;
   --bg: #0e0e10;
   --surface: #16161a;
@@ -153,8 +152,7 @@ html[data-compare='1'] [data-product-cta] {
   --grain-opacity: 0.06;
   --scrollbar-thumb: #3a3a42;
 
-  /* Tailwind @theme alias'ları kök elemandaki değeri miras aldığı için,
-     kapsanmış (scoped) koyu temada burada yeniden bağlanır. */
+  /* Tailwind @theme alias'larını koyu tema değerlerine bağlar. */
   --color-background: var(--bg);
   --color-foreground: var(--fg);
   --color-muted: var(--muted);

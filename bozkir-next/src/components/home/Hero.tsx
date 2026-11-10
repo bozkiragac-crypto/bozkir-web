@@ -106,7 +106,7 @@ export function Hero({ image }: { image?: string }) {
       <div className="container-x relative flex min-h-svh flex-col justify-end pb-20 pt-[var(--header-height)] md:pb-32">
         <div data-hero-copy className="max-w-4xl">
           <div data-hero-item>
-            <ChapterMark index={1} total={14} label={t('home.hero.eyebrow')} className="text-white/60" />
+            <ChapterMark label={t('home.hero.eyebrow')} className="text-white/60" />
           </div>
           <h1 data-hero-item className="text-hero mt-8 text-white">
             {t('home.hero.titleLead')}{' '}

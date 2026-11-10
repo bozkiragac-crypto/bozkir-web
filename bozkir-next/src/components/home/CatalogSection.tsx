@@ -20,7 +20,7 @@ function Cover({ catalog, placeholder }: { catalog: Catalog; placeholder: string
           <span className="text-xs tracking-[0.16em] uppercase">{placeholder}</span>
         </div>
       )}
-      <span className="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-[0.75rem] tracking-[0.16em] text-white uppercase">
+      <span className="absolute start-4 top-4 rounded-full bg-black/70 px-3 py-1 text-[0.75rem] tracking-[0.16em] text-white uppercase">
         PDF
       </span>
     </div>
@@ -38,7 +38,7 @@ export async function CatalogSection({ locale }: { locale: Locale }) {
 
   return (
     <Container id="katalog" className="pad-compact">
-      <ChapterMark index={9} total={14} label={h.eyebrow} className="mb-6" />
+      <ChapterMark label={h.eyebrow} className="mb-6" />
       {featured && (
         <Reveal>
           <div className="grid items-center gap-12 rounded-xl border border-border bg-surface p-8 md:grid-cols-[1fr_1.2fr] md:p-14">

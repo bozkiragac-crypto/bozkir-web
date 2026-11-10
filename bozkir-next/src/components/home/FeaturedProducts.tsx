@@ -31,7 +31,7 @@ export async function FeaturedProducts({ locale }: { locale: Locale }) {
 
   return (
     <Container id="urunler" className="pad-band">
-      <ChapterMark index={4} total={14} label={h.eyebrow} className="mb-5" />
+      <ChapterMark label={h.eyebrow} className="mb-5" />
       <SectionHeading
         title={h.title}
         body={h.body}

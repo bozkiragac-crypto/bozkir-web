@@ -57,7 +57,7 @@ export default async function CookiePage({ params }: PageProps) {
         <LegalSection key={section.title} title={section.title}>
           {i === 1 ? (
             <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[560px] text-left text-sm">
+              <table className="w-full min-w-[560px] text-start text-sm">
                 <thead className="bg-surface text-foreground">
                   <tr>
                     <th className="p-4 font-medium">{ck.tableHead.type}</th>

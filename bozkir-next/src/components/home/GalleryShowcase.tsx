@@ -98,7 +98,7 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
               type="button"
               onClick={() => setLightbox(i)}
               aria-label={t('home.gallery.expand')}
-              className="absolute right-2.5 top-2.5 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white opacity-100 backdrop-blur-sm transition hover:bg-black/50 md:opacity-0 md:group-focus-visible:opacity-100 md:group-hover:opacity-100"
+              className="absolute end-2.5 top-2.5 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white opacity-100 backdrop-blur-sm transition hover:bg-black/50 md:opacity-0 md:group-focus-visible:opacity-100 md:group-hover:opacity-100"
             >
               <Expand className="h-4 w-4" />
             </button>

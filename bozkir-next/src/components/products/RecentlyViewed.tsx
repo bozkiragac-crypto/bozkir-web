@@ -8,6 +8,7 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ChapterMark } from '@/components/ui/ChapterMark';
+import { fetchProductBatch } from '@/lib/api/product-batch';
 
 /** "Son görüntülenen" şeridi — en fazla 4 ürün, tam kart olarak. */
 export function RecentlyViewed({ excludeSlug }: { excludeSlug?: string }) {
@@ -25,15 +26,9 @@ export function RecentlyViewed({ excludeSlug }: { excludeSlug?: string }) {
       return;
     }
     let cancelled = false;
-    Promise.all(
-      slugs.map((s) =>
-        fetch(`/api/product?slug=${encodeURIComponent(s)}&locale=${locale}`)
-          .then((r) => (r.ok ? r.json() : null))
-          .catch(() => null),
-      ),
-    ).then((res) => {
+    fetchProductBatch(slugs, locale).then((res) => {
       if (cancelled) return;
-      setProducts(res.filter((p): p is Product => !!p && typeof p.slug === 'string'));
+      setProducts(res);
     });
     return () => {
       cancelled = true;
@@ -44,7 +39,7 @@ export function RecentlyViewed({ excludeSlug }: { excludeSlug?: string }) {
 
   return (
     <Container id="son-bakilanlar" className="pad-compact">
-      <ChapterMark index={13} total={14} label={t('product.recent')} className="mb-5" />
+      <ChapterMark label={t('product.recent')} className="mb-5" />
       <SectionHeading eyebrow={t('product.recent')} title={t('product.recentTitle')} />
       <div className="mt-10 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
         {products.map((p) => (

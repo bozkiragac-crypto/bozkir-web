@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f7f5" />
+    <title>Bağlantı yok — Bozkır Ağaç</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f7f5;
+        --fg: #1b1b1b;
+        --muted: #6b6b66;
+        --line: #dedcd4;
+        --accent: #b3a98f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: calc(env(safe-area-inset-top) + 24px) 24px
+          calc(env(safe-area-inset-bottom) + 24px);
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        text-align: center;
+      }
+      main {
+        max-width: 22rem;
+      }
+      .mark {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 24px;
+        object-fit: contain;
+      }
+      .eyebrow {
+        margin: 0 0 12px;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 24px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 0 0 8px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+      .en {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+      }
+      button {
+        margin-top: 24px;
+        min-height: 48px;
+        padding: 0 28px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--fg);
+        color: var(--bg);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img class="mark" src="/icon-192.png" alt="" width="64" height="64" />
+      <p class="eyebrow">Bozkır Ağaç</p>
+      <h1>Bağlantı yok</h1>
+      <p>İnternet bağlantınızı kontrol edip yeniden deneyin.</p>
+      <p class="en">No connection. Check your internet and try again.</p>
+      <button type="button" onclick="location.reload()">Yeniden dene</button>
+    </main>
+  </body>
+</html>

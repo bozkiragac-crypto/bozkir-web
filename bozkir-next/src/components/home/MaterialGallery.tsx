@@ -119,7 +119,6 @@ export async function MaterialGallery({ block, locale }: { block: ContentBlock; 
         eyebrow={block.subtitle || h.showcase}
         title={block.title}
         body={block.body}
-        chapter={5}
       />
 
       <script

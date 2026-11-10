@@ -9,6 +9,8 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ShareListButton, useImportFromUrl } from '@/components/products/ListImport';
+import { PrintButton } from '@/components/products/PrintButton';
+import { fetchProductBatch } from '@/lib/api/product-batch';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types/product';
@@ -17,23 +19,21 @@ export function CompareView() {
   const { compare, ready, removeCompare, clearCompare, favorites, toggleCompare } = useFavorites();
   const { t, locale } = useDictionary();
   const [details, setDetails] = useState<Record<string, Product>>({});
+  const [onlyDiff, setOnlyDiff] = useState(false);
   const { imported } = useImportFromUrl('compare');
 
   useEffect(() => {
     let cancelled = false;
     const missing = compare.filter((c) => !details[c.slug]);
     if (missing.length === 0) return;
-    Promise.all(
-      missing.map((c) =>
-        fetch(`/api/product?slug=${encodeURIComponent(c.slug)}&locale=${locale}`)
-          .then((r) => (r.ok ? r.json() : null))
-          .catch(() => null),
-      ),
+    fetchProductBatch(
+      missing.map((c) => c.slug),
+      locale,
     ).then((results) => {
-      if (cancelled) return;
+      if (cancelled || results.length === 0) return;
       setDetails((prev) => {
         const next = { ...prev };
-        for (const p of results) if (p && typeof p.slug === 'string') next[p.slug] = p as Product;
+        for (const p of results) next[p.slug] = p;
         return next;
       });
     });
@@ -70,18 +70,19 @@ export function CompareView() {
     },
   ];
   const differing = new Set(rows.filter((r) => new Set(r.values).size > 1).map((r) => r.label));
+  const visibleRows = onlyDiff ? rows.filter((r) => differing.has(r.label)) : rows;
 
   return (
-    <>
+    <div data-print-page>
       <PageHero
         eyebrow={t('compare.title')}
         title={t('compare.title')}
         description={t('compare.description')}
         crumbs={[{ label: t('common.home'), href: '/' }, { label: t('compare.title') }]}
       />
-      <Container className="pb-28">
+      <Container data-print-area className="pb-28 print:pb-0">
         {imported > 0 && (
-          <p className="mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">
+          <p className="no-print mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">
             {t('favorites.imported')}
           </p>
         )}
@@ -101,11 +102,32 @@ export function CompareView() {
           </div>
         ) : (
           <>
-            <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-              <p className="numerals text-sm text-muted-strong">
-                {items.length}/4 {t('compare.counter')} {items.length < 2 && t('compare.minTwo')}
-              </p>
+            <div className="no-print mt-10 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="numerals text-sm text-muted-strong">
+                  {items.length}/4 {t('compare.counter')} {items.length < 2 && t('compare.minTwo')}
+                </p>
+                {items.length > 1 && differing.size > 0 && (
+                  <button
+                    type="button"
+                    aria-pressed={onlyDiff}
+                    onClick={() => setOnlyDiff((value) => !value)}
+                    className={cn(
+                      'inline-flex h-9 items-center gap-2 rounded-full border px-4 text-sm transition',
+                      onlyDiff
+                        ? 'border-transparent bg-foreground text-background'
+                        : 'border-border text-muted-strong hover:border-foreground hover:text-foreground',
+                    )}
+                  >
+                    {onlyDiff ? t('compare.showAll') : t('compare.onlyDiff')}
+                    <span className="numerals text-xs opacity-80">
+                      {t('compare.diffCount').replace('{count}', String(differing.size))}
+                    </span>
+                  </button>
+                )}
+              </div>
               <div className="flex flex-wrap gap-3">
+                <PrintButton />
                 <ShareListButton slugs={compare.map((c) => c.slug)} />
                 <button
                   type="button"
@@ -130,8 +152,8 @@ export function CompareView() {
             </div>
 
             {/* Mobil: kart yığını */}
-            <div className="mt-8 grid gap-5 md:hidden">
-              {items.map(({ ref, product }) => {
+            <div className="no-print mt-8 grid gap-5 md:hidden">
+              {items.map(({ ref, product }, productIndex) => {
                 const src = product?.thumbnail ?? product?.images?.[0] ?? ref.image;
                 return (
                   <div key={ref.slug} className="rounded-xl border border-border bg-surface p-5">
@@ -170,8 +192,8 @@ export function CompareView() {
                       </div>
                     </div>
                     <dl className="mt-4 divide-y divide-border border-t border-border">
-                      {rows.map((row, i) => {
-                        const value = row.values[i] ?? '—';
+                      {visibleRows.map((row) => {
+                        const value = row.values[productIndex] ?? '—';
                         const hi = differing.has(row.label);
                         return (
                           <div
@@ -214,8 +236,8 @@ export function CompareView() {
             </div>
 
             {/* Karşılaştırma tablosu (masaüstü) */}
-            <div className="mt-8 hidden overflow-x-auto pb-4 md:block">
-              <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+            <div className="mt-8 hidden overflow-x-auto pb-4 md:block print:block">
+              <table className="w-full min-w-[640px] border-collapse text-start text-sm">
                 <caption className="sr-only">{t('compare.title')}</caption>
                 <thead>
                   <tr>
@@ -264,7 +286,7 @@ export function CompareView() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {rows.map((row) => {
+                  {visibleRows.map((row) => {
                     const highlight = new Set(row.values).size > 1;
                     return (
                       <tr key={row.label}>
@@ -319,7 +341,7 @@ export function CompareView() {
 
             {/* Favorilerden hızlı ekleme */}
             {favorites.length > 0 && (
-              <div className="mt-10">
+              <div className="no-print mt-10">
                 <h2 className="text-lg font-medium tracking-tight">
                   {t('compare.addFromFavorites')}
                 </h2>
@@ -349,6 +371,6 @@ export function CompareView() {
           </>
         )}
       </Container>
-    </>
+    </div>
   );
 }

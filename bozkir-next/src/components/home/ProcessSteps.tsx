@@ -25,8 +25,6 @@ export async function ProcessSteps({ block, locale }: { block: ContentBlock; loc
         <Reveal>
           <div className="max-w-2xl">
             <ChapterMark
-              index={8}
-              total={14}
               label={block.subtitle || dict.home.block.process}
               className="mb-4 text-background/70"
             />

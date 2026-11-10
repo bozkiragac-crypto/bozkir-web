@@ -46,7 +46,7 @@ export async function UsageAndGuide({
   return (
     <section id="uygulama" className="pad-band border-y border-border bg-surface/40">
       <Container>
-        <ChapterMark index={6} total={14} label={h.applications} className="mb-5" />
+        <ChapterMark label={h.applications} className="mb-5" />
         <SectionHeading title={headingTitle} body={headingBody} />
         <UsageTabs items={tabs} ariaLabel={headingTitle}>
           {panels}

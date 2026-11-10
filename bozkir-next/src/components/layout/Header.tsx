@@ -15,6 +15,7 @@ import { SearchDialog } from './SearchDialog';
 import { ThemeToggle } from './ThemeToggle';
 import { WishNav } from './WishNav';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { useActiveTheme } from './useActiveTheme';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 interface HeaderProps {
@@ -118,21 +119,20 @@ export function Header({
     [],
   );
 
-  // Ana sayfa baştan sona karanlık (data-night); header orada her zaman beyaz metin.
-  const onDark = isHome;
-  const nightHome = isHome;
+  // Koyu temada header her zaman koyu; ana sayfada ayrıca hero üzerindeyken
+  // (sayfa kaydırılmamışken) hero görseli nedeniyle beyaz metin kullanılır.
+  const theme = useActiveTheme();
+  const dark = theme === 'dark';
+  const onDark = dark || (isHome && !scrolled && !megaOpen);
 
   return (
     <>
       <header
         data-on-dark={onDark ? '' : undefined}
-        data-night={nightHome ? '' : undefined}
         className={cn(
           'fixed inset-x-0 top-0 z-[80] transition-[background-color,border-color,backdrop-filter] duration-300 ease-[var(--ease-out-expo)]',
           scrolled || megaOpen
-            ? nightHome
-              ? 'border-b border-white/10 bg-[#0e0e10]/85 backdrop-blur-xl'
-              : 'border-b border-border bg-background/95 lg:bg-background/80 lg:backdrop-blur-xl'
+            ? 'border-b border-border bg-background/95 backdrop-blur-xl lg:bg-background/85'
             : 'border-b border-transparent bg-transparent',
         )}
         style={{ height: 'var(--header-height)' }}

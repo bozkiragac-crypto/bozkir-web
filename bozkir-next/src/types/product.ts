@@ -25,6 +25,8 @@ export interface Product {
   brand?: string;
   featured?: boolean;
   sortOrder?: number;
+  /** Son güncelleme (ISO); sitemap `lastModified` için. */
+  updatedAt?: string;
   /** Admin'den düzenlenebilir SEO başlığı/açıklaması (boşsa otomatik üretilir). */
   seoTitle?: string;
   seoDescription?: string;
