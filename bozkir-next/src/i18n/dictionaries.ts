@@ -126,6 +126,10 @@ export const dictionaries = {
       viewAR: "AR'da gör",
       arStart: "AR'ı başlat",
       print: 'Yazdır',
+      sampleRequest: 'Numune iste',
+      sampleMessage:
+        'Merhaba, {product} için numune talep etmek istiyorum. Yardımcı olabilir misiniz?',
+      compatible: 'Uyumlu ürünler',
       arError:
         'AR başlatılamadı. Cihazınızın AR desteklediğinden ve HTTPS kullandığınızdan emin olun.',
       notFound: 'Ürün bulunamadı | Bozkır Ağaç Ürünleri',
@@ -821,6 +825,10 @@ export const dictionaries = {
       viewAR: 'View in AR',
       arStart: 'Start AR',
       print: 'Print',
+      sampleRequest: 'Request a sample',
+      sampleMessage:
+        'Hello, I would like to request a sample of {product}. Could you help me?',
+      compatible: 'Compatible products',
       arError:
         'Could not start AR. Make sure your device supports AR and you are on a secure (HTTPS) connection.',
       notFound: 'Product not found | Bozkır Wood Products',
@@ -1516,6 +1524,9 @@ export const dictionaries = {
       viewAR: 'اعرض بالواقع المعزز',
       arStart: 'ابدأ الواقع المعزز',
       print: 'طباعة',
+      sampleRequest: 'اطلب عينة',
+      sampleMessage: 'مرحبًا، أرغب في طلب عينة من {product}. هل يمكنكم مساعدتي؟',
+      compatible: 'منتجات متوافقة',
       arError: 'تعذّر بدء الواقع المعزز. تأكد من دعم جهازك واستخدامك لاتصال HTTPS.',
       notFound: 'المنتج غير موجود | منتجات بوزكير الخشبية',
     },

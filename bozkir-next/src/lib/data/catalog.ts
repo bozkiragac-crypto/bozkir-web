@@ -40,6 +40,44 @@ export function parseImageList(raw: unknown): string[] {
     .filter(Boolean);
 }
 
+/** JSONB teknik özellik satırlarını güvenli biçimde normalize eder. */
+export function parseSpecList(raw: unknown): { label: string; value: string }[] {
+  let value = raw;
+  if (typeof raw === 'string') {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => ({
+      label: String((item as { label?: unknown })?.label ?? '').trim(),
+      value: String((item as { value?: unknown })?.value ?? '').trim(),
+    }))
+    .filter((item) => item.label && item.value);
+}
+
+/** JSONB doküman listesini güvenli biçimde normalize eder. */
+export function parseDocList(raw: unknown): { title: string; url: string }[] {
+  let value = raw;
+  if (typeof raw === 'string') {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => ({
+      title: String((item as { title?: unknown })?.title ?? '').trim(),
+      url: String((item as { url?: unknown })?.url ?? '').trim(),
+    }))
+    .filter((item) => item.title && item.url);
+}
+
 interface IndexItem {
   id: string;
   slug: string;
@@ -50,6 +88,14 @@ interface IndexItem {
   face: string;
   colors: string[];
   thicknesses: string[];
+  dimensions: string;
+  applications: string[];
+  shortDescription: string;
+  description: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  technicalSpecs: { label: string; value: string }[];
+  documents: { title: string; url: string }[];
   createdAt: string;
   /** Son güncelleme (ISO); sitemap `lastModified` için kullanılır. */
   updatedAt: string;
@@ -74,6 +120,14 @@ interface RawRow {
   face: string | null;
   colors?: string | null;
   thicknesses?: string | null;
+  dimensions?: string | null;
+  applications?: string | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  descriptionEn?: string | null;
+  descriptionAr?: string | null;
+  technicalSpecs?: unknown;
+  documents?: unknown;
   img: string | null;
   createdAt: Date | string | null;
   updatedAt?: Date | string | null;
@@ -124,6 +178,14 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       face: String(row.face ?? '').trim(),
       colors: parseImageList(row.colors),
       thicknesses: parseImageList(row.thicknesses),
+      dimensions: String(row.dimensions ?? '').trim(),
+      applications: parseImageList(row.applications),
+      shortDescription: String(row.shortDescription ?? '').trim(),
+      description: String(row.description ?? '').trim(),
+      descriptionEn: String(row.descriptionEn ?? '').trim(),
+      descriptionAr: String(row.descriptionAr ?? '').trim(),
+      technicalSpecs: parseSpecList(row.technicalSpecs),
+      documents: parseDocList(row.documents),
       createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : '',
       updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : '',
       images: parseImageList(row.img),
@@ -182,6 +244,13 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
     face: item.face,
     colors: item.colors,
     thicknesses: item.thicknesses,
+    dimensions: item.dimensions || undefined,
+    applications: item.applications,
+    shortDescription: item.shortDescription || undefined,
+    description:
+      pickLocaleText(item.description, locale, item.descriptionEn, item.descriptionAr) || undefined,
+    technicalSpecs: item.technicalSpecs.length > 0 ? item.technicalSpecs : undefined,
+    documents: item.documents.length > 0 ? item.documents : undefined,
     images,
     thumbnail: images[0],
     seoTitle: item.seoTitle || undefined,

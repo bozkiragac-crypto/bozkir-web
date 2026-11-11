@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { saveProduct } from '@/lib/admin/safe-actions';
 import { useToast } from '@/components/ui/ToastProvider';
 import { ImageManager } from './ImageManager';
@@ -17,6 +17,14 @@ interface ProductFormProps {
     face: string;
     colors?: string | null;
     thicknesses?: string | null;
+    dimensions?: string | null;
+    applications?: string | null;
+    shortDescription?: string | null;
+    description?: string | null;
+    descriptionEn?: string | null;
+    descriptionAr?: string | null;
+    technicalSpecs?: { label: string; value: string }[] | null;
+    documents?: { title: string; url: string }[] | null;
     images: string[];
     nameEn?: string | null;
     nameAr?: string | null;
@@ -45,6 +53,18 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
   const [face, setFace] = useState(initial?.face ?? '');
   const [colors, setColors] = useState(initial?.colors ?? '');
   const [thicknesses, setThicknesses] = useState(initial?.thicknesses ?? '');
+  const [dimensions, setDimensions] = useState(initial?.dimensions ?? '');
+  const [applications, setApplications] = useState(initial?.applications ?? '');
+  const [shortDescription, setShortDescription] = useState(initial?.shortDescription ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [descriptionEn, setDescriptionEn] = useState(initial?.descriptionEn ?? '');
+  const [descriptionAr, setDescriptionAr] = useState(initial?.descriptionAr ?? '');
+  const [technicalSpecs, setTechnicalSpecs] = useState<{ label: string; value: string }[]>(
+    initial?.technicalSpecs ?? [],
+  );
+  const [documents, setDocuments] = useState<{ title: string; url: string }[]>(
+    initial?.documents ?? [],
+  );
   const [nameEn, setNameEn] = useState(initial?.nameEn ?? '');
   const [nameAr, setNameAr] = useState(initial?.nameAr ?? '');
   const [catEn, setCatEn] = useState(initial?.catEn ?? '');
@@ -71,6 +91,14 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       face,
       colors,
       thicknesses,
+      dimensions,
+      applications,
+      shortDescription,
+      description,
+      descriptionEn,
+      descriptionAr,
+      technicalSpecs,
+      documents,
       images,
       nameEn,
       nameAr,
@@ -96,6 +124,14 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       setFace('');
       setColors('');
       setThicknesses('');
+      setDimensions('');
+      setApplications('');
+      setShortDescription('');
+      setDescription('');
+      setDescriptionEn('');
+      setDescriptionAr('');
+      setTechnicalSpecs([]);
+      setDocuments([]);
       setWhatsappMessage('');
       setWhatsappMessageEn('');
       setWhatsappMessageAr('');
@@ -173,6 +209,24 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
             placeholder="8, 10, 18"
           />
         </label>
+        <label className="grid gap-2">
+          <span className={label}>Ölçü</span>
+          <input
+            value={dimensions}
+            onChange={(e) => setDimensions(e.target.value)}
+            className={field}
+            placeholder="2800 × 2100 mm"
+          />
+        </label>
+        <label className="grid gap-2 sm:col-span-2">
+          <span className={label}>Uygulama Alanları (virgülle)</span>
+          <input
+            value={applications}
+            onChange={(e) => setApplications(e.target.value)}
+            className={field}
+            placeholder="Mutfak dolabı, banyo mobilyası, ofis mobilyası"
+          />
+        </label>
       </div>
 
       <ImageManager
@@ -182,6 +236,119 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         ownerId={initial?.id}
         label="Ürün Görselleri"
       />
+
+      <fieldset className="grid gap-5 rounded-md border border-border p-5">
+        <legend className={`px-2 ${label}`}>Ürün açıklaması ve teknik bilgiler</legend>
+        <label className="grid gap-2">
+          <span className={label}>Kısa açıklama (kart ve liste)</span>
+          <input
+            value={shortDescription}
+            onChange={(e) => setShortDescription(e.target.value)}
+            className={field}
+            placeholder="Örn: Mat yüzeyli, çizilmeye dayanıklı MDF lam panel."
+          />
+        </label>
+        <label className="grid gap-2">
+          <span className={label}>Detay açıklaması</span>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={5}
+            className={area}
+            placeholder="Ürünün kullanımı, yüzeyi ve tedarik koşulları hakkında açıklama."
+          />
+        </label>
+
+        <div className="grid gap-3">
+          <span className={label}>Teknik özellikler</span>
+          {technicalSpecs.map((spec, index) => (
+            <div key={index} className="flex flex-wrap items-center gap-2">
+              <input
+                value={spec.label}
+                onChange={(e) =>
+                  setTechnicalSpecs((prev) =>
+                    prev.map((s, i) => (i === index ? { ...s, label: e.target.value } : s)),
+                  )
+                }
+                className={`${field} flex-1`}
+                placeholder="Özellik (ör. Yoğunluk)"
+                aria-label={`Teknik özellik ${index + 1} adı`}
+              />
+              <input
+                value={spec.value}
+                onChange={(e) =>
+                  setTechnicalSpecs((prev) =>
+                    prev.map((s, i) => (i === index ? { ...s, value: e.target.value } : s)),
+                  )
+                }
+                className={`${field} flex-1`}
+                placeholder="Değer (ör. 720 kg/m³)"
+                aria-label={`Teknik özellik ${index + 1} değeri`}
+              />
+              <button
+                type="button"
+                onClick={() => setTechnicalSpecs((prev) => prev.filter((_, i) => i !== index))}
+                className="inline-flex h-12 w-12 flex-none items-center justify-center rounded-md border border-border text-muted-strong hover:bg-surface-2 hover:text-foreground"
+                aria-label="Teknik özelliği kaldır"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setTechnicalSpecs((prev) => [...prev, { label: '', value: '' }])}
+            className="inline-flex h-11 w-fit items-center gap-2 rounded-full border border-border px-4 text-sm hover:bg-surface-2"
+          >
+            <Plus className="h-4 w-4" /> Teknik özellik ekle
+          </button>
+        </div>
+
+        <div className="grid gap-3">
+          <span className={label}>Dokümanlar (teknik föy, katalog)</span>
+          {documents.map((doc, index) => (
+            <div key={index} className="flex flex-wrap items-center gap-2">
+              <input
+                value={doc.title}
+                onChange={(e) =>
+                  setDocuments((prev) =>
+                    prev.map((d, i) => (i === index ? { ...d, title: e.target.value } : d)),
+                  )
+                }
+                className={`${field} flex-1`}
+                placeholder="Başlık (ör. Teknik föy)"
+                aria-label={`Doküman ${index + 1} başlığı`}
+              />
+              <input
+                value={doc.url}
+                onChange={(e) =>
+                  setDocuments((prev) =>
+                    prev.map((d, i) => (i === index ? { ...d, url: e.target.value } : d)),
+                  )
+                }
+                className={`${field} flex-1`}
+                placeholder="PDF adresi (/media/... veya https://...)"
+                aria-label={`Doküman ${index + 1} adresi`}
+              />
+              <button
+                type="button"
+                onClick={() => setDocuments((prev) => prev.filter((_, i) => i !== index))}
+                className="inline-flex h-12 w-12 flex-none items-center justify-center rounded-md border border-border text-muted-strong hover:bg-surface-2 hover:text-foreground"
+                aria-label="Dokümanı kaldır"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setDocuments((prev) => [...prev, { title: '', url: '' }])}
+            className="inline-flex h-11 w-fit items-center gap-2 rounded-full border border-border px-4 text-sm hover:bg-surface-2"
+          >
+            <Plus className="h-4 w-4" /> Doküman ekle
+          </button>
+        </div>
+      </fieldset>
 
       <details className="group rounded-md border border-border p-5">
         <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium">
@@ -225,6 +392,27 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
                 onChange={(e) => setCatAr(e.target.value)}
                 className={field}
                 dir="rtl"
+              />
+            </label>
+            <label className="grid gap-2 sm:col-span-2">
+              <span className={label}>Açıklama (EN)</span>
+              <textarea
+                value={descriptionEn}
+                onChange={(e) => setDescriptionEn(e.target.value)}
+                rows={3}
+                className={area}
+                placeholder="Product description in English (optional)."
+              />
+            </label>
+            <label className="grid gap-2 sm:col-span-2">
+              <span className={label}>Açıklama (AR)</span>
+              <textarea
+                value={descriptionAr}
+                onChange={(e) => setDescriptionAr(e.target.value)}
+                rows={3}
+                className={area}
+                dir="rtl"
+                placeholder="وصف المنتج بالعربية (اختياري)."
               />
             </label>
           </fieldset>

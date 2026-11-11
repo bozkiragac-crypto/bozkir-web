@@ -19,7 +19,8 @@ export interface Product {
   face?: string;
   colors?: string[];
   thicknesses?: string[];
-  dimensions?: string[];
+  /** Plaka/ölçü bilgisi, ör. "2800 × 2100 mm". */
+  dimensions?: string;
   applications?: string[];
   documents?: { title: string; url: string }[];
   brand?: string;

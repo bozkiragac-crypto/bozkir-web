@@ -84,6 +84,16 @@ const statements = [
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS colors TEXT`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS thicknesses TEXT`,
 
+  // ürün açıklaması, ölçü, uygulama alanları, teknik föy ve dokümanlar
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS description TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS description_en TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS description_ar TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS dimensions TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS applications TEXT`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS technical_specs JSONB`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS documents JSONB`,
+
   // çok dilli kampanya metinleri
   `ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS title_en TEXT`,
   `ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS title_ar TEXT`,

@@ -47,7 +47,7 @@ export function CompareView() {
   const quoteHref = `/teklif-al?urunler=${compare.map((c) => encodeURIComponent(c.slug)).join(',')}`;
 
   // Fark vurgusu için satır değerleri (aynı olanlar soluk, farklılar öne çıkar).
-  const rows: { label: string; values: string[]; numerals?: boolean }[] = [
+  const baseRows: { label: string; values: string[]; numerals?: boolean }[] = [
     {
       label: t('compare.code'),
       values: items.map(({ ref, product }) => product?.code ?? ref.code ?? '—'),
@@ -62,6 +62,11 @@ export function CompareView() {
       values: items.map(({ ref, product }) => (product?.face ?? ref.face) || '—'),
     },
     {
+      label: t('product.dimensions'),
+      values: items.map(({ product }) => product?.dimensions?.trim() || '—'),
+      numerals: true,
+    },
+    {
       label: t('compare.thickness'),
       values: items.map(({ product }) =>
         product?.thicknesses?.length ? product.thicknesses.join(' · ') : '—',
@@ -69,6 +74,35 @@ export function CompareView() {
       numerals: true,
     },
   ];
+
+  // Admin'den girilen teknik özellikler: tüm ürünlerdeki etiketlerin birleşimi.
+  // Aynı etiket (TR büyük/küçük harf duyarsız) tek satırda gösterilir.
+  const seenLabels = new Set(baseRows.map((r) => r.label.trim().toLocaleLowerCase('tr')));
+  const specLabels: string[] = [];
+  for (const { product } of items) {
+    for (const spec of product?.technicalSpecs ?? []) {
+      const key = spec.label.trim().toLocaleLowerCase('tr');
+      if (!key || seenLabels.has(key)) continue;
+      seenLabels.add(key);
+      specLabels.push(spec.label.trim());
+    }
+  }
+  const specRows = specLabels.map((label) => ({
+    label,
+    values: items.map(({ product }) => {
+      const key = label.toLocaleLowerCase('tr');
+      const match = product?.technicalSpecs?.find(
+        (spec) => spec.label.trim().toLocaleLowerCase('tr') === key,
+      );
+      return match?.value ?? '—';
+    }),
+  }));
+
+  // Tamamen boş satırları (tüm ürünlerde "—") tabloya hiç koyma.
+  const rows: { label: string; values: string[]; numerals?: boolean }[] = [
+    ...baseRows,
+    ...specRows,
+  ].filter((row) => row.values.some((value) => value && value !== '—'));
   const differing = new Set(rows.filter((r) => new Set(r.values).size > 1).map((r) => r.label));
   const visibleRows = onlyDiff ? rows.filter((r) => differing.has(r.label)) : rows;
 

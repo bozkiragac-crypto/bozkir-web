@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { getAdjacentProducts, getProductBySlug, getRelatedProducts } from '@/lib/api/products';
+import { ArrowLeft, ArrowRight, FileText, Package } from 'lucide-react';
+import { getAdjacentProducts, getProductBySlug, getProducts, getRelatedProducts } from '@/lib/api/products';
 import { getSiteSettings } from '@/lib/data/settings';
 import { siteConfig } from '@/config/site';
 import { telHref } from '@/lib/phone';
@@ -30,6 +30,21 @@ import { cn } from '@/lib/utils';
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>;
 }
+
+/**
+ * Panel ↔ kenar bandı eşlemesi: ürün detayında "uyumlu ürünler" bölümünde
+ * gösterilecek kategori. Anahtar ürünün kategorisi, değer hedef kategori.
+ */
+const COMPATIBLE_CATEGORY: Record<string, string> = {
+  'pvc-kenar-bant': 'mdflam',
+  mdflam: 'pvc-kenar-bant',
+  'lak-panel': 'pvc-kenar-bant',
+  suntalam: 'pvc-kenar-bant',
+  sunta: 'pvc-kenar-bant',
+  mdf: 'pvc-kenar-bant',
+  'kaplamali-mdf': 'pvc-kenar-bant',
+  'kapi-panel': 'pvc-kenar-bant',
+};
 
 export const revalidate = 600;
 export const dynamicParams = true;
@@ -73,10 +88,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
   if (!product) notFound();
 
   const settings = siteConfig;
-  const [related, adjacent] = await Promise.all([
+  const compatibleCategory = COMPATIBLE_CATEGORY[product.categorySlug];
+  const [related, adjacent, compatibleResult] = await Promise.all([
     getRelatedProducts(product.slug, locale, 4),
     getAdjacentProducts(product, locale),
+    compatibleCategory
+      ? getProducts({ category: compatibleCategory, limit: 4 }, locale)
+      : Promise.resolve(null),
   ]);
+  const compatible =
+    compatibleResult?.items.filter((item) => item.slug !== product.slug).slice(0, 4) ?? [];
 
   const image = product.images[0] ?? product.thumbnail;
   const productUrl = localeUrl(locale, `/urunler/${product.slug}`);
@@ -89,6 +110,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const whatsappLink = whatsappHref(
     siteSettings.whatsapp || siteSettings.phone,
     whatsappMessage,
+    siteSettings.phone,
+  );
+  const sampleMessage = dict.product.sampleMessage.replace(
+    '{product}',
+    `${product.name}${product.code ? ` (${product.code})` : ''}`,
+  );
+  const sampleLink = whatsappHref(
+    siteSettings.whatsapp || siteSettings.phone,
+    sampleMessage,
     siteSettings.phone,
   );
 
@@ -107,6 +137,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     '@type': 'Product',
     name: product.name,
     description:
+      product.description ??
       product.shortDescription ??
       `${product.name}${product.code ? ` (${product.code})` : ''} · ${product.category}`,
     sku: product.code || undefined,
@@ -127,6 +158,27 @@ export default async function ProductDetailPage({ params }: PageProps) {
   if (product.code) specs.push({ label: dict.compare.code, value: product.code });
   specs.push({ label: dict.compare.category, value: product.category });
   if (product.face) specs.push({ label: dict.compare.surface, value: product.face });
+  if (product.dimensions) specs.push({ label: dict.product.dimensions, value: product.dimensions });
+
+  // Detay bölümü: hızlı özet + kalınlık/renk + admin'den girilen teknik özellikler.
+  // Aynı etiket iki kez görünmesin (ör. teknik özellik olarak "Kod" girilmişse).
+  const detailSpecs = [...specs];
+  if (product.thicknesses?.length) {
+    detailSpecs.push({ label: dict.compare.thickness, value: product.thicknesses.join(' · ') });
+  }
+  if (product.colors?.length) {
+    detailSpecs.push({ label: dict.product.colors, value: product.colors.join(' · ') });
+  }
+  const seen = new Set(detailSpecs.map((s) => s.label.trim().toLocaleLowerCase('tr')));
+  for (const spec of product.technicalSpecs ?? []) {
+    const key = spec.label.trim().toLocaleLowerCase('tr');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    detailSpecs.push(spec);
+  }
+  const extendedSpecs = detailSpecs.slice(specs.length);
+  const applications = product.applications ?? [];
+  const documents = product.documents ?? [];
 
   return (
     <div data-print-page>
@@ -182,6 +234,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <ProductGallery images={product.images} alt={product.name} />
 
             <div className="lg:sticky lg:top-[calc(var(--header-height)+2rem)] lg:self-start">
+              {product.shortDescription && (
+                <p className="mb-6 text-base leading-relaxed text-muted-strong">
+                  {product.shortDescription}
+                </p>
+              )}
               <dl className="border-t border-border">
                 {specs.map((spec) => (
                   <div
@@ -202,7 +259,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   <ButtonLink
                     href={`/teklif-al?urun=${encodeURIComponent(product.slug)}`}
                     size="lg"
-                    data-cursor-label={dict.common.getQuote}
                   >
                     {dict.common.getQuote}
                   </ButtonLink>
@@ -242,6 +298,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
+              {sampleLink && (
+                <a
+                  href={sampleLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="no-print mt-5 inline-flex items-center gap-2 text-sm font-medium text-muted-strong transition-colors hover:text-foreground"
+                >
+                  <Package className="h-4 w-4" /> {dict.product.sampleRequest}
+                </a>
+              )}
+
               <Link
                 href="/urunler"
                 className="tap-target no-print mt-8 inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground"
@@ -251,6 +318,86 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </div>
           </div>
         </Container>
+
+        {(product.description || extendedSpecs.length > 0 || applications.length > 0 || documents.length > 0) && (
+          <Container className="pb-16 md:pb-20 print:pb-0">
+            <div className="grid gap-10 border-t border-border pt-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+              <div className="grid content-start gap-10">
+                {product.description && (
+                  <section>
+                    <h2 className="text-section">{dict.product.description}</h2>
+                    <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-muted-strong">
+                      {product.description}
+                    </p>
+                  </section>
+                )}
+
+                {applications.length > 0 && (
+                  <section>
+                    <h2 className="text-sm tracking-[0.14em] text-muted uppercase">
+                      {dict.product.applications}
+                    </h2>
+                    <ul className="mt-4 flex flex-wrap gap-2">
+                      {applications.map((application) => (
+                        <li
+                          key={application}
+                          className="rounded-full border border-border bg-surface px-3 py-1 text-sm text-muted-strong"
+                        >
+                          {application}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </div>
+
+              <div className="grid content-start gap-10">
+                {extendedSpecs.length > 0 && (
+                  <section>
+                    <h2 className="text-section">{dict.product.technicalSpecs}</h2>
+                    <dl className="mt-4 border-t border-border">
+                      {extendedSpecs.map((spec) => (
+                        <div
+                          key={spec.label}
+                          className="-mx-3 flex justify-between gap-4 rounded-md border-b border-border px-3 py-3 text-sm transition-colors hover:bg-surface-2"
+                        >
+                          <dt className="flex-none text-muted-strong">{spec.label}</dt>
+                          <dd className="min-w-0 break-words text-end">{spec.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </section>
+                )}
+
+                {documents.length > 0 && (
+                  <section>
+                    <h2 className="text-sm tracking-[0.14em] text-muted uppercase">
+                      {dict.product.documents}
+                    </h2>
+                    <ul className="mt-4 grid gap-2">
+                      {documents.map((doc) => (
+                        <li key={`${doc.title}-${doc.url}`}>
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between gap-4 rounded-md border border-border bg-surface px-4 py-3 text-sm transition-colors hover:border-foreground"
+                          >
+                            <span className="flex min-w-0 items-center gap-3">
+                              <FileText className="h-4 w-4 flex-none text-muted" />
+                              <span className="truncate">{doc.title}</span>
+                            </span>
+                            <span className="flex-none text-xs text-muted uppercase">PDF</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </div>
+            </div>
+          </Container>
+        )}
       </div>
 
       {(adjacent.prev || adjacent.next) && (
@@ -292,6 +439,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <span />
             )}
           </nav>
+        </Container>
+      )}
+
+      {compatible.length > 0 && (
+        <Container className="pb-16 md:pb-20">
+          <SectionHeading eyebrow={dict.nav.products} title={dict.product.compatible} />
+          <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
+            {compatible.map((p, i) => (
+              <Reveal key={p.id} delay={(i % 4) * 0.05}>
+                <ProductCard product={p} />
+              </Reveal>
+            ))}
+          </div>
         </Container>
       )}
 
