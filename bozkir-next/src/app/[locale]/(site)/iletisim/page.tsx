@@ -185,9 +185,13 @@ export default async function ContactPage({ params }: PageProps) {
       copy: whatsappLink,
     },
     { icon: Mail, label: c.email, value: s.email, href: `mailto:${s.email}`, copy: s.email },
-    { icon: MapPin, label: c.address, value: officeAddress, href: undefined, copy: '' },
     { icon: Clock, label: c.hours, value: hours, href: undefined, copy: '' },
   ];
+
+  // Adres yalnızca aşağıdaki "Konumlar" bölümünde (harita + kopyalama ile)
+  // gösterilir; üst bilgi kartlarında tekrar edilmez.
+  // 5 kart: ilk satır 3 eşit sütun, ikinci satır 2 eşit sütun.
+  const gridSpan = (idx: number) => (idx < 3 ? 'md:col-span-2' : 'md:col-span-3');
 
   return (
     <>
@@ -211,7 +215,7 @@ export default async function ContactPage({ params }: PageProps) {
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-0 -z-10 h-64 w-[80%] -translate-x-1/2 rounded-full bg-[color:var(--color-accent-soft)]/15 blur-3xl"
           />
-          <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-3">
+          <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-6">
             {items.map((item, idx) => {
               const Icon = item.icon;
               return (
@@ -219,9 +223,7 @@ export default async function ContactPage({ params }: PageProps) {
                   key={item.label}
                   className={cn(
                     'group relative bg-surface p-7 transition-colors hover:bg-surface-2/60',
-                    // Adres, aşağıdaki "Konumlar" bölümünde harita ve kopyalama
-                    // düğmesiyle birlikte gösteriliyor; mobilde tekrar etmesin.
-                    item.label === c.address && 'hidden lg:block',
+                    gridSpan(idx),
                   )}
                 >
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-foreground">
@@ -251,7 +253,7 @@ export default async function ContactPage({ params }: PageProps) {
                   ) : (
                     <p className="mt-2 break-words text-base font-medium">{item.value}</p>
                   )}
-                  {idx === 5 ? (
+                  {item.label === c.hours ? (
                     <OpenStatus
                       schedule={s.openHours}
                       timeZone={timeZone}
