@@ -1,5 +1,5 @@
 import type { Locale } from '@/i18n/config';
-import type { Product, ProductFilters, ProductQueryResult } from '@/types/product';
+import type { Product, ProductFacets, ProductFilters, ProductQueryResult } from '@/types/product';
 import {
   fetchProductBySlug,
   fetchProductFacets,
@@ -14,6 +14,8 @@ function toQuery(filters: ProductFilters = {}, locale?: Locale) {
   const params = new URLSearchParams();
   if (filters.category) params.set('category', filters.category);
   if (filters.surface) params.set('surface', filters.surface);
+  if (filters.thickness) params.set('thickness', filters.thickness);
+  if (filters.color) params.set('color', filters.color);
   if (filters.query) params.set('q', filters.query);
   if (filters.sort) params.set('sort', filters.sort);
   params.set('limit', String(filters.limit ?? 24));
@@ -45,8 +47,8 @@ export async function getProducts(
   }
 }
 
-/** Filtre paneli facet'leri (yüzey). */
-export async function getProductFacets(): Promise<{ surfaces: string[] }> {
+/** Filtre paneli facet'leri (yüzey, kalınlık, renk). */
+export async function getProductFacets(): Promise<ProductFacets> {
   return fetchProductFacets();
 }
 

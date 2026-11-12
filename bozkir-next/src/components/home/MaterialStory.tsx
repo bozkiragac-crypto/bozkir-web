@@ -21,24 +21,19 @@ interface MaterialStoryProps {
 /**
  * "Malzemeyi Keşfet" — masaüstünde CSS sticky + ScrollTrigger scrub,
  * mobilde yatay kaydırmalı kart akışı (pinning yok).
- * Bölüm sonunda panel kesiti (3D) yer alır; 3D yalnız masaüstünde yüklenir.
+ * Bölüm sonunda panel kesiti (3D) yer alır; 3D tüm kırılımlarda çalışır,
+ * görünür alana girince yüklenir.
  */
 export function MaterialStory({ categories }: MaterialStoryProps) {
   const items = useMemo(() => categories.filter((c) => c.featured).slice(0, 6), [categories]);
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
-  const [show3d, setShow3d] = useState(false);
   const { t } = useDictionary();
 
   useEffect(() => {
     if (items[active])
       track('product_view', { category: items[active]!.slug, source: 'material_story' });
   }, [active, items]);
-
-  // 3D panel (three.js) yalnız masaüstünde yüklenir: mobil bant genişliği korunur.
-  useEffect(() => {
-    setShow3d(window.matchMedia('(min-width: 1024px)').matches);
-  }, []);
 
   useGSAP(
     () => {
@@ -47,15 +42,20 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
       if (!window.matchMedia('(min-width: 1024px)').matches) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+      // Zaman çizelgesi bölümün tamamına değil, sticky sahneye bağlanır:
+      // ilerleme 0→1 tam olarak pin ömrüne denk gelir; son kategori sahne
+      // kaymadan önce tamamlanır.
+      const stage = el.querySelector('[data-story-stage]');
       const panel = el.querySelector('[data-panel]');
+      if (!stage) return;
       const count = items.length;
 
       const st = gsap.timeline({
         scrollTrigger: {
-          trigger: el,
+          trigger: stage,
           start: 'top top',
-          end: `+=${count * STORY_STEP_VH}%`,
-          scrub: 0.6,
+          end: 'bottom bottom',
+          scrub: 0.8,
           onUpdate: (self) => {
             const idx = Math.min(count - 1, Math.floor(self.progress * count));
             setActive((prev) => (prev === idx ? prev : idx));
@@ -114,13 +114,24 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
                   {c.description}
                 </p>
               </Link>
+              <Link
+                href={`/urunler?kategori=${c.slug}`}
+                className="tap-target mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-muted-strong transition-colors hover:text-foreground"
+              >
+                {t('home.story.productsCta')}
+                <ArrowRight className="h-3.5 w-3.5 rtl:-scale-x-100" />
+              </Link>
             </article>
           ))}
         </div>
       </div>
 
-      {/* Masaüstü: sticky sahne */}
-      <div className="relative hidden lg:block" style={{ height: `${items.length * STORY_STEP_VH}vh` }}>
+      {/* Masaüstü: sticky sahne (ScrollTrigger bu sahneye bağlı) */}
+      <div
+        data-story-stage
+        className="relative hidden lg:block"
+        style={{ height: `${items.length * STORY_STEP_VH}vh` }}
+      >
         <div className="sticky top-0 flex min-h-svh items-center overflow-clip py-12 lg:h-svh lg:py-0">
           <Container className="grid w-full grid-cols-1 items-center gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div className="order-2 lg:order-1">
@@ -171,6 +182,14 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
               >
                 {t('home.story.collectionCta')}
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 rtl:-scale-x-100" />
+              </Link>
+
+              <Link
+                href={`/urunler?kategori=${current?.slug ?? ''}`}
+                className="tap-target mt-3 flex w-fit items-center gap-2 text-sm text-muted-strong transition-colors hover:text-foreground lg:mt-4"
+              >
+                {t('home.story.productsCta')}
+                <ArrowRight className="h-3.5 w-3.5 rtl:-scale-x-100" />
               </Link>
 
               <dl className="mt-8 hidden max-w-md grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-6 text-sm lg:grid">
@@ -245,11 +264,8 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
               aria-hidden
               className="pointer-events-none absolute inset-x-0 -inset-y-6 -z-10 rounded-[2.5rem] bg-[color:var(--color-accent-soft)]/12 blur-2xl"
             />
-            <div className="hidden h-[min(52svh,480px)] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] lg:block">
-              {show3d ? <Panel3D /> : null}
-            </div>
-            <div className="flex h-[200px] items-center justify-center rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 px-8 text-center text-sm leading-relaxed text-muted lg:hidden">
-              {t('home.material3d.hint')}
+            <div className="h-[420px] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] sm:h-[460px] lg:h-[min(52svh,480px)]">
+              <Panel3D />
             </div>
           </div>
         </Container>

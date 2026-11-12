@@ -56,3 +56,10 @@ export interface ProductQueryResult {
   items: Product[];
   total: number;
 }
+
+/** Filtre panelinde gösterilen mevcut değerler. Boş dizi → filtre gizlenir. */
+export interface ProductFacets {
+  surfaces: string[];
+  thicknesses: string[];
+  colors: string[];
+}

@@ -29,13 +29,16 @@
     padding-block: clamp(3rem, 6vw, 5rem);
   }
 
-  /* Sinematik "bölüm" işareti: — MALZEME */
+  /* Sinematik "bölüm" işareti: — MALZEME
+     Metin rengi `--accent-ink`: `--accent` 12px metinde AA eşiğinin altında
+     kalıyordu (açık temada 3.44:1). Süs çizgileri `--accent` kullanmaya devam
+     eder; yalnızca okunabilir metin koyulaştırılır. */
   .chapter-mark {
     font-variant-numeric: tabular-nums;
     font-size: 0.75rem;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--accent-ink);
   }
 
   /* Yatay kaydırmalı şeritlerde çubuğu gizle (kartlar kısmi görünerek keşfi sağlar). */
@@ -107,6 +110,8 @@
   --border-strong: #d7d7d1;
   --accent: #8d8474;
   --accent-soft: #b3a98f;
+  /* Küçük metinlerde AA (4.5:1) sağlayan koyulaştırılmış accent. */
+  --accent-ink: #6f6656;
 
   /* Kart hover yükseltisi (tema-duyarlı). */
   --card-shadow: 0 30px 60px -32px rgba(0, 0, 0, 0.4);
@@ -145,6 +150,7 @@ html[data-compare='1'] [data-product-cta] {
   --border-strong: rgba(255, 255, 255, 0.22);
   --accent: #b3a98f;
   --accent-soft: #cfc3a6;
+  --accent-ink: #c9bfa5;
 
   --card-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.65);
 

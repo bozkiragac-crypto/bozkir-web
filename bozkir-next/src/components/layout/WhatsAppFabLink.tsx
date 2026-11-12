@@ -1,22 +1,27 @@
 'use client';
 
 import { track } from '@/lib/analytics';
+import { useConsent } from '@/components/consent/ConsentProvider';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 
 /** WhatsApp FAB için tıklama takibi yapan client link. */
 export function WhatsAppFabLink({
   href,
   ariaLabel,
-  cursor,
   label,
   className,
 }: {
   href: string;
   ariaLabel: string;
-  cursor: string;
   label: string;
   className: string;
 }) {
+  const { consent, ready } = useConsent();
+
+  // Çerez bandı (z-140) butonun (z-120) tam üstüne biniyordu: karar verilene
+  // kadar FAB gizlenir, bant kapandığında geri gelir.
+  if (!ready || consent === 'unset') return null;
+
   return (
     <a
       href={href}
@@ -24,7 +29,6 @@ export function WhatsAppFabLink({
       rel="noopener noreferrer"
       aria-label={ariaLabel}
       data-whatsapp-fab
-      data-cursor-label={cursor}
       onClick={() => track('whatsapp_click', { source: 'fab' })}
       className={className}
     >

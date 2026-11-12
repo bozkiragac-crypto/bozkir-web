@@ -13,10 +13,19 @@ interface ProductFilterProps {
   categories: Category[];
   /** Mevcut yüzey değerleri (facet). Boşsa yüzey filtresi gösterilmez. */
   surfaces?: string[];
+  /** Mevcut kalınlık değerleri. Boşsa filtre gizlenir. */
+  thicknesses?: string[];
+  /** Mevcut renk değerleri. Boşsa filtre gizlenir. */
+  colors?: string[];
 }
 
 /** Filtreler URL ile senkron: paylaşılabilir ve SEO dostu. Mobilde alt-sayfa. */
-export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps) {
+export function ProductFilter({
+  categories,
+  surfaces = [],
+  thicknesses = [],
+  colors = [],
+}: ProductFilterProps) {
   const router = useRouter();
   const params = useSearchParams();
   const routeParams = useParams();
@@ -27,6 +36,8 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
   const sheetRef = useRef<HTMLDivElement>(null);
   const activeCategory = params.get('kategori') ?? '';
   const activeSurface = params.get('yuzey') ?? '';
+  const activeThickness = params.get('kalinlik') ?? '';
+  const activeColor = params.get('renk') ?? '';
   const activeSort = params.get('sirala') ?? '';
 
   useFocusTrap(sheet, sheetRef);
@@ -67,12 +78,26 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
     track('filter_used', { filter: 'surface', value });
     update({ yuzey: value || null });
   }
+  function onThicknessChange(value: string) {
+    track('filter_used', { filter: 'thickness', value });
+    update({ kalinlik: value || null });
+  }
+  function onColorChange(value: string) {
+    track('filter_used', { filter: 'color', value });
+    update({ renk: value || null });
+  }
   function onSortChange(value: string) {
     track('filter_used', { filter: 'sort', value });
     update({ sirala: value || null });
   }
 
-  const activeCount = [activeCategory, activeSurface, activeSort].filter(Boolean).length;
+  const activeCount = [
+    activeCategory,
+    activeSurface,
+    activeThickness,
+    activeColor,
+    activeSort,
+  ].filter(Boolean).length;
 
   return (
     <div className="flex flex-col gap-3 border-y border-border py-5 lg:flex-row lg:items-center lg:justify-between">
@@ -169,6 +194,52 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
           </>
         )}
 
+        {thicknesses.length > 0 && (
+          <>
+            <label className="sr-only" htmlFor="thickness-filter">
+              {t('product.thickness')}
+            </label>
+            <Select
+              id="thickness-filter"
+              value={activeThickness}
+              onChange={(e) => onThicknessChange(e.target.value)}
+              aria-label={t('product.thickness')}
+            >
+              <option value="">
+                {t('product.thickness')}: {t('catalog.all')}
+              </option>
+              {thicknesses.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
+          </>
+        )}
+
+        {colors.length > 0 && (
+          <>
+            <label className="sr-only" htmlFor="color-filter">
+              {t('product.colors')}
+            </label>
+            <Select
+              id="color-filter"
+              value={activeColor}
+              onChange={(e) => onColorChange(e.target.value)}
+              aria-label={t('product.colors')}
+            >
+              <option value="">
+                {t('product.colors')}: {t('catalog.all')}
+              </option>
+              {colors.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
+          </>
+        )}
+
         <label className="sr-only" htmlFor="sort-filter">
           {t('catalog.sort')}
         </label>
@@ -199,7 +270,7 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
         >
           <div className="absolute inset-0 bg-black/45 backdrop-blur-sm" />
           <div
-            className="absolute inset-x-0 bottom-0 rounded-t-2xl border-t border-border bg-background p-5 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]"
+            className="absolute inset-x-0 bottom-0 max-h-[88svh] overflow-y-auto rounded-t-2xl border-t border-border bg-background p-5 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
@@ -247,6 +318,46 @@ export function ProductFilter({ categories, surfaces = [] }: ProductFilterProps)
                     {surfaces.map((s) => (
                       <option key={s} value={s}>
                         {s}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+              )}
+
+              {thicknesses.length > 0 && (
+                <label className="grid gap-1.5">
+                  <span className="text-xs tracking-[0.14em] text-muted uppercase">
+                    {t('product.thickness')}
+                  </span>
+                  <Select
+                    value={activeThickness}
+                    onChange={(e) => onThicknessChange(e.target.value)}
+                    className="w-full"
+                  >
+                    <option value="">{t('catalog.all')}</option>
+                    {thicknesses.map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+              )}
+
+              {colors.length > 0 && (
+                <label className="grid gap-1.5">
+                  <span className="text-xs tracking-[0.14em] text-muted uppercase">
+                    {t('product.colors')}
+                  </span>
+                  <Select
+                    value={activeColor}
+                    onChange={(e) => onColorChange(e.target.value)}
+                    className="w-full"
+                  >
+                    <option value="">{t('catalog.all')}</option>
+                    {colors.map((v) => (
+                      <option key={v} value={v}>
+                        {v}
                       </option>
                     ))}
                   </Select>
