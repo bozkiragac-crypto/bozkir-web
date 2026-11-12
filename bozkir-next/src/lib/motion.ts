@@ -18,5 +18,9 @@ export const STAGGER = {
   list: 0.05,
 } as const;
 
-/** "Malzemeyi Keşfet" sticky adımı: kategori başına kaydırma yüksekliği (vh). */
-export const STORY_STEP_VH = 30;
+/**
+ * "Malzemeyi Keşfet" sticky adımı: kategori başına kaydırma yüksekliği (vh).
+ * Sahne yüksekliği = adet × bu değer; gerçek pin mesafesi bundan bir ekran
+ * kısa olduğu için 50vh → kategori başına ~33vh okunabilir geçiş verir.
+ */
+export const STORY_STEP_VH = 50;

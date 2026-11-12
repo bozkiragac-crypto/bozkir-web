@@ -1,4 +1,4 @@
-import { Inter, Fraunces, Caveat, IBM_Plex_Sans_Arabic } from 'next/font/google';
+import { Inter, Fraunces, IBM_Plex_Sans_Arabic } from 'next/font/google';
 
 /** Paylaşılan font tanımları (layout, admin, 404 aynı dosyaları kullanır). */
 export const inter = Inter({
@@ -12,13 +12,6 @@ export const fraunces = Fraunces({
   display: 'swap',
   axes: ['opsz'],
 });
-// Caveat yalnızca hero'daki el yazısı vurguda kullanılır; ilk boyama preload'una gerek yok.
-export const caveat = Caveat({
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-hand',
-  display: 'swap',
-  preload: false,
-});
 // Arapça (RTL) arayüz fontu: yalnızca `[dir='rtl']` sayfalarda yüklenir.
 export const arabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],
@@ -28,4 +21,4 @@ export const arabic = IBM_Plex_Sans_Arabic({
   preload: false,
 });
 
-export const fontVariables = `${inter.variable} ${fraunces.variable} ${caveat.variable} ${arabic.variable}`;
+export const fontVariables = `${inter.variable} ${fraunces.variable} ${arabic.variable}`;

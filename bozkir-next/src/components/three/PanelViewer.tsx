@@ -13,6 +13,7 @@ import {
 } from '@react-three/drei';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 import * as THREE from 'three';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export type PanelCore = 'mdf' | 'particle';
 export type PanelSurface = 'melamin' | 'raw';
@@ -317,6 +318,10 @@ export function PanelViewer({
   const [localReset, setLocalReset] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
+  // Dokunmatik cihazlarda dikey kaydırma sayfaya bırakılır (kaydırma tuzağı
+  // olmasın); yatay sürükleme paneli döndürmeye devam eder.
+  const coarsePointer = useMediaQuery('(pointer: coarse)');
+  const touchAction = coarsePointer ? 'pan-y' : 'none';
 
   // +/- düğmeleri: OrbitControls örneğine doğrudan erişip hedefe göre mesafeyi ölçekler.
   const zoom = (factor: number) => {
@@ -350,7 +355,7 @@ export function PanelViewer({
       ref={wrapRef}
       data-lenis-prevent
       className="relative h-full w-full overscroll-contain"
-      style={{ touchAction: 'none' }}
+      style={{ touchAction }}
       onDoubleClick={() => setLocalReset((n) => n + 1)}
     >
       {labels && (
@@ -364,7 +369,7 @@ export function PanelViewer({
             onClick={() => zoom(0.9)}
             aria-label={labels.zoomIn}
             title={labels.zoomIn}
-            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground"
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground sm:h-9 sm:w-9"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -373,7 +378,7 @@ export function PanelViewer({
             onClick={() => zoom(1.12)}
             aria-label={labels.zoomOut}
             title={labels.zoomOut}
-            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground"
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground sm:h-9 sm:w-9"
           >
             <Minus className="h-4 w-4" />
           </button>
@@ -382,7 +387,7 @@ export function PanelViewer({
             onClick={() => setLocalReset((n) => n + 1)}
             aria-label={labels.reset}
             title={labels.reset}
-            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground"
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur transition-colors hover:border-foreground sm:h-9 sm:w-9"
           >
             <RotateCcw className="h-3.5 w-3.5" />
           </button>
@@ -400,7 +405,7 @@ export function PanelViewer({
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.05,
         }}
-        style={{ width: '100%', height: '100%', cursor: 'grab', touchAction: 'none' }}
+        style={{ width: '100%', height: '100%', cursor: 'grab', touchAction }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[3, 4, 5]} intensity={1.6} />

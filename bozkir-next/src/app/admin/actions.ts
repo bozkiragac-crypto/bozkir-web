@@ -364,6 +364,15 @@ export interface ProductInput {
   /** Virgülle ayrılmış renk / kalınlık seçenekleri. */
   colors?: string;
   thicknesses?: string;
+  dimensions?: string;
+  /** Virgülle ayrılmış uygulama alanları. */
+  applications?: string;
+  shortDescription?: string;
+  description?: string;
+  descriptionEn?: string;
+  descriptionAr?: string;
+  technicalSpecs?: { label: string; value: string }[];
+  documents?: { title: string; url: string }[];
   images: string[];
   isActive?: boolean;
   /** Çok dilli alanlar (opsiyonel); boşsa TR değeri kullanılır. */
@@ -426,6 +435,18 @@ export async function saveProduct(
   const whatsappMessageAr = input.whatsappMessageAr?.trim() || null;
   const colors = input.colors?.trim() || null;
   const thicknesses = input.thicknesses?.trim() || null;
+  const dimensions = input.dimensions?.trim() || null;
+  const applications = input.applications?.trim() || null;
+  const shortDescription = input.shortDescription?.trim() || null;
+  const description = input.description?.trim() || null;
+  const descriptionEn = input.descriptionEn?.trim() || null;
+  const descriptionAr = input.descriptionAr?.trim() || null;
+  const technicalSpecs = (input.technicalSpecs ?? [])
+    .map((s) => ({ label: s.label.trim(), value: s.value.trim() }))
+    .filter((s) => s.label && s.value);
+  const documents = (input.documents ?? [])
+    .map((d) => ({ title: d.title.trim(), url: d.url.trim() }))
+    .filter((d) => d.title && d.url);
 
   if (input.id) {
     const prev = await db
@@ -447,6 +468,14 @@ export async function saveProduct(
         face: input.face.trim() || null,
         colors,
         thicknesses,
+        dimensions,
+        applications,
+        shortDescription,
+        description,
+        descriptionEn,
+        descriptionAr,
+        technicalSpecs: technicalSpecs.length > 0 ? technicalSpecs : null,
+        documents: documents.length > 0 ? documents : null,
         img,
         isActive,
         nameEn,
@@ -479,6 +508,14 @@ export async function saveProduct(
       face: input.face.trim() || null,
       colors,
       thicknesses,
+      dimensions,
+      applications,
+      shortDescription,
+      description,
+      descriptionEn,
+      descriptionAr,
+      technicalSpecs: technicalSpecs.length > 0 ? technicalSpecs : null,
+      documents: documents.length > 0 ? documents : null,
       img,
       isActive,
       nameEn,

@@ -3,7 +3,7 @@ import { unstable_cache } from 'next/cache';
 import { DATA_TAGS } from '@/lib/data/tags';
 import type { Locale } from '@/i18n/config';
 import type { Category } from '@/types/category';
-import type { Product, ProductFilters, ProductQueryResult } from '@/types/product';
+import type { Product, ProductFacets, ProductFilters, ProductQueryResult } from '@/types/product';
 import { fallbackCategories } from '@/data/categories';
 import { getDb, hasDb } from '@/lib/db/client';
 import { products as productsTable } from '@/lib/db/schema';
@@ -40,6 +40,44 @@ export function parseImageList(raw: unknown): string[] {
     .filter(Boolean);
 }
 
+/** JSONB teknik özellik satırlarını güvenli biçimde normalize eder. */
+export function parseSpecList(raw: unknown): { label: string; value: string }[] {
+  let value = raw;
+  if (typeof raw === 'string') {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => ({
+      label: String((item as { label?: unknown })?.label ?? '').trim(),
+      value: String((item as { value?: unknown })?.value ?? '').trim(),
+    }))
+    .filter((item) => item.label && item.value);
+}
+
+/** JSONB doküman listesini güvenli biçimde normalize eder. */
+export function parseDocList(raw: unknown): { title: string; url: string }[] {
+  let value = raw;
+  if (typeof raw === 'string') {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => ({
+      title: String((item as { title?: unknown })?.title ?? '').trim(),
+      url: String((item as { url?: unknown })?.url ?? '').trim(),
+    }))
+    .filter((item) => item.title && item.url);
+}
+
 interface IndexItem {
   id: string;
   slug: string;
@@ -50,6 +88,14 @@ interface IndexItem {
   face: string;
   colors: string[];
   thicknesses: string[];
+  dimensions: string;
+  applications: string[];
+  shortDescription: string;
+  description: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  technicalSpecs: { label: string; value: string }[];
+  documents: { title: string; url: string }[];
   createdAt: string;
   /** Son güncelleme (ISO); sitemap `lastModified` için kullanılır. */
   updatedAt: string;
@@ -74,6 +120,14 @@ interface RawRow {
   face: string | null;
   colors?: string | null;
   thicknesses?: string | null;
+  dimensions?: string | null;
+  applications?: string | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  descriptionEn?: string | null;
+  descriptionAr?: string | null;
+  technicalSpecs?: unknown;
+  documents?: unknown;
   img: string | null;
   createdAt: Date | string | null;
   updatedAt?: Date | string | null;
@@ -124,6 +178,14 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       face: String(row.face ?? '').trim(),
       colors: parseImageList(row.colors),
       thicknesses: parseImageList(row.thicknesses),
+      dimensions: String(row.dimensions ?? '').trim(),
+      applications: parseImageList(row.applications),
+      shortDescription: String(row.shortDescription ?? '').trim(),
+      description: String(row.description ?? '').trim(),
+      descriptionEn: String(row.descriptionEn ?? '').trim(),
+      descriptionAr: String(row.descriptionAr ?? '').trim(),
+      technicalSpecs: parseSpecList(row.technicalSpecs),
+      documents: parseDocList(row.documents),
       createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : '',
       updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : '',
       images: parseImageList(row.img),
@@ -182,6 +244,13 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
     face: item.face,
     colors: item.colors,
     thicknesses: item.thicknesses,
+    dimensions: item.dimensions || undefined,
+    applications: item.applications,
+    shortDescription: item.shortDescription || undefined,
+    description:
+      pickLocaleText(item.description, locale, item.descriptionEn, item.descriptionAr) || undefined,
+    technicalSpecs: item.technicalSpecs.length > 0 ? item.technicalSpecs : undefined,
+    documents: item.documents.length > 0 ? item.documents : undefined,
     images,
     thumbnail: images[0],
     seoTitle: item.seoTitle || undefined,
@@ -230,6 +299,42 @@ function normSearch(value: string): string {
     .replace(/[^a-z0-9]+/g, '');
 }
 
+/** "8 mm" < "10 mm" < "18 mm": sayısal önek varsa ona göre, yoksa alfabetik. */
+export function sortFacetValues(values: string[]): string[] {
+  const numOf = (value: string) => {
+    const match = value.match(/^\s*(\d+(?:[.,]\d+)?)/);
+    return match ? Number(match[1]!.replace(',', '.')) : Number.NaN;
+  };
+  return [...values].sort((a, b) => {
+    const na = numOf(a);
+    const nb = numOf(b);
+    if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
+    return a.localeCompare(b, 'tr');
+  });
+}
+
+/**
+ * Facet değerlerini normalize ederek tekilleştirir (ilk yazım korunur).
+ * "18 mm" / "18MM" / " 18 mm " tek değere iner.
+ */
+export function collectFacetValues(values: string[]): string[] {
+  const byNorm = new Map<string, string>();
+  for (const raw of values) {
+    const value = String(raw ?? '').trim();
+    if (!value) continue;
+    const key = normSearch(value);
+    if (key && !byNorm.has(key)) byNorm.set(key, value);
+  }
+  return sortFacetValues([...byNorm.values()]);
+}
+
+/** Facet listesinde (ör. renk/kalınlık) normalize eşleşme arar. */
+export function facetMatches(values: string[] | undefined, needle: string): boolean {
+  const target = normSearch(needle);
+  if (!target) return true;
+  return (values ?? []).some((value) => normSearch(value) === target);
+}
+
 export async function fetchProducts(
   filters: ProductFilters = {},
   locale?: Locale,
@@ -241,6 +346,14 @@ export async function fetchProducts(
     const needle = normSearch(filters.surface);
     items = items.filter((i) => normSearch(i.face) === needle);
   }
+  if (filters.thickness) {
+    const thickness = filters.thickness;
+    items = items.filter((i) => facetMatches(i.thicknesses, thickness));
+  }
+  if (filters.color) {
+    const color = filters.color;
+    items = items.filter((i) => facetMatches(i.colors, color));
+  }
   if (filters.query) {
     const raw = toAscii(filters.query).toLowerCase().trim();
     // Çoklu kelime: tüm parçalar eşleşmeli ("lak panel bej").
@@ -248,7 +361,7 @@ export async function fetchProducts(
     // Arama hem Türkçe hem çeviri metinlerinde çalışır.
     const hayOf = (i: IndexItem) =>
       toAscii(
-        `${i.name} ${i.code} ${i.category} ${i.nameEn} ${i.nameAr} ${i.catEn} ${i.catAr}`,
+        `${i.name} ${i.code} ${i.category} ${i.nameEn} ${i.nameAr} ${i.catEn} ${i.catAr} ${i.face} ${i.colors.join(' ')} ${i.thicknesses.join(' ')}`,
       ).toLowerCase();
     if (tokens.length > 1) {
       items = items.filter((i) => {
@@ -370,13 +483,12 @@ export async function fetchProductImageRaw(id: string): Promise<string> {
   }
 }
 
-/** Filtre paneli için mevcut yüzey (face) değerleri. */
-export async function fetchProductFacets(): Promise<{ surfaces: string[] }> {
+/** Filtre paneli için mevcut facet değerleri (yüzey, kalınlık, renk). */
+export async function fetchProductFacets(): Promise<ProductFacets> {
   const items = await getProductsIndex();
-  const byNorm = new Map<string, string>();
-  for (const i of items) {
-    const face = i.face.trim();
-    if (face) byNorm.set(normSearch(face), face);
-  }
-  return { surfaces: [...byNorm.values()].sort((a, b) => a.localeCompare(b, 'tr')) };
+  return {
+    surfaces: collectFacetValues(items.map((i) => i.face)),
+    thicknesses: collectFacetValues(items.flatMap((i) => i.thicknesses)),
+    colors: collectFacetValues(items.flatMap((i) => i.colors)),
+  };
 }

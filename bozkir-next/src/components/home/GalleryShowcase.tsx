@@ -65,7 +65,6 @@ export function GalleryShowcase({ items: allItems }: { items: ShowcaseItem[] }) 
               aria-label={`${item.title} — ${t('home.gallery.expand')}`}
               aria-haspopup="dialog"
               className="block w-full text-start"
-              data-cursor-label={t('catalog.inspect')}
             >
               <div
                 className={cn(

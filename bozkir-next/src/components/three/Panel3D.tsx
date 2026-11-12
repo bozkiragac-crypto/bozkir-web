@@ -73,6 +73,16 @@ function PanelFallback({ alt = '' }: { alt?: string }) {
   );
 }
 
+/** WebGL yoksa/engelliyse 3D yerine statik görsel gösterilir (özellikle mobilde). */
+function hasWebGL(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+  } catch {
+    return false;
+  }
+}
+
 export function Panel3D() {
   const reduced = useReducedMotion();
   const isMobile = useIsMobile();
@@ -85,8 +95,14 @@ export function Panel3D() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [seeded, setSeeded] = useState(false);
   const [inView, setInView] = useState(false);
+  const [webglOk, setWebglOk] = useState(true);
   const [finish, setFinish] = useState(finishes[0]!);
   const [resetSignal, setResetSignal] = useState(0);
+
+  // Cihaz WebGL sağlamıyorsa ağır sahneyi hiç yükleme.
+  useEffect(() => {
+    setWebglOk(hasWebGL());
+  }, []);
 
   // WebGL yalnızca ekrana girince başlar; ekrandan çıkınca render durur.
   useEffect(() => {
@@ -119,7 +135,7 @@ export function Panel3D() {
   return (
     <div className="flex h-full w-full flex-col">
       <div ref={hostRef} className="relative min-h-0 flex-1">
-        {reduced || !seeded ? (
+        {reduced || !webglOk || !seeded ? (
           <PanelFallback alt={h.imageAlt} />
         ) : (
           <PanelViewer

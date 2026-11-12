@@ -19,7 +19,8 @@ export interface Product {
   face?: string;
   colors?: string[];
   thicknesses?: string[];
-  dimensions?: string[];
+  /** Plaka/ölçü bilgisi, ör. "2800 × 2100 mm". */
+  dimensions?: string;
   applications?: string[];
   documents?: { title: string; url: string }[];
   brand?: string;
@@ -54,4 +55,11 @@ export type ProductSort = 'newest' | 'name-asc' | 'name-desc' | 'code-asc';
 export interface ProductQueryResult {
   items: Product[];
   total: number;
+}
+
+/** Filtre panelinde gösterilen mevcut değerler. Boş dizi → filtre gizlenir. */
+export interface ProductFacets {
+  surfaces: string[];
+  thicknesses: string[];
+  colors: string[];
 }

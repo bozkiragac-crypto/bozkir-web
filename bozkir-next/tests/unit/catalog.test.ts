@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { pickLocaleText, localizedCategoryName, parseImageList } from '@/lib/data/catalog';
+import {
+  collectFacetValues,
+  facetMatches,
+  localizedCategoryName,
+  parseImageList,
+  pickLocaleText,
+  sortFacetValues,
+} from '@/lib/data/catalog';
 import type { Category } from '@/types/category';
 
 describe('pickLocaleText', () => {
@@ -62,5 +69,39 @@ describe('parseImageList', () => {
   });
   it('bozuk JSON güvenli', () => {
     expect(parseImageList('[bozuk')).toEqual([]);
+  });
+});
+
+describe('collectFacetValues', () => {
+  it('normalize ederek tekilleştirir (ilk yazım korunur)', () => {
+    expect(collectFacetValues(['Bej', 'BEJ', ' bej '])).toEqual(['Bej']);
+  });
+  it('boş değerleri atar', () => {
+    expect(collectFacetValues(['', '  ', '18 mm'])).toEqual(['18 mm']);
+  });
+  it('kalınlıkları sayısal sıralar', () => {
+    expect(collectFacetValues(['18 mm', '8 mm', '10 mm'])).toEqual(['8 mm', '10 mm', '18 mm']);
+  });
+});
+
+describe('sortFacetValues', () => {
+  it('sayısal önek yoksa alfabetik sıralar', () => {
+    expect(sortFacetValues(['Ceviz', 'Bej', 'Antik'])).toEqual(['Antik', 'Bej', 'Ceviz']);
+  });
+  it('girdiyi değiştirmez', () => {
+    const input = ['18 mm', '8 mm'];
+    sortFacetValues(input);
+    expect(input).toEqual(['18 mm', '8 mm']);
+  });
+});
+
+describe('facetMatches', () => {
+  it('boşluk/noktalama duyarsız eşleşir', () => {
+    expect(facetMatches(['18 mm'], '18MM')).toBe(true);
+    expect(facetMatches(['18 mm'], '8 mm')).toBe(false);
+  });
+  it('değer yoksa veya filtre boşsa eşleşir', () => {
+    expect(facetMatches(undefined, '')).toBe(true);
+    expect(facetMatches([], 'bej')).toBe(false);
   });
 });

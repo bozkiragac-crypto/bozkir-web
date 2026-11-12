@@ -46,6 +46,8 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
   const dict = await dictForRequest(locale ?? 'tr');
   const kategori = str(sp.kategori);
   const yuzey = str(sp.yuzey);
+  const kalinlik = str(sp.kalinlik);
+  const renk = str(sp.renk);
   const q = str(sp.q);
   const page = Math.max(1, parseInt(str(sp.sayfa) ?? '1', 10) || 1);
   const sortParam = str(sp.sirala);
@@ -61,6 +63,8 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
       {
         category: kategori,
         surface: yuzey,
+        thickness: kalinlik,
+        color: renk,
         query: q,
         sort,
         limit: PAGE_SIZE,
@@ -71,12 +75,14 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
   ]);
 
   const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
-  const hasFilters = Boolean(q || kategori || yuzey);
+  const hasFilters = Boolean(q || kategori || yuzey || kalinlik || renk);
   const buildHref = (target: number) => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (kategori) params.set('kategori', kategori);
     if (yuzey) params.set('yuzey', yuzey);
+    if (kalinlik) params.set('kalinlik', kalinlik);
+    if (renk) params.set('renk', renk);
     if (sort) params.set('sirala', sort);
     if (target > 1) params.set('sayfa', String(target));
     const qs = params.toString();
@@ -118,7 +124,12 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
       >
         <div className="mt-10">
           <Suspense fallback={<div className="h-20" />}>
-            <ProductFilter categories={categories} surfaces={facets.surfaces} />
+            <ProductFilter
+              categories={categories}
+              surfaces={facets.surfaces}
+              thicknesses={facets.thicknesses}
+              colors={facets.colors}
+            />
           </Suspense>
         </div>
       </PageHero>

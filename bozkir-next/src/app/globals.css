@@ -29,13 +29,16 @@
     padding-block: clamp(3rem, 6vw, 5rem);
   }
 
-  /* Sinematik "bölüm" işareti: — MALZEME */
+  /* Sinematik "bölüm" işareti: — MALZEME
+     Metin rengi `--accent-ink`: `--accent` 12px metinde AA eşiğinin altında
+     kalıyordu (açık temada 3.44:1). Süs çizgileri `--accent` kullanmaya devam
+     eder; yalnızca okunabilir metin koyulaştırılır. */
   .chapter-mark {
     font-variant-numeric: tabular-nums;
     font-size: 0.75rem;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--accent-ink);
   }
 
   /* Yatay kaydırmalı şeritlerde çubuğu gizle (kartlar kısmi görünerek keşfi sağlar). */
@@ -107,11 +110,12 @@
   --border-strong: #d7d7d1;
   --accent: #8d8474;
   --accent-soft: #b3a98f;
+  /* Küçük metinlerde AA (4.5:1) sağlayan koyulaştırılmış accent. */
+  --accent-ink: #6f6656;
 
   /* Kart hover yükseltisi (tema-duyarlı). */
   --card-shadow: 0 30px 60px -32px rgba(0, 0, 0, 0.4);
 
-  --grain-opacity: 0.035;
   --scrollbar-thumb: #d0d0cb;
 
   color-scheme: light;
@@ -146,10 +150,10 @@ html[data-compare='1'] [data-product-cta] {
   --border-strong: rgba(255, 255, 255, 0.22);
   --accent: #b3a98f;
   --accent-soft: #cfc3a6;
+  --accent-ink: #c9bfa5;
 
   --card-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.65);
 
-  --grain-opacity: 0.06;
   --scrollbar-thumb: #3a3a42;
 
   /* Tailwind @theme alias'larını koyu tema değerlerine bağlar. */
@@ -231,18 +235,6 @@ html[data-compare='1'] [data-product-cta] {
     transition:
       background-color 0.4s var(--ease-out-expo),
       color 0.4s var(--ease-out-expo);
-  }
-
-  /* İnce film greni — düz yüzeylere dokunsal premium his.
-     Header ve modalların (z-80+) altında kalır, tıklamayı engellemez. */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    pointer-events: none;
-    opacity: var(--grain-opacity);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   ::selection {
@@ -357,12 +349,13 @@ html[data-compare='1'] [data-product-cta] {
     text-wrap: balance;
   }
 
-  /* El yazısı vurgu (Caveat) — okunaklı, hafif eğimli. */
+  /* El yazısı vurgu — Fraunces italik (tek font ailesi, serif karakter). */
   .text-hand {
-    font-family: var(--font-hand), var(--font-sans), cursive;
-    font-weight: 600;
-    font-size: 1.08em;
-    letter-spacing: 0;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1.06em;
+    letter-spacing: -0.01em;
     line-height: 0.95;
   }
 
@@ -415,24 +408,6 @@ html[data-compare='1'] [data-product-cta] {
     to {
       background-position: -200% 0;
     }
-  }
-
-  /* Özel imleç aktifken native imleci gizle (metin alanları hariç). */
-  html.has-cursor,
-  html.has-cursor *:not(input):not(textarea):not(select) {
-    cursor: none !important;
-  }
-  html.has-cursor.cursor-native,
-  html.has-cursor.cursor-native * {
-    cursor: auto !important;
-  }
-  html.has-cursor.cursor-native input,
-  html.has-cursor.cursor-native textarea {
-    cursor: text !important;
-  }
-  /* Klavye odağında native imleç görünür (a11y). */
-  html.has-cursor :focus-visible {
-    cursor: auto !important;
   }
 
   /* Hover'da kayan alt çizgi (nav / footer linkleri). */

@@ -21,6 +21,19 @@ export const products = pgTable(
     colors: text('colors'),
     /** Kalınlık seçenekleri (virgülle ayrılmış metin). */
     thicknesses: text('thicknesses'),
+    /** Kısa açıklama (kart/liste) ve uzun açıklama (detay); EN/AR opsiyonel. */
+    shortDescription: text('short_description'),
+    description: text('description'),
+    descriptionEn: text('description_en'),
+    descriptionAr: text('description_ar'),
+    /** Plaka/ölçü bilgisi, ör. "2800 × 2100 mm". */
+    dimensions: text('dimensions'),
+    /** Uygulama alanları (virgülle ayrılmış metin). */
+    applications: text('applications'),
+    /** Teknik özellik satırları: [{ label, value }]. */
+    technicalSpecs: jsonb('technical_specs').$type<{ label: string; value: string }[]>(),
+    /** Ürün dokümanları: [{ title, url }]. */
+    documents: jsonb('documents').$type<{ title: string; url: string }[]>(),
     img: text('img'),
     isActive: boolean('is_active').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
