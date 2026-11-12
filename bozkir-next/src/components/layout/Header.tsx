@@ -8,6 +8,7 @@ import type { Category } from '@/types/category';
 import type { NavSettingItem } from '@/lib/data/settings';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { MegaMenu } from './MegaMenu';
 import { MobileMenu } from './MobileMenu';
@@ -141,12 +142,19 @@ export function Header({
         <div className="container-x flex h-full items-center justify-between gap-2 pt-[var(--safe-top)] sm:gap-4 lg:gap-6">
           <Link
             href="/"
-            className="tap-target min-w-0 flex-1 truncate text-[0.75rem] font-semibold tracking-[0.01em] uppercase sm:flex-none sm:text-[0.9rem] sm:tracking-[0.14em]"
+            className="tap-target flex min-w-0 items-center gap-2.5"
             aria-label={`${brandName} — ${t('common.home')}`}
           >
+            <BrandLogo
+              src={logoUrl}
+              alt=""
+              priority
+              onDark={onDark}
+              className="h-9 w-auto flex-none sm:h-10"
+            />
             <span
               className={cn(
-                'block truncate transition-colors',
+                'hidden truncate text-[0.9rem] font-semibold tracking-[0.14em] uppercase transition-colors sm:block',
                 onDark ? 'text-white' : 'text-foreground',
               )}
             >
@@ -155,7 +163,7 @@ export function Header({
           </Link>
 
           <nav
-            className="hidden items-center gap-6 xl:flex xl:gap-8"
+            className="hidden items-center gap-5 lg:flex xl:gap-8"
             aria-label={t('a11y.primaryNav')}
           >
             {navItems.map((item) => {
@@ -205,9 +213,9 @@ export function Header({
 
           <div className="flex flex-none items-center gap-0.5 sm:gap-2">
             {/* Mobilde tema + dil seçici mobil menüye taşındı (marka adı kırpılmasın). */}
-            <ThemeToggle onDark={onDark} className="hidden xl:inline-flex" />
+            <ThemeToggle onDark={onDark} className="hidden lg:inline-flex" />
             <WishNav onDark={onDark} />
-            <LocaleSwitcher onDark={onDark} className="hidden xl:inline-flex" />
+            <LocaleSwitcher onDark={onDark} className="hidden lg:inline-flex" />
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -222,7 +230,6 @@ export function Header({
             <MagneticButton className="hidden sm:inline-block">
               <Link
                 href="/teklif-al"
-                data-cursor-label={t('nav.quote')}
                 className={cn(
                   'inline-flex h-11 items-center rounded-full px-5 text-sm font-medium transition-colors',
                   onDark
@@ -240,7 +247,7 @@ export function Header({
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu"
               className={cn(
-                'flex h-11 w-11 items-center justify-center rounded-full xl:hidden',
+                'flex h-11 w-11 items-center justify-center rounded-full lg:hidden',
                 onDark ? 'text-white' : 'text-foreground',
               )}
             >
