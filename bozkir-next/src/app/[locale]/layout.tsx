@@ -12,7 +12,6 @@ import { Footer } from '@/components/layout/Footer';
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab';
 import { DeferredSmoothScroll } from '@/components/providers/DeferredSmoothScroll';
 import { ScrollToTop } from '@/components/providers/ScrollToTop';
-import { CursorProvider } from '@/components/providers/CursorProvider';
 import { FavoritesProvider } from '@/components/providers/FavoritesProvider';
 import { RecentlyViewedProvider } from '@/components/providers/RecentlyViewedProvider';
 import { CompareBar } from '@/components/products/CompareBar';
@@ -125,7 +124,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 <RecentlyViewedProvider>
                   <DeferredSmoothScroll>
                     <ScrollToTop />
-                    <CursorProvider />
                     <a
                       href="#main"
                       className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-foreground focus:px-5 focus:py-3 focus:text-background"

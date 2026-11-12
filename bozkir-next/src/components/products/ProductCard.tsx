@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ArrowUpRight, Eye } from 'lucide-react';
 import { SmartImage } from '@/components/ui/SmartImage';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
-import { FavoriteButton, CompareButton } from '@/components/products/WishButtons';
+import { FavoriteButton } from '@/components/products/WishButtons';
 import { ProductQuickView } from '@/components/products/ProductQuickView';
 import type { Product } from '@/types/product';
 import { cn, cssColor } from '@/lib/utils';
@@ -41,7 +41,6 @@ export function ProductCard({
       <Link
         href={`/urunler/${product.slug}`}
         className="block transition-transform [-webkit-tap-highlight-color:transparent] active:scale-[0.99]"
-        data-cursor-label={t('catalog.inspect')}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         onFocus={() => setHover(true)}
@@ -133,10 +132,10 @@ export function ProductCard({
         </div>
       </Link>
 
-      {/* Favori / karşılaştırma / hızlı bakış — mobilde her zaman, masaüstünde hover'da */}
+      {/* Favori / hızlı bakış — kart yüzeyindeki yükü az tutar; karşılaştırma
+          hızlı bakış ve detay sayfasından eklenir. Mobilde her zaman, masaüstünde hover'da. */}
       <div className="absolute end-2 top-2 z-10 flex flex-col gap-2 opacity-100 transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] md:translate-x-2 md:opacity-0 md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:translate-x-0 md:group-hover:opacity-100">
         <FavoriteButton product={ref} />
-        <CompareButton product={ref} />
         <button
           type="button"
           aria-label={`${product.name} — ${t('catalog.quickView')}`}

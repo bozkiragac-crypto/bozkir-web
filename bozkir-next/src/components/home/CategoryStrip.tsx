@@ -42,7 +42,6 @@ export async function CategoryStrip({
             <Link
               href={`/kategoriler/${category.slug}`}
               className="group block"
-              data-cursor-label={dict.catalog.inspect}
             >
               <div className="sheen relative aspect-[4/5] overflow-hidden rounded-lg bg-surface-2 ring-1 ring-transparent transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-1 group-hover:shadow-[var(--card-shadow)] group-hover:ring-border-strong">
                 {category.thumbnail ? (
