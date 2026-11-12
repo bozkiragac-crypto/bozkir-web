@@ -80,10 +80,7 @@ export async function getProductBySlug(slug: string, locale?: Locale): Promise<P
  * Birden fazla ürünü slug ile, verilen sırayı koruyarak getirir.
  * Yerel veri katmanında tek sorgu; harici API'de sıralı tek tek çözülür.
  */
-export async function getProductsBySlugs(
-  slugs: string[],
-  locale?: Locale,
-): Promise<Product[]> {
+export async function getProductsBySlugs(slugs: string[], locale?: Locale): Promise<Product[]> {
   const wanted = [...new Set(slugs.map((slug) => slug.trim()).filter(Boolean))];
   if (wanted.length === 0) return [];
   if (!hasRemoteApi()) return fetchProductsBySlugs(wanted, locale);
@@ -145,13 +142,16 @@ export async function getAdjacentProducts(
   };
 }
 
-/** Tüm ürünler (sitemap için) — sayfalama ile toplanır. */
-export async function getAllProducts(max = Number.POSITIVE_INFINITY): Promise<Product[]> {
+/** Tüm ürünler (sitemap ve teklif seçicisi için) — sayfalama ile toplanır. */
+export async function getAllProducts(
+  max = Number.POSITIVE_INFINITY,
+  locale?: Locale,
+): Promise<Product[]> {
   const out: Product[] = [];
   let offset = 0;
   const limit = 100;
   while (out.length < max) {
-    const page = await getProducts({ limit, offset });
+    const page = await getProducts({ limit, offset }, locale);
     out.push(...page.items);
     if (page.items.length < limit || out.length >= page.total || page.total === 0) break;
     offset += limit;

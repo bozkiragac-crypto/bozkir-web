@@ -183,9 +183,15 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
         ) : (
           <div className="rounded-lg border border-border bg-surface p-12 text-center">
             <h2 className="text-xl font-medium tracking-tight">
-              {hasFilters ? dict.catalog.noResults : dict.common.notFound}
+              {q
+                ? dict.catalog.noResultsFor.replace('{query}', q)
+                : hasFilters
+                  ? dict.catalog.noResults
+                  : dict.common.notFound}
             </h2>
-            <p className="mt-3 text-sm text-muted-strong">{dict.catalog.empty}</p>
+            <p className="mt-3 text-sm text-muted-strong">
+              {hasFilters ? dict.catalog.searchHint : dict.catalog.empty}
+            </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               {hasFilters && (
                 <Link
@@ -202,6 +208,25 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
                 {dict.nav.quote}
               </Link>
             </div>
+
+            {categories.length > 0 && (
+              <div className="mt-10 border-t border-border pt-8">
+                <p className="text-xs tracking-[0.14em] text-muted uppercase">
+                  {dict.catalog.browseCategories}
+                </p>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  {categories.slice(0, 8).map((category) => (
+                    <Link
+                      key={category.id}
+                      href={`/kategoriler/${category.slug}`}
+                      className="inline-flex h-9 items-center rounded-full border border-border px-4 text-xs font-medium text-muted-strong transition-colors hover:border-foreground hover:text-foreground"
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Container>

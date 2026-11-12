@@ -102,8 +102,49 @@ export function ProductFilter({
     activeSort,
   ].filter(Boolean).length;
 
+  const activeQuery = params.get('q') ?? '';
+  const chips: { key: string; label: string; onRemove: () => void }[] = [];
+  if (activeQuery) {
+    chips.push({
+      key: 'q',
+      label: `“${activeQuery}”`,
+      onRemove: () => {
+        setQuery('');
+        update({ q: null });
+      },
+    });
+  }
+  if (activeCategory) {
+    chips.push({
+      key: 'kategori',
+      label: categories.find((c) => c.slug === activeCategory)?.name ?? activeCategory,
+      onRemove: () => update({ kategori: null }),
+    });
+  }
+  if (activeSurface) {
+    chips.push({
+      key: 'yuzey',
+      label: activeSurface,
+      onRemove: () => update({ yuzey: null }),
+    });
+  }
+  if (activeThickness) {
+    chips.push({
+      key: 'kalinlik',
+      label: activeThickness,
+      onRemove: () => update({ kalinlik: null }),
+    });
+  }
+  if (activeColor) {
+    chips.push({
+      key: 'renk',
+      label: localizeColor(activeColor, locale),
+      onRemove: () => update({ renk: null }),
+    });
+  }
+
   return (
-    <div className="flex flex-col gap-3 border-y border-border py-5 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-3 border-y border-border py-5 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
       <form
         role="search"
         data-search-shell
@@ -258,6 +299,44 @@ export function ProductFilter({
           <option value="code-asc">{t('catalog.sortCode')}</option>
         </Select>
       </div>
+
+      {chips.length > 0 && (
+        <div
+          role="group"
+          aria-label={t('catalog.activeFilters')}
+          className="flex w-full flex-wrap items-center gap-2"
+        >
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">
+            {t('catalog.activeFilters')}
+          </span>
+          {chips.map((chip) => (
+            <span
+              key={chip.key}
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-surface py-1 ps-3 pe-1 text-xs text-muted-strong"
+            >
+              {chip.label}
+              <button
+                type="button"
+                onClick={chip.onRemove}
+                aria-label={`${t('catalog.removeFilter')}: ${chip.label}`}
+                className="flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-surface-2 hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              setQuery('');
+              update({ q: null, kategori: null, yuzey: null, kalinlik: null, renk: null });
+            }}
+            className="tap-target ms-1 inline-flex items-center text-xs font-medium underline underline-offset-4 hover:text-foreground"
+          >
+            {t('catalog.clearAll')}
+          </button>
+        </div>
+      )}
 
       {/* Mobil bottom-sheet */}
       {sheet && (

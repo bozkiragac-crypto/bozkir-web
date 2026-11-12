@@ -3,6 +3,8 @@
 import {
   cloneElement,
   isValidElement,
+  useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactElement,
@@ -11,11 +13,13 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Phone, Paperclip, CheckCircle2 } from 'lucide-react';
+import { X, Phone, Paperclip, CheckCircle2, Plus, Search } from 'lucide-react';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { track } from '@/lib/analytics';
 import { submitQuote } from '@/lib/api/quote';
+import { filterQuoteProducts } from '@/lib/quote-picker';
+import { MAX_QUOTE_PRODUCTS } from '@/lib/quote-products';
 import { Button } from '@/components/ui/Button';
 import { TurnstileWidget } from '@/components/forms/TurnstileWidget';
 import { useDictionary } from '@/i18n/DictionaryProvider';
@@ -30,6 +34,7 @@ export interface QuoteProduct {
   slug: string;
   name: string;
   code?: string;
+  category?: string;
   image?: string;
 }
 
@@ -50,25 +55,48 @@ const fieldClass =
 
 export function QuoteForm({
   products,
+  pickerProducts,
   turnstileSiteKey = '',
   whatsappLink,
 }: {
   products?: QuoteProduct[];
+  /** Teklif formundaki aranabilir ürün seçicisi için tüm aktif ürünler. */
+  pickerProducts?: QuoteProduct[];
   turnstileSiteKey?: string;
   /** Ayarlardaki genel WhatsApp şablonuyla hazırlanmış bağlantı. */
   whatsappLink?: string;
 }) {
-  const list = products && products.length > 0 ? products : [];
+  const [selected, setSelected] = useState<QuoteProduct[]>(products ?? []);
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [sent, setSent] = useState(false);
-  const [excluded, setExcluded] = useState<string[]>([]);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileReset, setTurnstileReset] = useState(0);
+  const [pickerQuery, setPickerQuery] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const { t } = useDictionary();
+
+  const pickerList = useMemo(() => {
+    const bySlug = new Map<string, QuoteProduct>();
+    for (const product of pickerProducts ?? []) bySlug.set(product.slug, product);
+    // Bağlantıdan gelen ürün, tüm liste henüz yüklenmemiş olsa da seçili kalır.
+    for (const product of products ?? []) {
+      if (!bySlug.has(product.slug)) bySlug.set(product.slug, product);
+    }
+    return [...bySlug.values()];
+  }, [pickerProducts, products]);
+
+  const selectedSlugs = useMemo(() => selected.map((p) => p.slug), [selected]);
+  const results = useMemo(
+    () => filterQuoteProducts(pickerList, pickerQuery, selectedSlugs, 8),
+    [pickerList, pickerQuery, selectedSlugs],
+  );
+  const atLimit = selected.length >= MAX_QUOTE_PRODUCTS;
 
   const schema = z.object({
     fullName: z.string().min(2, t('quote.errors.name')),
@@ -85,9 +113,8 @@ export function QuoteForm({
     consent: z.boolean().refine((v) => v === true, { message: t('quote.errors.consent') }),
   });
 
-  const active = list.filter((p) => !excluded.includes(p.slug));
   const label = (p: QuoteProduct) => `${p.name}${p.code ? ` (${p.code})` : ''}`;
-  const productLabel = active.map(label).join(', ');
+  const productLabel = selected.map(label).join(', ');
 
   const {
     register,
@@ -100,16 +127,58 @@ export function QuoteForm({
     defaultValues: { product: productLabel },
   });
 
+  // Seçilen ürünler form alanına ve gizli slug alanına yansır.
+  useEffect(() => {
+    setValue('product', selected.map((p) => `${p.name}${p.code ? ` (${p.code})` : ''}`).join(', '));
+  }, [selected, setValue]);
+
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setPickerOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [pickerOpen]);
+
+  function addProduct(product: QuoteProduct) {
+    if (selected.some((p) => p.slug === product.slug)) return;
+    if (selected.length >= MAX_QUOTE_PRODUCTS) {
+      setPickerOpen(false);
+      return;
+    }
+    setSelected((prev) => [...prev, product]);
+    track('quote_product_add', { product: product.slug });
+    setPickerQuery('');
+    setPickerOpen(false);
+  }
+
   function removeProduct(slug: string) {
-    setExcluded((prev) => {
-      const next = [...prev, slug];
-      const remaining = list
-        .filter((p) => !next.includes(p.slug))
-        .map(label)
-        .join(', ');
-      setValue('product', remaining);
-      return next;
-    });
+    setSelected((prev) => prev.filter((p) => p.slug !== slug));
+  }
+
+  function onPickerKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Escape') {
+      setPickerOpen(false);
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setPickerOpen(true);
+      setActiveIndex((i) => Math.min(Math.max(results.length - 1, 0), i + 1));
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(0, i - 1));
+      return;
+    }
+    if (e.key === 'Enter' && pickerOpen && results[activeIndex]) {
+      e.preventDefault();
+      addProduct(results[activeIndex]!);
+    }
   }
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -141,7 +210,7 @@ export function QuoteForm({
       setResult({ ok: false, message: t('quote.errorValidation') });
       return;
     }
-    const slugs = active.map((p) => p.slug).join(',');
+    const slugs = selected.map((p) => p.slug).join(',');
     track('quote_submit', { product: values.product, product_slug: slugs });
     const res = await submitQuote(
       {
@@ -150,7 +219,7 @@ export function QuoteForm({
         phone: values.phone,
         email: values.email,
         product: values.product,
-        productId: active.length === 1 ? (active[0]?.id ?? '') : '',
+        productId: selected.length === 1 ? (selected[0]?.id ?? '') : '',
         productSlug: slugs,
         quantity: values.quantity,
         dimensions: values.dimensions,
@@ -180,7 +249,8 @@ export function QuoteForm({
   }
 
   const waHref =
-    whatsappLink || `${siteConfig.whatsapp}?text=${encodeURIComponent(t('pages.whatsapp.message'))}`;
+    whatsappLink ||
+    `${siteConfig.whatsapp}?text=${encodeURIComponent(t('pages.whatsapp.message'))}`;
 
   if (sent) {
     return (
@@ -193,9 +263,9 @@ export function QuoteForm({
           <CheckCircle2 className="h-6 w-6" />
         </span>
         <p className="mt-4 text-lg font-medium text-success">{t('quote.success')}</p>
-        {active.length > 0 && (
+        {selected.length > 0 && (
           <ul className="mt-4 flex flex-wrap gap-2">
-            {active.map((p) => (
+            {selected.map((p) => (
               <li
                 key={p.slug}
                 className="rounded-full border border-border px-3 py-1 text-xs text-muted-strong"
@@ -252,13 +322,13 @@ export function QuoteForm({
         className="hidden"
       />
 
-      {active.length > 0 && (
+      {selected.length > 0 && (
         <div className="rounded-lg border border-border bg-surface p-4">
           <p className="text-xs tracking-[0.14em] text-muted uppercase">
-            {active.length > 1 ? t('quote.selectedProducts') : t('quote.selectedProduct')}
+            {selected.length > 1 ? t('quote.selectedProducts') : t('quote.selectedProduct')}
           </p>
           <ul className="mt-3 flex flex-col gap-3">
-            {active.map((p) => (
+            {selected.map((p) => (
               <li key={p.slug} className="flex items-center gap-4">
                 {p.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -289,6 +359,117 @@ export function QuoteForm({
           </ul>
         </div>
       )}
+
+      <div ref={pickerRef} className="relative">
+        <label
+          htmlFor="quote-product-picker"
+          className="mb-2 block text-xs tracking-[0.14em] text-muted uppercase"
+        >
+          {t('quote.addProduct')}
+        </label>
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+            aria-hidden
+          />
+          <input
+            id="quote-product-picker"
+            type="text"
+            role="combobox"
+            aria-expanded={pickerOpen}
+            aria-controls="quote-product-options"
+            aria-autocomplete="list"
+            aria-activedescendant={
+              pickerOpen && results[activeIndex] ? `quote-option-${activeIndex}` : undefined
+            }
+            autoComplete="off"
+            value={pickerQuery}
+            disabled={atLimit}
+            onChange={(e) => {
+              setPickerQuery(e.target.value);
+              setPickerOpen(true);
+              setActiveIndex(0);
+            }}
+            onFocus={() => setPickerOpen(true)}
+            onKeyDown={onPickerKeyDown}
+            placeholder={t('quote.searchProduct')}
+            className={cn(
+              fieldClass,
+              'ps-11 pe-10 disabled:cursor-not-allowed disabled:opacity-60',
+            )}
+          />
+          {pickerQuery && !atLimit && (
+            <button
+              type="button"
+              aria-label={t('catalog.clear')}
+              onClick={() => {
+                setPickerQuery('');
+                setPickerOpen(true);
+              }}
+              className="absolute end-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full hover:bg-surface-2"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <p className={cn('mt-1.5 text-xs', atLimit ? 'text-muted-strong' : 'text-muted')}>
+          {atLimit
+            ? t('quote.limitNote').replace('{max}', String(MAX_QUOTE_PRODUCTS))
+            : t('quote.productPickerHint')}
+        </p>
+
+        {pickerOpen && !atLimit && (
+          <div
+            id="quote-product-options"
+            role="listbox"
+            aria-label={t('quote.searchProduct')}
+            className="absolute inset-x-0 top-full z-20 mt-1 max-h-80 overflow-y-auto rounded-lg border border-border bg-surface p-1 shadow-xl"
+          >
+            {results.length === 0 ? (
+              <p role="status" className="px-3 py-4 text-sm text-muted-strong">
+                {t('quote.productSearchEmpty')}
+              </p>
+            ) : (
+              results.map((product, index) => (
+                <button
+                  key={product.slug}
+                  id={`quote-option-${index}`}
+                  type="button"
+                  role="option"
+                  aria-selected={index === activeIndex}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => addProduct(product)}
+                  className={cn(
+                    'flex w-full items-center gap-3 rounded-md px-3 py-2 text-start transition-colors',
+                    index === activeIndex ? 'bg-surface-2' : 'hover:bg-surface-2',
+                  )}
+                >
+                  {product.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={product.image}
+                      alt=""
+                      className="h-10 w-10 flex-none rounded-md object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-surface-2 text-muted">
+                      <Search className="h-4 w-4" aria-hidden />
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">{product.name}</span>
+                    <span className="block truncate text-xs text-muted">
+                      {[product.code, product.category].filter(Boolean).join(' · ')}
+                    </span>
+                  </span>
+                  <Plus className="h-4 w-4 flex-none text-muted" aria-hidden />
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field id="fullName" label={`${t('quote.fullName')} *`} error={errors.fullName?.message}>
@@ -328,9 +509,9 @@ export function QuoteForm({
         <Field id="product" label={t('quote.productField')} error={errors.product?.message}>
           <input
             id="product"
-            className={`${fieldClass} ${active.length > 0 ? 'opacity-70' : ''}`}
+            className={`${fieldClass} ${selected.length > 0 ? 'opacity-70' : ''}`}
             {...register('product')}
-            readOnly={active.length > 0}
+            readOnly={selected.length > 0}
             placeholder={t('quote.productPlaceholder')}
           />
         </Field>
@@ -429,7 +610,10 @@ export function QuoteForm({
           />
           <span>
             {t('quote.consent')}{' '}
-            <Link href="/kvkk" className="tap-target underline underline-offset-4 hover:text-foreground">
+            <Link
+              href="/kvkk"
+              className="tap-target underline underline-offset-4 hover:text-foreground"
+            >
               {t('quote.consentLink')}
             </Link>
           </span>

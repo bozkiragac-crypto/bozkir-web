@@ -4,7 +4,7 @@ import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { QuoteForm, type QuoteProduct } from '@/components/forms/QuoteForm';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-import { getProductsBySlugs } from '@/lib/api/products';
+import { getAllProducts, getProductsBySlugs } from '@/lib/api/products';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
 import { resolveWhatsAppTemplate, whatsappHref } from '@/lib/whatsapp';
 import { pickLocaleText } from '@/lib/data/catalog';
@@ -49,14 +49,20 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
     settings.whatsapp;
   // `urun` tek ürün, `urunler` karşılaştırmadan gelen çoklu ürün slug'ları.
   const { slugs, truncated } = parseQuoteSlugs([sp.urun, sp.urunler]);
-  const found = slugs.length ? await getProductsBySlugs(slugs, locale) : [];
-  const products: QuoteProduct[] = found.map((product) => ({
+  const [found, all] = await Promise.all([
+    slugs.length ? getProductsBySlugs(slugs, locale) : Promise.resolve([]),
+    getAllProducts(undefined, locale),
+  ]);
+  const toQuoteProduct = (product: (typeof all)[number]): QuoteProduct => ({
     id: product.id,
     slug: product.slug,
     name: product.name,
     code: product.code || undefined,
+    category: product.category,
     image: product.thumbnail ?? product.images[0],
-  }));
+  });
+  const products: QuoteProduct[] = found.map(toQuoteProduct);
+  const pickerProducts: QuoteProduct[] = all.map(toQuoteProduct);
 
   const first = products[0];
 
@@ -85,11 +91,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
       />
       <Container className="grid gap-10 pb-24 md:pb-32 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
         <div>
-          <BrandLogo
-            className="mb-6 h-12"
-            alt={dict.meta.brand}
-            src={settings.identity.logo}
-          />
+          <BrandLogo className="mb-6 h-12" alt={dict.meta.brand} src={settings.identity.logo} />
           {truncated && (
             <p
               role="status"
@@ -100,6 +102,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
           )}
           <QuoteForm
             products={products}
+            pickerProducts={pickerProducts}
             turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ''}
             whatsappLink={whatsappLink}
           />

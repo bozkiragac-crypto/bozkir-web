@@ -11,6 +11,8 @@ export type AnalyticsEvent =
   | 'catalog_download'
   | 'quote_start'
   | 'quote_submit'
+  | 'quote_product_add'
+  | 'sample_request'
   | 'contact_submit'
   | 'search'
   | 'search_select'

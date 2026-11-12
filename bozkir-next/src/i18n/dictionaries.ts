@@ -107,6 +107,12 @@ export const dictionaries = {
       sortCode: 'Ürün kodu',
       clearFilters: 'Filtreleri temizle',
       noResults: 'Aramanızla eşleşen ürün bulunamadı.',
+      noResultsFor: '"{query}" için sonuç bulunamadı.',
+      searchHint: 'Farklı bir arama deneyin veya filtreleri temizleyin.',
+      browseCategories: 'Kategorilere göz atın',
+      activeFilters: 'Aktif filtreler',
+      clearAll: 'Tümünü temizle',
+      removeFilter: 'Filtreyi kaldır',
     },
     product: {
       quoteTitle: 'Teklif Alın',
@@ -129,6 +135,7 @@ export const dictionaries = {
       sampleRequest: 'Numune iste',
       sampleMessage:
         'Merhaba, {product} için numune talep etmek istiyorum. Yardımcı olabilir misiniz?',
+      sampleOpening: 'WhatsApp’ta numune talebiniz hazırlanıyor…',
       compatible: 'Uyumlu ürünler',
       arError:
         'AR başlatılamadı. Cihazınızın AR desteklediğinden ve HTTPS kullandığınızdan emin olun.',
@@ -637,6 +644,10 @@ export const dictionaries = {
       removeProduct: 'Ürünü tekliften çıkar',
       limitNote: 'Listeden ilk {max} ürün teklife eklendi.',
       whatsappTitle: 'Daha hızlı dönüş',
+      addProduct: 'Ürün ekle',
+      searchProduct: 'Ürün ara',
+      productSearchEmpty: 'Eşleşen ürün bulunamadı.',
+      productPickerHint: 'Ürün adı, kodu veya kategori ile arayın.',
       productPlaceholder: 'Örn: MDF Lam',
       dimensionsPlaceholder: 'Örn: 2800 x 2100 x 18 mm',
       errors: {
@@ -807,6 +818,12 @@ export const dictionaries = {
       sortCode: 'Product code',
       clearFilters: 'Clear filters',
       noResults: 'No products match your search.',
+      noResultsFor: 'No results for "{query}".',
+      searchHint: 'Try a different search or clear the filters.',
+      browseCategories: 'Browse categories',
+      activeFilters: 'Active filters',
+      clearAll: 'Clear all',
+      removeFilter: 'Remove filter',
     },
     product: {
       quoteTitle: 'Request a Quote',
@@ -827,8 +844,8 @@ export const dictionaries = {
       arStart: 'Start AR',
       print: 'Print',
       sampleRequest: 'Request a sample',
-      sampleMessage:
-        'Hello, I would like to request a sample of {product}. Could you help me?',
+      sampleMessage: 'Hello, I would like to request a sample of {product}. Could you help me?',
+      sampleOpening: 'Opening WhatsApp with your sample request…',
       compatible: 'Compatible products',
       arError:
         'Could not start AR. Make sure your device supports AR and you are on a secure (HTTPS) connection.',
@@ -1337,6 +1354,10 @@ export const dictionaries = {
       removeProduct: 'Remove product from quote',
       limitNote: 'Only the first {max} products from the list were added to the quote.',
       whatsappTitle: 'Faster response',
+      addProduct: 'Add product',
+      searchProduct: 'Search product',
+      productSearchEmpty: 'No matching products.',
+      productPickerHint: 'Search by product name, code or category.',
       productPlaceholder: 'e.g. MDF Lam',
       dimensionsPlaceholder: 'e.g. 2800 x 2100 x 18 mm',
       errors: {
@@ -1507,6 +1528,12 @@ export const dictionaries = {
       sortCode: 'كود المنتج',
       clearFilters: 'مسح الفلاتر',
       noResults: 'لا توجد منتجات تطابق بحثك.',
+      noResultsFor: 'لا توجد نتائج لـ "{query}".',
+      searchHint: 'جرّب بحثًا مختلفًا أو امسح الفلاتر.',
+      browseCategories: 'تصفّح الفئات',
+      activeFilters: 'الفلاتر النشطة',
+      clearAll: 'مسح الكل',
+      removeFilter: 'إزالة الفلتر',
     },
     product: {
       quoteTitle: 'اطلب عرض سعر',
@@ -1528,6 +1555,7 @@ export const dictionaries = {
       print: 'طباعة',
       sampleRequest: 'اطلب عينة',
       sampleMessage: 'مرحبًا، أرغب في طلب عينة من {product}. هل يمكنكم مساعدتي؟',
+      sampleOpening: 'جارٍ فتح واتساب مع طلب العينة…',
       compatible: 'منتجات متوافقة',
       arError: 'تعذّر بدء الواقع المعزز. تأكد من دعم جهازك واستخدامك لاتصال HTTPS.',
       notFound: 'المنتج غير موجود | منتجات بوزكير الخشبية',
@@ -2018,6 +2046,10 @@ export const dictionaries = {
       removeProduct: 'إزالة المنتج من الطلب',
       limitNote: 'تمت إضافة أول {max} منتجات من القائمة إلى طلب عرض السعر.',
       whatsappTitle: 'رد أسرع',
+      addProduct: 'إضافة منتج',
+      searchProduct: 'ابحث عن منتج',
+      productSearchEmpty: 'لا توجد منتجات مطابقة.',
+      productPickerHint: 'ابحث باسم المنتج أو الكود أو الفئة.',
       productPlaceholder: 'مثال: MDF Lam',
       dimensionsPlaceholder: 'مثال: 2800 x 2100 x 18 مم',
       errors: {

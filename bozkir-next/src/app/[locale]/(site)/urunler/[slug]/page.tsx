@@ -1,8 +1,13 @@
 import type { Metadata } from 'next';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowRight, FileText, Package } from 'lucide-react';
-import { getAdjacentProducts, getProductBySlug, getProducts, getRelatedProducts } from '@/lib/api/products';
+import { ArrowLeft, ArrowRight, FileText } from 'lucide-react';
+import {
+  getAdjacentProducts,
+  getProductBySlug,
+  getProducts,
+  getRelatedProducts,
+} from '@/lib/api/products';
 import { getSiteSettings } from '@/lib/data/settings';
 import { siteConfig } from '@/config/site';
 import { telHref } from '@/lib/phone';
@@ -14,6 +19,7 @@ import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { ProductGallery } from '@/components/products/ProductGallery';
+import { SampleRequestLink } from '@/components/products/SampleRequestLink';
 import { ProductCard } from '@/components/products/ProductCard';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal } from '@/components/animations/Reveal';
@@ -299,14 +305,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {sampleLink && (
-                <a
+                <SampleRequestLink
                   href={sampleLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="no-print mt-5 inline-flex items-center gap-2 text-sm font-medium text-muted-strong transition-colors hover:text-foreground"
-                >
-                  <Package className="h-4 w-4" /> {dict.product.sampleRequest}
-                </a>
+                  label={dict.product.sampleRequest}
+                  openingLabel={dict.product.sampleOpening}
+                  productSlug={product.slug}
+                />
               )}
 
               <Link
@@ -319,7 +323,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
         </Container>
 
-        {(product.description || extendedSpecs.length > 0 || applications.length > 0 || documents.length > 0) && (
+        {(product.description ||
+          extendedSpecs.length > 0 ||
+          applications.length > 0 ||
+          documents.length > 0) && (
           <Container className="pb-16 md:pb-20 print:pb-0">
             <div className="grid gap-10 border-t border-border pt-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
               <div className="grid content-start gap-10">
