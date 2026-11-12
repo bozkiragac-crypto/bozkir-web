@@ -5,6 +5,8 @@ import type { Locale } from '@/i18n/config';
 import type { Category } from '@/types/category';
 import type { Product, ProductFacets, ProductFilters, ProductQueryResult } from '@/types/product';
 import { fallbackCategories } from '@/data/categories';
+import { deriveColors, localizeColor, translateDecorName } from '@/data/color-names';
+import { buildProductContent } from '@/data/product-content';
 import { getDb, hasDb } from '@/lib/db/client';
 import { products as productsTable } from '@/lib/db/schema';
 import { publicUrl } from '@/lib/storage/s3';
@@ -182,7 +184,7 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       category: cat,
       categorySlug: categorySlugOf(cat),
       face: String(row.face ?? '').trim(),
-      colors: parseImageList(row.colors),
+      colors: deriveColors(parseImageList(row.colors), name),
       thicknesses: mergeThicknesses(parseImageList(row.thicknesses), name),
       dimensions: String(row.dimensions ?? '').trim(),
       applications: parseImageList(row.applications),
@@ -239,25 +241,24 @@ export { pickLocaleText } from '@/lib/locale-text';
 
 function toProduct(item: IndexItem, locale?: Locale): Product {
   const images = item.images.map((value) => publicUrl(value));
-  return {
+  // Ürün adı bir renk/ahşap adıysa görüntüde çevrilir; marka/seri adları korunur.
+  const localizedName = pickLocaleText(item.name, locale, item.nameEn, item.nameAr);
+  const name = localizedName === item.name ? translateDecorName(item.name, locale) : localizedName;
+  const colors = item.colors.map((color) => localizeColor(color, locale));
+
+  const base: Product = {
     id: item.id,
     slug: item.slug,
-    name: pickLocaleText(item.name, locale, item.nameEn, item.nameAr),
+    name,
     code: isMeaningfulCode(item.code, item.category, item.name) ? item.code : undefined,
-    category: categoryDisplayName(
-      item.categorySlug,
-      item.category,
-      locale,
-      item.catEn,
-      item.catAr,
-    ),
+    category: categoryDisplayName(item.categorySlug, item.category, locale, item.catEn, item.catAr),
     categorySlug: item.categorySlug,
     updatedAt: item.updatedAt || undefined,
     face: isMeaningfulSurface(item.face) ? item.face : undefined,
-    colors: item.colors,
+    colors: colors.length > 0 ? colors : undefined,
     thicknesses: item.thicknesses,
     dimensions: item.dimensions || undefined,
-    applications: item.applications,
+    applications: item.applications.length > 0 ? item.applications : undefined,
     shortDescription: item.shortDescription || undefined,
     description:
       pickLocaleText(item.description, locale, item.descriptionEn, item.descriptionAr) || undefined,
@@ -275,6 +276,9 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
         item.whatsappMessageAr,
       ) || undefined,
   };
+
+  // Boş içerik alanları kategori şablonuyla doldurulur; admin verisi ezilmez.
+  return { ...base, ...buildProductContent(base, locale) };
 }
 
 /** Verilen ID'leri istenen sırada döndürür; bulunmayan/pasif ürünler atlanır. */
@@ -290,10 +294,7 @@ export async function fetchProductsByIds(ids: string[], locale?: Locale): Promis
 }
 
 /** Verilen slug'ları istenen sırada döndürür; bulunmayan/pasif ürünler atlanır. */
-export async function fetchProductsBySlugs(
-  slugs: string[],
-  locale?: Locale,
-): Promise<Product[]> {
+export async function fetchProductsBySlugs(slugs: string[], locale?: Locale): Promise<Product[]> {
   const wanted = slugs.map((slug) => String(slug).trim()).filter(Boolean);
   if (wanted.length === 0) return [];
   const index = await getProductsIndex();

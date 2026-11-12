@@ -239,6 +239,11 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
 
       <fieldset className="grid gap-5 rounded-md border border-border p-5">
         <legend className={`px-2 ${label}`}>Ürün açıklaması ve teknik bilgiler</legend>
+        <p className="text-xs text-muted">
+          Kısa açıklama ve detay açıklaması boş bırakılırsa kategori şablonundan doldurulur. Buraya
+          yazdığınız metin şablonu ezer; teknik özellikler yalnızca sizin girdiğiniz değerlerden
+          oluşur.
+        </p>
         <label className="grid gap-2">
           <span className={label}>Kısa açıklama (kart ve liste)</span>
           <input
@@ -357,7 +362,9 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
         </summary>
         <div className="mt-5 grid gap-6">
           <fieldset className="grid gap-5 rounded-md border border-border p-5 sm:grid-cols-2">
-            <legend className={`px-2 ${label}`}>Çeviriler (boşsa Türkçe kullanılır)</legend>
+            <legend className={`px-2 ${label}`}>
+              Çeviriler (boşsa Türkçe ad veya kategori şablonu kullanılır)
+            </legend>
             <label className="grid gap-2">
               <span className={label}>Ürün Adı (EN)</span>
               <input

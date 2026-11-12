@@ -8,6 +8,8 @@ import { Select } from '@/components/ui/Select';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { track } from '@/lib/analytics';
 import { useDictionary } from '@/i18n/DictionaryProvider';
+import { isLocale } from '@/i18n/config';
+import { localizeColor } from '@/data/color-names';
 
 interface ProductFilterProps {
   categories: Category[];
@@ -30,7 +32,8 @@ export function ProductFilter({
   const params = useSearchParams();
   const routeParams = useParams();
   const { t } = useDictionary();
-  const locale = typeof routeParams?.locale === 'string' ? routeParams.locale : 'tr';
+  const routeLocale = typeof routeParams?.locale === 'string' ? routeParams.locale : undefined;
+  const locale = isLocale(routeLocale) ? routeLocale : 'tr';
   const [query, setQuery] = useState(params.get('q') ?? '');
   const [sheet, setSheet] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -233,7 +236,7 @@ export function ProductFilter({
               </option>
               {colors.map((v) => (
                 <option key={v} value={v}>
-                  {v}
+                  {localizeColor(v, locale)}
                 </option>
               ))}
             </Select>
@@ -357,7 +360,7 @@ export function ProductFilter({
                     <option value="">{t('catalog.all')}</option>
                     {colors.map((v) => (
                       <option key={v} value={v}>
-                        {v}
+                        {localizeColor(v, locale)}
                       </option>
                     ))}
                   </Select>
