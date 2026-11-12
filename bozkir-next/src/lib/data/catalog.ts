@@ -9,6 +9,12 @@ import { getDb, hasDb } from '@/lib/db/client';
 import { products as productsTable } from '@/lib/db/schema';
 import { publicUrl } from '@/lib/storage/s3';
 import { pickLocaleText } from '@/lib/locale-text';
+import {
+  categoryDisplayName,
+  isMeaningfulCode,
+  isMeaningfulSurface,
+  mergeThicknesses,
+} from '@/lib/product-display';
 
 import { categoryKeyOf, categorySlugOf, slugify, toAscii } from '@/lib/data/category-key';
 
@@ -177,7 +183,7 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       categorySlug: categorySlugOf(cat),
       face: String(row.face ?? '').trim(),
       colors: parseImageList(row.colors),
-      thicknesses: parseImageList(row.thicknesses),
+      thicknesses: mergeThicknesses(parseImageList(row.thicknesses), name),
       dimensions: String(row.dimensions ?? '').trim(),
       applications: parseImageList(row.applications),
       shortDescription: String(row.shortDescription ?? '').trim(),
@@ -237,11 +243,17 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
     id: item.id,
     slug: item.slug,
     name: pickLocaleText(item.name, locale, item.nameEn, item.nameAr),
-    code: item.code,
-    category: pickLocaleText(item.category, locale, item.catEn, item.catAr),
+    code: isMeaningfulCode(item.code, item.category, item.name) ? item.code : undefined,
+    category: categoryDisplayName(
+      item.categorySlug,
+      item.category,
+      locale,
+      item.catEn,
+      item.catAr,
+    ),
     categorySlug: item.categorySlug,
     updatedAt: item.updatedAt || undefined,
-    face: item.face,
+    face: isMeaningfulSurface(item.face) ? item.face : undefined,
     colors: item.colors,
     thicknesses: item.thicknesses,
     dimensions: item.dimensions || undefined,
@@ -344,7 +356,7 @@ export async function fetchProducts(
   if (filters.category) items = items.filter((i) => i.categorySlug === filters.category);
   if (filters.surface) {
     const needle = normSearch(filters.surface);
-    items = items.filter((i) => normSearch(i.face) === needle);
+    items = items.filter((i) => isMeaningfulSurface(i.face) && normSearch(i.face) === needle);
   }
   if (filters.thickness) {
     const thickness = filters.thickness;
@@ -361,7 +373,7 @@ export async function fetchProducts(
     // Arama hem Türkçe hem çeviri metinlerinde çalışır.
     const hayOf = (i: IndexItem) =>
       toAscii(
-        `${i.name} ${i.code} ${i.category} ${i.nameEn} ${i.nameAr} ${i.catEn} ${i.catAr} ${i.face} ${i.colors.join(' ')} ${i.thicknesses.join(' ')}`,
+        `${i.name} ${i.code} ${i.category} ${i.nameEn} ${i.nameAr} ${i.catEn} ${i.catAr} ${isMeaningfulSurface(i.face) ? i.face : ''} ${i.colors.join(' ')} ${i.thicknesses.join(' ')}`,
       ).toLowerCase();
     if (tokens.length > 1) {
       items = items.filter((i) => {
@@ -487,7 +499,9 @@ export async function fetchProductImageRaw(id: string): Promise<string> {
 export async function fetchProductFacets(): Promise<ProductFacets> {
   const items = await getProductsIndex();
   return {
-    surfaces: collectFacetValues(items.map((i) => i.face)),
+    surfaces: collectFacetValues(
+      items.filter((i) => isMeaningfulSurface(i.face)).map((i) => i.face),
+    ),
     thicknesses: collectFacetValues(items.flatMap((i) => i.thicknesses)),
     colors: collectFacetValues(items.flatMap((i) => i.colors)),
   };

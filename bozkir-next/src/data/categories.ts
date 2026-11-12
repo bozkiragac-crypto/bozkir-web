@@ -62,6 +62,8 @@ export const fallbackCategories: Category[] = [
   },
   {
     id: 'sunta',
+    nameEn: 'Chipboard',
+    nameAr: 'سونتا',
     slug: 'sunta',
     name: 'Sunta',
     description: 'Mobilya üretiminin temel yonga levhası. Farklı kalınlık ve ölçülerde tedarik.',
@@ -113,6 +115,8 @@ export const fallbackCategories: Category[] = [
   // İkincil kategoriler
   {
     id: 'kaplamali-mdf',
+    nameEn: 'Veneered MDF',
+    nameAr: 'MDF مكسو',
     slug: 'kaplamali-mdf',
     name: 'Kaplamalı MDF',
     description: 'Kaplama uygulanmış MDF paneller.',
@@ -121,6 +125,8 @@ export const fallbackCategories: Category[] = [
   },
   {
     id: 'masif-panel',
+    nameEn: 'Solid Panel',
+    nameAr: 'لوح صلب',
     slug: 'masif-panel',
     name: 'Masif Panel',
     description: 'Masif ahşap paneller.',

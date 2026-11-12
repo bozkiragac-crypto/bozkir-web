@@ -9,7 +9,7 @@ import { FavoriteButton, CompareButton } from '@/components/products/WishButtons
 import { ShareButton } from '@/components/products/ShareButton';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useDictionary } from '@/i18n/DictionaryProvider';
-import { cn, cssColor } from '@/lib/utils';
+import { cssColor } from '@/lib/utils';
 import type { Product } from '@/types/product';
 
 /**
@@ -52,6 +52,14 @@ export function ProductQuickView({
 
   const image = product.thumbnail ?? product.images[0];
   const description = product.shortDescription ?? product.description;
+  const thicknessLabel = product.thicknesses?.slice(0, 2).join(' / ');
+  const meta = [
+    product.category,
+    product.face ? `${t('product.surface')} ${product.face}` : '',
+    thicknessLabel ?? '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
   const pRef = {
     id: product.id,
     slug: product.slug,
@@ -107,10 +115,7 @@ export function ProductQuickView({
               </p>
             )}
             <h2 className="mt-1 text-xl font-medium tracking-tight md:text-2xl">{product.name}</h2>
-            <p className={cn('mt-1 text-sm text-muted-strong', !product.face && 'capitalize')}>
-              {product.category}
-              {product.face ? ` · ${t('product.surface')} ${product.face}` : ''}
-            </p>
+            <p className="mt-1 text-sm text-muted-strong">{meta}</p>
           </div>
 
           {description && (

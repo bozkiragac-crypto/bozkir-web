@@ -363,8 +363,7 @@ export function QuoteForm({
 
       <div>
         <span className="mb-2 block text-xs tracking-[0.14em] text-muted uppercase">
-          {t('quote.attachment')}{' '}
-          <span className="normal-case tracking-normal">({t('quote.attachmentHint')})</span>
+          {t('quote.attachment')}
         </span>
         <label
           htmlFor="attachment"

@@ -8,7 +8,7 @@ import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
 import { FavoriteButton } from '@/components/products/WishButtons';
 import { ProductQuickView } from '@/components/products/ProductQuickView';
 import type { Product } from '@/types/product';
-import { cn, cssColor } from '@/lib/utils';
+import { cssColor } from '@/lib/utils';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export function ProductCard({
@@ -25,6 +25,16 @@ export function ProductCard({
   const { t } = useDictionary();
   const image = product.thumbnail ?? product.images[0];
   const secondImage = product.images.find((u) => u !== image);
+  // Kart alt satırı: kategori + (varsa) kalınlık/yüzey. Renk yalnızca hover
+  // rozetlerinde kalır; böylece kartta aynı bilgi iki kez görünmez.
+  const thicknessLabel = product.thicknesses?.slice(0, 2).join(' / ');
+  const meta = [
+    product.category,
+    product.face ? `${t('product.surface')} ${product.face}` : '',
+    thicknessLabel ?? '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
   const ref = {
     id: product.id,
     slug: product.slug,
@@ -91,18 +101,10 @@ export function ProductCard({
             <h3 className="link-underline-group mt-1 inline-block text-sm font-medium tracking-tight sm:text-base">
               {product.name}
             </h3>
-            <p
-              className={cn(
-                'mt-1 text-xs text-muted-strong sm:text-sm',
-                !product.face && 'capitalize',
-              )}
-            >
-              {product.category}
-              {product.face ? ` · ${t('product.surface')} ${product.face}` : ''}
-            </p>
-            {product.colors?.length || product.thicknesses?.length ? (
+            <p className="mt-1 text-xs text-muted-strong sm:text-sm">{meta}</p>
+            {product.colors?.length ? (
               <div className="mt-2 flex flex-wrap items-center gap-1.5 opacity-100 transition-opacity duration-300 ease-[var(--ease-out-expo)] md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
-                {product.colors?.slice(0, 5).map((c) => (
+                {product.colors.slice(0, 5).map((c) => (
                   <span
                     key={c}
                     className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-[0.75rem] capitalize text-muted-strong"
@@ -115,14 +117,6 @@ export function ProductCard({
                       />
                     ) : null}
                     {c}
-                  </span>
-                ))}
-                {product.thicknesses?.slice(0, 4).map((th) => (
-                  <span
-                    key={th}
-                    className="numerals rounded-full border border-border px-2 py-0.5 text-[0.75rem] text-muted-strong"
-                  >
-                    {th}
                   </span>
                 ))}
               </div>

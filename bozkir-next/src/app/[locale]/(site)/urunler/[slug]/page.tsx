@@ -159,13 +159,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
   specs.push({ label: dict.compare.category, value: product.category });
   if (product.face) specs.push({ label: dict.compare.surface, value: product.face });
   if (product.dimensions) specs.push({ label: dict.product.dimensions, value: product.dimensions });
+  if (product.thicknesses?.length) {
+    specs.push({ label: dict.compare.thickness, value: product.thicknesses.join(' · ') });
+  }
 
   // Detay bölümü: hızlı özet + kalınlık/renk + admin'den girilen teknik özellikler.
   // Aynı etiket iki kez görünmesin (ör. teknik özellik olarak "Kod" girilmişse).
   const detailSpecs = [...specs];
-  if (product.thicknesses?.length) {
-    detailSpecs.push({ label: dict.compare.thickness, value: product.thicknesses.join(' · ') });
-  }
   if (product.colors?.length) {
     detailSpecs.push({ label: dict.product.colors, value: product.colors.join(' · ') });
   }

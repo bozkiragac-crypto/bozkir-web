@@ -12,6 +12,7 @@ import { ShareListButton, useImportFromUrl } from '@/components/products/ListImp
 import { PrintButton } from '@/components/products/PrintButton';
 import { fetchProductBatch } from '@/lib/api/product-batch';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
+import { isMeaningfulCode, isMeaningfulSurface } from '@/lib/product-display';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types/product';
 
@@ -47,10 +48,25 @@ export function CompareView() {
   const quoteHref = `/teklif-al?urunler=${compare.map((c) => encodeURIComponent(c.slug)).join(',')}`;
 
   // Fark vurgusu için satır değerleri (aynı olanlar soluk, farklılar öne çıkar).
+  // Favorilerden gelen `ref` eski/kirli veri taşıyabilir; kod ve yüzey değerleri
+  // gösterim kurallarından geçirilir (anlamsız değerler "—" olur).
+  const codeOf = (entry: (typeof items)[number]) => {
+    const { ref, product } = entry;
+    const code = product?.code ?? ref.code;
+    if (!code) return '—';
+    return isMeaningfulCode(code, product?.category ?? ref.category, product?.name ?? ref.name)
+      ? code
+      : '—';
+  };
+  const surfaceOf = (entry: (typeof items)[number]) => {
+    const { ref, product } = entry;
+    const surface = product?.face ?? ref.face;
+    return isMeaningfulSurface(surface) ? String(surface) : '—';
+  };
   const baseRows: { label: string; values: string[]; numerals?: boolean }[] = [
     {
       label: t('compare.code'),
-      values: items.map(({ ref, product }) => product?.code ?? ref.code ?? '—'),
+      values: items.map(codeOf),
       numerals: true,
     },
     {
@@ -59,7 +75,7 @@ export function CompareView() {
     },
     {
       label: t('compare.surface'),
-      values: items.map(({ ref, product }) => (product?.face ?? ref.face) || '—'),
+      values: items.map(surfaceOf),
     },
     {
       label: t('product.dimensions'),
