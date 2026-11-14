@@ -57,6 +57,7 @@ export function CategorySearch() {
             setQuery('');
             submit('');
           }}
+          className="-me-2 flex h-11 w-11 flex-none items-center justify-center rounded-full text-muted transition-colors hover:text-foreground"
         >
           <X className="h-4 w-4 text-muted" />
         </button>

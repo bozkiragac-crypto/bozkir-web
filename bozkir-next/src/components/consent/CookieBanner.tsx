@@ -14,7 +14,7 @@ export function CookieBanner() {
 
   return (
     <div
-      role="dialog"
+      role="region"
       aria-live="polite"
       aria-label={c.consentPolicy}
       data-cookie-banner

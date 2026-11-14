@@ -173,6 +173,7 @@ export function ProductFilter({
               setQuery('');
               update({ q: null });
             }}
+            className="-me-2 flex h-11 w-11 flex-none items-center justify-center rounded-full text-muted transition-colors hover:text-foreground"
           >
             <X className="h-4 w-4 text-muted" />
           </button>
@@ -319,7 +320,7 @@ export function ProductFilter({
                 type="button"
                 onClick={chip.onRemove}
                 aria-label={`${t('catalog.removeFilter')}: ${chip.label}`}
-                className="flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-surface-2 hover:text-foreground"
+                className="tap-target flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-surface-2 hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
               </button>

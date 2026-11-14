@@ -163,7 +163,7 @@ export function CompareView() {
                     aria-pressed={onlyDiff}
                     onClick={() => setOnlyDiff((value) => !value)}
                     className={cn(
-                      'inline-flex h-9 items-center gap-2 rounded-full border px-4 text-sm transition',
+                      'inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm transition',
                       onlyDiff
                         ? 'border-transparent bg-foreground text-background'
                         : 'border-border text-muted-strong hover:border-foreground hover:text-foreground',
@@ -235,7 +235,7 @@ export function CompareView() {
                           type="button"
                           onClick={() => removeCompare(ref.slug)}
                           aria-label={t('quote.removeProduct')}
-                          className="mt-3 inline-flex h-9 items-center gap-1.5 rounded-full border border-border px-3 text-xs text-muted-strong transition hover:border-foreground hover:text-foreground"
+                          className="mt-3 inline-flex h-11 items-center gap-1.5 rounded-full border border-border px-3 text-xs text-muted-strong transition hover:border-foreground hover:text-foreground"
                         >
                           <X className="h-3.5 w-3.5" /> {t('quote.removeProduct')}
                         </button>

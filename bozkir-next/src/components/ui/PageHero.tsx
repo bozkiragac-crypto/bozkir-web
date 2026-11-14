@@ -52,12 +52,15 @@ export function PageHero({
                 {c.href ? (
                   <Link
                     href={c.href}
+                    aria-current={i === crumbs.length - 1 ? 'page' : undefined}
                     className="tap-target link-underline transition-colors hover:text-foreground"
                   >
                     {c.label}
                   </Link>
                 ) : (
-                  <span>{c.label}</span>
+                  <span aria-current={i === crumbs.length - 1 ? 'page' : undefined}>
+                    {c.label}
+                  </span>
                 )}
                 {i < crumbs.length - 1 && <span aria-hidden>/</span>}
               </span>

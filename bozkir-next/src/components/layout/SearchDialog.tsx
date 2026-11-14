@@ -228,7 +228,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
             type="button"
             onClick={onClose}
             aria-label={t('search.close')}
-            className="text-muted-strong hover:text-foreground"
+            className="-me-2 flex h-11 w-11 flex-none items-center justify-center rounded-full text-muted-strong transition-colors hover:bg-surface-2 hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -241,7 +241,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
               <button
                 type="button"
                 onClick={clearRecents}
-                className="text-xs text-muted-strong hover:text-foreground"
+                className="tap-target -me-2 inline-flex h-11 items-center rounded-full px-2 text-xs text-muted-strong transition-colors hover:text-foreground"
               >
                 {t('search.clear')}
               </button>

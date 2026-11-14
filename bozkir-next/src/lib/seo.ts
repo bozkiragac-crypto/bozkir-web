@@ -25,6 +25,18 @@ export function absoluteUrl(path = '/') {
 }
 
 /**
+ * Sayfalama canonical'ı: 1. sayfa temiz yolu korur, sonraki sayfalar
+ * `?sayfa=N` ile kendine canonical verir. Filtre parametreleri canonical'a
+ * girmez; böylece aynı içeriğin onlarca varyantı indekslenmez.
+ */
+export function paginatedPath(basePath: string, page: number, param = 'sayfa'): string {
+  if (!Number.isFinite(page) || page <= 1) return basePath;
+  const cleanPage = Math.floor(page);
+  const separator = basePath.includes('?') ? '&' : '?';
+  return `${basePath}${separator}${param}=${cleanPage}`;
+}
+
+/**
  * JSON-LD'yi `<script type="application/ld+json">` içine güvenle gömer.
  * `JSON.stringify` `<` kaçırmadığı için, DB'den gelen içerik `</script>` ile
  * script etiketinden çıkabilir (XSS). Bu yardımcı `< > &` ve satır ayraçlarını kaçırır.
@@ -224,6 +236,7 @@ export function organizationJsonLd(
 export function websiteJsonLd(
   locale: Locale = defaultLocale,
   siteName: string = siteConfig.legalName,
+  description?: string,
 ) {
   return {
     '@context': 'https://schema.org',
@@ -231,6 +244,8 @@ export function websiteJsonLd(
     name: siteName,
     url: absoluteUrl(`/${locale}`),
     inLanguage: locale,
+    ...(description ? { description } : {}),
+    publisher: { '@id': absoluteUrl('/#store') },
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -252,5 +267,69 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[], locale
       name: item.name,
       item: localeUrl(locale, item.path),
     })),
+  };
+}
+
+/** Liste sayfaları için ItemList şeması; adet ve mutlak URL'ler birlikte verilir. */
+export function itemListJsonLd(
+  items: { name: string; path: string }[],
+  locale?: Locale,
+  name?: string,
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    ...(name ? { name } : {}),
+    numberOfItems: items.length,
+    itemListElement: items.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: localeUrl(locale, item.path),
+      name: item.name,
+    })),
+  };
+}
+
+export interface ProductJsonLdInput {
+  name: string;
+  description: string;
+  url: string;
+  category: string;
+  brandName: string;
+  code?: string;
+  images?: string[];
+  /** Yüzey, kalınlık, renk, ölçü gibi gerçek ürün özellikleri. */
+  properties?: { name: string; value: string }[];
+}
+
+/**
+ * Ürün şeması. Fiyat veritabanında tutulmadığı için `offers` **bilinçli olarak
+ * eklenmez**; uydurma fiyat/Stok bilgisi SEO'ya zarar verir. Gerçek özellikler
+ * `additionalProperty` ile zenginleştirilir.
+ */
+export function productJsonLd(input: ProductJsonLdInput) {
+  const images = (input.images ?? []).filter(Boolean).map((image) => absoluteUrl(image));
+  const properties = (input.properties ?? []).filter((p) => p.name && p.value);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': input.url,
+    name: input.name,
+    description: input.description,
+    url: input.url,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': input.url },
+    category: input.category,
+    brand: { '@type': 'Brand', name: input.brandName },
+    ...(input.code ? { sku: input.code, mpn: input.code } : {}),
+    ...(images.length > 0 ? { image: images } : {}),
+    ...(properties.length > 0
+      ? {
+          additionalProperty: properties.map((property) => ({
+            '@type': 'PropertyValue',
+            name: property.name,
+            value: property.value,
+          })),
+        }
+      : {}),
   };
 }

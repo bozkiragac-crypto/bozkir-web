@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Plus } from 'lucide-react';
-import { buildMetadata, jsonLdString } from '@/lib/seo';
+import { absoluteUrl, buildMetadata, jsonLdString } from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
@@ -31,15 +31,23 @@ export default async function FaqPage({ params }: PageProps) {
   const block = await getContentBlock('faq', lang);
   const items = block?.items ?? [];
 
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: items.map((item) => ({
-      '@type': 'Question',
-      name: item.title,
-      acceptedAnswer: { '@type': 'Answer', text: item.description },
-    })),
-  };
+  // Yalnızca başlığı ve cevabı dolu öğeler şemaya girer; boş kayıtlar
+  // Google'da "eksik cevap" uyarısına yol açmamalı.
+  const faqItems = items.filter((item) => item.title.trim() && item.description.trim());
+  const faqJsonLd =
+    faqItems.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          '@id': absoluteUrl(`/${lang}/sss`),
+          inLanguage: lang,
+          mainEntity: faqItems.map((item) => ({
+            '@type': 'Question',
+            name: item.title,
+            acceptedAnswer: { '@type': 'Answer', text: item.description },
+          })),
+        }
+      : null;
 
   return (
     <>
@@ -50,10 +58,12 @@ export default async function FaqPage({ params }: PageProps) {
           { name: dict.nav.faq, path: '/sss' },
         ]}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdString(faqJsonLd) }}
-      />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdString(faqJsonLd) }}
+        />
+      )}
 
       <PageHero
         eyebrow={dict.nav.faq}

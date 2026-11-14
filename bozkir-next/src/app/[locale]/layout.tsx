@@ -112,7 +112,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: jsonLdString(websiteJsonLd(typed, settings.identity.legalName)),
+            __html: jsonLdString(
+              websiteJsonLd(typed, settings.identity.legalName, dict.meta.homeDescription),
+            ),
           }}
         />
       </head>

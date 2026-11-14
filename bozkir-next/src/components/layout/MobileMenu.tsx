@@ -120,7 +120,7 @@ export function MobileMenu({
                   key={c.id}
                   href={`/kategoriler/${c.slug}`}
                   onClick={onClose}
-                  className="py-2.5"
+                  className="py-2.5 tap-target"
                 >
                   {c.name}
                 </Link>

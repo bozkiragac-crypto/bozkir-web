@@ -13,7 +13,13 @@ import { siteConfig } from '@/config/site';
 import { telHref } from '@/lib/phone';
 import { buildProductWhatsAppMessage, whatsappHref } from '@/lib/whatsapp';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
-import { buildMetadata, breadcrumbJsonLd, absoluteUrl, localeUrl, jsonLdString } from '@/lib/seo';
+import {
+  buildMetadata,
+  breadcrumbJsonLd,
+  localeUrl,
+  jsonLdString,
+  productJsonLd,
+} from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
@@ -138,27 +144,34 @@ export default async function ProductDetailPage({ params }: PageProps) {
     image,
   };
 
-  const productJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
+  // JSON-LD yalnızca gerçek (DB/admin) verisini kullanır; boş alanlar eklenmez.
+  const jsonLdProperties: { name: string; value: string }[] = [];
+  if (product.face) jsonLdProperties.push({ name: dict.compare.surface, value: product.face });
+  if (product.dimensions) {
+    jsonLdProperties.push({ name: dict.product.dimensions, value: product.dimensions });
+  }
+  if (product.thicknesses?.length) {
+    jsonLdProperties.push({
+      name: dict.compare.thickness,
+      value: product.thicknesses.join(' · '),
+    });
+  }
+  if (product.colors?.length) {
+    jsonLdProperties.push({ name: dict.product.colors, value: product.colors.join(' · ') });
+  }
+  const productSchema = productJsonLd({
     name: product.name,
     description:
       product.description ??
       product.shortDescription ??
       `${product.name}${product.code ? ` (${product.code})` : ''} · ${product.category}`,
-    sku: product.code || undefined,
+    url: productUrl,
     category: product.category,
-    image: image ? [absoluteUrl(image)] : undefined,
-    brand: { '@type': 'Brand', name: dict.meta.brand },
-    url: localeUrl(locale, `/urunler/${product.slug}`),
-    ...(product.face
-      ? {
-          additionalProperty: [
-            { '@type': 'PropertyValue', name: dict.compare.surface, value: product.face },
-          ],
-        }
-      : {}),
-  };
+    brandName: dict.meta.brand,
+    code: product.code,
+    images: product.images.length > 0 ? product.images : image ? [image] : [],
+    properties: jsonLdProperties,
+  });
 
   const specs: { label: string; value: string }[] = [];
   if (product.code) specs.push({ label: dict.compare.code, value: product.code });
@@ -196,7 +209,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdString(productJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdString(productSchema) }}
       />
       <script
         type="application/ld+json"

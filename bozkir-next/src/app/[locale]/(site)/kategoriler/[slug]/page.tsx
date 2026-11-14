@@ -5,7 +5,13 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Suspense } from 'react';
 import { getCategories, getCategoryBySlug } from '@/lib/api/categories';
 import { getProducts } from '@/lib/api/products';
-import { buildMetadata, breadcrumbJsonLd, absoluteUrl, jsonLdString } from '@/lib/seo';
+import {
+  buildMetadata,
+  breadcrumbJsonLd,
+  itemListJsonLd,
+  jsonLdString,
+  paginatedPath,
+} from '@/lib/seo';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ProductCard } from '@/components/products/ProductCard';
@@ -31,8 +37,11 @@ function str(v: string | string[] | undefined) {
   return typeof v === 'string' ? v : undefined;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug, locale: localeParam } = await params;
+export async function generateMetadata({
+  params,
+  searchParams,
+}: PageProps): Promise<Metadata> {
+  const [{ slug, locale: localeParam }, sp] = await Promise.all([params, searchParams]);
   const localeParamOrNull = localeParam ?? undefined;
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
   const dict = await dictForRequest(locale ?? 'tr');
@@ -45,10 +54,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       locale,
     });
   }
+  const page = Math.max(1, parseInt(str(sp.sayfa) ?? '1', 10) || 1);
   return buildMetadata({
     title: category.seoTitle ?? `${category.name} | ${dict.meta.brand}`,
     description: category.seoDescription ?? category.description,
-    path: `/kategoriler/${category.slug}`,
+    // 2. sayfa kendine canonical verir; arama/sıralama canonical'a girmez.
+    path: paginatedPath(`/kategoriler/${category.slug}`, page),
     // Dinamik OG görseli: opengraph-image.tsx dosya-convention ile üretilir.
     image: null,
     locale,
@@ -114,16 +125,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: jsonLdString({
-              '@context': 'https://schema.org',
-              '@type': 'ItemList',
-              itemListElement: items.map((p, i) => ({
-                '@type': 'ListItem',
-                position: i + 1,
-                url: absoluteUrl(`/${locale ?? 'tr'}/urunler/${p.slug}`),
-                name: p.name,
-              })),
-            }),
+            __html: jsonLdString(
+              itemListJsonLd(
+                items.map((p) => ({ name: p.name, path: `/urunler/${p.slug}` })),
+                locale,
+                category.name,
+              ),
+            ),
           }}
         />
       )}
