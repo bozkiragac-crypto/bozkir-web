@@ -23,13 +23,41 @@ test.describe('Genel site gezinme', () => {
     }
   });
 
-  test('iletişim sayfası ofis + depo haritalarını gösterir', async ({ page }) => {
+  test('iletişim sayfası masaüstünde iki haritayı gösterir', async ({ page, isMobile }) => {
+    test.skip(!!isMobile, 'Masaüstü düzeni masaüstü projesinde test edilir');
+    await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/tr/iletisim');
-    await expect(page.getByText('İş yeri konumu').first()).toBeVisible();
-    await expect(page.getByText('Depo konumu').first()).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Konumlar' })).toBeVisible();
-    const maps = page.locator('iframe[title*="konum"]');
-    await expect(maps).toHaveCount(2);
+    await expect(page.getByRole('heading', { name: 'İş yeri konumu' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Depo konumu' })).toBeVisible();
+    // Sekmeler yalnızca lg altında görünür; masaüstünde iki ayrı harita vardır.
+    await expect(page.getByRole('tablist', { name: 'Konumlar' })).toBeHidden();
+    await expect(page.locator('iframe[title*="konum"]:visible')).toHaveCount(2);
+    await expect(page.getByRole('link', { name: /Yol tarifi al/ }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Haritada aç/ }).first()).toBeVisible();
+    await expect(page.getByText(/Şu an (açık|kapalı)/).first()).toBeVisible();
+  });
+
+  test('iletişim sayfası mobilde sekmelerle haritaları değiştirir', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/tr/iletisim');
+    await expect(page.getByRole('heading', { name: 'Konumlar' })).toBeVisible();
+    await expect(page.getByRole('tablist', { name: 'Konumlar' })).toBeVisible();
+
+    const officeTab = page.getByRole('tab', { name: 'İş yeri konumu' });
+    const depotTab = page.getByRole('tab', { name: 'Depo konumu' });
+    await expect(officeTab).toBeVisible();
+    await expect(depotTab).toBeVisible();
+    await expect(officeTab).toHaveAttribute('aria-selected', 'true');
+    // Aynı anda tek harita yüklenir (masaüstü haritaları gizli ama DOM'da kalır).
+    await expect(page.locator('iframe[title*="konum"]:visible')).toHaveCount(1);
+    await expect(page.locator('iframe[title*="iş yeri"]:visible')).toBeVisible();
+
+    await depotTab.click();
+    await expect(depotTab).toHaveAttribute('aria-selected', 'true');
+    await expect(officeTab).toHaveAttribute('aria-selected', 'false');
+    await expect(page.locator('iframe[title*="depo"]:visible')).toBeVisible();
+
     await expect(page.getByRole('link', { name: /Yol tarifi al/ }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: /Haritada aç/ }).first()).toBeVisible();
     await expect(page.getByText(/Şu an (açık|kapalı)/).first()).toBeVisible();
