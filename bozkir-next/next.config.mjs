@@ -11,6 +11,22 @@ const extraHosts = (process.env.NEXT_PUBLIC_MEDIA_HOSTS ?? '')
 
 const isDev = process.env.NODE_ENV !== 'production';
 
+// Canonical/hreflang/OG adresleri bu değerden üretilir. Üretim derlemesinde
+// localhost kalırsa arama motorlarına erişilemeyen URL'ler bildirilir;
+// sessizce devam etmek yerine derleme çıktısında görünür bir uyarı ver.
+if (!isDev) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl) {
+    console.warn(
+      '[bozkir] NEXT_PUBLIC_SITE_URL tanimli degil; varsayilan https://www.bozkiragac.com kullanilacak.',
+    );
+  } else if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/i.test(siteUrl)) {
+    console.warn(
+      `[bozkir] NEXT_PUBLIC_SITE_URL üretimde localhost (${siteUrl}). Canonical/OG adresleri yanlış olur; https://www.bozkiragac.com kullanın.`,
+    );
+  }
+}
+
 // GA4 (googletagmanager/google-analytics) ve Google Maps iframe'lerine izin veren CSP.
 // Next'in satır içi script'leri (hydration/theme) için 'unsafe-inline' gerekir.
 const csp = [

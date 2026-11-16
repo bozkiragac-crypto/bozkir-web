@@ -56,8 +56,13 @@ export async function generateMetadata({
   }
   const page = Math.max(1, parseInt(str(sp.sayfa) ?? '1', 10) || 1);
   return buildMetadata({
-    title: category.seoTitle ?? `${category.name} | ${dict.meta.brand}`,
-    description: category.seoDescription ?? category.description,
+    title: category.seoTitle?.trim() || `${category.name} | ${dict.meta.brand}`,
+    // Boş string `??` ile fallback'i engelliyordu; boş alanları atla.
+    description:
+      category.seoDescription?.trim() ||
+      category.description?.trim() ||
+      category.shortDescription?.trim() ||
+      undefined,
     // 2. sayfa kendine canonical verir; arama/sıralama canonical'a girmez.
     path: paginatedPath(`/kategoriler/${category.slug}`, page),
     // Dinamik OG görseli: opengraph-image.tsx dosya-convention ile üretilir.
@@ -138,7 +143,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       <PageHero
         eyebrow={dict.nav.collections}
         title={category.name}
-        description={category.description}
+        description={category.description || category.shortDescription}
         crumbs={[
           { label: dict.common.home, href: '/' },
           { label: dict.nav.collections, href: '/kategoriler' },
@@ -179,6 +184,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       <Container className="pb-24 md:pb-32">
         {items.length > 0 ? (
           <>
+            <h2 className="sr-only">{dict.productsPage.listTitle}</h2>
             <p className="numerals mb-8 text-sm text-muted">
               {result.total} {dict.catalog.countLabel}
               {totalPages > 1 ? ` · ${dict.common.page} ${page}/${totalPages}` : ''}

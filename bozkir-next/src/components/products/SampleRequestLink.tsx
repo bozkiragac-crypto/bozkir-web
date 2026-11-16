@@ -38,7 +38,7 @@ export function SampleRequestLink({
           setOpening(true);
           track('sample_request', { product: productSlug });
         }}
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-strong transition-colors hover:text-foreground"
+        className="-mx-2 inline-flex min-h-11 items-center gap-2 rounded-md px-2 text-sm font-medium text-muted-strong transition-colors hover:text-foreground"
       >
         <Package className="h-4 w-4" /> {label}
       </a>

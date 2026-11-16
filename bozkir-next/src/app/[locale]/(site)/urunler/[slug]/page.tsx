@@ -37,7 +37,7 @@ import { RecentlyViewed } from '@/components/products/RecentlyViewed';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { isLocale } from '@/i18n/config';
 import { dictForRequest } from '@/i18n/server';
-import { cn } from '@/lib/utils';
+import { cn, metaDescription } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>;
@@ -75,12 +75,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       locale,
     });
   }
+  // Meta açıklaması kısa etiket değil, ürünün gerçek açıklaması olmalı.
   const desc =
-    product.shortDescription ??
+    metaDescription(product.description) ||
+    metaDescription(product.shortDescription) ||
     `${product.name}${product.code ? ` (${product.code})` : ''} · ${product.category}. ${dict.meta.brandTagline}`;
   return buildMetadata({
-    title: product.seoTitle ?? `${product.name} | ${dict.meta.brand}`,
-    description: product.seoDescription ?? desc,
+    title: product.seoTitle?.trim() || `${product.name} | ${dict.meta.brand}`,
+    description: product.seoDescription?.trim() || desc,
     path: `/urunler/${product.slug}`,
     // Dinamik OG görseli: opengraph-image.tsx dosya-convention ile üretilir.
     image: null,

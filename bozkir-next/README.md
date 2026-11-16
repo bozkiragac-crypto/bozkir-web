@@ -71,6 +71,10 @@ npm run dev                       # http://localhost:3000
 `S3_PUBLIC_BASE_URL`: tarayıcının gördüğü medya tabanı. Üretimde `https://www.bozkiragac.com/media`
 (nginx `/media` → storage) veya göreli `/media`. Yerelde `http://localhost:8333/bozkir-media`.
 
+`NEXT_PUBLIC_SITE_URL`: herkese açık kanonik adres. Üretim derlemesinde
+`https://www.bozkiragac.com` olmalı; `localhost` kalırsa canonical, hreflang ve OG
+adresleri yanlış üretilir (derleme sırasında uyarı verilir).
+
 **E2E (opsiyonel)**: `BASE_URL`, `E2E_WORKERS`, `E2E_ADMIN_USER`, `E2E_ADMIN_PASS`,
 `E2E_ADMIN_TOTP_SECRET`. Admin kimlik bilgileri tanımlı değilse Playwright yalnızca admin
 dışı senaryoları çalıştırır; admin testleri hata yerine `skipped` olarak işaretlenir. Test

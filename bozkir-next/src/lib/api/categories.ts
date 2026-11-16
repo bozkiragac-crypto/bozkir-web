@@ -1,7 +1,7 @@
 import type { Category } from '@/types/category';
 import type { Locale } from '@/i18n/config';
 import { fallbackCategories, primaryCategorySlugs } from '@/data/categories';
-import { fetchCategories, localizedCategoryName } from '@/lib/data/catalog';
+import { fetchCategories, localizedCategoryName, pickLocaleText } from '@/lib/data/catalog';
 import { apiGet, hasRemoteApi } from './client';
 
 interface ApiCategory {
@@ -26,7 +26,9 @@ export async function getCategories(locale?: Locale): Promise<Category[]> {
           id: c.slug,
           slug: c.slug,
           name: fb ? localizedCategoryName(fb, locale) : c.name,
-          description: fb?.description ?? '',
+          description: fb
+            ? pickLocaleText(fb.description, locale, fb.descriptionEn, fb.descriptionAr)
+            : '',
           shortDescription: fb?.shortDescription,
           thumbnail: fb?.thumbnail,
           heroImage: fb?.heroImage,
@@ -35,7 +37,9 @@ export async function getCategories(locale?: Locale): Promise<Category[]> {
           productCount: c.count,
         } satisfies Category;
       });
-      return merged.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99) || a.name.localeCompare(a.name, 'tr'));
+      return merged.sort(
+        (a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99) || a.name.localeCompare(b.name, 'tr'),
+      );
     }
   } catch {
     // fallback

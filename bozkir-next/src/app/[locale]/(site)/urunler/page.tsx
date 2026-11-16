@@ -128,6 +128,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
               surfaces={facets.surfaces}
               thicknesses={facets.thicknesses}
               colors={facets.colors}
+              resultCount={result.total}
             />
           </Suspense>
         </div>
@@ -136,6 +137,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps) 
       <Container className="pb-24 md:pb-32">
         {result.items.length > 0 ? (
           <>
+            <h2 className="sr-only">{dict.productsPage.listTitle}</h2>
             <p className="numerals mb-8 text-sm text-muted">
               {result.total} {dict.catalog.countLabel}
               {totalPages > 1 ? ` · ${dict.common.page} ${page}/${totalPages}` : ''}

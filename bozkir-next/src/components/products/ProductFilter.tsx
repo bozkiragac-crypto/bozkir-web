@@ -19,6 +19,8 @@ interface ProductFilterProps {
   thicknesses?: string[];
   /** Mevcut renk değerleri. Boşsa filtre gizlenir. */
   colors?: string[];
+  /** Uygulanan filtrelere göre toplam sonuç sayısı (mobil sheet CTA'sı için). */
+  resultCount?: number;
 }
 
 /** Filtreler URL ile senkron: paylaşılabilir ve SEO dostu. Mobilde alt-sayfa. */
@@ -27,6 +29,7 @@ export function ProductFilter({
   surfaces = [],
   thicknesses = [],
   colors = [],
+  resultCount = 0,
 }: ProductFilterProps) {
   const router = useRouter();
   const params = useSearchParams();
@@ -462,6 +465,28 @@ export function ProductFilter({
                   <option value="code-asc">{t('catalog.sortCode')}</option>
                 </Select>
               </label>
+            </div>
+
+            {/* Sabit alt eylem çubuğu: seçim yaptıktan sonra sonucu görmek
+                için sheet'i kapatmayı keşfetmek zorunda kalınmasın. */}
+            <div className="sticky bottom-0 -mx-5 mt-5 flex items-center gap-3 border-t border-border bg-background px-5 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.25rem)]">
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery('');
+                  update({ q: null, kategori: null, yuzey: null, kalinlik: null, renk: null });
+                }}
+                className="tap-target inline-flex h-12 flex-none items-center justify-center rounded-full border border-border px-5 text-sm font-medium"
+              >
+                {t('catalog.clearAll')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSheet(false)}
+                className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-foreground px-5 text-sm font-medium text-background"
+              >
+                {t('catalog.showResults').replace('{count}', String(resultCount))}
+              </button>
             </div>
           </div>
         </div>

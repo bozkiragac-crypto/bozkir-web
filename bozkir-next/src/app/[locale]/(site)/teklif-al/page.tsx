@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const locale = isLocale(localeParamOrNull) ? localeParamOrNull : undefined;
   const dict = await dictForRequest(locale ?? 'tr');
   return buildMetadata({
-    title: dict.quote.title,
+    title: `${dict.quote.title} | ${dict.meta.brand}`,
     description: dict.quote.description,
     path: '/teklif-al',
     locale,

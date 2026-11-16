@@ -450,29 +450,69 @@ export async function fetchCategories(locale?: Locale): Promise<Category[]> {
   }
   if (counts.size === 0 && dbMeta.length === 0) return localizeFallbackCategories(locale);
 
+  /**
+   * DB'de alan boş bırakılmışsa (boş string) yerel fallback metnine düş.
+   * `??` burada yetersiz: boş string nullish değildir ve gerçek açıklamayı ezer.
+   */
+  function fallbackFor(slug: string) {
+    const fb = fallbackCategories.find((f) => f.slug === slug);
+    if (!fb) return undefined;
+    return {
+      description: pickLocaleText(fb.description, locale, fb.descriptionEn, fb.descriptionAr),
+      shortDescription:
+        pickLocaleText(
+          fb.shortDescription ?? '',
+          locale,
+          fb.shortDescriptionEn,
+          fb.shortDescriptionAr,
+        ) || undefined,
+      descriptionEn: fb.descriptionEn,
+      descriptionAr: fb.descriptionAr,
+      shortDescriptionEn: fb.shortDescriptionEn,
+      shortDescriptionAr: fb.shortDescriptionAr,
+      nameEn: fb.nameEn,
+      nameAr: fb.nameAr,
+    };
+  }
+
   const merged: Category[] = [];
   counts.forEach((value, slug) => {
     const meta = metaBySlug.get(slug);
     const fb = fallbackCategories.find((f) => f.slug === slug);
+    const fallback = fallbackFor(slug);
     merged.push({
       id: slug,
       slug,
       name: meta?.name ?? (fb ? localizedCategoryName(fb, locale) : value.name),
-      nameEn: meta?.nameEn ?? fb?.nameEn,
-      nameAr: meta?.nameAr ?? fb?.nameAr,
-      description: meta?.description ?? fb?.description ?? '',
-      shortDescription: meta?.shortDescription ?? fb?.shortDescription,
+      nameEn: meta?.nameEn ?? fallback?.nameEn,
+      nameAr: meta?.nameAr ?? fallback?.nameAr,
+      description: meta?.description?.trim() || fallback?.description || '',
+      descriptionEn: meta?.descriptionEn ?? fallback?.descriptionEn,
+      descriptionAr: meta?.descriptionAr ?? fallback?.descriptionAr,
+      shortDescription: meta?.shortDescription?.trim() || fallback?.shortDescription,
+      shortDescriptionEn: meta?.shortDescriptionEn ?? fallback?.shortDescriptionEn,
+      shortDescriptionAr: meta?.shortDescriptionAr ?? fallback?.shortDescriptionAr,
       thumbnail: meta?.thumbnail ?? fb?.thumbnail,
       heroImage: meta?.heroImage ?? fb?.heroImage,
       featured: meta?.featured ?? fb?.featured,
       sortOrder: meta?.sortOrder ?? fb?.sortOrder,
       productCount: value.count,
+      // DB'de tanımlı SEO alanları birleştirmede kaybolmamalı.
+      seoTitle: meta?.seoTitle,
+      seoDescription: meta?.seoDescription,
     });
   });
 
   // DB'de tanımlı ama ürünü olmayan aktif kategoriler de listelensin.
   for (const meta of dbMeta) {
-    if (!counts.has(meta.slug)) merged.push({ ...meta, productCount: 0 });
+    if (counts.has(meta.slug)) continue;
+    const fallback = fallbackFor(meta.slug);
+    merged.push({
+      ...meta,
+      description: meta.description?.trim() || fallback?.description || '',
+      shortDescription: meta.shortDescription?.trim() || fallback?.shortDescription,
+      productCount: 0,
+    });
   }
 
   return merged.sort(

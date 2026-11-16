@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ArrowUpRight, Eye } from 'lucide-react';
 import { SmartImage } from '@/components/ui/SmartImage';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
-import { FavoriteButton } from '@/components/products/WishButtons';
+import { CompareButton, FavoriteButton } from '@/components/products/WishButtons';
 import { ProductQuickView } from '@/components/products/ProductQuickView';
 import type { Product } from '@/types/product';
 import { cssColor } from '@/lib/utils';
@@ -28,6 +28,14 @@ export function ProductCard({
   // Kart alt satırı: kategori + (varsa) kalınlık/yüzey. Renk yalnızca hover
   // rozetlerinde kalır; böylece kartta aynı bilgi iki kez görünmez.
   const thicknessLabel = product.thicknesses?.slice(0, 2).join(' / ');
+  // Ürün adı zaten renk/ahşap adıysa aynı metni chip olarak tekrar etme.
+  const nameKey = product.name.trim().toLocaleLowerCase('tr');
+  const colorChips = (product.colors ?? []).filter(
+    (c, i, arr) =>
+      c.trim().toLocaleLowerCase('tr') !== nameKey &&
+      arr.findIndex((x) => x.trim().toLocaleLowerCase('tr') === c.trim().toLocaleLowerCase('tr')) ===
+        i,
+  );
   const meta = [
     product.category,
     product.face ? `${t('product.surface')} ${product.face}` : '',
@@ -102,9 +110,9 @@ export function ProductCard({
               {product.name}
             </h3>
             <p className="mt-1 text-xs text-muted-strong sm:text-sm">{meta}</p>
-            {product.colors?.length ? (
+            {colorChips.length ? (
               <div className="mt-2 flex flex-wrap items-center gap-1.5 opacity-100 transition-opacity duration-300 ease-[var(--ease-out-expo)] md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
-                {product.colors.slice(0, 5).map((c) => (
+                {colorChips.slice(0, 5).map((c) => (
                   <span
                     key={c}
                     className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-[0.75rem] capitalize text-muted-strong"
@@ -130,6 +138,7 @@ export function ProductCard({
           hızlı bakış ve detay sayfasından eklenir. Mobilde her zaman, masaüstünde hover'da. */}
       <div className="absolute end-2 top-2 z-10 flex flex-col gap-2 opacity-100 transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] md:translate-x-2 md:opacity-0 md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:translate-x-0 md:group-hover:opacity-100">
         <FavoriteButton product={ref} />
+        <CompareButton product={ref} />
         <button
           type="button"
           aria-label={`${product.name} — ${t('catalog.quickView')}`}

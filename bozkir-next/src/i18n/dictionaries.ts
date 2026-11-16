@@ -45,6 +45,8 @@ export const dictionaries = {
       escHint: 'Kapatmak için Esc',
       recent: 'Son aramalar',
       suggestions: 'Öneriler',
+      categories: 'Kategoriler',
+      viewAll: 'Tüm sonuçları gör',
       noResults: 'Sonuç bulunamadı',
       clear: 'Temizle',
     },
@@ -113,6 +115,7 @@ export const dictionaries = {
       activeFilters: 'Aktif filtreler',
       clearAll: 'Tümünü temizle',
       removeFilter: 'Filtreyi kaldır',
+      showResults: '{count} sonucu gör',
     },
     product: {
       quoteTitle: 'Teklif Alın',
@@ -154,6 +157,7 @@ export const dictionaries = {
       metaTitle: 'Ürünler | Bozkır Ağaç Ürünleri',
       metaDescription:
         'MDF lam, lake panel, suntalam, sunta, MDF, pervaz, PVC kenar bant ve tutkal ürün grupları. Renk ve kategoriye göre keşfedin.',
+      listTitle: 'Ürün listesi',
     },
     home: {
       hero: {
@@ -610,6 +614,10 @@ export const dictionaries = {
           },
         ],
       },
+      faq: {
+        metaDescription:
+          'Sıkça sorulan sorular: ürün grupları, sipariş ve teslimat süreci, numune talebi ve teklif hakkında merak edilenler.',
+      },
     },
     quote: {
       title: 'Teklif Al',
@@ -756,6 +764,8 @@ export const dictionaries = {
       escHint: 'Press Esc to close',
       recent: 'Recent searches',
       suggestions: 'Suggestions',
+      categories: 'Categories',
+      viewAll: 'View all results',
       noResults: 'No results',
       clear: 'Clear',
     },
@@ -824,6 +834,7 @@ export const dictionaries = {
       activeFilters: 'Active filters',
       clearAll: 'Clear all',
       removeFilter: 'Remove filter',
+      showResults: 'View {count} results',
     },
     product: {
       quoteTitle: 'Request a Quote',
@@ -863,6 +874,7 @@ export const dictionaries = {
       metaTitle: 'Products | Bozkır Wood Products',
       metaDescription:
         'MDF lam, lacquer panel, suntalam, chipboard, MDF, trim, PVC edge banding and adhesive product groups. Browse by colour and category.',
+      listTitle: 'Product list',
     },
     home: {
       hero: {
@@ -1320,6 +1332,10 @@ export const dictionaries = {
           },
         ],
       },
+      faq: {
+        metaDescription:
+          'Frequently asked questions about product groups, ordering and delivery, sample requests and getting a quote.',
+      },
     },
     quote: {
       title: 'Get a Quote',
@@ -1467,6 +1483,8 @@ export const dictionaries = {
       escHint: 'اضغط Esc للإغلاق',
       recent: 'عمليات البحث الأخيرة',
       suggestions: 'اقتراحات',
+      categories: 'الفئات',
+      viewAll: 'عرض كل النتائج',
       noResults: 'لا توجد نتائج',
       clear: 'مسح',
     },
@@ -1534,6 +1552,7 @@ export const dictionaries = {
       activeFilters: 'الفلاتر النشطة',
       clearAll: 'مسح الكل',
       removeFilter: 'إزالة الفلتر',
+      showResults: 'عرض النتائج ({count})',
     },
     product: {
       quoteTitle: 'اطلب عرض سعر',
@@ -1572,6 +1591,7 @@ export const dictionaries = {
       metaTitle: 'المنتجات | منتجات بوزكير الخشبية',
       metaDescription:
         'مجموعات MDF لام، لوح الدهان، سونتا لام، الخشب المضغوط، MDF، الإطارات، شريط حواف PVC والمواد اللاصقة. تصفّح حسب اللون والفئة.',
+      listTitle: 'قائمة المنتجات',
     },
     home: {
       hero: {
@@ -2013,6 +2033,10 @@ export const dictionaries = {
             body: ['يمكنك الكتابة إلى {email} للاستفسار عن سياسة ملفات الارتباط.'],
           },
         ],
+      },
+      faq: {
+        metaDescription:
+          'أسئلة شائعة حول مجموعات المنتجات والطلب والتسليم وطلبات العينات وعروض الأسعار.',
       },
     },
     quote: {

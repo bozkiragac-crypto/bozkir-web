@@ -134,7 +134,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                 onClick={() => goTo(active - 1)}
                 onKeyDown={onKeyNav}
                 aria-label={t('home.gallery.prevImage')}
-                className="absolute start-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur"
+                className="absolute start-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur"
               >
                 <ChevronLeft className="h-5 w-5 rtl:-scale-x-100" />
               </button>
@@ -143,7 +143,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                 onClick={() => goTo(active + 1)}
                 onKeyDown={onKeyNav}
                 aria-label={t('home.gallery.nextImage')}
-                className="absolute end-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur"
+                className="absolute end-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/85 text-foreground shadow-sm backdrop-blur"
               >
                 <ChevronRight className="h-5 w-5 rtl:-scale-x-100" />
               </button>

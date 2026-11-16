@@ -7,6 +7,7 @@ import { BreadcrumbScript } from '@/components/seo/BreadcrumbScript';
 import { getContentBlock } from '@/lib/api/content';
 import { isLocale } from '@/i18n/config';
 import { dictForRequest } from '@/i18n/server';
+import { metaDescription } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -16,9 +17,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale } = await params;
   const lang = isLocale(locale) ? locale : 'tr';
   const dict = await dictForRequest(lang);
+  // SSS içeriği panelden gelir; meta açıklaması için hero metnini kullan,
+  // boşsa sözlükteki gerçek kapsam özetine düş.
+  const block = await getContentBlock('faq', lang);
   return buildMetadata({
     title: `${dict.nav.faq} | ${dict.meta.brand}`,
-    description: dict.home.block.faq,
+    description: metaDescription(block?.body) || dict.pages.faq.metaDescription,
     path: '/sss',
     locale: lang,
   });

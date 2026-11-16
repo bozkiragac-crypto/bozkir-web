@@ -21,6 +21,12 @@ interface Suggestion {
   thumbnail?: string;
 }
 
+interface CategorySuggestion {
+  slug: string;
+  name: string;
+  count?: number;
+}
+
 const RECENTS_KEY = 'bozkir:search-recent';
 const MAX_RECENTS = 5;
 
@@ -40,6 +46,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
   const [value, setValue] = useState('');
   const [recents, setRecents] = useState<string[]>([]);
   const [results, setResults] = useState<Suggestion[]>([]);
+  const [categories, setCategories] = useState<CategorySuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +104,33 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     };
   }, [open, query, locale]);
 
+  // Kategori önerileri: diyalog açılınca bir kez çekilir, yazarken istemcide süzülür.
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    fetch(`/api/categories?locale=${locale}`, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: unknown) => {
+        if (!Array.isArray(data)) return;
+        setCategories(
+          data
+            .filter(
+              (c): c is CategorySuggestion =>
+                !!c && typeof c === 'object' && typeof (c as CategorySuggestion).slug === 'string',
+            )
+            .map((c) => ({
+              slug: c.slug,
+              name: String(c.name ?? ''),
+              count: typeof c.count === 'number' ? c.count : undefined,
+            })),
+        );
+      })
+      .catch((err) => {
+        if ((err as Error).name !== 'AbortError') setCategories([]);
+      });
+    return () => controller.abort();
+  }, [open, locale]);
+
   useEffect(() => {
     if (!open) return;
     const prevOverflow = document.body.style.overflow;
@@ -117,6 +151,20 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     document.getElementById(`search-suggestion-${active}`)?.scrollIntoView({ block: 'nearest' });
   }, [active]);
 
+  const categoryMatches =
+    query.length >= 2
+      ? categories
+          .filter((c) => {
+            const name = c.name.toLocaleLowerCase('tr');
+            const slug = c.slug.toLocaleLowerCase('en-US');
+            const q = query.toLocaleLowerCase('tr');
+            return name.includes(q) || slug.includes(query.toLocaleLowerCase('en-US'));
+          })
+          .slice(0, 4)
+      : [];
+  // Son öneri "tüm sonuçları gör": klavye sırası ürünlerden sonra buraya gelir.
+  const optionCount = results.length + 1;
+
   if (!open) return null;
 
   function remember(q: string) {
@@ -129,13 +177,17 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     }
   }
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
+  function goToResults() {
     if (!query) return;
     track('search', { query });
     remember(query);
     onClose();
     router.push(`/${locale}/urunler?q=${encodeURIComponent(query)}`);
+  }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    goToResults();
   }
 
   function openProduct(slug: string) {
@@ -144,19 +196,29 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     router.push(`/${locale}/urunler/${slug}`);
   }
 
+  function openCategory(slug: string) {
+    track('search_select', { slug, type: 'category' });
+    remember(query);
+    onClose();
+    router.push(`/${locale}/urunler?kategori=${encodeURIComponent(slug)}`);
+  }
+
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (query.length >= 2) {
-      if (results.length === 0) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setActive((i) => (i + 1) % results.length);
+        setActive((i) => (i + 1) % optionCount);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setActive((i) => (i <= 0 ? results.length - 1 : i - 1));
+        setActive((i) => (i <= 0 ? optionCount - 1 : i - 1));
       } else if (e.key === 'Enter' && active >= 0) {
         e.preventDefault();
-        const product = results[active];
-        if (product) openProduct(product.slug);
+        if (active < results.length) {
+          const product = results[active];
+          if (product) openProduct(product.slug);
+        } else {
+          goToResults();
+        }
       }
       return;
     }
@@ -322,7 +384,46 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
                   </li>
                 ))
               )}
+              <li role="presentation">
+                <button
+                  type="button"
+                  id={`search-suggestion-${results.length}`}
+                  role="option"
+                  aria-selected={active === results.length}
+                  onMouseEnter={() => setActive(results.length)}
+                  onClick={goToResults}
+                  className={cn(
+                    'flex w-full items-center gap-3 px-5 py-3 text-start text-sm font-medium transition-colors hover:bg-surface-2',
+                    active === results.length && 'bg-surface-2',
+                  )}
+                >
+                  <Search className="h-4 w-4 flex-none text-muted-strong" />
+                  <span className="truncate">
+                    {t('search.viewAll')}
+                    {query ? <span className="text-muted"> · “{query}”</span> : null}
+                  </span>
+                </button>
+              </li>
             </ul>
+
+            {categoryMatches.length > 0 && (
+              <div className="border-t border-border px-5 py-4">
+                <p className="text-eyebrow">{t('search.categories')}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {categoryMatches.map((c) => (
+                    <button
+                      key={c.slug}
+                      type="button"
+                      onClick={() => openCategory(c.slug)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm text-muted-strong transition-colors hover:border-foreground hover:text-foreground focus-visible:border-foreground focus-visible:text-foreground"
+                    >
+                      {c.name}
+                      {c.count ? <span className="numerals text-xs text-muted">({c.count})</span> : null}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

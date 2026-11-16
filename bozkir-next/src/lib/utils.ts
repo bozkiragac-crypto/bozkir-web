@@ -10,6 +10,22 @@ export function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+/**
+ * Meta açıklamasını tek satıra indirir ve arama sonuçlarında kesilmeyecek
+ * uzunlukta (~155 karakter) tutar. Boş metin verilirse `undefined` döner;
+ * böylece çağıran taraf kendi fallback'ini kullanabilir.
+ */
+export function metaDescription(value: string | undefined | null, max = 155): string | undefined {
+  const clean = String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!clean) return undefined;
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
 /** Değer geçerli bir CSS rengi ise (hex/rgb/hsl…) döndürür; değilse `undefined`. */
 export function cssColor(value: string): string | undefined {
   const v = value.trim();
