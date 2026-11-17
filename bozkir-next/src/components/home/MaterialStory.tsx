@@ -217,7 +217,9 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
                   <div
                     key={c.id}
                     className={cn(
-                      'absolute inset-0 transition-[opacity,transform] duration-[1100ms] ease-[var(--ease-out-expo)]',
+                      // Geçiş, kategori başına kaydırma süresinden kısa olmalı;
+                      // aksi halde görsel bir sonraki adıma tam oturmadan geçiyor.
+                      'absolute inset-0 transition-[opacity,transform] duration-[600ms] ease-[var(--ease-out-expo)]',
                       i === active ? 'scale-105 opacity-100' : 'scale-100 opacity-0',
                     )}
                     aria-hidden={i !== active}

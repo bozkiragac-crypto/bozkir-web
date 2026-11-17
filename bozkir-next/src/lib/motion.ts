@@ -21,6 +21,8 @@ export const STAGGER = {
 /**
  * "Malzemeyi Keşfet" sticky adımı: kategori başına kaydırma yüksekliği (vh).
  * Sahne yüksekliği = adet × bu değer; gerçek pin mesafesi bundan bir ekran
- * kısa olduğu için 50vh → kategori başına ~33vh okunabilir geçiş verir.
+ * kısa olduğu için 75vh → 6 kategoride kategori başına ~58vh (900px
+ * ekranda ~525px) okunabilir geçiş verir. Daha kısa adımda son kategoriler
+ * (Sunta/MDF) hızla geçiliyordu.
  */
-export const STORY_STEP_VH = 50;
+export const STORY_STEP_VH = 75;
