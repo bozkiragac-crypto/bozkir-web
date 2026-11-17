@@ -187,7 +187,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             <h2 className="sr-only">{dict.productsPage.listTitle}</h2>
             <p className="numerals mb-8 text-sm text-muted">
               {result.total} {dict.catalog.countLabel}
-              {totalPages > 1 ? ` · ${dict.common.page} ${page}/${totalPages}` : ''}
             </p>
             <div className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
               {items.map((product, i) => (
@@ -213,9 +212,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 ) : (
                   <span />
                 )}
-                <span className="numerals text-sm text-muted">
-                  {page} / {totalPages}
-                </span>
                 {page < totalPages ? (
                   <Link
                     href={buildHref(page + 1)}

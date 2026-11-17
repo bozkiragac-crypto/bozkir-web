@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { RotateCcw } from 'lucide-react';
+import { Maximize2, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useIsMobile } from '@/hooks/useMediaQuery';
@@ -16,6 +16,13 @@ const PanelViewer = dynamic(() => import('./PanelViewer').then((m) => m.PanelVie
   ssr: false,
   loading: () => <PanelFallback />,
 });
+
+// Tam ekran görüntüleyici yalnızca istendiğinde yüklenir; üç boyutlu sahne
+// paketi ilk sayfa yüküne girmez.
+const Panel3DFullscreen = dynamic(
+  () => import('./Panel3DFullscreen').then((m) => m.Panel3DFullscreen),
+  { ssr: false },
+);
 
 // AR katmanı yalnızca kullanıcı istediğinde yüklenir (SSR kapalı).
 const PanelAR = dynamic(() => import('./PanelAR').then((m) => m.PanelAR), { ssr: false });
@@ -98,6 +105,9 @@ export function Panel3D() {
   const [webglOk, setWebglOk] = useState(true);
   const [finish, setFinish] = useState(finishes[0]!);
   const [resetSignal, setResetSignal] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
+  // "Hareketi Azalt" tercihinde 3D yalnızca kullanıcı isterse yüklenir.
+  const [started, setStarted] = useState(false);
 
   // Cihaz WebGL sağlamıyorsa ağır sahneyi hiç yükleme.
   useEffect(() => {
@@ -132,27 +142,64 @@ export function Panel3D() {
     finish.color,
   ];
 
+  const viewerReady = webglOk && seeded;
+  // Mobilde satır içi WebGL yerine statik önizleme + tam ekran düğmesi gösterilir;
+  // böylece sayfa kaydırması ile panel döndürme çakışmaz.
+  const showInlineViewer = !isMobile && viewerReady && (!reduced || started);
+
   return (
     <div className="flex h-full w-full flex-col">
       <div ref={hostRef} className="relative min-h-0 flex-1">
-        {reduced || !webglOk || !seeded ? (
-          <PanelFallback alt={h.imageAlt} />
-        ) : (
+        {showInlineViewer ? (
           <PanelViewer
             finish={finish}
-            active={inView}
+            active={inView && !fullscreen}
             resetSignal={resetSignal}
             dprMax={isMobile ? 1.25 : 1.5}
+            autoRotate={!reduced}
             labels={{ zoomIn: h.zoomIn, zoomOut: h.zoomOut, reset: h.resetView }}
           />
+        ) : (
+          <>
+            <PanelFallback alt={h.imageAlt} />
+            {!webglOk ? (
+              <div className="absolute inset-0 flex items-end justify-center p-4 pb-14">
+                <p className="max-w-xs rounded-lg border border-border bg-background/90 px-4 py-2 text-center text-xs text-muted-strong backdrop-blur">
+                  {h.unsupported3d}
+                </p>
+              </div>
+            ) : isMobile ? (
+              <button
+                type="button"
+                onClick={() => setFullscreen(true)}
+                className="group absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/45 via-black/10 to-transparent"
+              >
+                <span className="inline-flex min-h-12 items-center gap-2 rounded-full bg-background px-6 py-3 text-sm font-medium text-foreground shadow-lg transition-transform group-hover:scale-[1.03] group-active:scale-[0.98]">
+                  <Maximize2 className="h-4 w-4" aria-hidden /> {h.open3d}
+                </span>
+              </button>
+            ) : reduced && seeded ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setStarted(true)}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full bg-background px-5 py-2.5 text-sm font-medium text-foreground shadow-lg"
+                >
+                  {h.start3d}
+                </button>
+              </div>
+            ) : null}
+          </>
         )}
-        <span
-          title={h.hint}
-          className="pointer-events-none absolute bottom-4 start-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1.5 text-[0.75rem] tracking-[0.14em] text-muted uppercase backdrop-blur"
-        >
-          <RotateCcw className="h-3.5 w-3.5" aria-hidden />
-          <span className="hidden sm:inline">{h.hint}</span>
-        </span>
+        {showInlineViewer && (
+          <span
+            title={h.hint}
+            className="pointer-events-none absolute bottom-4 start-4 inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1.5 text-[0.75rem] tracking-[0.14em] text-muted uppercase backdrop-blur"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+            <span className="hidden sm:inline">{h.hint}</span>
+          </span>
+        )}
       </div>
 
       <div className="border-t border-border p-4">
@@ -235,6 +282,15 @@ export function Panel3D() {
           ))}
         </ul>
       </div>
+
+      <Panel3DFullscreen
+        open={fullscreen}
+        onClose={() => setFullscreen(false)}
+        finish={finish}
+        finishes={finishes}
+        onFinishChange={setFinish}
+        autoRotate={!reduced}
+      />
     </div>
   );
 }

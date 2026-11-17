@@ -6,14 +6,12 @@ import {
   ContactShadows,
   Edges,
   Environment,
-  Html,
   Lightformer,
   OrbitControls,
   RoundedBox,
 } from '@react-three/drei';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 import * as THREE from 'three';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export type PanelCore = 'mdf' | 'particle';
 export type PanelSurface = 'melamin' | 'raw';
@@ -38,6 +36,10 @@ interface PanelViewerProps {
   resetSignal?: number;
   /** Cihaz başına piksel oranı üst sınırı (mobilde düşürülür). */
   dprMax?: number;
+  /** Panelin kendi kendine dönmesi. "Hareketi Azalt" tercihinde kapatılır. */
+  autoRotate?: boolean;
+  /** Dar/dikey kapsayıcıda paneli yatay olarak sığdıracak kamera mesafesi. */
+  fitCamera?: boolean;
   /** Zoom/sıfırlama düğmelerinin erişilebilir etiketleri. */
   labels?: { zoomIn: string; zoomOut: string; reset: string };
 }
@@ -273,19 +275,44 @@ function PanelModel({ finish }: { finish: PanelFinish }) {
 }
 
 /** Sıfırlama: TEK ATIŞ kamerayı başlangıca döndürür, sonra OrbitControls'a bırakır. */
-function CameraRig({ signal }: { signal: number }) {
+function CameraRig({ signal, fit }: { signal: number; fit: boolean }) {
   const camera = useThree((s) => s.camera);
+  const size = useThree((s) => s.size);
   const controls = useThree((s) => s.controls) as {
     target: THREE.Vector3;
     update: () => void;
   } | null;
-  const target = useRef(new THREE.Vector3(...CAM));
+
+  // Dar/dikey kapsayıcıda (tam ekran mobil) panelin yatay sığması için kamerayı
+  // geri çek. Geniş kapsayıcılarda sabit CAM mesafesi korunur.
+  const fitted = useMemo(() => {
+    if (!fit) return new THREE.Vector3(...CAM);
+    const aspect = size.width / Math.max(1, size.height);
+    const distance = THREE.MathUtils.clamp(
+      5.85 / Math.max(aspect, 0.55),
+      5.73,
+      MAX_DISTANCE,
+    );
+    return new THREE.Vector3(...CAM).normalize().multiplyScalar(distance);
+  }, [fit, size.width, size.height]);
+
+  const target = useRef(fitted.clone());
   const animating = useRef(false);
+  const first = useRef(true);
 
   useEffect(() => {
-    target.current.set(...CAM);
+    if (first.current) {
+      first.current = false;
+      camera.position.copy(fitted);
+      if (controls) {
+        controls.target.set(0, 0, 0);
+        controls.update();
+      }
+      return;
+    }
+    target.current.copy(fitted);
     animating.current = true;
-  }, [signal]);
+  }, [signal, fitted, camera, controls]);
 
   useFrame(() => {
     if (!animating.current) return;
@@ -313,15 +340,17 @@ export function PanelViewer({
   active = true,
   resetSignal = 0,
   dprMax = 1.75,
+  autoRotate = true,
+  fitCamera = false,
   labels,
 }: PanelViewerProps) {
   const [localReset, setLocalReset] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
-  // Dokunmatik cihazlarda dikey kaydırma sayfaya bırakılır (kaydırma tuzağı
-  // olmasın); yatay sürükleme paneli döndürmeye devam eder.
-  const coarsePointer = useMediaQuery('(pointer: coarse)');
-  const touchAction = coarsePointer ? 'pan-y' : 'none';
+
+  // Sahne her zaman dokunmatik döndürmeyi kendisi yönetir. Satır içi mobilde
+  // sahne yerine statik önizleme gösterildiği için sayfa kaydırması bozulmaz.
+  const touchAction = 'none';
 
   // +/- düğmeleri: OrbitControls örneğine doğrudan erişip hedefe göre mesafeyi ölçekler.
   const zoom = (factor: number) => {
@@ -442,17 +471,6 @@ export function PanelViewer({
           />
         </Environment>
 
-        <Html
-          position={[0, -HEIGHT / 2 - 0.32, 0]}
-          center
-          className="pointer-events-none select-none"
-          zIndexRange={[10, 0]}
-        >
-          <span className="whitespace-nowrap rounded-full border border-border bg-background/85 px-2.5 py-1 text-[0.75rem] font-medium tracking-[0.08em] text-foreground uppercase backdrop-blur">
-            {finish.label}
-          </span>
-        </Html>
-
         <OrbitControls
           ref={controlsRef}
           makeDefault
@@ -464,14 +482,18 @@ export function PanelViewer({
           maxDistance={MAX_DISTANCE}
           minPolarAngle={Math.PI / 3.4}
           maxPolarAngle={Math.PI / 1.75}
-          autoRotate
+          autoRotate={autoRotate}
           autoRotateSpeed={0.8}
           rotateSpeed={0.5}
           zoomSpeed={0.8}
         />
 
-        <CameraRig signal={localReset + resetSignal} />
+        <CameraRig signal={localReset + resetSignal} fit={fitCamera} />
       </Canvas>
+
+      <span className="pointer-events-none absolute start-3 top-3 z-10 whitespace-nowrap rounded-full border border-border bg-background/85 px-2.5 py-1 text-[0.75rem] font-medium tracking-[0.08em] text-foreground uppercase backdrop-blur">
+        {finish.label}
+      </span>
     </div>
   );
 }

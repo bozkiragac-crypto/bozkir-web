@@ -92,6 +92,18 @@ export const TEXT_GROUPS: TextGroupDef[] = [
         maxLength: 320,
       },
       { path: 'home.material3d.hint', label: 'Panel kesiti: ipucu', maxLength: 120 },
+      { path: 'home.material3d.open3d', label: 'Panel kesiti: 3D incele düğmesi', maxLength: 60 },
+      {
+        path: 'home.material3d.start3d',
+        label: 'Panel kesiti: 3D başlat düğmesi',
+        maxLength: 60,
+      },
+      {
+        path: 'home.material3d.unsupported3d',
+        label: 'Panel kesiti: 3D desteklenmiyor notu',
+        multiline: true,
+        maxLength: 140,
+      },
       { path: 'home.supply.eyebrow', label: 'Tedarik: üst etiket', maxLength: 60 },
       { path: 'home.supply.title', label: 'Tedarik: başlık', maxLength: 160 },
       { path: 'home.supply.cta', label: 'Tedarik: buton', maxLength: 60 },

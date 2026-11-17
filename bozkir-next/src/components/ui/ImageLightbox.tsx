@@ -93,11 +93,6 @@ export function ImageLightbox({
           <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-center text-sm text-white">
             {current.tag && <span className="me-2 text-white/70">{current.tag}</span>}
             {current.title}
-            {count > 1 && (
-              <span className="numerals ms-3 text-white/60">
-                {index! + 1} / {count}
-              </span>
-            )}
             {current.href && (
               <Link
                 href={current.href}

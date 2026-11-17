@@ -202,6 +202,9 @@ export const dictionaries = {
       },
       material3d: {
         resetView: 'Sıfırla',
+        open3d: '3D olarak incele',
+        start3d: '3D görünümünü başlat',
+        unsupported3d: 'Bu tarayıcı 3B görünümü desteklemiyor.',
         zoomIn: 'Yakınlaştır',
         zoomOut: 'Uzaklaştır',
         finishLabel: 'Yüzey bitişi',
@@ -920,6 +923,9 @@ export const dictionaries = {
       },
       material3d: {
         resetView: 'Reset',
+        open3d: 'View in 3D',
+        start3d: 'Start 3D view',
+        unsupported3d: 'This browser does not support 3D view.',
         zoomIn: 'Zoom in',
         zoomOut: 'Zoom out',
         finishLabel: 'Surface finish',
@@ -1636,6 +1642,9 @@ export const dictionaries = {
       },
       material3d: {
         resetView: 'إعادة الضبط',
+        open3d: 'عرض ثلاثي الأبعاد',
+        start3d: 'بدء العرض ثلاثي الأبعاد',
+        unsupported3d: 'هذا المتصفح لا يدعم العرض ثلاثي الأبعاد.',
         zoomIn: 'تكبير',
         zoomOut: 'تصغير',
         finishLabel: 'تشطيب السطح',

@@ -264,7 +264,10 @@ export function MaterialStory({ categories }: MaterialStoryProps) {
               aria-hidden
               className="pointer-events-none absolute inset-x-0 -inset-y-6 -z-10 rounded-[2.5rem] bg-[color:var(--color-accent-soft)]/12 blur-2xl"
             />
-            <div className="h-[420px] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] sm:h-[460px] lg:h-[min(52svh,480px)]">
+            <div
+              data-testid="panel-3d"
+              className="h-[420px] overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface to-surface-2 shadow-[var(--card-shadow)] sm:h-[460px] lg:h-[min(52svh,480px)]"
+            >
               <Panel3D />
             </div>
           </div>
