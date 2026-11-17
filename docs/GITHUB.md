@@ -24,8 +24,10 @@ CI, `services.postgres` ile geçici bir veritabanı kullanır; test verisi izole
 
 ## 3. CD — VPS'e otomatik dağıtım
 
-`.github/workflows/deploy.yml` → `main` push'ta VPS'e SSH ile bağlanır,
-`git reset --hard origin/main` + `docker compose up -d --build` + healthcheck.
+`.github/workflows/deploy.yml` → `main` push'unda CI yeşil olunca VPS'e SSH ile bağlanır,
+`git reset --hard origin/main` + `docker compose up -d --build` + healthcheck. Elle yeniden
+dağıtmak için Actions → **Deploy (VPS)** → *Run workflow*. Özellik dallarına push deploy etmez;
+canlıya çıkmak için PR'ın `main`'e birleştirilmesi gerekir.
 
 ### Gerekli GitHub Actions Secrets
 `Repository → Settings → Secrets and variables → Actions → New repository secret`
@@ -64,7 +66,7 @@ chmod 600 ~/.ssh/authorized_keys
 
 ## 5. Notlar
 
-- `deploy.yml`'de `needs` ile CI'ya bağlamak için job adlarını kullanın; ilk sürümde
-  bağımsız çalışır (hız için). İsterseniz `needs: [quality, build]` ekleyin.
+- Deploy, CI'ya `workflow_run` ile bağlıdır: yalnızca `main` push'unun CI'sı başarılıysa çalışır.
+- Secret'lar eksikse deploy kırmızı vermez; uyarı verip atlar ve iş özetinde eksik secret'ları listeler.
 - Rollback: VPS'te `git reset --hard <eski-sha> && docker compose up -d --build`.
 - Sırlar yalnızca GitHub Secrets ve VPS `.env` dosyalarında tutulur.

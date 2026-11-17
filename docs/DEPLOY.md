@@ -32,10 +32,16 @@ idempotent şema migrasyonu (`db-migrate.mjs`) → depolama bucket'ı (`init-sto
 
 ## 3. Dağıtım (GitHub Actions)
 1. `main`'e push → **CI** (lint, typecheck, unit, build, E2E).
-2. **Deploy (VPS)** şu an manuel (`workflow_dispatch`). CI yeşil olduğunda otomatik tetikleme
-   `deploy.yml` içindeki `workflow_run` bloğu açılarak etkinleştirilebilir.
-3. Manuel deploy: migrasyon öncesi yedek → sürümlü imaj (`bozkir-app:<sha>`) → migrate + seed → derin healthcheck.
+2. **CI yeşil olursa Deploy (VPS) otomatik tetiklenir** (`workflow_run`); yeniden dağıtmak veya
+   acil durumda Actions → **Deploy (VPS)** → *Run workflow* ile elle de çalıştırılabilir.
+3. Deploy sırası: migrasyon öncesi yedek → sürümlü imaj (`bozkir-app:<sha>`) → migrate + seed → derin healthcheck.
 4. Sağlık kontrolü başarısızsa **önceki sürüme otomatik rollback**.
+
+> Yalnızca `main` dalı canlıya çıkar. Özellik dallarına yapılan push'lar CI çalıştırmaz ve
+> deploy etmez; değişikliğin canlıya gitmesi için PR'ın `main`'e birleştirilmesi gerekir.
+>
+> Secret'lar eksikse deploy adımı kırmızı vermek yerine **uyarı ile atlanır** ve iş özetinde
+> eksik secret'lar listelenir. İstenen davranış buysa bu notu güncelleyin.
 
 GitHub Secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PATH` (ör. `/opt/bozkir-web`), opsiyonel `VPS_PORT`.
 

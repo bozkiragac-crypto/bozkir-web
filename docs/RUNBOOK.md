@@ -11,8 +11,9 @@
 ## Deploy
 
 1. `main` branch'e push → GitHub Actions **CI** (lint, typecheck, unit, build, E2E).
-2. **Deploy (VPS)** şu an **manuel** (`workflow_dispatch`). VPS ve secret'lar hazır olduğunda
-   `workflow_run` bloğu açılarak otomatik tetikleme etkinleştirilebilir.
+2. CI yeşilse **Deploy (VPS)** otomatik tetiklenir (`workflow_run`). Yeniden dağıtım/rollback için
+   Actions → **Deploy (VPS)** → *Run workflow*. Yalnızca `main` canlıya çıkar; özellik dalı push'ları
+   deploy etmez.
 3. Deploy sırası: **migrasyon öncesi yedek** → sürümlü imaj (`bozkir-app:<sha>`) → `up -d` → migrate + seed → derin healthcheck.
 4. Sağlık kontrolü başarısız olursa **önceki sürüme otomatik rollback** yapılır ve iş kırmızı biter.
 5. Deploy `git reset --hard origin/main` yapar; domain özelleştirmesi `deploy/nginx.docker.tls.conf`
