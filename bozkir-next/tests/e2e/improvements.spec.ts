@@ -24,7 +24,9 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
 
   test('ürünler: eşleşmeyen aramada boş durum ve temizle CTA görünür', async ({ page }) => {
     await gotoWithRetry(page, '/tr/urunler?q=zzzzqqqxyz');
-    await expect(page.getByText('Aramanızla eşleşen ürün bulunamadı.')).toBeVisible();
+    // Sorgu varken başlık, sorguyu içeren varyantı kullanır:
+    // `"{query}" için sonuç bulunamadı.`
+    await expect(page.getByRole('heading', { name: /için sonuç bulunamadı/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Filtreleri temizle' })).toBeVisible();
   });
 
@@ -57,8 +59,9 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
 
   test('iletişim haritaları iki farklı konumu (iş yeri + depo) gösterir', async ({ page }) => {
     await gotoWithRetry(page, '/tr/iletisim');
+    // Mobil sekmeli harita (lg:hidden) DOM'da da bulunur; görünür olanı doğrula.
     const maps = page.locator('iframe[src*="google.com/maps"]');
-    await expect(maps.first()).toBeVisible();
+    await expect(page.locator('iframe[src*="google.com/maps"]:visible').first()).toBeVisible();
     const sources = await maps.evaluateAll((els) => els.map((e) => (e as HTMLIFrameElement).src));
     expect(sources.length).toBeGreaterThanOrEqual(2);
     const joined = sources.join(' ');

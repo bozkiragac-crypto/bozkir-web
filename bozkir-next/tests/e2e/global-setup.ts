@@ -49,11 +49,13 @@ export async function waitForLoginOutcome(
 ): Promise<'ok' | 'totp' | 'error' | 'timeout'> {
   const deadline = Date.now() + timeout;
   const totpField = page.locator('input[autocomplete="one-time-code"]');
+  // Yalnızca giriş formunun hata mesajını dikkate al: Next.js route announcer
+  // da `role="alert"` taşır ve boş içerikle yanlış "hata" sonucu üretir.
+  const alert = page.locator('form [role="alert"]');
   while (Date.now() < deadline) {
     if (atAdmin(page)) return 'ok';
     if (await totpField.isVisible().catch(() => false)) return 'totp';
-    const alert = page.getByRole('alert').first();
-    if (await alert.isVisible().catch(() => false)) return 'error';
+    if (await alert.first().isVisible().catch(() => false)) return 'error';
     await page.waitForTimeout(250);
   }
   return 'timeout';
@@ -86,7 +88,7 @@ async function openAdminSession(base: string): Promise<void> {
     }
 
     if (outcome === 'error') {
-      const message = (await page.getByRole('alert').first().textContent())?.trim();
+      const message = (await page.locator('form [role="alert"]').first().textContent())?.trim();
       throw new Error(message || 'Admin girişi reddedildi.');
     }
     if (outcome !== 'ok') {

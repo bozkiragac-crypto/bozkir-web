@@ -84,7 +84,7 @@ jobs:
           PGPASSWORD=bozkir psql -h localhost -U bozkir -d bozkir -v ON_ERROR_STOP=1 -f docker/initdb/01-schema.sql
           npm run db:migrate
           node scripts/seed-e2e.mjs
-          npm run admin:reset -- --user bozkir --password "Bozkir.CI.1905!" --yes
+          npm run admin:reset -- --user bozkir --password "Bozkir.CI.1905!" --create --yes
       - name: Build
         run: npm run build
       # Playwright webServer, BASE_URL verilmediği için `npm run start`'ı kendisi başlatır.

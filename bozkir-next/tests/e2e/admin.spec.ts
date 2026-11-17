@@ -44,6 +44,8 @@ test.describe('Admin CRUD (oturumlu)', () => {
 
   test('ayarlar: çalışma saatleri ve konum alanları', async ({ adminPage }) => {
     await adminPage.goto('/admin/ayarlar');
+    // İletişim alanları kendi sekmesinde; varsayılan "Genel" sekmesi açılıyor.
+    await adminPage.getByRole('tab', { name: 'İletişim' }).click();
     await expect(adminPage.getByText('Çalışma saatleri (TR)')).toBeVisible();
     await expect(adminPage.getByText('Depo konumu')).toBeVisible();
     await expect(adminPage.getByText('İş yeri koordinatları (enlem,boylam)')).toBeVisible();

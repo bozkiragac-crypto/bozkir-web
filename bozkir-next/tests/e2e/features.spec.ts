@@ -48,7 +48,7 @@ test.describe('Yeni özellikler', () => {
     await page.evaluate(() => localStorage.removeItem('bozkir:consent'));
     await page.reload({ waitUntil: 'domcontentloaded' });
 
-    const banner = page.getByRole('dialog', { name: 'Çerez Politikası' });
+    const banner = page.locator('[data-cookie-banner]');
     await expect(banner).toBeVisible();
     await banner.getByRole('button', { name: 'Kabul Et' }).click();
     await expect(banner).toBeHidden();
@@ -57,7 +57,7 @@ test.describe('Yeni özellikler', () => {
     expect(stored).toBe('granted');
 
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.getByRole('dialog', { name: 'Çerez Politikası' })).toBeHidden();
+    await expect(page.locator('[data-cookie-banner]')).toBeHidden();
   });
 
   test('paylaşılan liste bağlantısı favorilere ürün ekler ve URL temizlenir', async ({ page }) => {
@@ -123,6 +123,8 @@ test.describe('Admin yeni özellikler', () => {
   test('ayarlar: 2FA, popup ve webhook alanları', async ({ adminPage }) => {
     await adminPage.goto('/admin/ayarlar', { waitUntil: 'domcontentloaded' });
     await expect(adminPage.getByText('İki Adımlı Doğrulama (2FA)')).toBeVisible();
+    // Popup ve webhook, "İçerik & SEO" sekmesinde.
+    await adminPage.getByRole('tab', { name: 'İçerik & SEO' }).click();
     await expect(adminPage.getByText('Kampanya popup')).toBeVisible();
     await expect(adminPage.getByText('Webhook').first()).toBeVisible();
   });

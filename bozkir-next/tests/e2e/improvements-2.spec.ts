@@ -11,10 +11,16 @@ test.describe('Vitrin, galeri ve gezinme iyileştirmeleri', () => {
 
     const dialog = page.locator('[role="dialog"][data-lenis-prevent]');
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText(/1 \/ \d+/)).toBeVisible();
+    // Sayaç kaldırıldı; gezinme, dialog'un erişilebilir adının (görsel başlığı)
+    // değişmesiyle doğrulanır.
+    const firstLabel = await dialog.getAttribute('aria-label');
+    expect(firstLabel).toBeTruthy();
 
     await dialog.getByRole('button', { name: 'Sonraki', exact: true }).click();
-    await expect(dialog.getByText(/2 \/ \d+/)).toBeVisible();
+    await expect.poll(() => dialog.getAttribute('aria-label')).not.toBe(firstLabel);
+
+    await dialog.getByRole('button', { name: 'Önceki', exact: true }).click();
+    await expect.poll(() => dialog.getAttribute('aria-label')).toBe(firstLabel);
   });
 
   test('ürün galerisi okları ve klavye ile gezinir', async ({ page, request }) => {
@@ -75,8 +81,17 @@ test.describe('Vitrin, galeri ve gezinme iyileştirmeleri', () => {
   });
 
   test('WhatsApp mesajı firma adı içermez', async ({ page }) => {
+    // FAB, çerez kararı verilene kadar gizlenir; testte doğrudan onay ver.
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('bozkir:consent', 'granted');
+      } catch {
+        // yok say
+      }
+    });
     await gotoWithRetry(page, '/tr');
     const fab = page.locator('[data-whatsapp-fab]').first();
+    await expect(fab).toBeVisible();
     const href = await fab.getAttribute('href');
     if (!href) test.skip(true, 'WhatsApp bağlantısı yok');
 
