@@ -15,12 +15,10 @@ import { useDictionary } from '@/i18n/DictionaryProvider';
  */
 export function MaterialShowcase({
   items,
-  eyebrow,
   title,
   body,
 }: {
   items: ShowcaseItem[];
-  eyebrow?: string;
   title: string;
   body?: string;
 }) {
@@ -35,7 +33,6 @@ export function MaterialShowcase({
       <Container>
         <ChapterMark label={t('home.block.showcase')} className="mb-5" />
         <SectionHeading
-          eyebrow={eyebrow}
           title={title}
           body={body}
           action={

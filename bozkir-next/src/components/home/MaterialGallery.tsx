@@ -114,12 +114,7 @@ export async function MaterialGallery({ block, locale }: { block: ContentBlock; 
 
   return (
     <section id="vitrin" className="pad-compact" aria-label={h.galleryAria}>
-      <MaterialShowcase
-        items={items}
-        eyebrow={block.subtitle || h.showcase}
-        title={block.title}
-        body={block.body}
-      />
+      <MaterialShowcase items={items} title={block.title} body={block.body} />
 
       <script
         type="application/ld+json"

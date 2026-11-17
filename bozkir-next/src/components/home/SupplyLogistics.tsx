@@ -20,7 +20,6 @@ export async function SupplyLogistics({ locale }: { locale: Locale }) {
     <Container id="lojistik" className="pad-compact">
       <ChapterMark label={h.eyebrow} className="mb-5" />
       <SectionHeading
-        eyebrow={h.eyebrow}
         title={h.title}
         action={
           <MagneticButton>

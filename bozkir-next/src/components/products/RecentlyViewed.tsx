@@ -40,7 +40,7 @@ export function RecentlyViewed({ excludeSlug }: { excludeSlug?: string }) {
   return (
     <Container id="son-bakilanlar" className="pad-compact">
       <ChapterMark label={t('product.recent')} className="mb-5" />
-      <SectionHeading eyebrow={t('product.recent')} title={t('product.recentTitle')} />
+      <SectionHeading title={t('product.recentTitle')} />
       <div className="mt-10 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-4 md:gap-y-10">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />

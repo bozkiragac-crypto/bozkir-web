@@ -130,6 +130,14 @@ export function Panel3D() {
     return () => io.disconnect();
   }, []);
 
+  // Bitiş seçimi mobilde statik önizlemede görünmediğinden 3D'yi otomatik açar;
+  // masaüstünde satır içi sahne seçimi zaten yansıtır. Tam ekran içinden gelen
+  // değişimler açık pencereye uygulanır, yeniden açma döngüsü oluşmaz.
+  const handleFinishChange = (f: PanelFinish) => {
+    setFinish(f);
+    if (isMobile && webglOk) setFullscreen(true);
+  };
+
   const layerWords = h.layers
     .split('·')
     .map((s) => s.trim())
@@ -162,6 +170,14 @@ export function Panel3D() {
         ) : (
           <>
             <PanelFallback alt={h.imageAlt} />
+            {isMobile && (
+              <span
+                data-testid="panel-preview-finish"
+                className="pointer-events-none absolute bottom-4 end-4 z-10 rounded-full border border-border bg-background/85 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm backdrop-blur"
+              >
+                {finish.label}
+              </span>
+            )}
             {!webglOk ? (
               <div className="absolute inset-0 flex items-end justify-center p-4 pb-14">
                 <p className="max-w-xs rounded-lg border border-border bg-background/90 px-4 py-2 text-center text-xs text-muted-strong backdrop-blur">
@@ -216,7 +232,7 @@ export function Panel3D() {
             value={finish.id}
             onChange={(v) => {
               const f = finishes.find((x) => x.id === v);
-              if (f) setFinish(f);
+              if (f) handleFinishChange(f);
             }}
             options={finishes.map((f) => ({ value: f.id, label: f.label, dot: f.color }))}
           />
@@ -250,7 +266,7 @@ export function Panel3D() {
             <button
               key={f.id}
               type="button"
-              onClick={() => setFinish(f)}
+              onClick={() => handleFinishChange(f)}
               aria-pressed={finish.id === f.id}
               className={cn(
                 'inline-flex min-h-11 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',

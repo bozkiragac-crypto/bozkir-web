@@ -17,7 +17,6 @@ export async function FaqAccordion({ block, locale }: { block: ContentBlock; loc
       <ChapterMark label={block.subtitle || dict.home.block.faq} className="mb-5" />
       <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <SectionHeading
-          eyebrow={block.subtitle || dict.home.block.faq}
           title={block.title}
           className="lg:border-0"
         />
