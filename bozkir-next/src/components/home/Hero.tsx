@@ -156,8 +156,10 @@ export function Hero({ image }: { image?: string }) {
           </div>
         </div>
 
+        {/* Tam ekran kaydırma: genel -80px başlık offset'i bu bağlantıya uygulanmaz. */}
         <a
           href="#malzeme"
+          data-scroll-offset="0"
           data-hero-item
           className="tap-target mt-16 inline-flex w-fit items-center gap-3 text-xs tracking-[0.24em] text-white/60 uppercase transition-colors hover:text-white"
         >

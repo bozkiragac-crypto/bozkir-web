@@ -66,14 +66,17 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
 
     // Sayfa içi çapa linkleri Lenis ile kaydırılsın.
     const onAnchorClick = (e: MouseEvent) => {
-      const target = (e.target as HTMLElement)?.closest('a[href^="#"]');
+      const target = (e.target as HTMLElement)?.closest('a[href^="#"]') as HTMLAnchorElement | null;
       if (!target) return;
       const id = target.getAttribute('href');
       if (!id || id === '#') return;
       const el = document.querySelector(id);
       if (!el) return;
+      // Bağlantı özel offset belirtmediyse sabit başlık için -80px kullanılır.
+      const configured = Number(target.dataset.scrollOffset);
+      const offset = Number.isFinite(configured) ? configured : -80;
       e.preventDefault();
-      lenis.scrollTo(el as HTMLElement, { offset: -80 });
+      lenis.scrollTo(el as HTMLElement, { offset });
     };
     document.addEventListener('click', onAnchorClick);
 
