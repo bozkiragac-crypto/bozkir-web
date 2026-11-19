@@ -130,12 +130,10 @@ export function Panel3D() {
     return () => io.disconnect();
   }, []);
 
-  // Bitiş seçimi mobilde statik önizlemede görünmediğinden 3D'yi otomatik açar;
-  // masaüstünde satır içi sahne seçimi zaten yansıtır. Tam ekran içinden gelen
-  // değişimler açık pencereye uygulanır, yeniden açma döngüsü oluşmaz.
+  // Bitiş seçimi satır içi sahneye anında yansır; tam ekran yalnızca kullanıcı
+  // büyütme düğmesine bastığında açılır.
   const handleFinishChange = (f: PanelFinish) => {
     setFinish(f);
-    if (isMobile && webglOk) setFullscreen(true);
   };
 
   const layerWords = h.layers
@@ -151,9 +149,9 @@ export function Panel3D() {
   ];
 
   const viewerReady = webglOk && seeded;
-  // Mobilde satır içi WebGL yerine statik önizleme + tam ekran düğmesi gösterilir;
-  // böylece sayfa kaydırması ile panel döndürme çakışmaz.
-  const showInlineViewer = !isMobile && viewerReady && (!reduced || started);
+  // Mobilde de satır içi WebGL kullanılır; tek parmak kaydırma PanelViewer'da
+  // tarayıcıya bırakılır, iki parmak modeli döndürür.
+  const showInlineViewer = viewerReady && (!reduced || started);
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -164,6 +162,7 @@ export function Panel3D() {
             active={inView && !fullscreen}
             resetSignal={resetSignal}
             dprMax={isMobile ? 1.25 : 1.5}
+            scrollableTouch={isMobile}
             autoRotate={!reduced}
             labels={{ zoomIn: h.zoomIn, zoomOut: h.zoomOut, reset: h.resetView }}
           />
@@ -184,16 +183,6 @@ export function Panel3D() {
                   {h.unsupported3d}
                 </p>
               </div>
-            ) : isMobile ? (
-              <button
-                type="button"
-                onClick={() => setFullscreen(true)}
-                className="group absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/45 via-black/10 to-transparent"
-              >
-                <span className="inline-flex min-h-12 items-center gap-2 rounded-full bg-background px-6 py-3 text-sm font-medium text-foreground shadow-lg transition-transform group-hover:scale-[1.03] group-active:scale-[0.98]">
-                  <Maximize2 className="h-4 w-4" aria-hidden /> {h.open3d}
-                </span>
-              </button>
             ) : reduced && seeded ? (
               <div className="absolute inset-0 flex items-center justify-center">
                 <button
@@ -255,7 +244,18 @@ export function Panel3D() {
                 <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                 <span className="hidden sm:inline">{h.resetView}</span>
               </button>
-              <PanelAR color={finish.color} />
+              {isMobile && showInlineViewer && (
+                <button
+                  type="button"
+                  onClick={() => setFullscreen(true)}
+                  aria-label={h.open3d}
+                  title={h.open3d}
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border px-3 py-1.5 text-muted-strong transition-colors hover:border-foreground"
+                >
+                  <Maximize2 className="h-4 w-4" aria-hidden />
+                </button>
+              )}
+              {seeded && <PanelAR color={finish.color} />}
             </div>
           </div>
         </div>
@@ -299,14 +299,16 @@ export function Panel3D() {
         </ul>
       </div>
 
-      <Panel3DFullscreen
-        open={fullscreen}
-        onClose={() => setFullscreen(false)}
-        finish={finish}
-        finishes={finishes}
-        onFinishChange={setFinish}
-        autoRotate={!reduced}
-      />
+      {fullscreen && (
+        <Panel3DFullscreen
+          open={fullscreen}
+          onClose={() => setFullscreen(false)}
+          finish={finish}
+          finishes={finishes}
+          onFinishChange={setFinish}
+          autoRotate={!reduced}
+        />
+      )}
     </div>
   );
 }

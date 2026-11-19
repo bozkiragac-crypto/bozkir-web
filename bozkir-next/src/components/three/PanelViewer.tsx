@@ -40,6 +40,8 @@ interface PanelViewerProps {
   autoRotate?: boolean;
   /** Dar/dikey kapsayıcıda paneli yatay olarak sığdıracak kamera mesafesi. */
   fitCamera?: boolean;
+  /** Satır içi mobilde tek parmak sayfayı kaydırır, iki parmak modeli döndürür. */
+  scrollableTouch?: boolean;
   /** Zoom/sıfırlama düğmelerinin erişilebilir etiketleri. */
   labels?: { zoomIn: string; zoomOut: string; reset: string };
 }
@@ -342,15 +344,16 @@ export function PanelViewer({
   dprMax = 1.75,
   autoRotate = true,
   fitCamera = false,
+  scrollableTouch = false,
   labels,
 }: PanelViewerProps) {
   const [localReset, setLocalReset] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
 
-  // Sahne her zaman dokunmatik döndürmeyi kendisi yönetir. Satır içi mobilde
-  // sahne yerine statik önizleme gösterildiği için sayfa kaydırması bozulmaz.
-  const touchAction = 'none';
+  // Satır içi mobilde dikey kaydırma tarayıcıya bırakılır; masada/tam ekranda
+  // sahne tüm dokunma hareketlerini kendisi yönetir.
+  const touchAction = scrollableTouch ? 'pan-y' : 'none';
 
   // +/- düğmeleri: OrbitControls örneğine doğrudan erişip hedefe göre mesafeyi ölçekler.
   const zoom = (factor: number) => {
@@ -382,7 +385,8 @@ export function PanelViewer({
   return (
     <div
       ref={wrapRef}
-      data-lenis-prevent
+      data-testid="panel-viewer"
+      data-lenis-prevent={scrollableTouch ? undefined : ''}
       className="relative h-full w-full overscroll-contain"
       style={{ touchAction }}
       onDoubleClick={() => setLocalReset((n) => n + 1)}
@@ -477,6 +481,11 @@ export function PanelViewer({
           enableDamping
           dampingFactor={0.08}
           enablePan={false}
+          touches={
+            scrollableTouch
+              ? { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE }
+              : undefined
+          }
           enableZoom
           minDistance={MIN_DISTANCE}
           maxDistance={MAX_DISTANCE}
