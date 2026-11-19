@@ -53,12 +53,10 @@ APP_TAG=<son-iyi-sha> docker compose up -d    # geri dön
 ```
 
 ## 4. nginx + TLS
-Docker nginx yalnızca `:80` dinler; TLS'i önüne certbot'lu host nginx veya bir edge proxy koyun:
+TLS Docker nginx içinde halledilir: `docker-compose.prod.yml` + `deploy/nginx.docker.tls.conf`
+(443 + ACME webroot). Tek komutla kurulum için:
 ```bash
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/bozkiragac.com
-sudo ln -s /etc/nginx/sites-available/bozkiragac.com /etc/nginx/sites-enabled/
-sudo certbot --nginx -d bozkiragac.com -d www.bozkiragac.com
-sudo nginx -t && sudo systemctl reload nginx
+bash deploy/go-live.sh bozkiragac.com admin@bozkiragac.com
 ```
 
 ## 5. DNS geçişi

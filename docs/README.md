@@ -1,12 +1,11 @@
-# Bozkır Ağaç
+# Bozkır Ağaç — Dokümantasyon
 
-Bu depo iki dönem içerir:
-
-| Klasör | Açıklama |
+| Dosya | Açıklama |
 | --- | --- |
-| **`bozkir-next/`** | **Aktif proje.** Next.js (App Router) uygulaması: site, yönetim paneli ve JSON API. Kurulum: `cd bozkir-next && npm install && npm run dev` |
-| `_archive/php-legacy/` | Emekliye ayrılan eski PHP sitesi + API (referans/geri dönüş). Artık çalıştırılmıyor. |
-| `tools/`, `img/`, `cache/` | PHP döneminden kalan yardımcı araçlar ve veriler (legacy). |
-| `supabase-kurulum.sql`, `supabase-admin-kurulum.sql` | Supabase tablo/RLS/storage kurulum betikleri (SQL Editor'de çalıştırılır). |
+| `ARCHITECTURE.md` | Sistem mimarisi ve veri akışı. |
+| `DEPLOY.md` | Docker Compose kurulumu, CI/CD ve doğrulama özeti. |
+| `GITHUB.md` | GitHub Actions iş akışları ve gerekli secret'lar. |
+| `RUNBOOK.md` | Operasyon: yedekleme, geri yükleme, PITR, sorun giderme. |
 
-Detaylar için: [`bozkir-next/README.md`](bozkir-next/README.md)
+Adım adım üretim kurulumu: [`bozkir-next/deploy/PRODUCTION.md`](../bozkir-next/deploy/PRODUCTION.md).
+Uygulama README'si: [`bozkir-next/README.md`](../bozkir-next/README.md).

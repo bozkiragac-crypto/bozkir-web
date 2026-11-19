@@ -6,7 +6,6 @@ Bu depo, Bozkır Ağaç Ürünleri web projesini barındırır.
 | --- | --- |
 | **`bozkir-next/`** | **Aktif uygulama.** Next.js 15 (App Router) + React 19 + TypeScript + PostgreSQL 16 + SeaweedFS (S3 uyumlu). Site, yönetim paneli, JSON API'si ve teklif formu. |
 | `docs/` | Dokümantasyon: kurulum, mimari, deploy, runbook. |
-| `archive/` | Emekliye ayrılmış legacy içerik (eski PHP sitesi, dönüşüm araçları, ham görseller). Git tarafından **izlenmez**. Silinmez; gerekirse geri dönüş için tutulur. |
 
 ## Hızlı Başlangıç
 
@@ -70,5 +69,5 @@ npm run test:e2e     # Docker servisleri ayaktayken
 
 - `products.code` bir **seri/malzeme kodu**dur, tekil değildir (örneğin `PVC KENAR` kategorisindeki tüm ürünler `PVC` kodunu taşır). Benzersizlik yerine `(kategori + kod + ad)` üçlüsü kontrol edilir.
 - Bir ürünün `img` değeri boşsa arayüz kırık görsel yerine düzgün bir placeholder gösterir; `npm run media:audit` eksik referansları tek komutla bulur.
-- `archive/` ve tüm legacy dosyalar git dışıdır; ana depo bu sayede hafif kalır.
+- Üretilmiş artefaktlar (`node_modules/`, `.next/`, test raporları, lokal yedekler) git dışıdır; ana depo hafif kalır.
 - Sırlar (`.env.local`) git'e girmez. VPS ve GitHub Actions için ayrı secret yönetimi kullanılır.

@@ -138,8 +138,9 @@ alanlarına yazılır ve admin listesinden ürün sayfasına geri link verilir.
 ```bash
 docker compose up -d --build
 ```
-TLS için nginx önüne certbot (`--nginx`) ekleyin; `SITE_URL` ve `S3_PUBLIC_BASE_URL` alan adına
-göre ayarlayın. Ayrıntı: `deploy/README.md`.
+TLS için `docker-compose.prod.yml` + `deploy/nginx.docker.tls.conf` kullanın (veya tek komutla
+`deploy/go-live.sh <domain> <email>`); `SITE_URL` ve `S3_PUBLIC_BASE_URL` alan adına göre
+ayarlayın. Ayrıntı: `deploy/PRODUCTION.md`.
 
 ## Durum
 
