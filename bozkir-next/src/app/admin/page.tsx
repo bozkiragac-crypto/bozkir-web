@@ -12,11 +12,13 @@ import {
   ArrowUpRight,
   Plus,
   HardDrive,
+  AlertCircle,
 } from 'lucide-react';
 import { getDb } from '@/lib/db/client';
 import { activityLog, adminUsers, campaigns, contentItems, products, quoteRequests } from '@/lib/db/schema';
 import { APP_TIME_ZONE, formatDateTime, formatDayKey, startOfLocalDay } from '@/lib/datetime';
 import { getBackupStatus } from '@/lib/backup-status';
+import { fetchContentAudit } from '@/lib/admin/content-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,6 +69,7 @@ export default async function AdminDashboardPage() {
     recentQuotes,
     recentActivity,
     daily,
+    contentAudit,
   ] = await Promise.all([
     db.select({ value: count() }).from(products),
     db.select({ value: count() }).from(products).where(eq(products.isActive, true)),
@@ -83,6 +86,7 @@ export default async function AdminDashboardPage() {
       .from(quoteRequests)
       .where(gte(quoteRequests.createdAt, since))
       .groupBy(sql`to_char(created_at AT TIME ZONE ${sql.raw(`'${APP_TIME_ZONE}'`)}, 'YYYY-MM-DD')`),
+    fetchContentAudit(),
   ]);
 
   const byDay = new Map(daily.map((d) => [d.day, Number(d.n)]));
@@ -235,6 +239,40 @@ export default async function AdminDashboardPage() {
             Tüm kayıtlar <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>
+      </div>
+
+      <div className="mt-6 rounded-xl border border-border bg-surface p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-accent" />
+            <div>
+              <p className="font-medium">İçerik denetimi</p>
+              <p className="mt-1 text-sm text-muted-strong">
+                {contentAudit.affectedCount === 0
+                  ? 'Aktif ürünlerde eksik içerik yok.'
+                  : `${contentAudit.affectedCount} aktif üründe eksik içerik · ${contentAudit.missingImageCount} görseiz · ${contentAudit.missingDescriptionCount} açıklamasız`}
+              </p>
+            </div>
+          </div>
+          <Link href="/admin/urunler" className="inline-flex items-center gap-2 text-sm font-medium">
+            Ürünlere git <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+        {contentAudit.samples.length > 0 && (
+          <ul className="mt-4 divide-y divide-border rounded-md border border-border">
+            {contentAudit.samples.map((s) => (
+              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
+                <Link href={`/admin/urunler/${s.id}`} className="truncate font-medium hover:underline">
+                  {s.name || s.code || s.id}
+                </Link>
+                <span className="flex gap-2 text-xs text-muted">
+                  {s.missingImage && <span className="text-amber-600">Görsel yok</span>}
+                  {s.missingDescription && <span className="text-amber-600">Açıklama yok</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-surface p-6">

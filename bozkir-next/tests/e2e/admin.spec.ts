@@ -22,6 +22,12 @@ test.describe('Admin giriş ve güvenlik', () => {
 });
 
 test.describe('Admin CRUD (oturumlu)', () => {
+  test('panelde içerik denetimi kartı görünür', async ({ adminPage }) => {
+    await adminPage.goto('/admin');
+    await expect(adminPage.getByText('İçerik denetimi')).toBeVisible();
+    await expect(adminPage.getByRole('link', { name: /Ürünlere git/ })).toBeVisible();
+  });
+
   test('ürünler listesi ve arama', async ({ adminPage }) => {
     await adminPage.goto('/admin/urunler');
     await expect(adminPage.getByRole('heading', { name: 'Ürünler' })).toBeVisible();
