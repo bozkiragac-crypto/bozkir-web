@@ -271,7 +271,7 @@ function UserRow({
           <input
             className={field}
             aria-label="Yeni şifre"
-            placeholder="Yeni şifre (ops.)"
+            placeholder="Yeni şifre (boşsa değişmez)"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />

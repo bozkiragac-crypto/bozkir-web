@@ -19,6 +19,23 @@ test.describe('Admin: kampanya ekleme ve hakkımızda', () => {
     await expect(adminPage.getByText(title)).toHaveCount(0, { timeout: 15_000 });
   });
 
+  test('yeni kategori oluşturulur ve bağlı ürün yoksa silinir', async ({ adminPage }) => {
+    const name = `E2E Kategori ${Date.now()}`;
+    await adminPage.goto('/admin/kategoriler/yeni');
+    await adminPage.getByLabel('Ad *', { exact: true }).fill(name);
+    await adminPage.getByRole('button', { name: 'Kaydet' }).click();
+    await expect(adminPage).toHaveURL(/\/admin\/kategoriler$/, { timeout: 15_000 });
+
+    const row = adminPage.locator('tr', { hasText: name });
+    await expect(row).toBeVisible();
+    await row.getByRole('button', { name: 'Sil' }).click();
+
+    const dialog = adminPage.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Sil' }).click();
+    await expect(adminPage.getByText(name)).toHaveCount(0, { timeout: 15_000 });
+  });
+
   test('hakkımızda editörü alanları ve kaydetme', async ({ adminPage }) => {
     await adminPage.goto('/admin/hakkimizda', { waitUntil: 'domcontentloaded' });
     await expect(adminPage.getByRole('heading', { name: 'Hakkımızda İçeriği' })).toBeVisible();
