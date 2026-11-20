@@ -46,7 +46,6 @@ export const CATEGORY_SLUGS: Record<string, string> = {
   PERVAZ: 'pervaz',
   TUTKAL: 'tutkal',
   KAPIPANEL: 'kapi-panel',
-  OSB: 'osb',
   DUVARPROFILI: 'duvar-profili',
 };
 

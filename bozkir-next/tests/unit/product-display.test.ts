@@ -64,7 +64,7 @@ describe('extractThickness', () => {
   it('addaki mm değerini kalınlığa çevirir', () => {
     expect(extractThickness('18mm Ham')).toEqual(['18 mm']);
     expect(extractThickness('2,7mm Ham')).toEqual(['2.7 mm']);
-    expect(extractThickness('15 mm Osb')).toEqual(['15 mm']);
+    expect(extractThickness('15 mm Mdf')).toEqual(['15 mm']);
   });
 
   it('kalınlık içermeyen adlarda boş döner', () => {

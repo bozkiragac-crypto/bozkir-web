@@ -156,16 +156,6 @@ export const fallbackCategories: Category[] = [
     featured: true,
     sortOrder: 9,
   },
-  {
-    id: 'osb',
-    nameEn: 'OSB Board',
-    nameAr: 'لوح OSB',
-    slug: 'osb',
-    name: 'OSB',
-    description: 'Yönlendirilmiş yonga levha; yapısal ve dekoratif kullanım.',
-    thumbnail: '/images/categories/osb.webp',
-    sortOrder: 13,
-  },
 ];
 
 /** Ana odak kategorileri (marka önceliği sırasına göre). */

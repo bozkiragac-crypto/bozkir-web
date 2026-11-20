@@ -32,7 +32,6 @@ const categories = [
   { slug: 'masif-panel', name: 'Masif Panel', name_en: 'Solid Panel', name_ar: 'لوح صلب', short: 'Masif ahşap panel', featured: false, sort: 10, thumb: '/images/categories/masifpanel.webp' },
   { slug: 'pervaz', name: 'Pervaz', name_en: 'Frame & Trim', name_ar: 'إطار وحافة', short: 'Pervaz malzemeleri', featured: false, sort: 11, thumb: '/images/categories/pervaz.webp' },
   { slug: 'tutkal', name: 'Tutkal', name_en: 'Adhesives', name_ar: 'مواد لاصقة', short: 'Apel yapıştırıcı', featured: true, sort: 12, thumb: '/images/categories/tutkal.webp' },
-  { slug: 'osb', name: 'OSB', name_en: 'OSB Board', name_ar: 'لوح OSB', short: 'Yönlendirilmiş yonga levha', featured: false, sort: 13, thumb: '/images/categories/osb.webp' },
 ];
 
 const brands = [

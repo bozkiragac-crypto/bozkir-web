@@ -285,23 +285,6 @@ const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       ar: ['وصل الألواح', 'لصق الحواف', 'تجميع الأثاث', 'الإنتاج في الورشة'],
     },
   },
-  osb: {
-    short: {
-      tr: 'Yönlendirilmiş yonga levha',
-      en: 'Oriented strand board',
-      ar: 'لوح ألياف موجهة',
-    },
-    description: {
-      tr: 'Yönlendirilmiş yonga levha (OSB) ürünleridir. Yapısal ve dekoratif uygulamalarda taşıyıcı veya kaplama levhası olarak kullanılır.',
-      en: 'Oriented strand board (OSB) products. Used as a structural or cladding board in structural and decorative applications.',
-      ar: 'منتجات ألواح الألياف الموجهة (OSB). تُستخدم كلوح إنشائي أو تكسية في التطبيقات الإنشائية والديكورية.',
-    },
-    applications: {
-      tr: ['Yapısal kaplama', 'Ambalaj ve sandık', 'Dekoratif panel', 'Kendi işini yapan projeler'],
-      en: ['Structural sheathing', 'Packaging and crates', 'Decorative panels', 'DIY projects'],
-      ar: ['التكسية الإنشائية', 'التغليف والصناديق', 'ألواح ديكورية', 'مشاريع الأعمال اليدوية'],
-    },
-  },
 };
 
 function templateFor(categorySlug: string): CategoryContent {
