@@ -12,9 +12,11 @@ import { Dropdown } from '@/components/ui/Dropdown';
 import type { PanelFinish } from './PanelViewer';
 
 // WebGL sahnesi yalnızca görünür alana girince indirilir (code-split + lazy).
+// Yükleme sırasında statik görsel gösterilmez; aksi halde mobilde "önce görsel,
+// sonra 3D" izlenimi oluşur. Nötr iskelet kullanılır.
 const PanelViewer = dynamic(() => import('./PanelViewer').then((m) => m.PanelViewer), {
   ssr: false,
-  loading: () => <PanelFallback />,
+  loading: () => <PanelSkeleton />,
 });
 
 // Tam ekran görüntüleyici yalnızca istendiğinde yüklenir; üç boyutlu sahne
@@ -80,6 +82,17 @@ function PanelFallback({ alt = '' }: { alt?: string }) {
   );
 }
 
+/** 3D chunk'ı yüklenirken gösterilen görüntüsüz yer tutucu. */
+function PanelSkeleton() {
+  return (
+    <div
+      data-testid="panel-skeleton"
+      aria-hidden
+      className="h-full w-full animate-pulse bg-gradient-to-br from-surface via-background to-surface"
+    />
+  );
+}
+
 /** WebGL yoksa/engelliyse 3D yerine statik görsel gösterilir (özellikle mobilde). */
 function hasWebGL(): boolean {
   try {
@@ -114,7 +127,27 @@ export function Panel3D() {
     setWebglOk(hasWebGL());
   }, []);
 
+  // 3D paketini ilk kullanıcı etkileşiminde ısıt: bölüme gelindiğinde chunk
+  // önbellekte hazır olur. İlk sayfa yükünde WebGL kodu indirilmez.
+  useEffect(() => {
+    const warm = () => {
+      void import('./PanelViewer');
+      stopWarming();
+    };
+    const stopWarming = () => {
+      window.removeEventListener('scroll', warm);
+      window.removeEventListener('touchstart', warm);
+      window.removeEventListener('pointerdown', warm);
+    };
+    window.addEventListener('scroll', warm, { passive: true });
+    window.addEventListener('touchstart', warm, { passive: true });
+    window.addEventListener('pointerdown', warm, { passive: true });
+    return stopWarming;
+  }, []);
+
   // WebGL yalnızca ekrana girince başlar; ekrandan çıkınca render durur.
+  // Bir ekran önceden tetikleyerek kullanıcı bölüme geldiğinde sahnenin hazır
+  // olmasını sağlarız.
   useEffect(() => {
     const el = hostRef.current;
     if (!el) return;
@@ -124,7 +157,7 @@ export function Panel3D() {
         setInView(visible);
         if (visible) setSeeded(true);
       },
-      { rootMargin: '200px' },
+      { rootMargin: '100% 0px' },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -169,14 +202,6 @@ export function Panel3D() {
         ) : (
           <>
             <PanelFallback alt={h.imageAlt} />
-            {isMobile && (
-              <span
-                data-testid="panel-preview-finish"
-                className="pointer-events-none absolute bottom-4 end-4 z-10 rounded-full border border-border bg-background/85 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm backdrop-blur"
-              >
-                {finish.label}
-              </span>
-            )}
             {!webglOk ? (
               <div className="absolute inset-0 flex items-end justify-center p-4 pb-14">
                 <p className="max-w-xs rounded-lg border border-border bg-background/90 px-4 py-2 text-center text-xs text-muted-strong backdrop-blur">
