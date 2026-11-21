@@ -72,6 +72,7 @@ export default async function EditProductPage({ params }: PageProps) {
             whatsappMessage: product.whatsappMessage ?? '',
             whatsappMessageEn: product.whatsappMessageEn ?? '',
             whatsappMessageAr: product.whatsappMessageAr ?? '',
+            availabilityStatus: product.availabilityStatus ?? '',
           }}
         />
       </div>

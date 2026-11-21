@@ -94,6 +94,9 @@ const statements = [
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS technical_specs JSONB`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS documents JSONB`,
 
+  // ürün temin durumu (stokta / sipariş üzerine / stok sorunuz); boş = belirtilmemiş
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS availability_status TEXT`,
+
   // çok dilli kampanya metinleri
   `ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS title_en TEXT`,
   `ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS title_ar TEXT`,

@@ -49,6 +49,8 @@ export const products = pgTable(
     whatsappMessage: text('whatsapp_message'),
     whatsappMessageEn: text('whatsapp_message_en'),
     whatsappMessageAr: text('whatsapp_message_ar'),
+    /** Temin durumu: in_stock | on_order | check_availability (null = belirtilmemiş). */
+    availabilityStatus: text('availability_status'),
   },
   (t) => [index('products_cat_idx').on(t.cat), index('products_created_idx').on(t.createdAt)],
 );

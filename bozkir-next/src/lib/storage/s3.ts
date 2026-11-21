@@ -18,18 +18,69 @@ export const MEDIA_BUCKET = process.env.S3_BUCKET ?? 'bozkir-media';
  */
 const PUBLIC_BASE = (process.env.S3_PUBLIC_BASE_URL ?? '/media').replace(/\/$/, '');
 
+const WEAK_STORAGE_CREDS = new Set([
+  'any',
+  'minioadmin',
+  'admin',
+  'password',
+  'secret',
+  'changeme',
+  'change-me',
+  'test',
+]);
+
+function isLikelyLocalStorageEndpoint(endpoint: string): boolean {
+  try {
+    const u = new URL(endpoint);
+    return ['localhost', '127.0.0.1', '::1', 'storage', 'minio', 'seaweedfs'].includes(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function hasStrongStorageCredentials(): boolean {
+  const key = ACCESS_KEY.trim();
+  const secret = SECRET_KEY.trim();
+  if (!key || !secret) return false;
+  const lk = key.toLowerCase();
+  const ls = secret.toLowerCase();
+  if (WEAK_STORAGE_CREDS.has(lk) || WEAK_STORAGE_CREDS.has(ls)) return false;
+  return true;
+}
+
 export function storageConfigured(): boolean {
-  return !!ENDPOINT;
+  if (!ENDPOINT.trim()) return false;
+  if (process.env.NODE_ENV === 'production' && !isLikelyLocalStorageEndpoint(ENDPOINT)) {
+    return hasStrongStorageCredentials();
+  }
+  return true;
+}
+
+function assertStorageUsable(): void {
+  if (!ENDPOINT.trim()) {
+    throw new Error('Nesne depolama ucu (S3_ENDPOINT) tanımlı değil.');
+  }
+  if (process.env.NODE_ENV === 'production' && !isLikelyLocalStorageEndpoint(ENDPOINT)) {
+    if (!hasStrongStorageCredentials()) {
+      throw new Error(
+        'Production ortamında nesne depolama kimlik bilgileri güçlü ve benzersiz olmalıdır.',
+      );
+    }
+  }
 }
 
 let client: S3Client | null = null;
 function getClient(): S3Client {
+  assertStorageUsable();
   if (!client) {
     client = new S3Client({
       endpoint: ENDPOINT,
       region: process.env.S3_REGION ?? 'us-east-1',
       forcePathStyle: true,
-      credentials: { accessKeyId: ACCESS_KEY || 'any', secretAccessKey: SECRET_KEY || 'any' },
+      credentials: {
+        accessKeyId: ACCESS_KEY.trim() || 'any',
+        secretAccessKey: SECRET_KEY.trim() || 'any',
+      },
     });
   }
   return client;
@@ -51,6 +102,18 @@ export async function ensureBucket(): Promise<void> {
     }
     throw err;
   }
+}
+
+function isSafeObjectKey(key: string): boolean {
+  if (!key || key.length > 1024) return false;
+  // kontrol karakterleri ve null byte
+  if (/[\x00-\x1f\x7f]/.test(key)) return false;
+  // ters eğik çizgi, baştaki eğik çizgi
+  if (key.includes('\\') || key.startsWith('/')) return false;
+  // path traversal segmentleri
+  const segments = key.split('/');
+  if (segments.some((s) => s === '' || s === '.' || s === '..')) return false;
+  return true;
 }
 
 export async function putObject(
@@ -174,24 +237,32 @@ export function objectKeyFromUrl(url: string): string | null {
   const value = (url ?? '').trim();
   if (!value || value.startsWith('data:')) return null;
 
-  if (PUBLIC_BASE && value.startsWith(`${PUBLIC_BASE}/`))
-    return value.slice(PUBLIC_BASE.length + 1);
-  if (value.startsWith('/media/')) return value.slice('/media/'.length);
+  let candidate: string | null = null;
 
-  const bucketPrefix = `/${MEDIA_BUCKET}/`;
-  const idx = value.indexOf(bucketPrefix);
-  if (idx !== -1 && idx < value.length - bucketPrefix.length)
-    return value.slice(idx + bucketPrefix.length);
-
-  try {
-    const u = new URL(value);
-    const parts = u.pathname.split('/').filter(Boolean);
-    const bi = parts.indexOf(MEDIA_BUCKET);
-    if (bi >= 0 && bi < parts.length - 1) return parts.slice(bi + 1).join('/');
-  } catch {
-    // göreli yol — aşağıda null
+  if (PUBLIC_BASE && value.startsWith(`${PUBLIC_BASE}/`)) {
+    candidate = value.slice(PUBLIC_BASE.length + 1);
+  } else if (value.startsWith('/media/')) {
+    candidate = value.slice('/media/'.length);
+  } else {
+    const bucketPrefix = `/${MEDIA_BUCKET}/`;
+    const idx = value.indexOf(bucketPrefix);
+    if (idx !== -1 && idx < value.length - bucketPrefix.length) {
+      candidate = value.slice(idx + bucketPrefix.length);
+    } else {
+      try {
+        const u = new URL(value);
+        const parts = u.pathname.split('/').filter(Boolean);
+        const bi = parts.indexOf(MEDIA_BUCKET);
+        if (bi >= 0 && bi < parts.length - 1) candidate = parts.slice(bi + 1).join('/');
+      } catch {
+        // göreli yol — aşağıda null
+      }
+    }
   }
-  return null;
+
+  if (!candidate) return null;
+  const clean = candidate.split('?')[0]?.split('#')[0] ?? '';
+  return isSafeObjectKey(clean) ? clean : null;
 }
 
 /** Değeri (URL veya düz anahtar) nesne anahtarına indirger; harici değilse `null`. */
@@ -201,6 +272,9 @@ export function toObjectKey(value: string): string | null {
   const fromUrl = objectKeyFromUrl(v);
   if (fromUrl) return fromUrl;
   // Protokolsüz, kök-göreli olmayan düz anahtar (örn. products/<id>/1.webp)
-  if (!/^[a-z][a-z0-9+.-]*:/i.test(v) && !v.startsWith('/')) return v;
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(v) && !v.startsWith('/')) {
+    const clean = v.split('?')[0]?.split('#')[0] ?? '';
+    return isSafeObjectKey(clean) ? clean : null;
+  }
   return null;
 }

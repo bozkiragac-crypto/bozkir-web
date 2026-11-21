@@ -35,6 +35,7 @@ interface ProductFormProps {
     whatsappMessage?: string | null;
     whatsappMessageEn?: string | null;
     whatsappMessageAr?: string | null;
+    availabilityStatus?: string | null;
   };
 }
 
@@ -55,6 +56,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
   const [thicknesses, setThicknesses] = useState(initial?.thicknesses ?? '');
   const [dimensions, setDimensions] = useState(initial?.dimensions ?? '');
   const [applications, setApplications] = useState(initial?.applications ?? '');
+  const [availabilityStatus, setAvailabilityStatus] = useState(initial?.availabilityStatus ?? '');
   const [shortDescription, setShortDescription] = useState(initial?.shortDescription ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [descriptionEn, setDescriptionEn] = useState(initial?.descriptionEn ?? '');
@@ -93,6 +95,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       thicknesses,
       dimensions,
       applications,
+      availabilityStatus: availabilityStatus || undefined,
       shortDescription,
       description,
       descriptionEn,
@@ -126,6 +129,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       setThicknesses('');
       setDimensions('');
       setApplications('');
+      setAvailabilityStatus('');
       setShortDescription('');
       setDescription('');
       setDescriptionEn('');
@@ -226,6 +230,19 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
             className={field}
             placeholder="Mutfak dolabı, banyo mobilyası, ofis mobilyası"
           />
+        </label>
+        <label className="grid gap-2">
+          <span className={label}>Temin durumu</span>
+          <select
+            value={availabilityStatus}
+            onChange={(e) => setAvailabilityStatus(e.target.value)}
+            className={field}
+          >
+            <option value="">Belirtilmemiş (gösterme)</option>
+            <option value="in_stock">Stokta</option>
+            <option value="on_order">Sipariş üzerine</option>
+            <option value="check_availability">Stok sorunuz</option>
+          </select>
         </label>
       </div>
 

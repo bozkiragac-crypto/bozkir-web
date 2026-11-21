@@ -38,10 +38,13 @@ const csp = [
   "connect-src 'self' https://*.google-analytics.com https://www.googletagmanager.com https://challenges.cloudflare.com",
   'frame-src https://www.google.com https://maps.google.com https://challenges.cloudflare.com',
   "media-src 'self' https:",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'self'",
+  ...(isDev ? [] : ['upgrade-insecure-requests']),
 ].join('; ');
 
 /** @type {import('next').NextConfig} */

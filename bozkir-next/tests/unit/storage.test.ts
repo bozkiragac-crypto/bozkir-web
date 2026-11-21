@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { publicUrl, objectKeyFromUrl, toObjectKey, isOwnStorageUrl } from '@/lib/storage/s3';
 
 describe('s3 publicUrl', () => {
@@ -34,6 +34,13 @@ describe('s3 objectKeyFromUrl / toObjectKey', () => {
   it('harici/data değerler null', () => {
     expect(toObjectKey('http://random.example/x')).toBeNull();
     expect(toObjectKey('data:image/png;base64,AAA')).toBeNull();
+  });
+
+  it('path traversal ve güvenli olmayan anahtarları reddeder', () => {
+    expect(toObjectKey('products/../secrets.txt')).toBeNull();
+    expect(toObjectKey('../x')).toBeNull();
+    expect(toObjectKey('/etc/passwd')).toBeNull();
+    expect(objectKeyFromUrl('/media/products/../x')).toBeNull();
   });
 });
 

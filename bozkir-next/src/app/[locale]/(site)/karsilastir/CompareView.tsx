@@ -89,6 +89,21 @@ export function CompareView() {
       ),
       numerals: true,
     },
+    {
+      label: t('product.availability'),
+      values: items.map(({ product }) => {
+        switch (product?.availabilityStatus) {
+          case 'in_stock':
+            return t('product.availabilityInStock');
+          case 'on_order':
+            return t('product.availabilityOnOrder');
+          case 'check_availability':
+            return t('product.availabilityCheck');
+          default:
+            return '\u2014';
+        }
+      }),
+    },
   ];
 
   // Admin'den girilen teknik özellikler: tüm ürünlerdeki etiketlerin birleşimi.

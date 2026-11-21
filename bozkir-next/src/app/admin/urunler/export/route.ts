@@ -32,7 +32,8 @@ export async function GET(request: Request) {
     .orderBy(asc(products.code))
     .limit(MAX_EXPORT_ROWS);
 
-  const header = 'code,name,cat,face,img,is_active,name_en,name_ar,cat_en,cat_ar';
+  const header =
+    'code,name,cat,face,img,is_active,name_en,name_ar,cat_en,cat_ar,availability_status';
   const lines = rows.map((r) => {
     const img = parseImageField(r.img ?? '').join('|');
     return [
@@ -46,6 +47,7 @@ export async function GET(request: Request) {
       r.nameAr ?? '',
       r.catEn ?? '',
       r.catAr ?? '',
+      r.availabilityStatus ?? '',
     ]
       .map(cell)
       .join(',');

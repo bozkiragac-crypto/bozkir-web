@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 import { safeHref } from '@/lib/safe-url';
 
 describe('safeHref', () => {
@@ -33,5 +33,10 @@ describe('safeHref', () => {
     expect(safeHref('not a url')).toBe('');
     expect(safeHref(null)).toBe('');
     expect(safeHref(undefined)).toBe('');
+  });
+
+  it('kontrol karakterleri ve file şemasını reddeder', () => {
+    expect(safeHref('https://example.com/\nset-cookie:x')).toBe('');
+    expect(safeHref('file:///etc/passwd')).toBe('');
   });
 });

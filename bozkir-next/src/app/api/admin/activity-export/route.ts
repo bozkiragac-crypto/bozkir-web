@@ -12,10 +12,10 @@ export const dynamic = 'force-dynamic';
 /** Yöneticiye özel aktivite CSV dışa aktarımı; aktif filtreleri korur. */
 export async function GET(request: Request) {
   const admin = await getCurrentAdmin();
-  if (!admin) return new NextResponse('yetkisiz', { status: 401 });
+  if (!admin) return new NextResponse('yetkisiz', { status: 401, headers: { 'Cache-Control': 'no-store' } });
 
   const db = getDb();
-  if (!db) return new NextResponse('veritabanı yok', { status: 503 });
+  if (!db) return new NextResponse('veritabanı yok', { status: 503, headers: { 'Cache-Control': 'no-store' } });
 
   const params = new URL(request.url).searchParams;
   const sp: Record<string, string> = {};

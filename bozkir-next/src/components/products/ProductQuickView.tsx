@@ -116,6 +116,16 @@ export function ProductQuickView({
             )}
             <h2 className="mt-1 text-xl font-medium tracking-tight md:text-2xl">{product.name}</h2>
             <p className="mt-1 text-sm text-muted-strong">{meta}</p>
+            {product.availabilityStatus && (
+              <p className="mt-1 text-xs text-muted-strong">
+                {t('product.availability')}:{' '}
+                {product.availabilityStatus === 'in_stock'
+                  ? t('product.availabilityInStock')
+                  : product.availabilityStatus === 'on_order'
+                    ? t('product.availabilityOnOrder')
+                    : t('product.availabilityCheck')}
+              </p>
+            )}
           </div>
 
           {description && (

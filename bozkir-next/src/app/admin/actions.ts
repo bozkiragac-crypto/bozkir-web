@@ -30,7 +30,6 @@ import { safeHref } from '@/lib/safe-url';
 import { DATA_TAGS } from '@/lib/data/tags';
 import {
   deleteObject,
-  objectKeyFromUrl,
   putObject,
   publicUrl,
   toObjectKey,
@@ -43,6 +42,30 @@ import { categorySlugOf } from '@/lib/data/category-key';
 import { isQuoteStatus, type QuoteStatus } from '@/lib/quotes/status';
 import { isRateLimited, pickClientIp } from '@/lib/ratelimit';
 import { slugify } from '@/lib/slug';
+import { parseAvailabilityStatus } from '@/lib/product-availability';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function isUuid(value: string | null | undefined): value is string {
+  return typeof value === 'string' && UUID_RE.test(value.trim());
+}
+function trimStr(value: unknown, max = 2000): string {
+  return String(value ?? '').trim().slice(0, max);
+}
+function optStr(value: unknown, max = 2000): string | null {
+  const v = trimStr(value, max);
+  return v ? v : null;
+}
+function safeSortOrder(value: unknown): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.trunc(n) : 0;
+}
+function isSafeMediaOwnerId(value: string): boolean {
+  return /^[a-zA-Z0-9_-]{1,64}$/.test(value);
+}
+const MEDIA_DELETE_PREFIXES = ['products/', 'campaigns/', 'content/', 'catalogs/', 'drafts/', 'brands/', 'categories/'] as const;
+function canDeleteMediaKey(key: string): boolean {
+  return MEDIA_DELETE_PREFIXES.some((p) => key.startsWith(p));
+}
 
 function extOf(name: string, type: string) {
   const fromName = name.split('.').pop()?.toLowerCase();
@@ -192,11 +215,16 @@ export async function changeOwnPassword(
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  if (!currentPassword) return { ok: false, error: 'Mevcut şifre gerekli.' };
-  if (!newPassword || newPassword.length < 8) {
-    return { ok: false, error: 'Yeni şifre en az 8 karakter olmalı.' };
+  const current = typeof currentPassword === 'string' ? currentPassword : '';
+  const next = typeof newPassword === 'string' ? newPassword : '';
+  if (!current) return { ok: false, error: 'Mevcut şifre gerekli.' };
+  if (!next || next.length < 12) {
+    return { ok: false, error: 'Yeni şifre en az 12 karakter olmalı.' };
   }
-  if (newPassword === currentPassword) {
+  if (next.length > 128) {
+    return { ok: false, error: 'Yeni şifre çok uzun.' };
+  }
+  if (next === current) {
     return { ok: false, error: 'Yeni şifre mevcut şifreyle aynı olamaz.' };
   }
 
@@ -204,10 +232,10 @@ export async function changeOwnPassword(
   const user = rows[0];
   if (!user) return { ok: false, error: 'Kullanıcı bulunamadı.' };
 
-  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  const valid = await bcrypt.compare(current, user.passwordHash);
   if (!valid) return { ok: false, error: 'Mevcut şifre hatalı.' };
 
-  const passwordHash = await bcrypt.hash(newPassword, 10);
+  const passwordHash = await bcrypt.hash(next, 12);
   await db
     .update(adminUsers)
     .set({ passwordHash, failedAttempts: 0, lockedUntil: null })
@@ -224,8 +252,9 @@ export async function startTotpSetup(): Promise<{
   error?: string;
 }> {
   const admin = await requireAdminUser();
+  const account = (admin.username ?? admin.email ?? 'admin').replace(/[^a-zA-Z0-9._@-]/g, '').slice(0, 64) || 'admin';
   const secret = createTotpSecret();
-  const uri = totpKeyUri(admin.username ?? admin.email ?? 'admin', secret);
+  const uri = totpKeyUri(account, secret);
   return { ok: true, secret, uri };
 }
 
@@ -237,11 +266,16 @@ export async function enableTotp(
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
-  const ok = await verifyTotp(secret, code);
+  const cleanSecret = typeof secret === 'string' ? secret.trim().replace(/\s+/g, '') : '';
+  const cleanCode = typeof code === 'string' ? code.trim() : '';
+  if (!/^[A-Z2-7]{16,128}$/i.test(cleanSecret)) {
+    return { ok: false, error: 'Geçersiz 2FA anahtarı.' };
+  }
+  const ok = await verifyTotp(cleanSecret, cleanCode);
   if (!ok) return { ok: false, error: 'Kod doğrulanamadı.' };
   await db
     .update(adminUsers)
-    .set({ totpSecret: encryptTotpSecret(secret), totpEnabled: true })
+    .set({ totpSecret: encryptTotpSecret(cleanSecret), totpEnabled: true })
     .where(eq(adminUsers.id, admin.id));
   await logActivity(admin, 'update', 'auth', admin.id, '2FA etkinleştirildi');
   return { ok: true };
@@ -253,13 +287,14 @@ export async function disableTotp(code: string): Promise<{ ok: boolean; error?: 
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
   if (!admin.totpSecret || !admin.totpEnabled) return { ok: false, error: '2FA zaten kapalı.' };
+  const cleanCode = typeof code === 'string' ? code.trim() : '';
   let secret: string;
   try {
     secret = decryptTotpSecret(admin.totpSecret);
   } catch {
     return { ok: false, error: '2FA secret okunamadı. Yöneticiye başvurun.' };
   }
-  const ok = await verifyTotp(secret, code);
+  const ok = await verifyTotp(secret, cleanCode);
   if (!ok) return { ok: false, error: 'Kod doğrulanamadı.' };
   await db
     .update(adminUsers)
@@ -290,6 +325,10 @@ export async function uploadMedia(
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return { error: 'Dosya seçilmedi.' };
 
+  if (!MEDIA_FOLDERS.includes(folder)) return { error: 'Geçersiz klasör.' };
+  const safeOwner =
+    typeof ownerId === 'string' && isSafeMediaOwnerId(ownerId.trim()) ? ownerId.trim() : 'drafts';
+
   const isPdf = ALLOWED_PDF_MIME.includes(file.type);
   if (isPdf) {
     if (file.size > MAX_PDF_MB * 1024 * 1024)
@@ -298,8 +337,6 @@ export async function uploadMedia(
     const invalid = validateUpload(file);
     if (invalid) return { error: invalid };
   }
-
-  if (!MEDIA_FOLDERS.includes(folder)) return { error: 'Geçersiz klasör.' };
 
   const original = Buffer.from(await file.arrayBuffer());
 
@@ -323,7 +360,7 @@ export async function uploadMedia(
     ext = optimized.ext;
   }
 
-  const key = `${folder}/${ownerId ?? 'drafts'}/${crypto.randomUUID()}.${ext}`;
+  const key = `${folder}/${safeOwner}/${crypto.randomUUID()}.${ext}`;
   try {
     await putObject(key, body, contentType);
   } catch {
@@ -335,8 +372,8 @@ export async function uploadMedia(
 
 export async function deleteMedia(url: string): Promise<void> {
   const admin = await requireOwner();
-  const key = toObjectKey(url);
-  if (key) {
+  const key = typeof url === 'string' ? toObjectKey(url) : null;
+  if (key && canDeleteMediaKey(key)) {
     await deleteObject(key);
     await logActivity(admin, 'delete', 'media', key, `Silindi: ${key}`);
   }
@@ -345,8 +382,10 @@ export async function deleteMedia(url: string): Promise<void> {
 /** Medya kütüphanesinden nesne anahtarıyla siler. */
 export async function deleteMediaKey(key: string): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireOwner();
-  const objectKey = toObjectKey(key) ?? key;
+  const raw = typeof key === 'string' ? key.trim() : '';
+  const objectKey = toObjectKey(raw) ?? (raw && !raw.includes('://') && !raw.startsWith('/') ? raw : null);
   if (!objectKey) return { ok: false, error: 'Geçersiz anahtar.' };
+  if (!canDeleteMediaKey(objectKey)) return { ok: false, error: 'Bu medya anahtarı silinemez.' };
   await deleteObject(objectKey);
   await logActivity(admin, 'delete', 'media', objectKey, `Silindi: ${objectKey}`);
   revalidatePath('/admin/medya');
@@ -385,6 +424,8 @@ export interface ProductInput {
   whatsappMessage?: string;
   whatsappMessageEn?: string;
   whatsappMessageAr?: string;
+  /** Temin durumu (opsiyonel): in_stock | on_order | check_availability */
+  availabilityStatus?: string;
 }
 
 export async function saveProduct(
@@ -394,9 +435,12 @@ export async function saveProduct(
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const name = input.name.trim();
-  const code = input.code.trim();
-  const cat = input.cat.trim();
+  const id = typeof input.id === 'string' && input.id.trim() ? input.id.trim() : undefined;
+  if (id && !isUuid(id)) return { ok: false, error: 'Geçersiz ürün kimliği.' };
+
+  const name = trimStr(input.name, 300);
+  const code = trimStr(input.code, 120);
+  const cat = trimStr(input.cat, 200);
   if (!name || !code || !cat) return { ok: false, error: 'Ad, kod ve kategori zorunludur.' };
 
   // `products.code` bir seri/malzeme kodu olduğu için **tekil değildir**:
@@ -407,57 +451,73 @@ export async function saveProduct(
   // Korunan tek kural: aynı kategori + kod + ad ile **ikinci bir kayıt
   // açılamaz** (41 saniye arayla oluşan kazara çift kayıtları engeller).
   // Düzenleme bu kontrolde kendi kaydı hariç tutulur.
-  if (!input.id) {
-    const dupe = await db
-      .select({ id: products.id, name: products.name })
-      .from(products)
-      .where(and(eq(products.code, code), eq(products.cat, cat), eq(products.name, name)))
-      .limit(1);
-    if (dupe[0]) {
-      return {
-        ok: false,
-        error: `Bu kategoride aynı kod ve adla bir ürün zaten var: "${cat} / ${code} / ${name}". Ürün kodları seri kodu olduğu için farklı ürünler aynı kodu kullanabilir, ancak aynı üçlü tekrar edemez.`,
-      };
-    }
+  const dupes = await db
+    .select({ id: products.id })
+    .from(products)
+    .where(and(eq(products.code, code), eq(products.cat, cat), eq(products.name, name)))
+    .limit(2);
+  if (dupes.some((d) => d.id !== id)) {
+    return {
+      ok: false,
+      error: `Bu kategoride aynı kod ve adla bir ürün zaten var: "${cat} / ${code} / ${name}". Ürün kodları seri kodu olduğu için farklı ürünler aynı kodu kullanabilir, ancak aynı üçlü tekrar edemez.`,
+    };
   }
 
-  const keys = input.images.map((u) => objectKeyFromUrl(u) ?? u.trim()).filter(Boolean);
+  const inputImages = Array.isArray(input.images) ? input.images : [];
+  const keys = inputImages
+    .map((u) => {
+      const raw = String(u ?? '').trim();
+      if (!raw) return null;
+      const k = toObjectKey(raw);
+      if (k) return k;
+      if (/^(https?:\/\/|\/)/i.test(raw) && !raw.startsWith('data:')) return raw.slice(0, 2048);
+      return null;
+    })
+    .filter((k): k is string => !!k)
+    .slice(0, 20);
   const img = serializeImageField(keys);
   const isActive = input.isActive ?? true;
-  const nameEn = input.nameEn?.trim() || null;
-  const nameAr = input.nameAr?.trim() || null;
-  const catEn = input.catEn?.trim() || null;
-  const catAr = input.catAr?.trim() || null;
-  const seoTitle = input.seoTitle?.trim() || null;
-  const seoDescription = input.seoDescription?.trim() || null;
-  const whatsappMessage = input.whatsappMessage?.trim() || null;
-  const whatsappMessageEn = input.whatsappMessageEn?.trim() || null;
-  const whatsappMessageAr = input.whatsappMessageAr?.trim() || null;
-  const colors = input.colors?.trim() || null;
-  const thicknesses = input.thicknesses?.trim() || null;
-  const dimensions = input.dimensions?.trim() || null;
-  const applications = input.applications?.trim() || null;
-  const shortDescription = input.shortDescription?.trim() || null;
-  const description = input.description?.trim() || null;
-  const descriptionEn = input.descriptionEn?.trim() || null;
-  const descriptionAr = input.descriptionAr?.trim() || null;
-  const technicalSpecs = (input.technicalSpecs ?? [])
-    .map((s) => ({ label: s.label.trim(), value: s.value.trim() }))
+  const nameEn = optStr(input.nameEn, 300);
+  const nameAr = optStr(input.nameAr, 300);
+  const catEn = optStr(input.catEn, 200);
+  const catAr = optStr(input.catAr, 200);
+  const seoTitle = optStr(input.seoTitle, 200);
+  const seoDescription = optStr(input.seoDescription, 500);
+  const whatsappMessage = optStr(input.whatsappMessage, 2000);
+  const whatsappMessageEn = optStr(input.whatsappMessageEn, 2000);
+  const whatsappMessageAr = optStr(input.whatsappMessageAr, 2000);
+  const availabilityStatus = parseAvailabilityStatus(input.availabilityStatus) ?? null;
+  const face = optStr(input.face, 200);
+  const colors = optStr(input.colors, 500);
+  const thicknesses = optStr(input.thicknesses, 500);
+  const dimensions = optStr(input.dimensions, 200);
+  const applications = optStr(input.applications, 1000);
+  const shortDescription = optStr(input.shortDescription, 1000);
+  const description = optStr(input.description, 10000);
+  const descriptionEn = optStr(input.descriptionEn, 10000);
+  const descriptionAr = optStr(input.descriptionAr, 10000);
+  const technicalSpecs = (Array.isArray(input.technicalSpecs) ? input.technicalSpecs : [])
+    .slice(0, 40)
+    .map((s) => ({ label: trimStr(s?.label, 120), value: trimStr(s?.value, 240) }))
     .filter((s) => s.label && s.value);
-  const documents = (input.documents ?? [])
-    .map((d) => ({ title: d.title.trim(), url: d.url.trim() }))
+  const documents = (Array.isArray(input.documents) ? input.documents : [])
+    .slice(0, 20)
+    .map((d) => ({
+      title: trimStr(d?.title, 200),
+      url: safeHref(trimStr(d?.url, 2048)),
+    }))
     .filter((d) => d.title && d.url);
 
-  if (input.id) {
+  if (id) {
     const prev = await db
       .select({ img: products.img })
       .from(products)
-      .where(eq(products.id, input.id))
+      .where(eq(products.id, id))
       .limit(1);
     const oldKeys = parseImageField(prev[0]?.img ?? '')
       .map((v) => toObjectKey(v))
       .filter((k): k is string => !!k);
-    const next = new Set(keys);
+    const next = new Set(keys.filter((k) => toObjectKey(k)));
 
     await db
       .update(products)
@@ -465,7 +525,7 @@ export async function saveProduct(
         name,
         code,
         cat,
-        face: input.face.trim() || null,
+        face,
         colors,
         thicknesses,
         dimensions,
@@ -487,16 +547,17 @@ export async function saveProduct(
         whatsappMessage,
         whatsappMessageEn,
         whatsappMessageAr,
+        availabilityStatus,
         updatedAt: new Date(),
       })
-      .where(eq(products.id, input.id));
+      .where(eq(products.id, id));
 
     for (const key of oldKeys) {
       if (!next.has(key)) await deleteObject(key);
     }
-    await logActivity(admin, 'update', 'product', input.id, `Ürün güncellendi: ${name}`);
+    await logActivity(admin, 'update', 'product', id, `Ürün güncellendi: ${name}`);
     await flushSiteCaches();
-    return { ok: true, id: input.id };
+    return { ok: true, id };
   }
 
   const inserted = await db
@@ -505,7 +566,7 @@ export async function saveProduct(
       name,
       code,
       cat,
-      face: input.face.trim() || null,
+      face,
       colors,
       thicknesses,
       dimensions,
@@ -527,6 +588,7 @@ export async function saveProduct(
       whatsappMessage,
       whatsappMessageEn,
       whatsappMessageAr,
+      availabilityStatus,
     })
     .returning({ id: products.id });
 
@@ -539,6 +601,7 @@ export async function deleteProduct(id: string): Promise<{ ok: boolean; error?: 
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz ürün kimliği.' };
 
   const prev = await db
     .select({ img: products.img, name: products.name })
@@ -564,9 +627,10 @@ export async function setProductActive(
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz ürün kimliği.' };
   await db
     .update(products)
-    .set({ isActive, updatedAt: new Date() })
+    .set({ isActive: !!isActive, updatedAt: new Date() })
     .where(eq(products.id, id));
   await logActivity(
     admin,
@@ -582,22 +646,25 @@ export async function setProductActive(
 export async function bulkDeleteProducts(ids: string[]): Promise<{ ok: boolean; deleted: number }> {
   const admin = await requireOwner();
   const db = getDb();
-  if (!db || ids.length === 0) return { ok: false, deleted: 0 };
+  const cleanIds = Array.isArray(ids)
+    ? Array.from(new Set(ids.filter((id): id is string => isUuid(id)))).slice(0, 500)
+    : [];
+  if (!db || cleanIds.length === 0) return { ok: false, deleted: 0 };
 
   const rows = await db
     .select({ img: products.img })
     .from(products)
-    .where(inArray(products.id, ids));
+    .where(inArray(products.id, cleanIds));
   for (const row of rows) {
     const keys = parseImageField(row.img ?? '')
       .map((v) => toObjectKey(v))
       .filter((k): k is string => !!k);
     for (const key of keys) await deleteObject(key);
   }
-  await db.delete(products).where(inArray(products.id, ids));
-  await logActivity(admin, 'delete', 'product', undefined, `${ids.length} ürün toplu silindi`);
+  await db.delete(products).where(inArray(products.id, cleanIds));
+  await logActivity(admin, 'delete', 'product', undefined, `${cleanIds.length} ürün toplu silindi`);
   await flushSiteCaches();
-  return { ok: true, deleted: ids.length };
+  return { ok: true, deleted: cleanIds.length };
 }
 
 export interface ImportResult {
@@ -651,6 +718,7 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
   const iNameAr = idx('name_ar');
   const iCatEn = idx('cat_en');
   const iCatAr = idx('cat_ar');
+  const iAvailability = idx('availability_status');
 
   let created = 0;
   let updated = 0;
@@ -672,13 +740,17 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
 
       const face = iFace >= 0 ? (r[iFace] ?? '').trim() || null : null;
       const imgRaw = iImg >= 0 ? (r[iImg] ?? '').trim() : '';
-      const img = imgRaw ? (objectKeyFromUrl(imgRaw) ?? imgRaw) : null;
+      const img = imgRaw
+        ? (toObjectKey(imgRaw) ?? (/^(https?:\/\/|\/)/i.test(imgRaw) && !imgRaw.startsWith('data:') ? imgRaw.slice(0, 2048) : null))
+        : null;
       const isActive =
         iActive >= 0 ? !/^(0|false|pasif|hayir)$/i.test((r[iActive] ?? '').trim()) : true;
       const nameEn = iNameEn >= 0 ? (r[iNameEn] ?? '').trim() || null : null;
       const nameAr = iNameAr >= 0 ? (r[iNameAr] ?? '').trim() || null : null;
       const catEn = iCatEn >= 0 ? (r[iCatEn] ?? '').trim() || null : null;
       const catAr = iCatAr >= 0 ? (r[iCatAr] ?? '').trim() || null : null;
+      const availabilityStatus =
+        iAvailability >= 0 ? parseAvailabilityStatus(r[iAvailability]) ?? null : undefined;
 
       // Eşleştirme `code` ile yapılırsa seri kodlu ürünler çakışır (105 ürünün
       // kodu `PVC`); bu satırın adını ve kategorisini de eşleştirmeye katıyoruz.
@@ -686,28 +758,37 @@ export async function importProductsCsv(csv: string, dryRun = true): Promise<Imp
       if (existingId) {
         updated++;
         if (!dryRun) {
-          await tx
-            .update(products)
-            .set({
-              name,
-              cat,
-              face,
-              img,
-              isActive,
-              nameEn,
-              nameAr,
-              catEn,
-              catAr,
-              updatedAt: new Date(),
-            })
-            .where(eq(products.id, existingId));
+          const updateSet: Record<string, unknown> = {
+            name,
+            cat,
+            face,
+            img,
+            isActive,
+            nameEn,
+            nameAr,
+            catEn,
+            catAr,
+            updatedAt: new Date(),
+          };
+          if (availabilityStatus !== undefined) updateSet.availabilityStatus = availabilityStatus;
+          await tx.update(products).set(updateSet).where(eq(products.id, existingId));
         }
       } else {
         created++;
         if (!dryRun) {
-          await tx
-            .insert(products)
-            .values({ code, name, cat, face, img, isActive, nameEn, nameAr, catEn, catAr });
+          await tx.insert(products).values({
+            code,
+            name,
+            cat,
+            face,
+            img,
+            isActive,
+            nameEn,
+            nameAr,
+            catEn,
+            catAr,
+            ...(availabilityStatus !== undefined ? { availabilityStatus } : {}),
+          });
         }
       }
     }
@@ -754,33 +835,40 @@ export async function saveCampaign(
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const title = input.title.trim();
+  const id = typeof input.id === 'string' && input.id.trim() ? input.id.trim() : undefined;
+  if (id && !isUuid(id)) return { ok: false, error: 'Geçersiz kampanya kimliği.' };
+
+  const title = trimStr(input.title, 200);
   if (!title) return { ok: false, error: 'Başlık zorunludur.' };
 
-  const imageInput = input.imageUrl.trim();
+  const imageInput = trimStr(input.imageUrl, 2048);
+  const startsAt = input.startsAt ? new Date(input.startsAt) : null;
+  const endsAt = input.endsAt ? new Date(input.endsAt) : null;
   const payload = {
     title,
-    description: input.description.trim() || null,
-    imageUrl: imageInput ? (objectKeyFromUrl(imageInput) ?? imageInput) : null,
+    description: optStr(input.description, 2000),
+    imageUrl: imageInput
+      ? (toObjectKey(imageInput) ?? (/^(https?:\/\/|\/)/i.test(imageInput) ? imageInput : null))
+      : null,
     linkUrl: safeHref(input.linkUrl) || null,
-    linkLabel: input.linkLabel.trim() || 'İncele',
-    sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
-    isActive: input.isActive,
-    startsAt: input.startsAt ? new Date(input.startsAt) : null,
-    endsAt: input.endsAt ? new Date(input.endsAt) : null,
-    titleEn: input.titleEn?.trim() || null,
-    titleAr: input.titleAr?.trim() || null,
-    descriptionEn: input.descriptionEn?.trim() || null,
-    descriptionAr: input.descriptionAr?.trim() || null,
-    linkLabelEn: input.linkLabelEn?.trim() || null,
-    linkLabelAr: input.linkLabelAr?.trim() || null,
+    linkLabel: trimStr(input.linkLabel, 80) || 'İncele',
+    sortOrder: safeSortOrder(input.sortOrder),
+    isActive: !!input.isActive,
+    startsAt: startsAt && !Number.isNaN(startsAt.getTime()) ? startsAt : null,
+    endsAt: endsAt && !Number.isNaN(endsAt.getTime()) ? endsAt : null,
+    titleEn: optStr(input.titleEn, 200),
+    titleAr: optStr(input.titleAr, 200),
+    descriptionEn: optStr(input.descriptionEn, 2000),
+    descriptionAr: optStr(input.descriptionAr, 2000),
+    linkLabelEn: optStr(input.linkLabelEn, 80),
+    linkLabelAr: optStr(input.linkLabelAr, 80),
   };
 
-  if (input.id) {
-    await db.update(campaigns).set(payload).where(eq(campaigns.id, input.id));
-    await logActivity(admin, 'update', 'campaign', input.id, `Kampanya güncellendi: ${title}`);
+  if (id) {
+    await db.update(campaigns).set(payload).where(eq(campaigns.id, id));
+    await logActivity(admin, 'update', 'campaign', id, `Kampanya güncellendi: ${title}`);
     await flushSiteCaches();
-    return { ok: true, id: input.id };
+    return { ok: true, id };
   }
 
   const inserted = await db.insert(campaigns).values(payload).returning({ id: campaigns.id });
@@ -793,6 +881,7 @@ export async function deleteCampaign(id: string): Promise<{ ok: boolean; error?:
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz kampanya kimliği.' };
 
   const prev = await db
     .select({ imageUrl: campaigns.imageUrl, title: campaigns.title })
@@ -839,33 +928,43 @@ export async function saveCatalog(
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const title = input.title.trim();
-  if (!title) return { ok: false, error: 'Başlık zorunludur.' };
-  const slug = input.slug.trim() || slugifyCatalog(title) || crypto.randomUUID();
+  const id = typeof input.id === 'string' && input.id.trim() ? input.id.trim() : undefined;
+  if (id && !isUuid(id)) return { ok: false, error: 'Geçersiz katalog kimliği.' };
 
-  const coverInput = input.cover.trim();
-  const pdfInput = input.pdfUrl.trim();
+  const title = trimStr(input.title, 200);
+  if (!title) return { ok: false, error: 'Başlık zorunludur.' };
+  const slug = trimStr(input.slug, 200) || slugifyCatalog(title) || crypto.randomUUID();
+
+  const coverInput = trimStr(input.cover, 2048);
+  const pdfInput = trimStr(input.pdfUrl, 2048);
   const payload = {
     slug,
     title,
-    description: input.description.trim() || null,
-    year: Number.isFinite(input.year) && input.year > 0 ? input.year : null,
-    cover: coverInput ? (objectKeyFromUrl(coverInput) ?? coverInput) : null,
-    pdfUrl: pdfInput ? (objectKeyFromUrl(pdfInput) ?? pdfInput) : null,
-    pageCount: Number.isFinite(input.pageCount) && input.pageCount > 0 ? input.pageCount : null,
-    sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
-    isActive: input.isActive,
-    titleEn: input.titleEn?.trim() || null,
-    titleAr: input.titleAr?.trim() || null,
-    descriptionEn: input.descriptionEn?.trim() || null,
-    descriptionAr: input.descriptionAr?.trim() || null,
+    description: optStr(input.description, 4000),
+    year: Number.isFinite(Number(input.year)) && Number(input.year) > 0 ? Math.trunc(Number(input.year)) : null,
+    cover: coverInput
+      ? (toObjectKey(coverInput) ?? (/^(https?:\/\/|\/)/i.test(coverInput) ? coverInput : null))
+      : null,
+    pdfUrl: pdfInput
+      ? (toObjectKey(pdfInput) ?? (/^(https?:\/\/|\/)/i.test(pdfInput) ? pdfInput : null))
+      : null,
+    pageCount:
+      Number.isFinite(Number(input.pageCount)) && Number(input.pageCount) > 0
+        ? Math.trunc(Number(input.pageCount))
+        : null,
+    sortOrder: safeSortOrder(input.sortOrder),
+    isActive: !!input.isActive,
+    titleEn: optStr(input.titleEn, 200),
+    titleAr: optStr(input.titleAr, 200),
+    descriptionEn: optStr(input.descriptionEn, 4000),
+    descriptionAr: optStr(input.descriptionAr, 4000),
   };
 
-  if (input.id) {
-    await db.update(catalogs).set(payload).where(eq(catalogs.id, input.id));
-    await logActivity(admin, 'update', 'catalog', input.id, `Katalog güncellendi: ${title}`);
+  if (id) {
+    await db.update(catalogs).set(payload).where(eq(catalogs.id, id));
+    await logActivity(admin, 'update', 'catalog', id, `Katalog güncellendi: ${title}`);
     await flushSiteCaches();
-    return { ok: true, id: input.id };
+    return { ok: true, id };
   }
 
   const inserted = await db.insert(catalogs).values(payload).returning({ id: catalogs.id });
@@ -878,6 +977,7 @@ export async function deleteCatalog(id: string): Promise<{ ok: boolean; error?: 
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz katalog kimliği.' };
 
   const prev = await db
     .select({ cover: catalogs.cover, pdfUrl: catalogs.pdfUrl, title: catalogs.title })
@@ -925,37 +1025,44 @@ export async function saveCategory(
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const name = input.name.trim();
+  const id = typeof input.id === 'string' && input.id.trim() ? input.id.trim() : undefined;
+  if (id && !isUuid(id)) return { ok: false, error: 'Geçersiz kategori kimliği.' };
+
+  const name = trimStr(input.name, 200);
   if (!name) return { ok: false, error: 'Ad zorunludur.' };
-  const slug = input.slug.trim() || slugify(name) || crypto.randomUUID();
-  const thumb = input.thumbnail.trim();
-  const hero = input.heroImage.trim();
+  const slug = trimStr(input.slug, 200) || slugify(name) || crypto.randomUUID();
+  const thumb = trimStr(input.thumbnail, 2048);
+  const hero = trimStr(input.heroImage, 2048);
 
   const payload = {
     slug,
     name,
-    nameEn: input.nameEn?.trim() || null,
-    nameAr: input.nameAr?.trim() || null,
-    description: input.description.trim() || null,
-    descriptionEn: input.descriptionEn?.trim() || null,
-    descriptionAr: input.descriptionAr?.trim() || null,
-    shortDescription: input.shortDescription?.trim() || null,
-    shortDescriptionEn: input.shortDescriptionEn?.trim() || null,
-    shortDescriptionAr: input.shortDescriptionAr?.trim() || null,
-    thumbnail: thumb ? (objectKeyFromUrl(thumb) ?? thumb) : null,
-    heroImage: hero ? (objectKeyFromUrl(hero) ?? hero) : null,
-    featured: input.featured,
-    sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
-    isActive: input.isActive,
-    seoTitle: input.seoTitle?.trim() || null,
-    seoDescription: input.seoDescription?.trim() || null,
+    nameEn: optStr(input.nameEn, 200),
+    nameAr: optStr(input.nameAr, 200),
+    description: optStr(input.description, 4000),
+    descriptionEn: optStr(input.descriptionEn, 4000),
+    descriptionAr: optStr(input.descriptionAr, 4000),
+    shortDescription: optStr(input.shortDescription, 1000),
+    shortDescriptionEn: optStr(input.shortDescriptionEn, 1000),
+    shortDescriptionAr: optStr(input.shortDescriptionAr, 1000),
+    thumbnail: thumb
+      ? (toObjectKey(thumb) ?? (/^(https?:\/\/|\/)/i.test(thumb) ? thumb : null))
+      : null,
+    heroImage: hero
+      ? (toObjectKey(hero) ?? (/^(https?:\/\/|\/)/i.test(hero) ? hero : null))
+      : null,
+    featured: !!input.featured,
+    sortOrder: safeSortOrder(input.sortOrder),
+    isActive: !!input.isActive,
+    seoTitle: optStr(input.seoTitle, 200),
+    seoDescription: optStr(input.seoDescription, 500),
   };
 
-  if (input.id) {
-    await db.update(categories).set(payload).where(eq(categories.id, input.id));
-    await logActivity(admin, 'update', 'category', input.id, `Kategori güncellendi: ${name}`);
+  if (id) {
+    await db.update(categories).set(payload).where(eq(categories.id, id));
+    await logActivity(admin, 'update', 'category', id, `Kategori güncellendi: ${name}`);
     await flushSiteCaches();
-    return { ok: true, id: input.id };
+    return { ok: true, id };
   }
 
   const inserted = await db.insert(categories).values(payload).returning({ id: categories.id });
@@ -1027,6 +1134,10 @@ export async function deleteCategory(
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz kategori kimliği.' };
+  if (mode !== 'block' && mode !== 'cascade' && mode !== 'deactivate') {
+    return { ok: false, error: 'Geçersiz silme modu.' };
+  }
 
   const prev = await db
     .select({
@@ -1121,27 +1232,30 @@ export async function saveBrand(
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const name = input.name.trim();
+  const id = typeof input.id === 'string' && input.id.trim() ? input.id.trim() : undefined;
+  if (id && !isUuid(id)) return { ok: false, error: 'Geçersiz marka kimliği.' };
+
+  const name = trimStr(input.name, 200);
   if (!name) return { ok: false, error: 'Ad zorunludur.' };
-  const logo = input.logo.trim();
+  const logo = trimStr(input.logo, 2048);
 
   const payload = {
     name,
-    logo: logo ? (objectKeyFromUrl(logo) ?? logo) : null,
+    logo: logo ? (toObjectKey(logo) ?? (/^(https?:\/\/|\/)/i.test(logo) ? logo : null)) : null,
     url: safeHref(input.url) || null,
-    category: input.category.trim() || null,
-    categoryEn: input.categoryEn?.trim() || null,
-    categoryAr: input.categoryAr?.trim() || null,
-    description: input.description?.trim() || null,
-    sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
-    isActive: input.isActive,
+    category: optStr(input.category, 200),
+    categoryEn: optStr(input.categoryEn, 200),
+    categoryAr: optStr(input.categoryAr, 200),
+    description: optStr(input.description, 2000),
+    sortOrder: safeSortOrder(input.sortOrder),
+    isActive: !!input.isActive,
   };
 
-  if (input.id) {
-    await db.update(brands).set(payload).where(eq(brands.id, input.id));
-    await logActivity(admin, 'update', 'brand', input.id, `Marka güncellendi: ${name}`);
+  if (id) {
+    await db.update(brands).set(payload).where(eq(brands.id, id));
+    await logActivity(admin, 'update', 'brand', id, `Marka güncellendi: ${name}`);
     await flushSiteCaches();
-    return { ok: true, id: input.id };
+    return { ok: true, id };
   }
 
   const inserted = await db.insert(brands).values(payload).returning({ id: brands.id });
@@ -1154,6 +1268,7 @@ export async function deleteBrand(id: string): Promise<{ ok: boolean; error?: st
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz marka kimliği.' };
 
   const prev = await db
     .select({ logo: brands.logo, name: brands.name })
@@ -1191,21 +1306,22 @@ export async function saveContentBlock(
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const key = input.key.trim();
+  const key = trimStr(input.key, 100);
   if (!key) return { ok: false, error: 'Blok anahtarı zorunludur.' };
+  if (!/^[a-z0-9_.:-]{1,100}$/i.test(key)) return { ok: false, error: 'Geçersiz blok anahtarı.' };
 
   const values = {
     key,
-    title: input.title.trim() || null,
-    subtitle: input.subtitle.trim() || null,
-    body: input.body.trim() || null,
-    isActive: input.isActive,
-    titleEn: input.titleEn?.trim() || null,
-    titleAr: input.titleAr?.trim() || null,
-    subtitleEn: input.subtitleEn?.trim() || null,
-    subtitleAr: input.subtitleAr?.trim() || null,
-    bodyEn: input.bodyEn?.trim() || null,
-    bodyAr: input.bodyAr?.trim() || null,
+    title: optStr(input.title, 500),
+    subtitle: optStr(input.subtitle, 500),
+    body: optStr(input.body, 20000),
+    isActive: !!input.isActive,
+    titleEn: optStr(input.titleEn, 500),
+    titleAr: optStr(input.titleAr, 500),
+    subtitleEn: optStr(input.subtitleEn, 500),
+    subtitleAr: optStr(input.subtitleAr, 500),
+    bodyEn: optStr(input.bodyEn, 20000),
+    bodyAr: optStr(input.bodyAr, 20000),
   };
 
   await db
@@ -1246,26 +1362,34 @@ export async function saveContentItem(
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
 
-  const imageInput = input.imageUrl.trim();
+  const id = typeof input.id === 'string' && input.id.trim() ? input.id.trim() : undefined;
+  if (id && !isUuid(id)) return { ok: false, error: 'Geçersiz içerik kimliği.' };
+
+  const blockKey = trimStr(input.blockKey, 100);
+  if (!blockKey) return { ok: false, error: 'Blok anahtarı zorunludur.' };
+
+  const imageInput = trimStr(input.imageUrl, 2048);
   const payload = {
-    blockKey: input.blockKey.trim(),
-    title: input.title.trim() || null,
-    description: input.description.trim() || null,
-    imageUrl: imageInput ? (objectKeyFromUrl(imageInput) ?? imageInput) : null,
+    blockKey,
+    title: optStr(input.title, 500),
+    description: optStr(input.description, 10000),
+    imageUrl: imageInput
+      ? (toObjectKey(imageInput) ?? (/^(https?:\/\/|\/)/i.test(imageInput) ? imageInput : null))
+      : null,
     linkUrl: safeHref(input.linkUrl) || null,
-    tag: input.tag.trim() || null,
-    sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
-    isActive: input.isActive,
-    titleEn: input.titleEn?.trim() || null,
-    titleAr: input.titleAr?.trim() || null,
-    descriptionEn: input.descriptionEn?.trim() || null,
-    descriptionAr: input.descriptionAr?.trim() || null,
-    tagEn: input.tagEn?.trim() || null,
-    tagAr: input.tagAr?.trim() || null,
+    tag: optStr(input.tag, 120),
+    sortOrder: safeSortOrder(input.sortOrder),
+    isActive: !!input.isActive,
+    titleEn: optStr(input.titleEn, 500),
+    titleAr: optStr(input.titleAr, 500),
+    descriptionEn: optStr(input.descriptionEn, 10000),
+    descriptionAr: optStr(input.descriptionAr, 10000),
+    tagEn: optStr(input.tagEn, 120),
+    tagAr: optStr(input.tagAr, 120),
   };
 
-  if (input.id) {
-    await db.update(contentItems).set(payload).where(eq(contentItems.id, input.id));
+  if (id) {
+    await db.update(contentItems).set(payload).where(eq(contentItems.id, id));
   } else {
     await db.insert(contentItems).values(payload);
   }
@@ -1274,8 +1398,8 @@ export async function saveContentItem(
     admin,
     'update',
     'content',
-    input.blockKey,
-    `İçerik öğesi kaydedildi (${input.blockKey})`,
+    blockKey,
+    `İçerik öğesi kaydedildi (${blockKey})`,
   );
   await flushSiteCaches();
   return { ok: true };
@@ -1285,6 +1409,7 @@ export async function deleteContentItem(id: string): Promise<{ ok: boolean; erro
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz içerik kimliği.' };
 
   const prev = await db
     .select({ imageUrl: contentItems.imageUrl })
@@ -1346,50 +1471,57 @@ export async function saveAboutContent(
   const rows: (typeof contentItems.$inferInsert)[] = [];
   let order = 0;
 
-  for (const s of input.stats ?? []) {
-    if (!s.value.trim() && !s.label.trim()) continue;
+  for (const s of (Array.isArray(input.stats) ? input.stats : []).slice(0, 30)) {
+    const value = trimStr(s?.value, 120);
+    const label = trimStr(s?.label, 240);
+    if (!value && !label) continue;
     rows.push({
       blockKey: KEY,
       tag: 'stat',
-      title: s.value.trim(),
-      description: s.label.trim(),
-      titleEn: s.value.trim(),
-      titleAr: s.value.trim(),
-      descriptionEn: s.labelEn?.trim() || null,
-      descriptionAr: s.labelAr?.trim() || null,
+      title: value || null,
+      description: label || null,
+      titleEn: value || null,
+      titleAr: value || null,
+      descriptionEn: optStr(s?.labelEn, 240),
+      descriptionAr: optStr(s?.labelAr, 240),
       sortOrder: order++,
       isActive: true,
     });
   }
-  for (const v of input.values ?? []) {
-    if (!v.title.trim() && !v.text.trim()) continue;
+  for (const v of (Array.isArray(input.values) ? input.values : []).slice(0, 30)) {
+    const title = trimStr(v?.title, 200);
+    const text = trimStr(v?.text, 2000);
+    if (!title && !text) continue;
     rows.push({
       blockKey: KEY,
       tag: 'value',
-      title: v.title.trim(),
-      description: v.text.trim(),
-      titleEn: v.titleEn?.trim() || null,
-      titleAr: v.titleAr?.trim() || null,
-      descriptionEn: v.textEn?.trim() || null,
-      descriptionAr: v.textAr?.trim() || null,
+      title: title || null,
+      description: text || null,
+      titleEn: optStr(v?.titleEn, 200),
+      titleAr: optStr(v?.titleAr, 200),
+      descriptionEn: optStr(v?.textEn, 2000),
+      descriptionAr: optStr(v?.textAr, 2000),
       sortOrder: order++,
       isActive: true,
     });
   }
-  for (const m of input.timeline ?? []) {
-    if (!m.year.trim() && !m.title.trim()) continue;
+  for (const m of (Array.isArray(input.timeline) ? input.timeline : []).slice(0, 50)) {
+    const year = trimStr(m?.year, 40);
+    const title = trimStr(m?.title, 200);
+    const text = trimStr(m?.text, 2000);
+    if (!year && !title) continue;
     rows.push({
       blockKey: KEY,
       tag: 'timeline',
-      title: m.year.trim(),
-      description: m.title.trim(),
-      linkUrl: m.text.trim(),
-      titleEn: m.year.trim(),
-      titleAr: m.year.trim(),
-      descriptionEn: m.titleEn?.trim() || null,
-      descriptionAr: m.titleAr?.trim() || null,
-      tagEn: m.textEn?.trim() || null,
-      tagAr: m.textAr?.trim() || null,
+      title: year || null,
+      description: title || null,
+      linkUrl: text || null,
+      titleEn: year || null,
+      titleAr: year || null,
+      descriptionEn: optStr(m?.titleEn, 200),
+      descriptionAr: optStr(m?.titleAr, 200),
+      tagEn: optStr(m?.textEn, 2000),
+      tagAr: optStr(m?.textAr, 2000),
       sortOrder: order++,
       isActive: true,
     });
@@ -1427,6 +1559,7 @@ export async function saveTranslations(
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, saved: 0, error: 'Veritabanı bağlantısı yok.' };
+  if (!Array.isArray(updates)) return { ok: false, saved: 0, error: 'Geçersiz veri.' };
 
   const tables = {
     product: products,
@@ -1444,12 +1577,16 @@ export async function saveTranslations(
   };
 
   let saved = 0;
-  for (const u of updates) {
-    const table = tables[u.kind];
-    if (!table) continue;
+  for (const u of updates.slice(0, 500)) {
+    if (!u || !(u.kind in tables) || !isUuid(u.id)) continue;
+    const kind = u.kind as TranslationKind;
+    const table = tables[kind];
+    const fields = u.fields && typeof u.fields === 'object' ? u.fields : {};
     const set: Record<string, string | null> = {};
-    for (const field of allowed[u.kind]) {
-      if (field in u.fields) set[field] = (u.fields[field] ?? '').trim() || null;
+    for (const field of allowed[kind]) {
+      if (field in fields) {
+        set[field] = trimStr((fields as Record<string, unknown>)[field], 2000) || null;
+      }
     }
     if (Object.keys(set).length === 0) continue;
     try {
@@ -1477,6 +1614,7 @@ export async function deleteQuoteRequest(id: string): Promise<{ ok: boolean; err
   const admin = await requireOwner();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz talep kimliği.' };
 
   await db.delete(quoteRequests).where(eq(quoteRequests.id, id));
   await logActivity(admin, 'delete', 'quote', id, 'Teklif talebi silindi');
@@ -1491,6 +1629,7 @@ export async function updateQuoteStatus(
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz talep kimliği.' };
   if (!isQuoteStatus(status)) return { ok: false, error: 'Geçersiz durum.' };
 
   await db
@@ -1509,10 +1648,11 @@ export async function updateQuoteNote(
   const admin = await requireAdminUser();
   const db = getDb();
   if (!db) return { ok: false, error: 'Veritabanı bağlantısı yok.' };
+  if (!isUuid(id)) return { ok: false, error: 'Geçersiz talep kimliği.' };
 
   await db
     .update(quoteRequests)
-    .set({ internalNote: internalNote.trim() || null, updatedAt: new Date() })
+    .set({ internalNote: optStr(internalNote, 5000), updatedAt: new Date() })
     .where(eq(quoteRequests.id, id));
   await logActivity(admin, 'update', 'quote', id, 'Teklif dahili notu güncellendi');
   revalidatePath('/admin/teklifler');

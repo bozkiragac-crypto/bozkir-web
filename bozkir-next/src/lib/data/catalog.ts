@@ -17,6 +17,7 @@ import {
   isMeaningfulSurface,
   mergeThicknesses,
 } from '@/lib/product-display';
+import { parseAvailabilityStatus } from '@/lib/product-availability';
 
 import { categoryKeyOf, categorySlugOf, slugify, toAscii } from '@/lib/data/category-key';
 
@@ -118,6 +119,7 @@ interface IndexItem {
   whatsappMessage: string;
   whatsappMessageEn: string;
   whatsappMessageAr: string;
+  availabilityStatus: string;
 }
 
 interface RawRow {
@@ -148,6 +150,7 @@ interface RawRow {
   whatsappMessage?: string | null;
   whatsappMessageEn?: string | null;
   whatsappMessageAr?: string | null;
+  availabilityStatus?: string | null;
 }
 
 function buildIndex(rows: RawRow[]): IndexItem[] {
@@ -206,6 +209,7 @@ function buildIndex(rows: RawRow[]): IndexItem[] {
       whatsappMessage: String(row.whatsappMessage ?? '').trim(),
       whatsappMessageEn: String(row.whatsappMessageEn ?? '').trim(),
       whatsappMessageAr: String(row.whatsappMessageAr ?? '').trim(),
+      availabilityStatus: String(row.availabilityStatus ?? '').trim(),
     });
   }
   return out;
@@ -275,6 +279,7 @@ function toProduct(item: IndexItem, locale?: Locale): Product {
         item.whatsappMessageEn,
         item.whatsappMessageAr,
       ) || undefined,
+    availabilityStatus: parseAvailabilityStatus(item.availabilityStatus),
   };
 
   // Boş içerik alanları kategori şablonuyla doldurulur; admin verisi ezilmez.

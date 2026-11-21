@@ -33,6 +33,8 @@ export interface Product {
   seoDescription?: string;
   /** Ürün bazlı WhatsApp mesajı (locale'e göre çözülür; boşsa genel şablon). */
   whatsappMessage?: string;
+  /** Temin durumu anahtarı (boşsa belirtilmemiş/gizli). */
+  availabilityStatus?: 'in_stock' | 'on_order' | 'check_availability';
 }
 
 export interface ProductFilters {

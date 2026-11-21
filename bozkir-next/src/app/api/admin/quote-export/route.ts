@@ -32,10 +32,10 @@ function quoteFilters(status: string, q: string): SQL | undefined {
 /** Yöneticiye özel teklif CSV dışa aktarımı; aktif filtreleri korur. */
 export async function GET(request: Request) {
   const admin = await getCurrentAdmin();
-  if (!admin) return new NextResponse('yetkisiz', { status: 401 });
+  if (!admin) return new NextResponse('yetkisiz', { status: 401, headers: { 'Cache-Control': 'no-store' } });
 
   const db = getDb();
-  if (!db) return new NextResponse('veritabanı yok', { status: 503 });
+  if (!db) return new NextResponse('veritabanı yok', { status: 503, headers: { 'Cache-Control': 'no-store' } });
 
   const params = new URL(request.url).searchParams;
   const status = params.get('durum') ?? '';

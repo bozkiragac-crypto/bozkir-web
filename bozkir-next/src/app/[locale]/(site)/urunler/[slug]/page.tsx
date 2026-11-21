@@ -175,6 +175,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
     properties: jsonLdProperties,
   });
 
+  const availabilityLabel = (() => {
+    switch (product.availabilityStatus) {
+      case 'in_stock':
+        return dict.product.availabilityInStock;
+      case 'on_order':
+        return dict.product.availabilityOnOrder;
+      case 'check_availability':
+        return dict.product.availabilityCheck;
+      default:
+        return undefined;
+    }
+  })();
+
   const specs: { label: string; value: string }[] = [];
   if (product.code) specs.push({ label: dict.compare.code, value: product.code });
   specs.push({ label: dict.compare.category, value: product.category });
@@ -182,6 +195,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
   if (product.dimensions) specs.push({ label: dict.product.dimensions, value: product.dimensions });
   if (product.thicknesses?.length) {
     specs.push({ label: dict.compare.thickness, value: product.thicknesses.join(' · ') });
+  }
+  if (availabilityLabel) {
+    specs.push({ label: dict.product.availability, value: availabilityLabel });
   }
 
   // Detay bölümü: hızlı özet + kalınlık/renk + admin'den girilen teknik özellikler.

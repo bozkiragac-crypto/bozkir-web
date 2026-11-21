@@ -2,27 +2,34 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:
 
 const PREFIX = 'v1:';
 const ALGO = 'aes-256-gcm';
+let warnedDerivedKey = false;
 
 /**
- * 2FA secret'larını DB'de şifreler. Anahtar önceliği:
+ * 2FA secret'lar?n? DB'de ?ifreler. Anahtar ?nceli?i:
  *   1) TOTP_ENCRYPTION_KEY (base64 veya 64 karakter hex, 32 byte)
- *   2) AUTH_SECRET'tan türetilmiş SHA-256 (geriye uyumluluk)
+ *   2) AUTH_SECRET'tan t?retilmi? SHA-256 (geriye uyumluluk)
  *
- * AUTH_SECRET döndürülürse mevcut TOTP secret'ları okunamaz; üretimde ayrı
- * TOTP_ENCRYPTION_KEY kullanın ve parola yöneticisinde saklayın.
+ * AUTH_SECRET d?nd?r?l?rse mevcut TOTP secret'lar? okunamaz; ?retimde ayr?
+ * TOTP_ENCRYPTION_KEY kullan?n ve parola y?neticisinde saklay?n.
  */
 function encryptionKey(): Buffer {
   const raw = process.env.TOTP_ENCRYPTION_KEY?.trim();
   if (raw) {
     const key = /^[0-9a-f]{64}$/i.test(raw) ? Buffer.from(raw, 'hex') : Buffer.from(raw, 'base64');
     if (key.length !== 32) {
-      throw new Error('TOTP_ENCRYPTION_KEY 32 byte olmalı (base64 veya 64 karakter hex).');
+      throw new Error('TOTP_ENCRYPTION_KEY 32 byte olmal? (base64 veya 64 karakter hex).');
     }
     return key;
   }
   const authSecret = process.env.AUTH_SECRET?.trim();
   if (!authSecret) {
-    throw new Error('TOTP_ENCRYPTION_KEY veya AUTH_SECRET tanımlı olmalı.');
+    throw new Error('TOTP_ENCRYPTION_KEY veya AUTH_SECRET tan?ml? olmal?.');
+  }
+  if (process.env.NODE_ENV === 'production' && !warnedDerivedKey) {
+    warnedDerivedKey = true;
+    console.warn(
+      '[auth] Production ortam?nda ayr? bir TOTP_ENCRYPTION_KEY tan?mlaman?z ?nerilir (AUTH_SECRET d?n???m?nde 2FA s?rlar? okunamaz hale gelebilir).',
+    );
   }
   return createHash('sha256').update(authSecret).digest();
 }
@@ -39,12 +46,12 @@ export function encryptTotpSecret(secret: string): string {
   return `${PREFIX}${iv.toString('base64')}:${tag.toString('base64')}:${encrypted.toString('base64')}`;
 }
 
-/** Eski düz metin kayıtları da okunur (kademeli migrasyon). */
+/** Eski d?z metin kay?tlar da okunur (kademeli migrasyon). */
 export function decryptTotpSecret(value: string): string {
   if (!value) return '';
   if (!isEncryptedTotpSecret(value)) return value;
   const parts = value.slice(PREFIX.length).split(':');
-  if (parts.length !== 3) throw new Error('Geçersiz TOTP secret formatı.');
+  if (parts.length !== 3) throw new Error('Ge?ersiz TOTP secret format?.');
   const [ivB64, tagB64, dataB64] = parts;
   const decipher = createDecipheriv(ALGO, encryptionKey(), Buffer.from(ivB64!, 'base64'));
   decipher.setAuthTag(Buffer.from(tagB64!, 'base64'));
