@@ -11,11 +11,13 @@ export function CopyButton({
   label,
   copiedLabel,
   className,
+  iconOnly = false,
 }: {
   value: string;
   label: string;
   copiedLabel: string;
   className?: string;
+  iconOnly?: boolean;
 }) {
   const toast = useToast();
   const [done, setDone] = useState(false);
@@ -47,18 +49,16 @@ export function CopyButton({
     <button
       type="button"
       onClick={copy}
-      aria-label={label}
+      aria-label={done ? copiedLabel : label}
+      title={done ? copiedLabel : label}
       className={cn(
-        'inline-flex h-10 items-center gap-1.5 rounded-full border border-border px-3.5 text-xs text-muted-strong transition-colors hover:border-foreground hover:text-foreground',
+        'inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 text-xs text-muted-strong transition-colors hover:border-foreground hover:text-foreground disabled:opacity-40',
+        iconOnly && 'w-10 justify-center px-0',
         className,
       )}
     >
-      {done ? (
-        <Check className="h-3.5 w-3.5" aria-hidden />
-      ) : (
-        <Copy className="h-3.5 w-3.5" aria-hidden />
-      )}
-      {label}
+      {done ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
+      {!iconOnly && <span>{done ? copiedLabel : label}</span>}
     </button>
   );
 }

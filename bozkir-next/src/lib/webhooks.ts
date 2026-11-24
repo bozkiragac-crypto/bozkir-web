@@ -42,6 +42,46 @@ export function isDisallowedHost(hostname: string): boolean {
   return false;
 }
 
+function webhookUrlAllowed(parsed: URL): boolean {
+  if (parsed.protocol !== 'https:') return false;
+  if (parsed.username || parsed.password) return false;
+  if (isDisallowedHost(parsed.hostname)) return false;
+  return true;
+}
+
+async function resolvesToDisallowedIp(hostname: string): Promise<boolean> {
+  if (isIP(hostname) !== 0) return isDisallowedIp(hostname);
+  try {
+    const addrs = await Promise.race([
+      lookup(hostname, { all: true, verbatim: true }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('dns timeout')), 3000)),
+    ]);
+    if (addrs.length === 0) return true;
+    return addrs.some((a) => isDisallowedIp(a.address));
+  } catch {
+    return true;
+  }
+}
+
+/** Webhook URL'sini kayıt/teslim öncesi doğrular. */
+export async function validateWebhookUrl(value: string): Promise<string | null> {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return 'Webhook URL geçersiz.';
+  }
+  if (!webhookUrlAllowed(parsed)) {
+    return 'Webhook URL yalnızca herkese açık bir https:// adresi olmalıdır.';
+  }
+  if (await resolvesToDisallowedIp(parsed.hostname)) {
+    return 'Webhook URL iç/ağ adresine çözümleniyor; güvenlik nedeniyle reddedildi.';
+  }
+  return null;
+}
+
 /**
  * Genel webhook gönderimi. `site_settings.webhookUrl` tanımlıysa JSON POST atar.
  * Hata olsa bile akışı bozmaz (bildirim kaybı talebi engellemez).
@@ -55,7 +95,7 @@ export async function sendWebhook(event: string, data: Record<string, unknown>):
   } catch {
     return;
   }
-  if (!url || !/^https?:\/\//i.test(url)) return;
+  if (!url) return;
 
   let parsed: URL;
   try {
@@ -63,18 +103,8 @@ export async function sendWebhook(event: string, data: Record<string, unknown>):
   } catch {
     return;
   }
-  if (isDisallowedHost(parsed.hostname)) return;
-
-  // DNS rebinding koruması: çözülen tüm adresler de genel olmalı.
-  try {
-    const addrs = await Promise.race([
-      lookup(parsed.hostname, { all: true }),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('dns timeout')), 3000)),
-    ]);
-    if (addrs.some((a) => isDisallowedIp(a.address))) return;
-  } catch {
-    return; // çözülemiyorsa gönderme
-  }
+  if (!webhookUrlAllowed(parsed)) return;
+  if (await resolvesToDisallowedIp(parsed.hostname)) return;
 
   const payload: WebhookEvent = { event, data };
   const body = JSON.stringify({ ...payload, ts: new Date().toISOString() });
@@ -88,9 +118,16 @@ export async function sendWebhook(event: string, data: Record<string, unknown>):
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5000);
   try {
-    await fetch(url, { method: 'POST', headers, body, signal: controller.signal });
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+      redirect: 'error',
+      signal: controller.signal,
+    });
+    void res.arrayBuffer().catch(() => undefined);
   } catch {
-    // yok say (ağ hatası/timeout)
+    // yok say (ağ hatası/timeout/redirect)
   } finally {
     clearTimeout(timer);
   }

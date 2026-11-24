@@ -582,6 +582,7 @@ li {
   [data-product-cta],
   [data-cookie-banner],
   [data-whatsapp-fab],
+  [data-cursor-dot],
   .no-print {
     display: none !important;
   }
@@ -627,7 +628,7 @@ li {
   margin: 1.2cm;
 }
 
-/* Ürün detayda mobil sabit CTA çubuğu varken WhatsApp FAB onun üstüne kaysın. */
+/* Ürün detayda mobil sabit CTA çubuğu varken FAB'ler onun üstüne kaysın. */
 @media (max-width: 767px) {
   body:has([data-product-cta]) [data-whatsapp-fab] {
     bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));

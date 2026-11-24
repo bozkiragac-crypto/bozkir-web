@@ -23,13 +23,11 @@ export function SettingsForm({
   initial,
   categories,
   campaigns = [],
-  smtpPassSet = false,
   navLabels = {},
 }: {
   initial: SiteSettings;
   categories: { slug: string; name: string }[];
   campaigns?: { id: string; title: string }[];
-  smtpPassSet?: boolean;
   navLabels?: Record<string, string>;
 }) {
   const router = useRouter();
@@ -599,8 +597,14 @@ export function SettingsForm({
             Yeni teklif geldiğinde bildirim e-postası gönderilir. Gönderim başarısız olsa da teklif
             kaydedilir.
           </p>
+          <div className="mt-5 rounded-md border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-strong">
+            SMTP parolası güvenlik nedeniyle admin panelinden yönetilmez. Sunucuda{' '}
+            <code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>,{' '}
+            <code>SMTP_PASS</code>, <code>SMTP_FROM</code>, <code>NOTIFY_EMAIL</code> ortam
+            değişkenlerini kullanın.
+          </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <Label t="SMTP sunucu">
+            <Label t="SMTP sunucu (bilgi)">
               <input
                 className={field}
                 value={form.smtp.host}
@@ -608,7 +612,7 @@ export function SettingsForm({
                 placeholder="smtp.example.com"
               />
             </Label>
-            <Label t="Port">
+            <Label t="Port (bilgi)">
               <input
                 className={field}
                 value={form.smtp.port}
@@ -616,24 +620,14 @@ export function SettingsForm({
                 placeholder="587"
               />
             </Label>
-            <Label t="Kullanıcı">
+            <Label t="Kullanıcı (bilgi)">
               <input
                 className={field}
                 value={form.smtp.user}
                 onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, user: e.target.value } })}
               />
             </Label>
-            <Label t="Şifre">
-              <input
-                className={field}
-                type="password"
-                autoComplete="new-password"
-                value={form.smtp.pass}
-                placeholder={smtpPassSet ? '•••••• (değiştirmek için yazın)' : ''}
-                onChange={(e) => setForm({ ...form, smtp: { ...form.smtp, pass: e.target.value } })}
-              />
-            </Label>
-            <Label t="Gönderen adresi (From)">
+            <Label t="Gönderen adresi (bilgi)">
               <input
                 className={field}
                 value={form.smtp.from}
@@ -641,7 +635,7 @@ export function SettingsForm({
                 placeholder="Bozkır Ağaç <no-reply@...>"
               />
             </Label>
-            <Label t="Bildirim alıcısı">
+            <Label t="Bildirim alıcısı (yedek)">
               <input
                 className={field}
                 value={form.notifyEmail}

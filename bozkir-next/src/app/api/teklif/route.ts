@@ -135,7 +135,8 @@ export async function POST(request: Request) {
     // Aynı talep kısa süre içinde tekrar geldi: insert yok, sessiz başarı.
     return NextResponse.json({
       ok: true,
-      message: 'Talebiniz alındı. En kısa sürede dönüş yapacağız.',
+      code: 'duplicate',
+      message: 'Talebiniz zaten alındı. Ekibimiz en kısa sürede dönüş yapacak.',
     });
   }
   if (guard.action === 'limit') {
@@ -150,6 +151,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
+        code: guard.reason === 'contact' ? 'limit_contact' : 'limit_global',
         message:
           guard.reason === 'contact'
             ? 'Bu bilgilerle kısa süre içinde çok fazla talep gönderildi. Lütfen biraz sonra tekrar deneyin veya bizi arayın.'
@@ -269,6 +271,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     ok: true,
+    code: 'received',
     message: 'Talebiniz alındı. En kısa sürede dönüş yapacağız.',
   });
 }

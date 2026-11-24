@@ -24,9 +24,9 @@ export async function submitQuote(payload: QuoteRequest, file?: File | null): Pr
   try {
     const res = await fetch('/api/teklif', { method: 'POST', body: form });
     const data = (await res.json().catch(() => null)) as QuoteResponse | null;
-    if (!data) return { ok: false, message: 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.', status: res.status };
+    if (!data) return { ok: false, code: 'error', message: 'Sunucu yanıtı okunamadı. Lütfen tekrar deneyin.', status: res.status };
     return { ...data, status: res.status };
   } catch {
-    return { ok: false, message: 'Bağlantı hatası. Lütfen tekrar deneyin veya bizi arayın.' };
+    return { ok: false, code: 'error', message: 'Bağlantı hatası. Lütfen tekrar deneyin veya bizi arayın.' };
   }
 }

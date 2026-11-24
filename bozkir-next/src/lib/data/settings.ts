@@ -86,11 +86,14 @@ export interface SiteSettings {
   metaPixelId: string;
   /** Teklif bildirimlerinin gönderileceği e-posta. */
   notifyEmail: string;
+  /**
+   * SMTP meta bilgileri (env-only). Parola DB'de tutulmaz; SMTP_PASS env ile yönetilir.
+   * Bu alanlar sadece geriye dönük uyumluluk / görüntüleme amaçlıdır.
+   */
   smtp: {
     host: string;
     port: string;
     user: string;
-    pass: string;
     from: string;
   };
   /** WhatsApp genel ve ürün mesaj şablonları (TR/EN/AR). */
@@ -160,7 +163,7 @@ function defaults(): SiteSettings {
     gaMeasurementId: '',
     metaPixelId: '',
     notifyEmail: '',
-    smtp: { host: '', port: '587', user: '', pass: '', from: '' },
+    smtp: { host: '', port: '587', user: '', from: '' },
     whatsappMessages: {
       general: { ...DEFAULT_WHATSAPP_MESSAGES.general },
       product: { ...DEFAULT_WHATSAPP_MESSAGES.product },
@@ -232,7 +235,12 @@ function merge(base: SiteSettings, saved: Partial<SiteSettings>): SiteSettings {
     address: { ...base.address, ...(saved.address ?? {}) },
     warehouse: { ...base.warehouse, ...(saved.warehouse ?? {}) },
     social: { ...base.social, ...(saved.social ?? {}) },
-    smtp: { ...base.smtp, ...(saved.smtp ?? {}) },
+    smtp: {
+      host: String(saved.smtp?.host ?? base.smtp.host),
+      port: String(saved.smtp?.port ?? base.smtp.port),
+      user: String(saved.smtp?.user ?? base.smtp.user),
+      from: String(saved.smtp?.from ?? base.smtp.from),
+    },
     whatsappMessages: mergeWhatsAppMessages(base.whatsappMessages, saved.whatsappMessages),
   };
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowRight, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, FileText, Phone } from 'lucide-react';
 import {
   getAdjacentProducts,
   getProductBySlug,
@@ -511,20 +511,34 @@ export default async function ProductDetailPage({ params }: PageProps) {
       {/* Mobil sabit CTA çubuğu */}
       <div
         data-product-cta
-        className="fixed inset-x-0 bottom-0 z-[70] flex gap-3 border-t border-border bg-background/95 px-4 pb-[calc(var(--safe-bottom)+0.75rem)] pt-3 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-[70] border-t border-border bg-background/95 px-4 pb-[calc(var(--safe-bottom)+0.75rem)] pt-3 backdrop-blur md:hidden"
       >
-        <a
-          href={telHref(settings.phone)}
-          className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-border text-sm font-medium"
-        >
-          {dict.common.phone}
-        </a>
-        <Link
-          href={`/teklif-al?urun=${encodeURIComponent(product.slug)}`}
-          className="inline-flex h-12 flex-[1.4] items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background"
-        >
-          {dict.common.getQuote}
-        </Link>
+        <div className="mx-auto flex max-w-lg items-center gap-2">
+          <a
+            href={telHref(settings.phone)}
+            className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-border text-sm font-medium"
+          >
+            <Phone className="h-4 w-4" aria-hidden /> {dict.common.phone}
+          </a>
+          {whatsappLink && (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={dict.pages.whatsapp.aria}
+              className="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full border border-border text-[#25D366]"
+            >
+              <WhatsAppIcon className="h-5 w-5" />
+            </a>
+          )}
+          <CompareButton product={ref} className="h-12 w-12 flex-none" />
+          <Link
+            href={`/teklif-al?urun=${encodeURIComponent(product.slug)}`}
+            className="inline-flex h-12 flex-[1.5] items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background"
+          >
+            {dict.common.getQuote}
+          </Link>
+        </div>
       </div>
     </div>
   );

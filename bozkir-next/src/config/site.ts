@@ -10,18 +10,18 @@ export const siteConfig = {
   whatsapp: 'https://wa.me/905355271612',
   email: 'info@bozkiragac.com',
   address: {
-    street: 'Güzelburç Mah, Yunus Emre Cad No:10/C',
+    street: '',
     locality: 'Antakya',
     region: 'Hatay',
     postalCode: '31030',
     country: 'TR',
-    /** İş yeri (ofis) koordinatı: 36°14'19.1"N 36°10'36.5"E. */
-    coords: '36.238639,36.176806',
+    /** İş yeri (eski depo) koordinatı: 36°15'02.0"N 36°10'53.3"E. */
+    coords: '36.250556,36.181472',
   },
   warehouse: {
-    address: '',
-    /** Depo koordinatı: 36°15'02.0"N 36°10'53.3"E. */
-    coords: '36.250556,36.181472',
+    address: 'Güzelburç Mah, Yunus Emre Cad No:10/C, 31030 Antakya / Hatay',
+    /** Depo (eski iş yeri) koordinatı: 36°14'19.1"N 36°10'36.5"E. */
+    coords: '36.238639,36.176806',
   },
   hours: 'Pazartesi – Cuma: 08:00 – 18:00 · Cumartesi: 08:00 – 14:00',
   hoursEn: 'Monday – Friday: 08:00 – 18:00 · Saturday: 08:00 – 14:00',

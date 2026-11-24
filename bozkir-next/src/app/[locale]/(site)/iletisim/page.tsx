@@ -7,6 +7,7 @@ import { resolveWhatsAppTemplate, whatsappHref } from '@/lib/whatsapp';
 import { PageHero } from '@/components/ui/PageHero';
 import { Container } from '@/components/ui/Container';
 import { ButtonLink } from '@/components/ui/Button';
+import { MagneticButton } from '@/components/ui/MagneticButton';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { TrackedLink } from '@/components/analytics/TrackedLink';
 import { Reveal } from '@/components/animations/Reveal';
@@ -124,6 +125,7 @@ function LocationSection({
                 >
                   <ExternalLink className="h-4 w-4" aria-hidden /> {labels.openInMaps}
                 </a>
+                <CopyButton value={coords} label={labels.copy} copiedLabel={labels.copied} />
               </div>
             </div>
           </div>
@@ -156,7 +158,12 @@ export default async function ContactPage({ params }: PageProps) {
   const timeZone = process.env.APP_TIME_ZONE || 'Europe/Istanbul';
   const officeCoords = s.address.coords.trim();
   const depotCoords = s.warehouse.coords.trim();
-  const officeAddress = `${s.address.street}, ${s.address.postalCode} ${s.address.locality} / ${s.address.region}`;
+  const officeAddress =
+    s.address.street.trim() ||
+    [s.address.street, s.address.postalCode, s.address.locality, s.address.region]
+      .filter(Boolean)
+      .join(', ')
+      .replace(/^,\s*/, '');
   const whatsappMessage = resolveWhatsAppTemplate(s.whatsappMessages, lang, 'general');
   const whatsappLink =
     whatsappHref(s.whatsapp || s.phone, whatsappMessage, s.phone) || s.whatsapp;
@@ -276,9 +283,11 @@ export default async function ContactPage({ params }: PageProps) {
         </div>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-          <ButtonLink href="/teklif-al" size="lg" className="w-full justify-center sm:w-auto">
-            {c.ctaQuote}
-          </ButtonLink>
+          <MagneticButton className="w-full sm:w-auto [&>a]:w-full sm:[&>a]:w-auto">
+            <ButtonLink href="/teklif-al" size="lg" className="w-full justify-center sm:w-auto">
+              {c.ctaQuote}
+            </ButtonLink>
+          </MagneticButton>
           <TrackedLink
             href={whatsappLink}
             event="whatsapp_click"
@@ -297,13 +306,13 @@ export default async function ContactPage({ params }: PageProps) {
             {
               id: 'is-yeri',
               label: c.officeTitle,
-              coords: officeCoords,
+              coords: depotCoords,
               mapTitle: c.officeMapTitle,
             },
             {
               id: 'depo',
               label: c.depotTitle,
-              coords: depotCoords,
+              coords: officeCoords,
               mapTitle: c.depotMapTitle,
             },
           ]}
@@ -315,8 +324,8 @@ export default async function ContactPage({ params }: PageProps) {
           eyebrow={c.address}
           title={c.officeTitle}
           description={c.officeDescription}
-          address={officeAddress}
-          coords={officeCoords}
+          address={s.warehouse.address}
+          coords={depotCoords}
           mapTitle={c.officeMapTitle}
           labels={mapLabels}
         />
@@ -328,8 +337,8 @@ export default async function ContactPage({ params }: PageProps) {
           eyebrow={c.warehouse}
           title={c.depotTitle}
           description={c.depotDescription}
-          address={s.warehouse.address}
-          coords={depotCoords}
+          address={officeAddress}
+          coords={officeCoords}
           mapTitle={c.depotMapTitle}
           labels={mapLabels}
         />

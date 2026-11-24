@@ -18,21 +18,28 @@ export function sanitizeHeader(value: string | undefined): string {
   return (value ?? '').replace(/[\r\n\u0000-\u001f\u007f]+/g, ' ').trim();
 }
 
-function smtpReady(s: {
-  smtp: { host: string; port: string; user: string; pass: string; from: string };
-  notifyEmail: string;
-  email: string;
-}) {
-  const to = sanitizeHeader(s.notifyEmail || s.email);
-  if (!s.smtp.host || !to) return null;
-  const portNum = Number(s.smtp.port) || 587;
+function env(name: string): string {
+  return process.env[name]?.trim() ?? '';
+}
+
+/**
+ * SMTP yapılandırması env-only: hassas parola DB'de tutulmaz.
+ * Desteklenen env: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, NOTIFY_EMAIL.
+ */
+function smtpReady(s: { notifyEmail: string; email: string }) {
+  const host = env('SMTP_HOST');
+  const to = sanitizeHeader(env('NOTIFY_EMAIL') || s.notifyEmail || s.email);
+  if (!host || !to) return null;
+  const portNum = Number.parseInt(env('SMTP_PORT') || '587', 10) || 587;
+  const user = env('SMTP_USER');
+  const pass = env('SMTP_PASS');
+  const from = sanitizeHeader(env('SMTP_FROM')) || sanitizeHeader(user) || to;
   const transporter = nodemailer.createTransport({
-    host: s.smtp.host,
+    host,
     port: portNum,
     secure: portNum === 465,
-    auth: s.smtp.user ? { user: s.smtp.user, pass: s.smtp.pass } : undefined,
+    auth: user ? { user, pass } : undefined,
   });
-  const from = sanitizeHeader(s.smtp.from) || sanitizeHeader(s.smtp.user) || to;
   return { transporter, to, from };
 }
 

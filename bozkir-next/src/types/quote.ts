@@ -26,4 +26,13 @@ export interface QuoteResponse {
   message: string;
   /** HTTP durum kodu (429/422 vb. ayrımı için). */
   status?: number;
+  /** İstemci UX'i için opsiyonel durum kodu. */
+  code?:
+    | 'received'
+    | 'duplicate'
+    | 'limit_contact'
+    | 'limit_global'
+    | 'validation'
+    | 'service_unavailable'
+    | 'error';
 }

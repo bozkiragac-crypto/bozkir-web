@@ -11,6 +11,7 @@ import { cleanTextValue, type SiteTexts } from '@/i18n/overrides';
 import { locales } from '@/i18n/config';
 import { parseCoords, formatLatLng } from '@/lib/geo';
 import { normalizeWeeklyHours } from '@/lib/open-hours';
+import { validateWebhookUrl } from '@/lib/webhooks';
 
 /** Admin'den gelen metinleri yalnızca kayıtlı anahtarlarla ve sınırlı uzunlukta saklar. */
 function sanitizeTexts(input?: SiteTexts): SiteTexts {
@@ -83,6 +84,38 @@ export async function saveSiteSettings(
     return { ok: false, error: 'Favicon URL geçersiz. /yol veya http(s):// adresi kullanın.' };
   }
 
+  const webhookUrl = (input.webhookUrl ?? '').trim();
+  const webhookError = await validateWebhookUrl(webhookUrl);
+  if (webhookError) return { ok: false, error: webhookError };
+
+  const notifyEmail = (input.notifyEmail ?? '').trim();
+  if (notifyEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notifyEmail)) {
+    return { ok: false, error: 'Bildirim e-postası geçersiz.' };
+  }
+
+  const gaMeasurementId = (input.gaMeasurementId ?? '').trim();
+  if (gaMeasurementId && !/^(G|GT|AW)-[A-Z0-9]+$/i.test(gaMeasurementId)) {
+    return { ok: false, error: 'GA Measurement ID biçimi geçersiz (örn. G-XXXXXXX).' };
+  }
+
+  const metaPixelId = (input.metaPixelId ?? '').trim();
+  if (metaPixelId && !/^\d{5,20}$/.test(metaPixelId)) {
+    return { ok: false, error: 'Meta Pixel ID yalnızca rakamlardan oluşmalıdır.' };
+  }
+
+  const smtpHost = (input.smtp?.host ?? '').trim();
+  const smtpPortRaw = (input.smtp?.port ?? '587').trim();
+  const smtpPortNum = Number.parseInt(smtpPortRaw || '587', 10);
+  if (!Number.isInteger(smtpPortNum) || smtpPortNum < 1 || smtpPortNum > 65535) {
+    return { ok: false, error: 'SMTP portu 1-65535 arasında olmalıdır.' };
+  }
+  const smtpUser = (input.smtp?.user ?? '').trim();
+  const smtpFrom = (input.smtp?.from ?? '').trim();
+  if (smtpFrom && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(smtpFrom)) {
+    return { ok: false, error: 'SMTP gönderen e-postası geçersiz.' };
+  }
+  // SMTP parolası admin UI'dan/env'den yönetilir; DB'de tutulmaz.
+
   const value: SiteSettings = {
     identity: {
       brandName: (input.identity?.brandName ?? '').trim() || current.identity.brandName,
@@ -123,7 +156,7 @@ export async function saveSiteSettings(
     },
     popupEnabled: !!input.popupEnabled,
     popupCampaignId: (input.popupCampaignId ?? '').trim(),
-    webhookUrl: (input.webhookUrl ?? '').trim(),
+    webhookUrl,
     featuredOrder: (input.featuredOrder ?? []).map((s) => s.trim()).filter(Boolean),
     featuredProducts: Array.isArray(input.featuredProducts)
       ? input.featuredProducts.map((s) => String(s).trim()).filter(Boolean).slice(0, 12)
@@ -133,15 +166,14 @@ export async function saveSiteSettings(
     ogImage: (input.ogImage ?? '').trim(),
     heroImage: (input.heroImage ?? '').trim(),
     maintenance: !!input.maintenance,
-    gaMeasurementId: (input.gaMeasurementId ?? '').trim(),
-    metaPixelId: (input.metaPixelId ?? '').trim(),
-    notifyEmail: (input.notifyEmail ?? '').trim(),
+    gaMeasurementId,
+    metaPixelId,
+    notifyEmail,
     smtp: {
-      host: (input.smtp?.host ?? '').trim(),
-      port: (input.smtp?.port ?? '587').trim() || '587',
-      user: (input.smtp?.user ?? '').trim(),
-      pass: (input.smtp?.pass ?? '') || current.smtp.pass,
-      from: (input.smtp?.from ?? '').trim(),
+      host: smtpHost,
+      port: String(smtpPortNum),
+      user: smtpUser,
+      from: smtpFrom,
     },
     whatsappMessages: {
       general: {

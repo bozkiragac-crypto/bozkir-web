@@ -39,6 +39,7 @@ export function ProductFilter({
   const locale = isLocale(routeLocale) ? routeLocale : 'tr';
   const [query, setQuery] = useState(params.get('q') ?? '');
   const [sheet, setSheet] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
   const sheetRef = useRef<HTMLDivElement>(null);
   const activeCategory = params.get('kategori') ?? '';
   const activeSurface = params.get('yuzey') ?? '';
@@ -51,6 +52,31 @@ export function ProductFilter({
   useEffect(() => {
     setQuery(params.get('q') ?? '');
   }, [params]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('bozkir-search-recent');
+      const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+      if (Array.isArray(parsed)) setRecent(parsed.filter((v): v is string => typeof v === 'string').slice(0, 5));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  function rememberSearch(value: string) {
+    const v = value.trim();
+    if (v.length < 2) return;
+    try {
+      const raw = localStorage.getItem('bozkir-search-recent');
+      const prev = raw ? (JSON.parse(raw) as unknown) : [];
+      const list = Array.isArray(prev) ? prev.filter((x): x is string => typeof x === 'string') : [];
+      const next = [v, ...list.filter((x) => x.toLocaleLowerCase('tr') !== v.toLocaleLowerCase('tr'))].slice(0, 5);
+      localStorage.setItem('bozkir-search-recent', JSON.stringify(next));
+      setRecent(next);
+    } catch {
+      // ignore
+    }
+  }
 
   // Alt-sayfa açıkken arka plan kaymasın.
   useEffect(() => {
@@ -148,40 +174,65 @@ export function ProductFilter({
 
   return (
     <div className="flex flex-col gap-3 border-y border-border py-5 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
-      <form
-        role="search"
-        data-search-shell
-        onSubmit={(e) => {
-          e.preventDefault();
-          track('search', { query });
-          update({ q: query || null });
-        }}
-        className="flex items-center gap-3 rounded-full border border-border px-4 lg:w-80"
-      >
-        <Search className="h-4 w-4 text-muted" />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t('catalog.searchPlaceholder')}
-          aria-label={t('catalog.search')}
-          data-search-input
-          className="h-11 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
-        />
-        {query && (
-          <button
-            type="button"
-            aria-label={t('catalog.clear')}
-            onClick={() => {
-              setQuery('');
-              update({ q: null });
-            }}
-            className="-me-2 flex h-11 w-11 flex-none items-center justify-center rounded-full text-muted transition-colors hover:text-foreground"
-          >
-            <X className="h-4 w-4 text-muted" />
-          </button>
+      <div className="w-full lg:w-80">
+        <form
+          role="search"
+          data-search-shell
+          onSubmit={(e) => {
+            e.preventDefault();
+            const nextQ = query.trim() || null;
+            if (nextQ) rememberSearch(nextQ);
+            track('search', { query: nextQ ?? '', results: resultCount });
+            update({ q: nextQ });
+          }}
+          className="flex items-center gap-3 rounded-full border border-border px-4"
+        >
+          <Search className="h-4 w-4 text-muted" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t('catalog.searchPlaceholder')}
+            aria-label={t('catalog.search')}
+            data-search-input
+            className="h-11 flex-1 bg-transparent text-base outline-none placeholder:text-muted sm:text-sm"
+          />
+          {query && (
+            <button
+              type="button"
+              aria-label={t('catalog.clear')}
+              onClick={() => {
+                setQuery('');
+                update({ q: null });
+              }}
+              className="-me-2 flex h-11 w-11 flex-none items-center justify-center rounded-full text-muted transition-colors hover:text-foreground"
+            >
+              <X className="h-4 w-4 text-muted" />
+            </button>
+          )}
+        </form>
+        {!query && !activeQuery && recent.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 px-1">
+            <span className="text-[0.75rem] tracking-[0.12em] text-muted uppercase">
+              {t('search.recent')}
+            </span>
+            {recent.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  setQuery(item);
+                  rememberSearch(item);
+                  update({ q: item });
+                }}
+                className="rounded-full border border-border px-3 py-1 text-xs text-muted-strong hover:border-foreground hover:text-foreground"
+              >
+                {item}
+              </button>
+            ))}
+          </div>
         )}
-      </form>
+      </div>
 
       {/* Mobil: filtre/sırala bottom-sheet tetikleyici */}
       <button

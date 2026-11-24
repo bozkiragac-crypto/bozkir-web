@@ -10,6 +10,7 @@ import { getSiteSettings } from '@/lib/data/settings';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppFab } from '@/components/layout/WhatsAppFab';
+import { CursorDot } from '@/components/layout/CursorDot';
 import { DeferredSmoothScroll } from '@/components/providers/DeferredSmoothScroll';
 import { ScrollToTop } from '@/components/providers/ScrollToTop';
 import { FavoritesProvider } from '@/components/providers/FavoritesProvider';
@@ -141,6 +142,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                     <main id="main">{children}</main>
                     <Footer s={settings} categories={categories} />
                     <WhatsAppFab locale={typed} />
+                    <CursorDot />
                     <CompareBar />
                     <CampaignPopupServer locale={typed} />
                     <CookieBanner />

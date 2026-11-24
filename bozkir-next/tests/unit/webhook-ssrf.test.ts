@@ -1,5 +1,10 @@
-import { describe, expect, it } from 'vitest';
-import { isDisallowedHost, isDisallowedIp } from '@/lib/webhooks';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/lib/data/settings', () => ({
+  getSiteSettings: vi.fn(async () => ({ webhookUrl: '' })),
+}));
+
+import { isDisallowedHost, isDisallowedIp, validateWebhookUrl } from '@/lib/webhooks';
 
 describe('webhook SSRF guard', () => {
   it('özel/ayrılmış ana bilgisayarları reddeder', () => {
@@ -27,6 +32,15 @@ describe('webhook SSRF guard', () => {
     for (const h of ['example.com', 'hooks.slack.com', '8.8.8.8', '1.1.1.1']) {
       expect(isDisallowedHost(h), h).toBe(false);
     }
+  });
+
+  it('webhook URL doğrulaması https ve özel ağları reddeder', async () => {
+    await expect(validateWebhookUrl('')).resolves.toBeNull();
+    await expect(validateWebhookUrl('http://example.com/hook')).resolves.toBeTruthy();
+    await expect(validateWebhookUrl('https://localhost/hook')).resolves.toBeTruthy();
+    await expect(validateWebhookUrl('https://127.0.0.1/hook')).resolves.toBeTruthy();
+    await expect(validateWebhookUrl('ftp://example.com/hook')).resolves.toBeTruthy();
+    await expect(validateWebhookUrl('https://user:pass@example.com/hook')).resolves.toBeTruthy();
   });
 
   it('IPv4/IPv6 ayrımını doğru yapar', () => {

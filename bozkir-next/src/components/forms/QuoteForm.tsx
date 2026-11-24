@@ -18,6 +18,7 @@ import { LocaleLink as Link } from '@/components/ui/LocaleLink';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { track } from '@/lib/analytics';
 import { submitQuote } from '@/lib/api/quote';
+import type { QuoteResponse } from '@/types/quote';
 import { filterQuoteProducts } from '@/lib/quote-picker';
 import { MAX_QUOTE_PRODUCTS } from '@/lib/quote-products';
 import { Button } from '@/components/ui/Button';
@@ -71,7 +72,8 @@ export function QuoteForm({
   const [fileError, setFileError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
+  const [result, setResult] = useState<QuoteResponse | null>(null);
   const [sent, setSent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileReset, setTurnstileReset] = useState(0);
@@ -207,10 +209,13 @@ export function QuoteForm({
   async function onSubmit(values: FormValues) {
     setResult(null);
     if (turnstileSiteKey && !turnstileToken) {
-      setResult({ ok: false, message: t('quote.errorValidation') });
+      setResult({ ok: false, code: 'validation', message: t('quote.errorValidation') });
+      requestAnimationFrame(() => errorSummaryRef.current?.focus());
       return;
     }
     const slugs = selected.map((p) => p.slug).join(',');
+    const productLabel =
+      selected.length > 1 ? selected.map((p) => p.name).join(', ') : values.product;
     track('quote_submit', { product: values.product, product_slug: slugs });
     const res = await submitQuote(
       {
@@ -230,29 +235,42 @@ export function QuoteForm({
       file,
     );
     if (res.ok) {
+      setResult(res);
       setSent(true);
       reset({ product: productLabel });
       return;
     }
-    // Token tek kullanımlık: başarısız gönderimden sonra yenile.
     if (turnstileSiteKey) {
       setTurnstileToken('');
       setTurnstileReset((n) => n + 1);
     }
     const message =
       res.status === 429
-        ? t('quote.errorRate')
+        ? res.code === 'limit_contact'
+          ? t('quote.errorLimitContact')
+          : t('quote.errorRate')
         : res.status === 422
           ? t('quote.errorValidation')
           : t('quote.errorGeneric');
-    setResult({ ok: false, message });
+    setResult({ ...res, message });
+    requestAnimationFrame(() => errorSummaryRef.current?.focus());
   }
+
+  const onInvalid = () => {
+    requestAnimationFrame(() => {
+      const firstInvalid = document.querySelector<HTMLElement>(
+        '[aria-invalid="true"], input:invalid, textarea:invalid, select:invalid',
+      );
+      (firstInvalid ?? errorSummaryRef.current)?.focus?.();
+    });
+  };
 
   const waHref =
     whatsappLink ||
     `${siteConfig.whatsapp}?text=${encodeURIComponent(t('pages.whatsapp.message'))}`;
 
   if (sent) {
+    const isDuplicate = result?.code === 'duplicate';
     return (
       <div
         role="status"
@@ -262,7 +280,12 @@ export function QuoteForm({
         <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-success shadow-[0_0_0_6px_color-mix(in_srgb,currentColor_12%,transparent)]">
           <CheckCircle2 className="h-6 w-6" />
         </span>
-        <p className="mt-4 text-lg font-medium text-success">{t('quote.success')}</p>
+        <p className="mt-4 text-lg font-medium text-success">
+          {isDuplicate ? t('quote.duplicateTitle') : t('quote.success')}
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-strong">
+          {isDuplicate ? t('quote.duplicateBody') : t('quote.successNext')}
+        </p>
         {selected.length > 0 && (
           <ul className="mt-4 flex flex-wrap gap-2">
             {selected.map((p) => (
@@ -275,7 +298,6 @@ export function QuoteForm({
             ))}
           </ul>
         )}
-        <p className="mt-4 text-sm text-muted-strong">{t('quote.description')}</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a
             href={waHref}
@@ -296,10 +318,13 @@ export function QuoteForm({
         </div>
         <button
           type="button"
-          onClick={() => setSent(false)}
+          onClick={() => {
+            setSent(false);
+            setResult(null);
+          }}
           className="mt-6 text-sm text-muted-strong underline underline-offset-4 hover:text-foreground"
         >
-          {t('quote.submit')}
+          {t('quote.newRequest')}
         </button>
       </div>
     );
@@ -307,11 +332,34 @@ export function QuoteForm({
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, onInvalid)}
       onFocus={() => track('quote_start')}
       noValidate
       className="grid gap-5"
     >
+      {result && !result.ok && (
+        <div
+          ref={errorSummaryRef}
+          tabIndex={-1}
+          role="alert"
+          aria-live="assertive"
+          className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger outline-none"
+        >
+          <p className="font-medium">{result.message}</p>
+          {result.status === 429 && (
+            <p className="mt-1 text-danger/90">
+              {t('quote.limitHelp')}{' '}
+              <a href={waHref} target="_blank" rel="noopener noreferrer" className="underline">
+                WhatsApp
+              </a>{' '}
+              /{' '}
+              <a href={siteConfig.phoneHref} className="underline">
+                {siteConfig.phone}
+              </a>
+            </p>
+          )}
+        </div>
+      )}
       {/* Bot tuzağı: gerçek kullanıcı görmez/görmezden gelir. */}
       <input
         type="text"
@@ -645,11 +693,7 @@ export function QuoteForm({
         >
           {isSubmitting ? t('quote.submitting') : t('quote.submit')}
         </Button>
-        {result && !result.ok && (
-          <p className="text-sm text-danger" role="alert">
-            {result.message}
-          </p>
-        )}
+
       </div>
 
       <p className="text-xs leading-relaxed text-muted">{t('quote.privacyNote')}</p>

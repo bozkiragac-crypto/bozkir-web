@@ -5,9 +5,23 @@ import type Lenis from 'lenis';
  * SmoothScrollProvider örneği kaydeder; ScrollToTop gibi bileşenler kullanır.
  */
 let instance: Lenis | null = null;
+const listeners = new Set<(lenis: Lenis | null) => void>();
 
 export function setLenis(lenis: Lenis | null): void {
   instance = lenis;
+  listeners.forEach((fn) => fn(lenis));
+}
+
+export function getLenis(): Lenis | null {
+  return instance;
+}
+
+export function subscribeLenis(fn: (lenis: Lenis | null) => void): () => void {
+  listeners.add(fn);
+  fn(instance);
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 /**
