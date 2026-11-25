@@ -1,21 +1,29 @@
-import { test, expect, gotoWithRetry } from './fixtures';
+import { test, expect, gotoWithRetry, requestGetWithRetry } from './fixtures';
 
 // Lenis/GSAP kaynaklı scroll sürtünmesini elemek için hareket azaltma açık.
 test.use({ reducedMotion: 'reduce' });
 
 test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları', () => {
-  test('ürünler: sıralama seçici URL günceller ve sonuç döner', async ({ page }) => {
+  test('ürünler: sıralama seçici URL günceller ve sonuç döner', async ({ page, isMobile }) => {
     await gotoWithRetry(page, '/tr/urunler');
-    const sort = page.locator('#sort-filter');
+    let sort = page.locator('#sort-filter');
+    if (isMobile) {
+      await page.locator('button[aria-controls="product-filter-sheet"]').click();
+      sort = page.locator('#product-filter-sheet').getByRole('combobox', { name: 'Sırala' });
+    }
     await expect(sort).toBeVisible();
     await sort.selectOption('name-asc');
     await expect(page).toHaveURL(/sirala=name-asc/);
     await expect(page.locator('a[href*="/tr/urunler/"]').first()).toBeVisible();
   });
 
-  test('ürünler: filtre değişince sayfalama sıfırlanır', async ({ page }) => {
+  test('ürünler: filtre değişince sayfalama sıfırlanır', async ({ page, isMobile }) => {
     await gotoWithRetry(page, '/tr/urunler?q=lak&sayfa=2');
-    const category = page.locator('#category-filter');
+    let category = page.locator('#category-filter');
+    if (isMobile) {
+      await page.locator('button[aria-controls="product-filter-sheet"]').click();
+      category = page.locator('#product-filter-sheet').getByRole('combobox', { name: 'Kategori' });
+    }
     await expect(category).toBeVisible();
     await category.selectOption({ index: 1 });
     await expect(page).toHaveURL(/kategori=/, { timeout: 15_000 });
@@ -45,14 +53,14 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
   });
 
   test('güvenlik başlıkları: CSP + HSTS gönderilir', async ({ request }) => {
-    const res = await request.get('/tr');
+    const res = await requestGetWithRetry(request, '/tr');
     expect(res.status()).toBeLessThan(400);
     expect(res.headers()['content-security-policy']).toContain("default-src 'self'");
     expect(res.headers()['strict-transport-security']).toContain('max-age=');
   });
 
   test('medya varlıkları uzun cache ve güvenlik başlıkları taşır', async ({ request }) => {
-    const res = await request.get('/media/olmayan-dosya.webp');
+    const res = await requestGetWithRetry(request, '/media/olmayan-dosya.webp');
     expect(res.headers()['cache-control']).toContain('max-age=31536000');
     expect(res.headers()['x-content-type-options']).toBe('nosniff');
   });
@@ -95,7 +103,7 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
     const product = page.locator('main a[href*="/tr/urunler/"]').first();
     await product.waitFor({ state: 'visible' });
     const href = (await product.getAttribute('href')) ?? '';
-    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    await gotoWithRetry(page, href);
     const expand = page.getByRole('button', { name: 'Görseli büyüt' }).first();
     await expect(expand).toBeVisible({ timeout: 15_000 });
     // Scroll/animasyon sürtünmesini elemek için doğrudan DOM tıklaması.

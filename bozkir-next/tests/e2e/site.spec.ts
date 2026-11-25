@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, gotoWithRetry, requestGetWithRetry } from './fixtures';
 
 test.describe('Genel site gezinme', () => {
   test('ana sayfa bölümleri yüklenir', async ({ page }) => {
@@ -17,7 +17,7 @@ test.describe('Genel site gezinme', () => {
 
   test('statik sayfalar 200 döner ve başlık içerir', async ({ page }) => {
     for (const path of ['/tr/hakkimizda', '/tr/iletisim', '/tr/katalog', '/tr/bayilikler']) {
-      const res = await page.goto(path);
+      const res = await gotoWithRetry(page, path);
       expect(res?.status(), path).toBeLessThan(400);
       await expect(page.getByRole('heading', { level: 1 }).first(), path).toBeVisible();
     }
@@ -105,10 +105,10 @@ test.describe('Genel site gezinme', () => {
   });
 
   test('sitemap ve robots erişilebilir', async ({ request }) => {
-    const sitemap = await request.get('/sitemap.xml');
+    const sitemap = await requestGetWithRetry(request, '/sitemap.xml');
     expect(sitemap.ok()).toBeTruthy();
     expect(await sitemap.text()).toContain('/tr/urunler');
-    const robots = await request.get('/robots.txt');
+    const robots = await requestGetWithRetry(request, '/robots.txt');
     expect(robots.ok()).toBeTruthy();
   });
 });

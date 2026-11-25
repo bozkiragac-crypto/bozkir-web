@@ -65,7 +65,7 @@ export function ImageLightbox({
         type="button"
         onClick={onClose}
         aria-label={t('home.gallery.close')}
-        className="absolute end-4 top-4 flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:bg-white/10 hover:text-white"
+        className="absolute end-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full text-white/80 hover:bg-white/10 hover:text-white"
       >
         <X className="h-6 w-6" />
       </button>
@@ -78,7 +78,7 @@ export function ImageLightbox({
             onIndexChange((index! - 1 + count) % count);
           }}
           aria-label={t('home.gallery.prev')}
-          className="absolute left-3 flex h-12 w-12 items-center justify-center rounded-full text-white/80 hover:bg-white/10 hover:text-white md:left-8"
+          className="absolute left-3 z-10 flex h-12 w-12 items-center justify-center rounded-full text-white/80 hover:bg-white/10 hover:text-white md:left-8"
         >
           <ChevronLeft className="h-7 w-7 rtl:-scale-x-100" />
         </button>
@@ -114,7 +114,7 @@ export function ImageLightbox({
             onIndexChange((index! + 1) % count);
           }}
           aria-label={t('home.gallery.next')}
-          className="absolute right-3 flex h-12 w-12 items-center justify-center rounded-full text-white/80 hover:bg-white/10 hover:text-white md:right-8"
+          className="absolute right-3 z-10 flex h-12 w-12 items-center justify-center rounded-full text-white/80 hover:bg-white/10 hover:text-white md:right-8"
         >
           <ChevronRight className="h-7 w-7 rtl:-scale-x-100" />
         </button>

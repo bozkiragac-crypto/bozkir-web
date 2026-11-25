@@ -24,6 +24,8 @@ test.describe('Ürünler ve katalog', () => {
       }
     }
     await expect(page).toHaveURL(/q=lak/, { timeout: 15_000 });
+    // Form gönderimindeki nginx 503 yanıtına karşı son URL'i sağlıklı yükle.
+    await gotoWithRetry(page, page.url());
     await expect(page.locator('a[href*="/tr/urunler/"]').first()).toBeVisible();
   });
 
@@ -32,7 +34,7 @@ test.describe('Ürünler ve katalog', () => {
     const firstProduct = page.locator('main a[href*="/tr/urunler/"]').first();
     await firstProduct.waitFor({ state: 'visible' });
     const href = (await firstProduct.getAttribute('href')) ?? '';
-    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    await gotoWithRetry(page, href);
     await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
     await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
     await expect(page.locator('a[href*="teklif-al?urun="]').first()).toBeVisible();

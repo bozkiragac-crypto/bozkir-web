@@ -43,7 +43,7 @@ export function ContactMapTabs({
   }
 
   return (
-    <div className="mt-8 hidden">
+    <div className="mt-8 lg:hidden">
       <div
         role="tablist"
         aria-label={ariaLabel}

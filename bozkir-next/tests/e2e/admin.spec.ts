@@ -1,9 +1,9 @@
-import { test, expect, loginAdmin, ADMIN_USER } from './fixtures';
+import { test, expect, loginAdmin, ADMIN_USER, ADMIN_PASS } from './fixtures';
 
 test.describe('Admin giriş ve güvenlik', () => {
   test('yanlış şifre reddedilir', async ({ page }) => {
     await page.goto('/admin/login');
-    await page.getByLabel('Kullanıcı adı').fill(ADMIN_USER);
+    await page.getByLabel('Kullanıcı adı').fill(ADMIN_USER || 'bozkir');
     await page.getByLabel('Şifre').fill('yanlis-sifre-xyz');
     await page.getByRole('button', { name: 'Giriş Yap' }).click();
     await expect(page).toHaveURL(/\/admin\/login/);
@@ -15,6 +15,7 @@ test.describe('Admin giriş ve güvenlik', () => {
   });
 
   test('doğru bilgilerle panele giriş yapılır', async ({ page }) => {
+    test.skip(!ADMIN_USER || !ADMIN_PASS, 'E2E_ADMIN_USER / E2E_ADMIN_PASS tanımlı değil');
     await loginAdmin(page);
     await expect(page).toHaveURL(/\/admin$/);
     await expect(page.locator('main')).toBeVisible();

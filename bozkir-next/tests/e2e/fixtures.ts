@@ -1,4 +1,10 @@
-import { test as base, expect, type Page } from '@playwright/test';
+import {
+  test as base,
+  expect,
+  type APIRequestContext,
+  type APIResponse,
+  type Page,
+} from '@playwright/test';
 import { existsSync, readFileSync } from 'node:fs';
 import { generate } from 'otplib';
 import { ADMIN_SKIP_PATH, ADMIN_STATE_PATH, waitForLoginOutcome } from './global-setup';
@@ -87,7 +93,16 @@ export async function gotoWithRetry(
   for (let i = 0; i < attempts; i++) {
     try {
       const res = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20_000 });
+      // nginx page-limit 503'ü tek istekte görülebiliyor; yeniden dene.
+      if (res && res.status() >= 500) throw new Error(`${res.status()} ${url}`);
       await dismissConsent(page);
+      // FavoritesProvider client effect'i işaretler; etkileşimler hydration öncesine
+      // denk gelirse kontrollü input/select değişimleri URL'e yansımaz.
+      await page.waitForFunction(
+        () => document.documentElement.dataset.compare !== undefined,
+        null,
+        { timeout: 10_000 },
+      );
       return res;
     } catch (err) {
       last = err;
@@ -95,6 +110,23 @@ export async function gotoWithRetry(
     }
   }
   throw last;
+}
+
+/**
+ * API isteklerinde geçici nginx 503'lerine karşı yeniden dener.
+ */
+export async function requestGetWithRetry(
+  request: APIRequestContext,
+  url: string,
+  attempts = 3,
+): Promise<APIResponse> {
+  let last!: APIResponse;
+  for (let i = 0; i < attempts; i++) {
+    last = await request.get(url);
+    if (last.status() < 500) return last;
+    await new Promise((resolve) => setTimeout(resolve, 800));
+  }
+  return last;
 }
 
 /** Çerez bandı açıksa kabul eder (tıklamaları örtmesini engeller). */

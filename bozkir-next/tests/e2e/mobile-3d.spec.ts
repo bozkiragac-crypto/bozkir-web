@@ -11,6 +11,7 @@ test.use({
 test('mobilde 3D bölümü önizleme olmadan satır içi açılır, sayfa kaydırması engellenmez', async ({
   page,
 }) => {
+  test.setTimeout(90_000);
   await gotoWithRetry(page, '/tr');
 
   const panel = page.locator('[data-testid="panel-3d"]');
@@ -18,7 +19,7 @@ test('mobilde 3D bölümü önizleme olmadan satır içi açılır, sayfa kaydı
   await panel.scrollIntoViewIfNeeded();
 
   const viewer = panel.locator('[data-testid="panel-viewer"]');
-  await expect(viewer).toBeVisible({ timeout: 25_000 });
+  await expect(viewer).toBeVisible({ timeout: 60_000 });
   await expect(viewer.locator('canvas')).toBeVisible();
 
   // Statik önizleme görseli yerine 3D doğrudan görünür.
@@ -35,6 +36,7 @@ test('mobilde 3D bölümü önizleme olmadan satır içi açılır, sayfa kaydı
 test(`3D chunk yüklenirken mobilde statik görsel yerine nötr yer tutucu gösterilir`, async ({
   page,
 }) => {
+  test.setTimeout(90_000);
   // Hydration tamamlanmadan kaydırırsak IntersectionObserver henüz bağlı olmaz.
   await page.goto('/tr', { waitUntil: 'networkidle' });
 

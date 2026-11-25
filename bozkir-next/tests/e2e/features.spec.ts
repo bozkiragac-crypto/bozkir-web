@@ -1,4 +1,4 @@
-import { test, expect, gotoWithRetry } from './fixtures';
+import { test, expect, gotoWithRetry, requestGetWithRetry } from './fixtures';
 
 test.describe('Yeni özellikler', () => {
   test('ürün detayında "Benzer Ürünler" bölümü görünür', async ({ page }) => {
@@ -6,7 +6,7 @@ test.describe('Yeni özellikler', () => {
     const product = page.locator('main a[href*="/tr/urunler/"]').first();
     await product.waitFor({ state: 'visible' });
     const href = (await product.getAttribute('href')) ?? '';
-    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    await gotoWithRetry(page, href);
     await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
     await expect(page.getByRole('heading', { name: 'Benzer Ürünler' })).toBeVisible();
   });
@@ -72,7 +72,7 @@ test.describe('Yeni özellikler', () => {
     );
     expect(slugs.length).toBeGreaterThan(0);
 
-    await page.goto(`/tr/favoriler?liste=${slugs.join(',')}`, { waitUntil: 'domcontentloaded' });
+    await gotoWithRetry(page, `/tr/favoriler?liste=${slugs.join(',')}`);
     await expect(page.getByText('Paylaşılan liste eklendi')).toBeVisible({ timeout: 15_000 });
     await expect(page).not.toHaveURL(/liste=/);
     const count = await page.evaluate(() => {
@@ -88,10 +88,10 @@ test.describe('Yeni özellikler', () => {
     await cat.waitFor({ state: 'visible' });
     const href = (await cat.getAttribute('href')) ?? '';
     expect(href).toMatch(/\/tr\/kategoriler\/.+/);
-    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    await gotoWithRetry(page, href);
 
     // Sayfalama parametresi hata üretmemeli.
-    const res = await page.goto(`${href}?sayfa=2`, { waitUntil: 'domcontentloaded' });
+    const res = await gotoWithRetry(page, `${href}?sayfa=2`);
     expect(res?.status()).toBeLessThan(400);
 
     // Kategori içi arama formu var ve gönderimde `q` parametresi ekler.
@@ -108,12 +108,19 @@ test.describe('Yeni özellikler', () => {
     await product.waitFor({ state: 'visible' });
     const href = (await product.getAttribute('href')) ?? '';
 
-    const html = await (await request.get(href)).text();
-    const og = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
-    expect(og, 'og:image etiketi bulunmalı').toBeTruthy();
+    let og: string | undefined;
+    await expect
+      .poll(async () => {
+        const res = await requestGetWithRetry(request, href);
+        if (!res.ok()) return false;
+        const html = await res.text();
+        og = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
+        return !!og;
+      }, { timeout: 15_000 })
+      .toBe(true);
 
     const path = new URL(og!).pathname + new URL(og!).search;
-    const img = await request.get(path);
+    const img = await requestGetWithRetry(request, path);
     expect(img.status()).toBe(200);
     expect(img.headers()['content-type']).toContain('image/png');
   });
