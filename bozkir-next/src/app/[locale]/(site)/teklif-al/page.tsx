@@ -6,7 +6,7 @@ import { QuoteForm, type QuoteProduct } from '@/components/forms/QuoteForm';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { getAllProducts, getProductsBySlugs } from '@/lib/api/products';
 import { getSiteSettings, telHref } from '@/lib/data/settings';
-import { resolveWhatsAppTemplate, whatsappHref } from '@/lib/whatsapp';
+import { buildQuoteWhatsAppMessage, whatsappHref } from '@/lib/whatsapp';
 import { pickLocaleText } from '@/lib/data/catalog';
 import { MAX_QUOTE_PRODUCTS, parseQuoteSlugs } from '@/lib/quote-products';
 import { Phone } from 'lucide-react';
@@ -39,14 +39,6 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
   const dict = await dictForRequest(locale ?? 'tr');
   const settings = await getSiteSettings();
   const hours = pickLocaleText(settings.hours, locale, settings.hoursEn, settings.hoursAr);
-  const whatsappMessage = resolveWhatsAppTemplate(
-    settings.whatsappMessages,
-    locale ?? 'tr',
-    'general',
-  );
-  const whatsappLink =
-    whatsappHref(settings.whatsapp || settings.phone, whatsappMessage, settings.phone) ||
-    settings.whatsapp;
   // `urun` tek ürün, `urunler` karşılaştırmadan gelen çoklu ürün slug'ları.
   const { slugs, truncated } = parseQuoteSlugs([sp.urun, sp.urunler]);
   const [found, all] = await Promise.all([
@@ -63,6 +55,17 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
   });
   const products: QuoteProduct[] = found.map(toQuoteProduct);
   const pickerProducts: QuoteProduct[] = all.map(toQuoteProduct);
+  const quoteMessage = buildQuoteWhatsAppMessage(
+    settings.whatsappMessages,
+    locale ?? 'tr',
+    {
+      products: products.map((p) => `${p.name}${p.code ? ` (${p.code})` : ''}`),
+      page: '/teklif-al',
+    },
+  );
+  const whatsappLink =
+    whatsappHref(settings.whatsapp || settings.phone, quoteMessage, settings.phone) ||
+    settings.whatsapp;
 
   const first = products[0];
 
@@ -105,6 +108,9 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
             pickerProducts={pickerProducts}
             turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ''}
             whatsappLink={whatsappLink}
+            whatsappBase={settings.whatsapp || settings.phone}
+            whatsappFallbackPhone={settings.phone}
+            whatsappMessages={settings.whatsappMessages}
           />
         </div>
         <aside className="space-y-6">

@@ -12,6 +12,7 @@ import { locales } from '@/i18n/config';
 import { parseCoords, formatLatLng } from '@/lib/geo';
 import { normalizeWeeklyHours } from '@/lib/open-hours';
 import { validateWebhookUrl } from '@/lib/webhooks';
+import { normalizeWhatsAppMessages } from '@/lib/whatsapp';
 
 /** Admin'den gelen metinleri yalnızca kayıtlı anahtarlarla ve sınırlı uzunlukta saklar. */
 function sanitizeTexts(input?: SiteTexts): SiteTexts {
@@ -175,18 +176,10 @@ export async function saveSiteSettings(
       user: smtpUser,
       from: smtpFrom,
     },
-    whatsappMessages: {
-      general: {
-        tr: (input.whatsappMessages?.general?.tr ?? '').trim() || current.whatsappMessages.general.tr,
-        en: (input.whatsappMessages?.general?.en ?? '').trim() || current.whatsappMessages.general.en,
-        ar: (input.whatsappMessages?.general?.ar ?? '').trim() || current.whatsappMessages.general.ar,
-      },
-      product: {
-        tr: (input.whatsappMessages?.product?.tr ?? '').trim() || current.whatsappMessages.product.tr,
-        en: (input.whatsappMessages?.product?.en ?? '').trim() || current.whatsappMessages.product.en,
-        ar: (input.whatsappMessages?.product?.ar ?? '').trim() || current.whatsappMessages.product.ar,
-      },
-    },
+    whatsappMessages: normalizeWhatsAppMessages(
+      input.whatsappMessages,
+      current.whatsappMessages,
+    ),
     kvkkText: (input.kvkkText ?? '').trim(),
     privacyText: (input.privacyText ?? '').trim(),
     cookiePolicyText: (input.cookiePolicyText ?? '').trim(),

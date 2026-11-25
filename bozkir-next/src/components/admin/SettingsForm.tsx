@@ -9,10 +9,48 @@ import { ImageManager } from '@/components/admin/ImageManager';
 import { Select } from '@/components/ui/Select';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { normalizeWeeklyHours } from '@/lib/open-hours';
+import {
+  buildProductWhatsAppMessage,
+  WHATSAPP_TEMPLATE_MAX_LENGTH,
+  type WhatsAppIntent,
+} from '@/lib/whatsapp';
 import type { NavSettingItem, SiteSettings } from '@/lib/data/settings';
 
 /** 0=Pazar … 6=Cumartesi (JS getDay ile uyumlu). */
 const DAY_LABELS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+
+const WHATSAPP_SECTIONS: { intent: WhatsAppIntent; title: string; hint: string }[] = [
+  { intent: 'general', title: 'Genel mesaj', hint: 'FAB, ana sayfa, iletişim ve genel CTA.' },
+  { intent: 'product', title: 'Ürün mesajı', hint: 'Ürün detay ve mobil ürün CTA.' },
+  { intent: 'sample', title: 'Numune mesajı', hint: 'Ürün detayındaki “Numune iste” bağlantısı.' },
+  { intent: 'quote', title: 'Teklif mesajı', hint: 'Teklif sayfası, form ve teklif sonrası WhatsApp.' },
+  { intent: 'share', title: 'Paylaşım mesajı', hint: 'Ürün paylaş menüsündeki WhatsApp seçeneği.' },
+];
+
+const WHATSAPP_PLACEHOLDERS = [
+  '{product}',
+  '{code}',
+  '{category}',
+  '{surface}',
+  '{thickness}',
+  '{dimensions}',
+  '{availability}',
+  '{products}',
+  '{summary}',
+  '{page}',
+  '{url}',
+];
+
+const WHATSAPP_PREVIEW_PRODUCT = {
+  name: 'MDF Lam',
+  code: '51192',
+  category: 'MDF Lam',
+  slug: 'mdf-lam-51192',
+  face: 'Mat',
+  thicknesses: ['18 mm'],
+  dimensions: '2800 × 2100 mm',
+  availabilityStatus: 'in_stock' as const,
+};
 
 const field =
   'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-foreground';
@@ -649,47 +687,65 @@ export function SettingsForm({
         <div className={`${section} lg:col-span-2 ${hide('email')}`}>
           <p className="font-medium">WhatsApp mesaj şablonları</p>
           <p className="mt-1 text-sm text-muted-strong">
-            Genel mesaj ve ürün mesajı. Yer tutucular: <code>{'{product}'}</code>,{' '}
-            <code>{'{code}'}</code>, <code>{'{category}'}</code>, <code>{'{url}'}</code>. Ürün
-            bazlı mesaj boşsa ürün şablonu, o da boşsa genel şablon kullanılır.
+            Her bağlantı kendi niyetine göre şablon seçer. Kullanılabilir yer tutucular:{' '}
+            {WHATSAPP_PLACEHOLDERS.map((key, i) => (
+              <span key={key}>
+                {i > 0 && ', '}
+                <code>{key}</code>
+              </span>
+            ))}
+            . Eksik bırakılan dil veya intent varsayılan metni kullanır; ürün bazlı özel mesaj
+            yalnızca ürün şablonunda geçerlidir.
           </p>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            {(['tr', 'en', 'ar'] as const).map((lang) => (
-              <Label key={`wa-general-${lang}`} t={`Genel mesaj (${lang.toUpperCase()})`} full>
-                <textarea
-                  className={`${area} h-24`}
-                  dir={lang === 'ar' ? 'rtl' : undefined}
-                  value={form.whatsappMessages.general[lang]}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      whatsappMessages: {
-                        ...form.whatsappMessages,
-                        general: { ...form.whatsappMessages.general, [lang]: e.target.value },
-                      },
-                    })
-                  }
-                />
-              </Label>
+          <div className="mt-6 grid gap-5">
+            {WHATSAPP_SECTIONS.map((wa) => (
+              <div key={wa.intent} className="rounded-lg border border-border p-4">
+                <p className="text-sm font-medium">{wa.title}</p>
+                <p className="mt-1 text-xs text-muted-strong">{wa.hint}</p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  {(['tr', 'en', 'ar'] as const).map((lang) => (
+                    <Label
+                      key={`wa-${wa.intent}-${lang}`}
+                      t={`${wa.title} (${lang.toUpperCase()})`}
+                      full
+                    >
+                      <textarea
+                        className={`${area} h-24`}
+                        dir={lang === 'ar' ? 'rtl' : undefined}
+                        maxLength={WHATSAPP_TEMPLATE_MAX_LENGTH}
+                        value={form.whatsappMessages[wa.intent][lang]}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            whatsappMessages: {
+                              ...form.whatsappMessages,
+                              [wa.intent]: {
+                                ...form.whatsappMessages[wa.intent],
+                                [lang]: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </Label>
+                  ))}
+                </div>
+              </div>
             ))}
-            {(['tr', 'en', 'ar'] as const).map((lang) => (
-              <Label key={`wa-product-${lang}`} t={`Ürün mesajı (${lang.toUpperCase()})`} full>
-                <textarea
-                  className={`${area} h-24`}
-                  dir={lang === 'ar' ? 'rtl' : undefined}
-                  value={form.whatsappMessages.product[lang]}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      whatsappMessages: {
-                        ...form.whatsappMessages,
-                        product: { ...form.whatsappMessages.product, [lang]: e.target.value },
-                      },
-                    })
-                  }
-                />
-              </Label>
-            ))}
+          </div>
+          <div className="mt-5 rounded-lg bg-surface-2 p-4">
+            <p className="text-xs tracking-[0.14em] text-muted uppercase">
+              Ürün mesajı önizlemesi (TR)
+            </p>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-strong">
+              {buildProductWhatsAppMessage(
+                WHATSAPP_PREVIEW_PRODUCT,
+                form.whatsappMessages,
+                'tr',
+                'https://www.bozkiragac.com/tr/urunler/mdf-lam-51192',
+                { availabilityLabel: () => 'Stokta' },
+              )}
+            </p>
           </div>
         </div>
 

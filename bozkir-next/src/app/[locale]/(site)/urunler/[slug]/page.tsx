@@ -38,6 +38,7 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
 import { isLocale } from '@/i18n/config';
 import { dictForRequest } from '@/i18n/server';
 import { cn, metaDescription } from '@/lib/utils';
+import type { AvailabilityStatus } from '@/types/product';
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>;
@@ -115,20 +116,47 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   const image = product.images[0] ?? product.thumbnail;
   const productUrl = localeUrl(locale, `/urunler/${product.slug}`);
+  const availabilityLabel = (() => {
+    switch (product.availabilityStatus) {
+      case 'in_stock':
+        return dict.product.availabilityInStock;
+      case 'on_order':
+        return dict.product.availabilityOnOrder;
+      case 'check_availability':
+        return dict.product.availabilityCheck;
+      default:
+        return undefined;
+    }
+  })();
+  const waOptions = {
+    availabilityLabel: (_key: AvailabilityStatus) => availabilityLabel ?? '',
+    locale: locale ?? 'tr',
+  };
   const whatsappMessage = buildProductWhatsAppMessage(
     product,
     siteSettings.whatsappMessages,
     locale ?? 'tr',
     productUrl,
+    waOptions,
+  );
+  const sampleMessage = buildProductWhatsAppMessage(
+    product,
+    siteSettings.whatsappMessages,
+    locale ?? 'tr',
+    productUrl,
+    { ...waOptions, intent: 'sample', useCustomMessage: false },
+  );
+  const shareMessage = buildProductWhatsAppMessage(
+    product,
+    siteSettings.whatsappMessages,
+    locale ?? 'tr',
+    productUrl,
+    { ...waOptions, intent: 'share', useCustomMessage: false },
   );
   const whatsappLink = whatsappHref(
     siteSettings.whatsapp || siteSettings.phone,
     whatsappMessage,
     siteSettings.phone,
-  );
-  const sampleMessage = dict.product.sampleMessage.replace(
-    '{product}',
-    `${product.name}${product.code ? ` (${product.code})` : ''}`,
   );
   const sampleLink = whatsappHref(
     siteSettings.whatsapp || siteSettings.phone,
@@ -174,19 +202,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
     images: product.images.length > 0 ? product.images : image ? [image] : [],
     properties: jsonLdProperties,
   });
-
-  const availabilityLabel = (() => {
-    switch (product.availabilityStatus) {
-      case 'in_stock':
-        return dict.product.availabilityInStock;
-      case 'on_order':
-        return dict.product.availabilityOnOrder;
-      case 'check_availability':
-        return dict.product.availabilityCheck;
-      default:
-        return undefined;
-    }
-  })();
 
   const specs: { label: string; value: string }[] = [];
   if (product.code) specs.push({ label: dict.compare.code, value: product.code });
@@ -316,7 +331,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     name={product.name}
                     url={productUrl}
                     imageUrl={image}
-                    message={whatsappMessage}
+                    message={shareMessage}
                     className="h-11 w-11"
                   />
                   {whatsappLink && (

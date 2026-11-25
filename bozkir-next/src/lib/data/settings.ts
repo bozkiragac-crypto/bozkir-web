@@ -5,9 +5,14 @@ import { siteSettings } from '@/lib/db/schema';
 import { siteConfig } from '@/config/site';
 import {
   DEFAULT_WHATSAPP_MESSAGES,
+  WHATSAPP_INTENTS,
+  isLegacyWhatsAppTemplate,
+  type NormalizedWhatsAppMessages,
+  type WhatsAppIntent,
   type WhatsAppMessageSettings,
 } from '@/lib/whatsapp';
 import type { SiteTexts } from '@/i18n/overrides';
+import type { Locale } from '@/i18n/config';
 
 export const SETTINGS_TAG = 'settings';
 const SETTINGS_KEY = 'site';
@@ -96,8 +101,8 @@ export interface SiteSettings {
     user: string;
     from: string;
   };
-  /** WhatsApp genel ve ürün mesaj şablonları (TR/EN/AR). */
-  whatsappMessages: WhatsAppMessageSettings;
+  /** WhatsApp intent mesaj şablonları (TR/EN/AR). */
+  whatsappMessages: NormalizedWhatsAppMessages;
   /** KVKK aydınlatma metni (boşsa sözlük içeriği kullanılır). */
   kvkkText: string;
   /** Gizlilik politikası metni (boşsa sözlük içeriği kullanılır). */
@@ -167,6 +172,9 @@ function defaults(): SiteSettings {
     whatsappMessages: {
       general: { ...DEFAULT_WHATSAPP_MESSAGES.general },
       product: { ...DEFAULT_WHATSAPP_MESSAGES.product },
+      sample: { ...DEFAULT_WHATSAPP_MESSAGES.sample },
+      quote: { ...DEFAULT_WHATSAPP_MESSAGES.quote },
+      share: { ...DEFAULT_WHATSAPP_MESSAGES.share },
     },
     kvkkText: '',
     privacyText: '',
@@ -190,34 +198,35 @@ const loadSettings = unstable_cache(
 );
 
 /**
- * Eski varsayılan WhatsApp metinleri firma adını içeriyordu. Daha önce
- * kaydedilmiş ayarlar bu metinlerde takılı kalmasın diye marka adı geçen
- * değerler güncel varsayılana düşürülür.
+ * Kaydedilmiş eski varsayılan şablonlar (ve eski marka adlı metinler) yeni
+ * akıllı şablonların önüne geçmesin diye güncel varsayılana düşürülür. Admin'in
+ * gerçekten özelleştirdiği metinler korunur.
  */
-const LEGACY_WHATSAPP_BRANDS = ['Bozkır Ağaç Ürünleri', 'Bozkır Wood Products', 'بوزكير'];
-
-function pickWhatsAppMessage(value: string | undefined, fallback: string): string {
+function pickWhatsAppMessage(
+  intent: WhatsAppIntent,
+  locale: Locale,
+  value: string | undefined,
+  fallback: string,
+): string {
   const text = value?.trim();
-  if (!text) return fallback;
-  return LEGACY_WHATSAPP_BRANDS.some((brand) => text.includes(brand)) ? fallback : text;
+  if (!text || isLegacyWhatsAppTemplate(intent, locale, text)) return fallback;
+  return text;
 }
 
 function mergeWhatsAppMessages(
-  base: WhatsAppMessageSettings,
+  base: NormalizedWhatsAppMessages,
   saved: Partial<WhatsAppMessageSettings> | undefined,
-): WhatsAppMessageSettings {
-  return {
-    general: {
-      tr: pickWhatsAppMessage(saved?.general?.tr, base.general.tr),
-      en: pickWhatsAppMessage(saved?.general?.en, base.general.en),
-      ar: pickWhatsAppMessage(saved?.general?.ar, base.general.ar),
-    },
-    product: {
-      tr: pickWhatsAppMessage(saved?.product?.tr, base.product.tr),
-      en: pickWhatsAppMessage(saved?.product?.en, base.product.en),
-      ar: pickWhatsAppMessage(saved?.product?.ar, base.product.ar),
-    },
-  };
+): NormalizedWhatsAppMessages {
+  const out = {} as NormalizedWhatsAppMessages;
+  for (const intent of WHATSAPP_INTENTS) {
+    const fallback = base[intent] ?? DEFAULT_WHATSAPP_MESSAGES[intent];
+    out[intent] = {
+      tr: pickWhatsAppMessage(intent, 'tr', saved?.[intent]?.tr, fallback.tr),
+      en: pickWhatsAppMessage(intent, 'en', saved?.[intent]?.en, fallback.en),
+      ar: pickWhatsAppMessage(intent, 'ar', saved?.[intent]?.ar, fallback.ar),
+    };
+  }
+  return out;
 }
 
 function merge(base: SiteSettings, saved: Partial<SiteSettings>): SiteSettings {

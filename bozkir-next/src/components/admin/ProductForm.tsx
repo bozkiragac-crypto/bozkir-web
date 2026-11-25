@@ -466,9 +466,12 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
           <fieldset className="grid gap-5 rounded-md border border-border p-5">
             <legend className={`px-2 ${label}`}>WhatsApp mesajı (opsiyonel)</legend>
             <p className="text-xs text-muted">
-              Boş bırakılırsa Ayarlar → WhatsApp mesaj şablonları kullanılır. Yer tutucular:{' '}
-              <code>{'{product}'}</code>, <code>{'{code}'}</code>, <code>{'{category}'}</code>,{' '}
-              <code>{'{url}'}</code>.
+              Boş bırakılırsa Ayarlar → Ürün mesajı şablonu kullanılır. Yalnızca ürün WhatsApp
+              bağlantısında geçerlidir; numune ve paylaşım kendi şablonlarını kullanır. Yer
+              tutucular: <code>{'{product}'}</code>, <code>{'{code}'}</code>,{' '}
+              <code>{'{category}'}</code>, <code>{'{surface}'}</code>,{' '}
+              <code>{'{thickness}'}</code>, <code>{'{dimensions}'}</code>,{' '}
+              <code>{'{availability}'}</code>, <code>{'{url}'}</code>.
             </p>
             <textarea
               value={whatsappMessage}

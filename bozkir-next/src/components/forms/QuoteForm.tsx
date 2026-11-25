@@ -25,6 +25,11 @@ import { Button } from '@/components/ui/Button';
 import { TurnstileWidget } from '@/components/forms/TurnstileWidget';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { siteConfig } from '@/config/site';
+import {
+  buildQuoteWhatsAppMessage,
+  whatsappHref,
+  type WhatsAppMessageSettings,
+} from '@/lib/whatsapp';
 import { cn } from '@/lib/utils';
 
 const MAX_FILE_MB = 10;
@@ -59,13 +64,22 @@ export function QuoteForm({
   pickerProducts,
   turnstileSiteKey = '',
   whatsappLink,
+  whatsappBase = '',
+  whatsappFallbackPhone = '',
+  whatsappMessages,
 }: {
   products?: QuoteProduct[];
   /** Teklif formundaki aranabilir ürün seçicisi için tüm aktif ürünler. */
   pickerProducts?: QuoteProduct[];
   turnstileSiteKey?: string;
-  /** Ayarlardaki genel WhatsApp şablonuyla hazırlanmış bağlantı. */
+  /** Sunucuda seçili ürünlerle hazırlanmış başlangıç bağlantısı (fallback). */
   whatsappLink?: string;
+  /** Ayarlardaki WhatsApp numarası / wa.me değeri. */
+  whatsappBase?: string;
+  /** WhatsApp numarası boşsa kullanılacak telefon. */
+  whatsappFallbackPhone?: string;
+  /** Admin'den düzenlenen intent şablonları. */
+  whatsappMessages?: WhatsAppMessageSettings;
 }) {
   const [selected, setSelected] = useState<QuoteProduct[]>(products ?? []);
   const [file, setFile] = useState<File | null>(null);
@@ -74,6 +88,7 @@ export function QuoteForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const [result, setResult] = useState<QuoteResponse | null>(null);
+  const [lastSubmitted, setLastSubmitted] = useState<FormValues | null>(null);
   const [sent, setSent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileReset, setTurnstileReset] = useState(0);
@@ -81,7 +96,7 @@ export function QuoteForm({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const pickerRef = useRef<HTMLDivElement>(null);
-  const { t } = useDictionary();
+  const { t, locale } = useDictionary();
 
   const pickerList = useMemo(() => {
     const bySlug = new Map<string, QuoteProduct>();
@@ -122,6 +137,7 @@ export function QuoteForm({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<FormValues>({
@@ -235,6 +251,7 @@ export function QuoteForm({
       file,
     );
     if (res.ok) {
+      setLastSubmitted(values);
       setResult(res);
       setSent(true);
       reset({ product: productLabel });
@@ -265,7 +282,34 @@ export function QuoteForm({
     });
   };
 
+  const liveValues = watch();
+  const messageValues = sent && lastSubmitted ? lastSubmitted : liveValues;
+  const dynamicWhatsappLink = useMemo(() => {
+    if (!whatsappBase && !whatsappFallbackPhone) return '';
+    const message = buildQuoteWhatsAppMessage(whatsappMessages, locale, {
+      products: selected.map((p) => `${p.name}${p.code ? ` (${p.code})` : ''}`),
+      fullName: messageValues.fullName,
+      company: messageValues.company,
+      quantity: messageValues.quantity,
+      dimensions: messageValues.dimensions,
+      note: messageValues.note,
+      page: '/teklif-al',
+    });
+    return whatsappHref(whatsappBase, message, whatsappFallbackPhone);
+  }, [
+    selected,
+    locale,
+    whatsappBase,
+    whatsappFallbackPhone,
+    whatsappMessages,
+    messageValues.fullName,
+    messageValues.company,
+    messageValues.quantity,
+    messageValues.dimensions,
+    messageValues.note,
+  ]);
   const waHref =
+    dynamicWhatsappLink ||
     whatsappLink ||
     `${siteConfig.whatsapp}?text=${encodeURIComponent(t('pages.whatsapp.message'))}`;
 
@@ -321,6 +365,7 @@ export function QuoteForm({
           onClick={() => {
             setSent(false);
             setResult(null);
+            setLastSubmitted(null);
           }}
           className="mt-6 text-sm text-muted-strong underline underline-offset-4 hover:text-foreground"
         >
