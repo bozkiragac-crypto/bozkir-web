@@ -590,9 +590,6 @@ li {
   [data-print-area] .text-eyebrow {
     display: none !important;
   }
-  [data-print-area] {
-    break-inside: avoid;
-  }
   [data-print-area] > .container-x,
   [data-print-area] [class*='pb-40'] {
     padding-bottom: 0 !important;
@@ -615,10 +612,12 @@ li {
   [class*='lg:sticky'] {
     position: static !important;
   }
-  /* Görseller/kartlar sayfa ortasında bölünmesin. */
+  /* Görseller, kartlar ve tablo satırları sayfa ortasında bölünmesin;
+     içerik uzunsa birden fazla sayfaya doğal olarak yayılır. */
   main img,
   main article,
-  main li {
+  main li,
+  main tr {
     break-inside: avoid;
   }
 }

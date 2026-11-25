@@ -198,7 +198,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                 type="button"
                 onClick={() => setLightbox(active)}
                 aria-label={t('home.gallery.expand')}
-                className="absolute end-3 top-3 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 text-foreground opacity-100 backdrop-blur transition hover:border-foreground md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+                className="no-print absolute end-3 top-3 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 text-foreground opacity-100 backdrop-blur transition hover:border-foreground md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
               >
                 <Expand className="h-4 w-4" />
               </button>

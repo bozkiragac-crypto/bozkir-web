@@ -7,6 +7,7 @@ import { Scale, Trash2, X, ArrowRight } from 'lucide-react';
 import { useFavorites } from '@/components/providers/FavoritesProvider';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 import { PageHero } from '@/components/ui/PageHero';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { Container } from '@/components/ui/Container';
 import { ShareListButton, useImportFromUrl } from '@/components/products/ListImport';
 import { PrintButton } from '@/components/products/PrintButton';
@@ -16,7 +17,7 @@ import { isMeaningfulCode, isMeaningfulSurface } from '@/lib/product-display';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types/product';
 
-export function CompareView() {
+export function CompareView({ logo }: { logo?: string }) {
   const { compare, ready, removeCompare, clearCompare, favorites, toggleCompare } = useFavorites();
   const { t, locale } = useDictionary();
   const [details, setDetails] = useState<Record<string, Product>>({});
@@ -139,13 +140,21 @@ export function CompareView() {
 
   return (
     <div data-print-page>
-      <PageHero
-        eyebrow={t('compare.title')}
-        title={t('compare.title')}
-        description={t('compare.description')}
-        crumbs={[{ label: t('common.home'), href: '/' }, { label: t('compare.title') }]}
-      />
-      <Container data-print-area className="pb-28 print:pb-0">
+      <div data-print-area>
+        <PageHero
+          eyebrow={t('compare.title')}
+          eyebrowClassName="print:hidden"
+          title={t('compare.title')}
+          description={t('compare.description')}
+          crumbs={[{ label: t('common.home'), href: '/' }, { label: t('compare.title') }]}
+          leading={
+            <div className="hidden print:block">
+              <BrandLogo className="mb-4 h-12" priority alt={t('meta.brand')} src={logo} />
+            </div>
+          }
+          className="print:pt-0 print:pb-4"
+        />
+        <Container className="pb-28 print:pb-0">
         {imported > 0 && (
           <p className="no-print mb-6 rounded-lg border border-border bg-surface px-5 py-3 text-sm text-muted-strong">
             {t('favorites.imported')}
@@ -320,7 +329,7 @@ export function CompareView() {
                           type="button"
                           onClick={() => removeCompare(ref.slug)}
                           aria-label={t('quote.removeProduct')}
-                          className="float-end flex h-11 w-11 items-center justify-center rounded-full border border-border text-muted-strong transition hover:border-foreground hover:text-foreground"
+                          className="no-print float-end flex h-11 w-11 items-center justify-center rounded-full border border-border text-muted-strong transition hover:border-foreground hover:text-foreground"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -435,7 +444,8 @@ export function CompareView() {
             )}
           </>
         )}
-      </Container>
+        </Container>
+      </div>
     </div>
   );
 }

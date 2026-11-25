@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { buildMetadata } from '@/lib/seo';
 import { CompareView } from './CompareView';
+import { getSiteSettings } from '@/lib/data/settings';
 import { isLocale } from '@/i18n/config';
 import { dictForRequest } from '@/i18n/server';
 
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
-export default function ComparePage() {
-  return <CompareView />;
+export default async function ComparePage() {
+  const settings = await getSiteSettings();
+  return <CompareView logo={settings.identity.logo} />;
 }
