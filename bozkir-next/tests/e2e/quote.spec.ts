@@ -37,6 +37,11 @@ test.afterAll(async () => {
 test.describe('Teklif formu', () => {
   test('boş form doğrulama hataları gösterir', async ({ page }) => {
     await page.goto('/tr/teklif-al');
+    // Form `noValidate` kullanıyor; hydration bitmeden tıklama handler'a ulaşmıyor.
+    await page.waitForFunction(() => {
+      const form = document.querySelector('form');
+      return !!form && Object.keys(form).some((key) => key.startsWith('__reactFiber$'));
+    });
     await page.getByRole('button', { name: 'Teklif İste' }).click();
     await expect(page.getByText('Ad Soyad giriniz')).toBeVisible();
     await expect(page.getByText('Devam etmek için onay verin')).toBeVisible();
