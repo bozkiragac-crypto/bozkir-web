@@ -9,6 +9,18 @@ test.describe('Admin giriş ve güvenlik', () => {
     await expect(page).toHaveURL(/\/admin\/login/);
   });
 
+  test('hatalı denemeden sonra doğru şifre giriş yapılabilir', async ({ page }) => {
+    test.skip(!ADMIN_USER || !ADMIN_PASS, 'E2E_ADMIN_USER / E2E_ADMIN_PASS tanımlı değil');
+    await page.goto('/admin/login');
+    await page.getByLabel('Kullanıcı adı').fill(ADMIN_USER);
+    await page.getByLabel('Şifre').fill('yanlis-sifre-xyz');
+    await page.getByRole('button', { name: 'Giriş Yap' }).click();
+    await expect(page.getByRole('alert')).toBeVisible();
+
+    await loginAdmin(page);
+    await expect(page).toHaveURL(/\/admin$/);
+  });
+
   test('korumalı rota oturumsuz login’e yönlendirir', async ({ page }) => {
     await page.goto('/admin/urunler', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/admin\/login/);

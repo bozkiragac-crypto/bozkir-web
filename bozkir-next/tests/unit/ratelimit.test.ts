@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isRateLimited } from '@/lib/ratelimit';
+import { isRateLimited, resetRateLimit, RATE_WINDOW_SECONDS } from '@/lib/ratelimit';
 
 describe('ratelimit', () => {
   it('limit altında izin verir, aşınca engeller', () => {
@@ -19,5 +19,17 @@ describe('ratelimit', () => {
     expect(isRateLimited(a, 1)).toBe(false);
     expect(isRateLimited(a, 1)).toBe(true);
     expect(isRateLimited(b, 1)).toBe(false);
+  });
+
+  it('reset sonrası sayaç sıfırdan başlar', () => {
+    const key = `reset-${Math.random()}`;
+    expect(isRateLimited(key, 1)).toBe(false);
+    expect(isRateLimited(key, 1)).toBe(true);
+    resetRateLimit(key);
+    expect(isRateLimited(key, 1)).toBe(false);
+  });
+
+  it('pencere süresi saniye olarak okunabilir', () => {
+    expect(RATE_WINDOW_SECONDS).toBeGreaterThan(0);
   });
 });

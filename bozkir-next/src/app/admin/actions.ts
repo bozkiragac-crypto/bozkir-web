@@ -40,7 +40,7 @@ import { decryptTotpSecret, encryptTotpSecret } from '@/lib/auth/totp-crypto';
 import { parseCsv } from '@/lib/csv';
 import { categorySlugOf } from '@/lib/data/category-key';
 import { isQuoteStatus, type QuoteStatus } from '@/lib/quotes/status';
-import { isRateLimited, pickClientIp } from '@/lib/ratelimit';
+import { isRateLimited, pickClientIp, resetRateLimit } from '@/lib/ratelimit';
 import { slugify } from '@/lib/slug';
 import { parseAvailabilityStatus } from '@/lib/product-availability';
 
@@ -112,23 +112,11 @@ export async function signIn(
   const id = identifier.trim().toLowerCase();
   if (!id || !password) return { ok: false, error: 'Kullanıcı adı ve şifre gerekli.' };
 
-  // Hesap kilitlemeye ek olarak kaba kuvvet denemelerini hesap ve IP bazında sınırla.
-  if (isRateLimited(`login:${id}`, 10)) {
-    return {
-      ok: false,
-      error: 'Çok fazla giriş denemesi. Lütfen birkaç dakika sonra tekrar deneyin.',
-    };
-  }
+  let ip = 'unknown';
   try {
-    const ip = pickClientIp((await headers()) as unknown as Headers);
-    if (isRateLimited(`login-ip:${ip}`, 30)) {
-      return {
-        ok: false,
-        error: 'Çok fazla giriş denemesi. Lütfen birkaç dakika sonra tekrar deneyin.',
-      };
-    }
+    ip = pickClientIp((await headers()) as unknown as Headers);
   } catch {
-    // Başlık okunamazsa IP limitini atla (hesap bazlı limit yine devrede).
+    // Başlık okunamazsa IP anahtarı 'unknown' olarak kalır.
   }
 
   const rows = await db
@@ -139,17 +127,30 @@ export async function signIn(
   const user = rows[0];
   if (!user || !user.isActive) return { ok: false, error: 'Kullanıcı adı veya şifre hatalı.' };
 
-  // Kilitliyse kalan süreyi bildir.
-  if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
-    const mins = Math.max(1, Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60_000));
-    return {
-      ok: false,
-      error: `Hesap geçici olarak kilitli. ${mins} dakika sonra tekrar deneyin.`,
-    };
-  }
-
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
+    // Kilit başkasının hatalı denemelerinden gelmiş olabilir; kalan süreyi bildir
+    // ve sayacı tüketme. Doğru şifre aşağıda kiliti her zaman temizler.
+    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
+      const mins = Math.max(1, Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60_000));
+      return {
+        ok: false,
+        error: `Hesap geçici olarak kilitli. ${mins} dakika sonra tekrar deneyin.`,
+      };
+    }
+
+    // Sayaçlar yalnızca gerçekten yanlış şifre girildiğinde artar.
+    const accountKey = `login:${id}:${ip}`;
+    const ipKey = `login-ip:${ip}`;
+    const accountLimited = isRateLimited(accountKey, 10);
+    const ipLimited = isRateLimited(ipKey, 30);
+    if (accountLimited || ipLimited) {
+      return {
+        ok: false,
+        error: 'Çok fazla giriş denemesi. Lütfen birkaç dakika sonra tekrar deneyin.',
+      };
+    }
+
     const attempts = (user.failedAttempts ?? 0) + 1;
     const shouldLock = attempts >= MAX_LOGIN_ATTEMPTS;
     await db
@@ -173,6 +174,14 @@ export async function signIn(
         : 'Kullanıcı adı veya şifre hatalı.',
     };
   }
+
+  // Şifre doğruysa (başkasının denemelerinden gelen) kilit ve sayaçlar hemen temizlenir.
+  resetRateLimit(`login:${id}:${ip}`);
+  resetRateLimit(`login-ip:${ip}`);
+  await db
+    .update(adminUsers)
+    .set({ failedAttempts: 0, lockedUntil: null })
+    .where(eq(adminUsers.id, user.id));
 
   // 2FA etkinse kod doğrulanmadan oturum açılmaz.
   if (user.totpEnabled && user.totpSecret) {

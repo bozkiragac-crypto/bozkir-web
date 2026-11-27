@@ -11,6 +11,8 @@ interface Entry {
 }
 
 const WINDOW_MS = Number(process.env.RATE_WINDOW_MS ?? 10 * 60 * 1000);
+/** 429 yanıtlarında `Retry-After` başlığı için pencere süresi. */
+export const RATE_WINDOW_SECONDS = Math.ceil(WINDOW_MS / 1000);
 const MAX_HITS = Number(process.env.RATE_MAX_HITS ?? 5);
 const MAX_KEYS = Number(process.env.RATE_MAX_KEYS ?? 5000);
 
@@ -50,6 +52,11 @@ export function isRateLimited(key: string, max = MAX_HITS): boolean {
   entry.hits.push(now);
   store.set(key, entry);
   return false;
+}
+
+/** Başarılı işlem sonrası ilgili sayaçları sıfırlar. */
+export function resetRateLimit(key: string): void {
+  store.delete(key);
 }
 
 /**

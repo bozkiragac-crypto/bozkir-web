@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getDb } from '@/lib/db/client';
 import { quoteRequests } from '@/lib/db/schema';
 import { putObject, storageConfigured } from '@/lib/storage/s3';
-import { clientIp, isRateLimited } from '@/lib/ratelimit';
+import { clientIp, isRateLimited, RATE_WINDOW_SECONDS } from '@/lib/ratelimit';
 import { isAllowedAttachment } from '@/lib/file-signature';
 import { sendWebhook } from '@/lib/webhooks';
 import { sendQuoteNotification, sendAdminAlert } from '@/lib/mailer';
@@ -60,15 +60,6 @@ const RATE_MAX = Number(process.env.QUOTE_RATE_LIMIT_MAX ?? 5);
 
 export async function POST(request: Request) {
   const ip = clientIp(request);
-  if (isRateLimited(`teklif:${ip}`, RATE_MAX)) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message: 'Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin.',
-      },
-      { status: 429 },
-    );
-  }
 
   let form: FormData;
   try {
@@ -124,6 +115,20 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, message: 'Bot doğrulaması başarısız. Lütfen sayfayı yenileyip tekrar deneyin.' },
       { status: 422 },
+    );
+  }
+
+  // Geçersiz form, honeypot veya bot istekleri gerçek kullanıcının kotasını yemesin.
+  if (isRateLimited(`teklif:${ip}`, RATE_MAX)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: 'Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin.',
+      },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(RATE_WINDOW_SECONDS) },
+      },
     );
   }
 
