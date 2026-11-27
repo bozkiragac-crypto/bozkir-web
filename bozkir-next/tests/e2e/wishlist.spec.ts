@@ -5,8 +5,23 @@ test.describe('Favoriler, karşılaştırma ve paylaşım', () => {
     await page.goto('/tr/urunler');
     const favBtn = page.locator('button[aria-label*="favorilere ekle" i]').first();
     await favBtn.click();
-    // header favori linkinde 1 rozeti
-    await expect(page.locator('a[href*="/favoriler"]')).toBeVisible();
+    // Header rozeti ve kalıcı kayıt, gezinmeden önce gerçekten tamamlanmalı.
+    await expect(page.locator('a[href*="/favoriler"]').first()).toHaveAttribute(
+      'aria-label',
+      /\(1\)/,
+    );
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          try {
+            const raw = JSON.parse(localStorage.getItem('bozkir:favorites') ?? '[]');
+            return Array.isArray(raw) ? raw.length : 0;
+          } catch {
+            return 0;
+          }
+        }),
+      )
+      .toBe(1);
     await page.goto('/tr/favoriler');
     await expect(page.getByText(/Henüz favori ürününüz yok/)).toHaveCount(0);
   });
