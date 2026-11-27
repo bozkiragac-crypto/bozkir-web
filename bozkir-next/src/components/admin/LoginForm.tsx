@@ -37,7 +37,6 @@ export function LoginForm({ logoUrl }: { logoUrl?: string }) {
       // Depolama erişilemezse geç (gizli sekme vb.).
     }
     router.replace('/admin');
-    router.refresh();
   }
 
   const field =

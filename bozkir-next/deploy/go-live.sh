@@ -42,7 +42,7 @@ if [ ! -f .env ]; then
 POSTGRES_USER=bozkir
 POSTGRES_PASSWORD=$(rand_hex 24)
 POSTGRES_DB=bozkir
-SITE_URL=https://${DOMAIN}
+SITE_URL=https://www.${DOMAIN}
 S3_ACCESS_KEY=any
 S3_SECRET_KEY=any
 S3_BUCKET=bozkir-media

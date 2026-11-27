@@ -145,7 +145,6 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       return;
     }
     router.push('/admin/urunler');
-    router.refresh();
   }
 
   return (

@@ -74,7 +74,6 @@ export function CatalogForm({ initial }: CatalogFormProps) {
       return;
     }
     router.push('/admin/kataloglar');
-    router.refresh();
   }
 
   return (

@@ -88,7 +88,6 @@ export function CampaignForm({ initial }: CampaignFormProps) {
       return;
     }
     router.push('/admin/kampanyalar');
-    router.refresh();
   }
 
   return (

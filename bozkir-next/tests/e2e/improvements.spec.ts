@@ -59,6 +59,13 @@ test.describe('İyileştirmeler: sıralama, boş durum, güvenlik başlıkları'
     expect(res.headers()['strict-transport-security']).toContain('max-age=');
   });
 
+  test('admin yanıtları tarayıcıya public cache header göndermez', async ({ request }) => {
+    // Yönlendirmeyi izleme: kural `/` location'ındaki yanıt başlığını ölçer.
+    const res = await request.get('/admin/kampanyalar', { maxRedirects: 0 });
+    expect([200, 307, 308]).toContain(res.status());
+    expect(res.headers()['cache-control']).toContain('no-store');
+  });
+
   test('medya varlıkları uzun cache ve güvenlik başlıkları taşır', async ({ request }) => {
     const res = await requestGetWithRetry(request, '/media/olmayan-dosya.webp');
     expect(res.headers()['cache-control']).toContain('max-age=31536000');

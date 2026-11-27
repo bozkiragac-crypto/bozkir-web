@@ -61,7 +61,6 @@ export function BrandForm({ initial }: BrandFormProps) {
       return;
     }
     router.push('/admin/bayilikler');
-    router.refresh();
   }
 
   return (

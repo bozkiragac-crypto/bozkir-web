@@ -32,7 +32,6 @@ export function AdminTabGuard() {
     }
     void signOut().finally(() => {
       router.replace('/admin/login');
-      router.refresh();
     });
   }, [router]);
 

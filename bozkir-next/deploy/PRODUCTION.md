@@ -179,7 +179,7 @@ POSTGRES_PASSWORD=<4.1'de ürettiğiniz 48 karakterlik değer>
 POSTGRES_DB=bozkir
 
 # --- Site kimliği (kanonik URL, sitemap, OG görseli) ---
-SITE_URL=https://bozkiragac.com
+SITE_URL=https://www.bozkiragac.com
 
 # --- Depolama (SeaweedFS) ---
 S3_BUCKET=bozkir-media
@@ -500,7 +500,7 @@ Yayına almadan önce hepsini işaretleyin:
 - [ ] Admin parolası **değiştirildi** (varsayılan değil)
 - [ ] Admin 2FA (TOTP) etkin
 - [ ] `.env` / `.env.local` içinde güçlü `POSTGRES_PASSWORD` ve `AUTH_SECRET`
-- [ ] `SITE_URL` = `https://bozkiragac.com` (canonical/sitemap/OG doğru)
+- [ ] `SITE_URL` = `https://www.bozkiragac.com` (canonical/sitemap/OG doğru)
 - [ ] Turnstile anahtarları tanımlı ve teklif formunda **gerçekten** görünüyor
 - [ ] SMTP + `notifyEmail` (veya webhook) ayarlı; test e-postası geldi
 - [ ] Gerçek kampanya + görsel eklendi, popup doğru çıkıyor

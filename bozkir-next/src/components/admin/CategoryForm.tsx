@@ -85,7 +85,6 @@ export function CategoryForm({ initial }: CategoryFormProps) {
       return;
     }
     router.push('/admin/kategoriler');
-    router.refresh();
   }
 
   return (
