@@ -37,4 +37,33 @@ test.describe('Favoriler, karşılaştırma ve paylaşım', () => {
     const shareHref = await share.getAttribute('href');
     expect(shareHref).toContain('wa.me/?text=');
   });
+
+  test('ürün detayında WhatsApp paylaşımı tek noktada toplanır', async ({ page }) => {
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('bozkir:consent', 'granted');
+      } catch {
+        // yok say
+      }
+    });
+    await page.goto('/tr/urunler', { waitUntil: 'domcontentloaded' });
+    const product = page.locator('main a[href*="/tr/urunler/"]').first();
+    await product.waitFor({ state: 'visible' });
+    const href = (await product.getAttribute('href')) ?? '';
+    await page.goto(href, { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/tr\/urunler\/.+/);
+
+    // Ürün sayfasına özel bağımsız WhatsApp ikonları kalmamalı (site genel FAB hariç).
+    await expect(
+      page.locator('a[aria-label="WhatsApp ile yazın"]:not([data-whatsapp-fab])'),
+    ).toHaveCount(0);
+    await expect(page.locator('[data-product-cta] a[href*="wa.me"]')).toHaveCount(0);
+
+    // Paylaş menüsündeki tek WhatsApp bağlantısı korunmalı.
+    await page.getByRole('button', { name: 'Paylaş', exact: true }).first().click();
+    await expect(page.locator('a[href*="wa.me/?text="]')).toHaveCount(1);
+
+    // Site genel FAB korunmalı.
+    await expect(page.locator('[data-whatsapp-fab]')).toHaveCount(1);
+  });
 });

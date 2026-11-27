@@ -12,7 +12,6 @@ import { getSiteSettings } from '@/lib/data/settings';
 import { siteConfig } from '@/config/site';
 import { telHref } from '@/lib/phone';
 import { buildProductWhatsAppMessage, whatsappHref } from '@/lib/whatsapp';
-import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import {
   buildMetadata,
   breadcrumbJsonLd,
@@ -132,13 +131,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
     availabilityLabel: (_key: AvailabilityStatus) => availabilityLabel ?? '',
     locale: locale ?? 'tr',
   };
-  const whatsappMessage = buildProductWhatsAppMessage(
-    product,
-    siteSettings.whatsappMessages,
-    locale ?? 'tr',
-    productUrl,
-    waOptions,
-  );
   const sampleMessage = buildProductWhatsAppMessage(
     product,
     siteSettings.whatsappMessages,
@@ -152,11 +144,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
     locale ?? 'tr',
     productUrl,
     { ...waOptions, intent: 'share', useCustomMessage: false },
-  );
-  const whatsappLink = whatsappHref(
-    siteSettings.whatsapp || siteSettings.phone,
-    whatsappMessage,
-    siteSettings.phone,
   );
   const sampleLink = whatsappHref(
     siteSettings.whatsapp || siteSettings.phone,
@@ -334,18 +321,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     message={shareMessage}
                     className="h-11 w-11"
                   />
-                  {whatsappLink && (
-                    <a
-                      href={whatsappLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={dict.pages.whatsapp.aria}
-                      title={dict.pages.whatsapp.aria}
-                      className="no-print flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 text-[#25D366] backdrop-blur transition active:scale-95 hover:border-foreground"
-                    >
-                      <WhatsAppIcon className="h-4 w-4" />
-                    </a>
-                  )}
                   <PrintButton className="no-print" />
                 </div>
               </div>
@@ -535,17 +510,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           >
             <Phone className="h-4 w-4" aria-hidden /> {dict.common.phone}
           </a>
-          {whatsappLink && (
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={dict.pages.whatsapp.aria}
-              className="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full border border-border text-[#25D366]"
-            >
-              <WhatsAppIcon className="h-5 w-5" />
-            </a>
-          )}
           <CompareButton product={ref} className="h-12 w-12 flex-none" />
           <Link
             href={`/teklif-al?urun=${encodeURIComponent(product.slug)}`}
