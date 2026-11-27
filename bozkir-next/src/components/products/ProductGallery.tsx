@@ -49,15 +49,23 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
 
   // Mobil: kaydırmalı (swipe) galeri.
   const mobileRef = useRef<HTMLDivElement>(null);
+  // Yumuşak kaydırma sırasında ara `scroll` olayları aktif görseli geri yazmasın.
+  const scrollTarget = useRef<number | null>(null);
   const onMobileScroll = () => {
     const el = mobileRef.current;
     if (!el) return;
     const idx = Math.round(el.scrollLeft / el.clientWidth);
+    if (scrollTarget.current !== null) {
+      if (idx !== scrollTarget.current) return;
+      scrollTarget.current = null;
+    }
     setActive((p) => (p === idx ? p : idx));
   };
   const scrollToSlide = (i: number) => {
     const el = mobileRef.current;
     if (!el) return;
+    scrollTarget.current = i;
+    if (Math.round(el.scrollLeft / el.clientWidth) === i) scrollTarget.current = null;
     el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
   };
 
@@ -68,6 +76,8 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
     setActive(next);
     const el = mobileRef.current;
     if (el && el.clientWidth > 0) {
+      scrollTarget.current = next;
+      if (Math.round(el.scrollLeft / el.clientWidth) === next) scrollTarget.current = null;
       el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' });
     }
   };

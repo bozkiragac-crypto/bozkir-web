@@ -51,6 +51,39 @@ test.describe('Vitrin, galeri ve gezinme iyileştirmeleri', () => {
     );
   });
 
+  test('galeride geciken scroll olayı klavye gezinmesini bozmaz', async ({ page, request }) => {
+    const res = await request.get('/api/products?limit=100');
+    const json = await res.json();
+    const product = (json.items ?? []).find(
+      (item: { images?: string[] }) => (item.images?.length ?? 0) > 1,
+    );
+    if (!product) test.skip(true, 'Birden fazla görselli ürün yok');
+
+    await gotoWithRetry(page, `/tr/urunler/${product.slug}`);
+    const current = () => page.locator('button[aria-current="true"]:visible').first();
+    await expect(current()).toHaveAttribute('aria-label', /^1 \//);
+
+    const next = page.locator('[aria-label="Sonraki görsel"]:visible').first();
+    await next.click();
+    await expect(current()).toHaveAttribute('aria-label', /^2 \//);
+
+    // Yumuşak kaydırma sırasında geç gelen eski scroll olayını taklit et.
+    await page.evaluate(() => {
+      const track = Array.from(document.querySelectorAll('button[aria-label^="1 /"]'))
+        .map((slide) => slide.parentElement as HTMLElement | null)
+        .find((el) => el && el.clientWidth > 0 && el.scrollWidth > el.clientWidth);
+      if (!track) return;
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft = 0;
+      track.dispatchEvent(new Event('scroll', { bubbles: true }));
+    });
+    await expect(current()).toHaveAttribute('aria-label', /^2 \//);
+
+    await next.focus();
+    await next.press('ArrowLeft');
+    await expect(current()).toHaveAttribute('aria-label', /^1 \//);
+  });
+
   test('sayfalama en üstten açılır', async ({ page }) => {
     await gotoWithRetry(page, '/tr/urunler');
     const nextPage = page.getByRole('link', { name: 'Sonraki', exact: true });
