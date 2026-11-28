@@ -84,9 +84,13 @@ async function flushSiteCaches() {
   revalidateTag(DATA_TAGS.content);
   revalidateTag(DATA_TAGS.campaigns);
   revalidateTag(DATA_TAGS.catalogs);
-  revalidatePath('/', 'layout');
-  revalidatePath('/urunler', 'layout');
-  revalidatePath('/kategoriler', 'layout');
+  // Kök layout'u geçersiz kılmak admin RSC ağacını da tazeliyor; formun
+  // `router.push` çağrısı bu tazelemeyle yarışıyor ve DOM liste sayfasına
+  // geçmesine rağmen URL `/yeni` kalabiliyordu. Yalnızca public locale
+  // ağaçlarını tazele; admin zaten force-dynamic.
+  for (const locale of ['tr', 'en', 'ar']) {
+    revalidatePath(`/${locale}`, 'layout');
+  }
 }
 
 /* ---------------- Auth ---------------- */

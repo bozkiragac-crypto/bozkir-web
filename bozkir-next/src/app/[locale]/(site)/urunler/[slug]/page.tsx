@@ -501,7 +501,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       {/* Mobil sabit CTA çubuğu */}
       <div
         data-product-cta
-        className="fixed inset-x-0 bottom-0 z-[70] border-t border-border bg-background/95 px-4 pb-[calc(var(--safe-bottom)+0.75rem)] pt-3 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-[70] border-t border-border bg-background/95 px-4 pb-[calc(var(--safe-bottom)+0.75rem)] pt-3 backdrop-blur lg:hidden"
       >
         <div className="mx-auto flex max-w-lg items-center gap-2">
           <a

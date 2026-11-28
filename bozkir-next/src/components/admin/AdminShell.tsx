@@ -63,6 +63,7 @@ function NavList({ onNavigate, role }: { onNavigate?: () => void; role: string }
           <Link
             key={item.href}
             href={item.href}
+            prefetch={false}
             onClick={onNavigate}
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
@@ -79,6 +80,7 @@ function NavList({ onNavigate, role }: { onNavigate?: () => void; role: string }
       })}
       <Link
         href="/"
+        prefetch={false}
         target="_blank"
         className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-strong transition-colors hover:bg-surface-2 hover:text-foreground"
       >
@@ -97,6 +99,7 @@ function UserBox({ username, role }: { username: string; role: string }) {
       <div className="mt-3 flex flex-col gap-2">
         <Link
           href="/admin/hesap"
+          prefetch={false}
           className="text-sm font-medium text-muted-strong hover:text-foreground"
         >
           Hesabım
@@ -143,7 +146,11 @@ export function AdminShell({
     <div className="min-h-svh bg-background">
       {/* Mobil üst bar */}
       <div className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 pb-3 pt-[calc(var(--safe-top)+0.75rem)] backdrop-blur lg:hidden">
-        <Link href="/admin" className="text-[0.8rem] font-semibold tracking-[0.1em] uppercase">
+        <Link
+          href="/admin"
+          prefetch={false}
+          className="text-[0.8rem] font-semibold tracking-[0.1em] uppercase"
+        >
           {siteConfig.legalName}
         </Link>
         <div className="flex items-center gap-1">
@@ -189,6 +196,7 @@ export function AdminShell({
           <div className="mb-6 flex items-center justify-between gap-3">
             <Link
               href="/admin"
+              prefetch={false}
               className="text-[0.8rem] font-semibold tracking-[0.1em] uppercase leading-tight"
             >
               {siteConfig.legalName}

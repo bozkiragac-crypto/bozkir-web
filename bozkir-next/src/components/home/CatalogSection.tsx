@@ -63,12 +63,12 @@ export async function CatalogSection({ locale }: { locale: Locale }) {
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-3 text-muted">
                   <FileText className="h-8 w-8" />
-                  <span className="text-[0.65rem] tracking-[0.16em] uppercase">
+                  <span className="text-xs tracking-[0.12em] uppercase">
                     {h.placeholder}
                   </span>
                 </div>
               )}
-              <span className="absolute start-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[0.65rem] tracking-[0.16em] text-white uppercase">
+              <span className="absolute start-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-xs tracking-[0.12em] text-white uppercase">
                 PDF
               </span>
             </div>

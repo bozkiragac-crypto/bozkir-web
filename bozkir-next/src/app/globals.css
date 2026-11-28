@@ -274,6 +274,8 @@ html[data-compare='1'] [data-product-cta] {
   }
   [data-search-shell]:focus-within {
     border-color: var(--border-strong) !important;
+    /* Klavye odağı input'ta gizli tutulsa bile kapsayıcıda görünür halka. */
+    box-shadow: 0 0 0 2px var(--fg);
   }
 
   /* Native dropdown seçenekleri her iki temada da okunur olsun. Koyu temada

@@ -22,7 +22,7 @@ export default async function EditBrandPage({ params }: PageProps) {
 
   return (
     <div>
-      <Link href="/admin/bayilikler" className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
+      <Link prefetch={false} href="/admin/bayilikler" className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Bayilikler
       </Link>
       <h1 className="mt-6 text-2xl font-medium tracking-tight">Markayı Düzenle</h1>

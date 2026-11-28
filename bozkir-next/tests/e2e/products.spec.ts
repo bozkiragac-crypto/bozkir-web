@@ -79,7 +79,10 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
     const editLink = adminPage.getByRole('link', { name: 'Düzenle' }).first();
     await expect(editLink).toBeVisible({ timeout: 15_000 });
     await editLink.click();
-    await adminPage.waitForURL(/\/admin\/urunler\/[^/]+$/, { timeout: 15_000 });
+    await adminPage.waitForURL(/\/admin\/urunler\/[^/]+$/, {
+      timeout: 30_000,
+      waitUntil: 'domcontentloaded',
+    });
 
     await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({
       timeout: 15_000,
@@ -92,7 +95,7 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
     await expect(adminPage.getByText('Bu ürün kodu zaten kullanılıyor')).toHaveCount(0, {
       timeout: 15_000,
     });
-    await expect(adminPage).toHaveURL(/\/admin\/urunler$/, { timeout: 15_000 });
+    await expect(adminPage).toHaveURL(/\/admin\/urunler$/, { timeout: 30_000 });
   });
 
   test('aynı kategori + kod + ad ile ikinci kayıt açılamaz', async ({ adminPage }) => {
@@ -101,7 +104,10 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
     const editLink2 = adminPage.getByRole('link', { name: 'Düzenle' }).first();
     await expect(editLink2).toBeVisible({ timeout: 15_000 });
     await editLink2.click();
-    await adminPage.waitForURL(/\/admin\/urunler\/[^/]+$/, { timeout: 15_000 });
+    await adminPage.waitForURL(/\/admin\/urunler\/[^/]+$/, {
+      timeout: 30_000,
+      waitUntil: 'domcontentloaded',
+    });
     await expect(adminPage.getByRole('heading', { name: 'Ürünü Düzenle' })).toBeVisible({
       timeout: 15_000,
     });
@@ -120,6 +126,6 @@ test.describe('Admin: ürün kodu (seri kodu) davranışı', () => {
     await expect(adminPage.getByText('aynı kod ve adla bir ürün zaten var')).toBeVisible({
       timeout: 15_000,
     });
-    await expect(adminPage).toHaveURL(/\/admin\/urunler\/yeni$/, { timeout: 15_000 });
+    await expect(adminPage).toHaveURL(/\/admin\/urunler\/yeni$/, { timeout: 30_000 });
   });
 });

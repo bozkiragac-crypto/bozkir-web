@@ -10,17 +10,24 @@ const extraHosts = (process.env.NEXT_PUBLIC_MEDIA_HOSTS ?? '')
   .filter(Boolean);
 
 const isDev = process.env.NODE_ENV !== 'production';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const isLocalSite = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/i.test(siteUrl ?? '');
+// CSP'deki upgrade-insecure-requests yalnızca HTTPS ile servis edilen gerçek
+// dağıtımda güvenlidir. HTTP localhost (yerel Docker E2E) üzerinde Next RSC
+// prefetch'leri https://localhost'a yükseltilir, bağlantı reddedilir ve admin
+// client navigation flake olur.
+const securePublicSite =
+  !isDev && !isLocalSite && /^https:\/\//i.test(siteUrl ?? 'https://www.bozkiragac.com');
 
 // Canonical/hreflang/OG adresleri bu değerden üretilir. Üretim derlemesinde
 // localhost kalırsa arama motorlarına erişilemeyen URL'ler bildirilir;
 // sessizce devam etmek yerine derleme çıktısında görünür bir uyarı ver.
 if (!isDev) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   if (!siteUrl) {
     console.warn(
       '[bozkir] NEXT_PUBLIC_SITE_URL tanimli degil; varsayilan https://www.bozkiragac.com kullanilacak.',
     );
-  } else if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/i.test(siteUrl)) {
+  } else if (isLocalSite) {
     console.warn(
       `[bozkir] NEXT_PUBLIC_SITE_URL üretimde localhost (${siteUrl}). Canonical/OG adresleri yanlış olur; https://www.bozkiragac.com kullanın.`,
     );
@@ -44,7 +51,7 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'self'",
-  ...(isDev ? [] : ['upgrade-insecure-requests']),
+  ...(securePublicSite ? ['upgrade-insecure-requests'] : []),
 ].join('; ');
 
 /** @type {import('next').NextConfig} */

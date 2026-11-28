@@ -20,7 +20,7 @@ export default async function AdminCatalogsPage() {
           <h1 className="text-2xl font-medium tracking-tight">Kataloglar</h1>
           <p className="mt-1 text-sm text-muted-strong">Sitedeki katalog bölümünde gösterilir (kapak + PDF).</p>
         </div>
-        <Link
+        <Link prefetch={false}
           href="/admin/kataloglar/yeni"
           className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
         >
@@ -53,7 +53,7 @@ export default async function AdminCatalogsPage() {
                   )}
                 </td>
                 <td className="p-4">
-                  <Link href={`/admin/kataloglar/${c.id}`} className="font-medium hover:underline">
+                  <Link prefetch={false} href={`/admin/kataloglar/${c.id}`} className="font-medium hover:underline">
                     {c.title}
                   </Link>
                 </td>
@@ -81,7 +81,7 @@ export default async function AdminCatalogsPage() {
                 <td className="numerals p-4 text-muted-strong">{c.sortOrder}</td>
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-2">
-                    <Link
+                    <Link prefetch={false}
                       href={`/admin/kataloglar/${c.id}`}
                       className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
                     >

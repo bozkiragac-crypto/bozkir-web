@@ -185,7 +185,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
           className="mt-8 flex items-center justify-center gap-2"
         >
           {page > 1 && (
-            <Link
+            <Link prefetch={false}
               href={`/admin/aktivite${activityQueryString(filters, page - 1)}`}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >
@@ -196,7 +196,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps) {
             {page} / {totalPages}
           </span>
           {page < totalPages && (
-            <Link
+            <Link prefetch={false}
               href={`/admin/aktivite${activityQueryString(filters, page + 1)}`}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >

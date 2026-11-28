@@ -26,8 +26,12 @@ test.describe('Favoriler, karşılaştırma ve paylaşım', () => {
     await expect(page.getByText(/Henüz favori ürününüz yok/)).toHaveCount(0);
   });
 
-  test('karşılaştırmaya ekleyince compare bar açılır', async ({ page }) => {
+  test('karşılaştırmaya ekleyince compare bar açılır', async ({ page, isMobile }) => {
     await page.goto('/tr/urunler');
+    // Mobilde karşılaştırma ikonu "diğer işlemler" menüsünde tutulur.
+    if (isMobile) {
+      await page.getByRole('button', { name: /daha fazla işlem/i }).first().click();
+    }
     const cmpBtn = page.locator('button[aria-label*="karşılaştırmaya ekle" i]').first();
     await cmpBtn.click();
     await expect(page.locator('a[href*="/karsilastir"]').first()).toBeVisible();

@@ -118,7 +118,7 @@ export default async function AdminDashboardPage() {
           <h1 className="text-2xl font-medium tracking-tight">Panel</h1>
           <p className="mt-1 text-sm text-muted-strong">Site içeriğini ve talepleri buradan yönetin.</p>
         </div>
-        <Link
+        <Link prefetch={false}
           href="/admin/urunler/yeni"
           className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
         >
@@ -130,7 +130,7 @@ export default async function AdminDashboardPage() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link key={card.href} href={card.href} className="group rounded-xl border border-border bg-surface p-6 transition-colors hover:bg-surface-2">
+            <Link prefetch={false} key={card.href} href={card.href} className="group rounded-xl border border-border bg-surface p-6 transition-colors hover:bg-surface-2">
               <div className="flex items-center justify-between">
                 <Icon className="h-5 w-5 text-accent" />
                 <span className="flex items-center gap-2">
@@ -194,7 +194,7 @@ export default async function AdminDashboardPage() {
               ))}
             </ul>
           )}
-          <Link href="/admin/teklifler" className="mt-4 inline-flex items-center gap-2 text-sm font-medium">
+          <Link prefetch={false} href="/admin/teklifler" className="mt-4 inline-flex items-center gap-2 text-sm font-medium">
             Tümünü gör <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>
@@ -210,7 +210,7 @@ export default async function AdminDashboardPage() {
           ].map((q) => {
             const Icon = q.icon;
             return (
-              <Link key={q.href} href={q.href} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-5 transition-colors hover:bg-surface-2">
+              <Link prefetch={false} key={q.href} href={q.href} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-5 transition-colors hover:bg-surface-2">
                 <Icon className="h-5 w-5 text-accent" />
                 <span className="text-sm font-medium">{q.label}</span>
               </Link>
@@ -235,7 +235,7 @@ export default async function AdminDashboardPage() {
               ))}
             </ul>
           )}
-          <Link href="/admin/aktivite" className="mt-4 inline-flex items-center gap-2 text-sm font-medium">
+          <Link prefetch={false} href="/admin/aktivite" className="mt-4 inline-flex items-center gap-2 text-sm font-medium">
             Tüm kayıtlar <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>
@@ -254,7 +254,7 @@ export default async function AdminDashboardPage() {
               </p>
             </div>
           </div>
-          <Link href="/admin/urunler" className="inline-flex items-center gap-2 text-sm font-medium">
+          <Link prefetch={false} href="/admin/urunler" className="inline-flex items-center gap-2 text-sm font-medium">
             Ürünlere git <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>
@@ -262,7 +262,7 @@ export default async function AdminDashboardPage() {
           <ul className="mt-4 divide-y divide-border rounded-md border border-border">
             {contentAudit.samples.map((s) => (
               <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
-                <Link href={`/admin/urunler/${s.id}`} className="truncate font-medium hover:underline">
+                <Link prefetch={false} href={`/admin/urunler/${s.id}`} className="truncate font-medium hover:underline">
                   {s.name || s.code || s.id}
                 </Link>
                 <span className="flex gap-2 text-xs text-muted">

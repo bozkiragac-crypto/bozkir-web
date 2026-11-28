@@ -95,7 +95,7 @@ export default async function EditContentBlockPage({ params }: PageProps) {
 
   return (
     <div>
-      <Link
+      <Link prefetch={false}
         href="/admin/icerik"
         className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground"
       >

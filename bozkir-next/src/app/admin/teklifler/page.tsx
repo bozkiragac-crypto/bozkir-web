@@ -146,7 +146,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
           const active = status === t.key;
           const href = `/admin/teklifler${buildQuery({ durum: t.key, q })}`;
           return (
-            <Link
+            <Link prefetch={false}
               key={t.key || 'all'}
               href={href}
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
@@ -185,7 +185,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
           Ara
         </button>
         {q && (
-          <Link
+          <Link prefetch={false}
             href={`/admin/teklifler${buildQuery({ durum: status })}`}
             className="inline-flex items-center rounded-md px-3 py-2 text-xs text-muted-strong transition-colors hover:text-foreground"
           >
@@ -328,7 +328,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
           className="mt-8 flex items-center justify-center gap-2"
         >
           {page > 1 && (
-            <Link
+            <Link prefetch={false}
               href={`/admin/teklifler${buildQuery({ durum: status, q, sayfa: page - 1 })}`}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >
@@ -339,7 +339,7 @@ export default async function QuoteRequestsPage({ searchParams }: PageProps) {
             {page} / {totalPages}
           </span>
           {page < totalPages && (
-            <Link
+            <Link prefetch={false}
               href={`/admin/teklifler${buildQuery({ durum: status, q, sayfa: page + 1 })}`}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >

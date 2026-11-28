@@ -62,7 +62,7 @@ export function MobileMenu({
       ref={menuRef}
       role="dialog"
       aria-modal="true"
-      aria-label={t('nav.menu')}
+      aria-label={t('nav.menuDialog')}
       className={cn(
         'fixed inset-0 z-[180] flex flex-col overscroll-contain bg-background transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] xl:hidden',
         open ? 'pointer-events-auto opacity-100' : 'pointer-events-none translate-y-4 opacity-0',

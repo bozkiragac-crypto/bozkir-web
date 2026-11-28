@@ -144,7 +144,8 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
       router.refresh();
       return;
     }
-    router.push('/admin/urunler');
+    // Server action sonrası client router geçişi, action tazelemesiyle yarışır.
+    window.location.assign('/admin/urunler');
   }
 
   return (

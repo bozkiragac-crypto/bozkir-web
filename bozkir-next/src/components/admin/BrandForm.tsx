@@ -60,7 +60,8 @@ export function BrandForm({ initial }: BrandFormProps) {
       setError(res.error ?? 'Kaydedilemedi.');
       return;
     }
-    router.push('/admin/bayilikler');
+    // Server action sonrası client router geçişi, action tazelemesiyle yarışır.
+    window.location.assign('/admin/bayilikler');
   }
 
   return (

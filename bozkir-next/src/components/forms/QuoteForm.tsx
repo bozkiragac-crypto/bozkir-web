@@ -570,6 +570,8 @@ export function QuoteForm({
             id="fullName"
             className={fieldClass}
             {...register('fullName')}
+            required
+            aria-required="true"
             autoComplete="name"
           />
         </Field>
@@ -586,6 +588,8 @@ export function QuoteForm({
             id="phone"
             className={fieldClass}
             {...register('phone')}
+            required
+            aria-required="true"
             inputMode="tel"
             autoComplete="tel"
           />
@@ -595,6 +599,8 @@ export function QuoteForm({
             id="email"
             className={fieldClass}
             {...register('email')}
+            required
+            aria-required="true"
             inputMode="email"
             autoComplete="email"
           />
@@ -697,6 +703,8 @@ export function QuoteForm({
           <input
             type="checkbox"
             {...register('consent')}
+            required
+            aria-required="true"
             aria-invalid={errors.consent ? true : undefined}
             aria-describedby={errors.consent ? 'consent-error' : undefined}
             className="mt-0.5 h-4 w-4 flex-none accent-foreground"

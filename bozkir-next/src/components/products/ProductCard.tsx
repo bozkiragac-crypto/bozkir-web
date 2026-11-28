@@ -1,14 +1,14 @@
 'use client';
 
 import { LocaleLink as Link } from '@/components/ui/LocaleLink';
-import { useState } from 'react';
-import { ArrowUpRight, Eye } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowUpRight, Eye, MoreHorizontal } from 'lucide-react';
 import { SmartImage } from '@/components/ui/SmartImage';
 import { ImagePlaceholder } from '@/components/ui/ImagePlaceholder';
 import { CompareButton, FavoriteButton } from '@/components/products/WishButtons';
 import { ProductQuickView } from '@/components/products/ProductQuickView';
 import type { Product } from '@/types/product';
-import { cssColor } from '@/lib/utils';
+import { cn, cssColor } from '@/lib/utils';
 import { useDictionary } from '@/i18n/DictionaryProvider';
 
 export function ProductCard({
@@ -22,7 +22,18 @@ export function ProductCard({
   const [brokenAlt, setBrokenAlt] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   const [hover, setHover] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
   const { t } = useDictionary();
+  const actionsId = `product-actions-${product.id}`;
+
+  useEffect(() => {
+    if (!actionsOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActionsOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [actionsOpen]);
   const image = product.thumbnail ?? product.images[0];
   const secondImage = product.images.find((u) => u !== image);
   // Kart alt satırı: kategori + (varsa) kalınlık/yüzey. Renk yalnızca hover
@@ -55,7 +66,7 @@ export function ProductCard({
 
   return (
     // Kök `div`: aksiyon butonları `<a>` DIŞINDA kardeş olarak durur (geçerli HTML + klavye).
-    <div className="group relative">
+    <div className="group relative" data-product-card>
       <Link
         href={`/urunler/${product.slug}`}
         className="block transition-transform [-webkit-tap-highlight-color:transparent] active:scale-[0.99]"
@@ -134,19 +145,46 @@ export function ProductCard({
         </div>
       </Link>
 
-      {/* Favori / hızlı bakış — kart yüzeyindeki yükü az tutar; karşılaştırma
-          hızlı bakış ve detay sayfasından eklenir. Mobilde her zaman, masaüstünde hover'da. */}
-      <div className="absolute end-2 top-2 z-10 flex flex-col gap-2 opacity-100 transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] md:translate-x-2 md:opacity-0 md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:translate-x-0 md:group-hover:opacity-100">
+      {/* Mobilde yalnızca favori + "diğer işlemler" görünür; karşılaştırma ve
+          hızlı bakış ikinci dokunuşa alınır. Masaüstünde hover/focus davranışı korunur. */}
+      <div className="absolute end-2 top-2 z-10 flex flex-col items-end gap-2 opacity-100 transition-[opacity,transform] duration-300 ease-[var(--ease-out-expo)] md:translate-x-2 md:opacity-0 md:group-focus-within:translate-x-0 md:group-focus-within:opacity-100 md:group-hover:translate-x-0 md:group-hover:opacity-100">
         <FavoriteButton product={ref} />
-        <CompareButton product={ref} />
         <button
           type="button"
-          aria-label={`${product.name} — ${t('catalog.quickView')}`}
-          onClick={() => setQuickOpen(true)}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition active:scale-95 hover:border-foreground"
+          aria-label={`${product.name} — ${t('catalog.moreActions')}`}
+          aria-expanded={actionsOpen}
+          aria-controls={actionsId}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setActionsOpen((open) => !open);
+          }}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition active:scale-95 hover:border-foreground md:hidden"
         >
-          <Eye className="h-4 w-4" />
+          <MoreHorizontal className="h-4 w-4" aria-hidden />
         </button>
+        <div
+          id={actionsId}
+          className={cn(
+            'flex-col gap-2',
+            actionsOpen ? 'flex' : 'hidden',
+            'md:flex',
+          )}
+        >
+          <CompareButton product={ref} />
+          <button
+            type="button"
+            aria-label={`${product.name} — ${t('catalog.quickView')}`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setQuickOpen(true);
+            }}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background/85 backdrop-blur transition active:scale-95 hover:border-foreground"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <ProductQuickView product={product} open={quickOpen} onClose={() => setQuickOpen(false)} />

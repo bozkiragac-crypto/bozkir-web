@@ -73,7 +73,8 @@ export function CatalogForm({ initial }: CatalogFormProps) {
       setError(res.error ?? 'Kaydedilemedi.');
       return;
     }
-    router.push('/admin/kataloglar');
+    // Server action sonrası client router geçişi, action tazelemesiyle yarışır.
+    window.location.assign('/admin/kataloglar');
   }
 
   return (

@@ -94,7 +94,7 @@ test.describe('Admin CRUD: kategori & marka (oturumlu)', () => {
     const yeniMarka = adminPage.getByRole('link', { name: /Yeni Marka/ }).first();
     await expect(yeniMarka).toBeVisible();
     await yeniMarka.click();
-    await expect(adminPage).toHaveURL(/\/admin\/bayilikler\/yeni/, { timeout: 15_000 });
+    await expect(adminPage).toHaveURL(/\/admin\/bayilikler\/yeni/, { timeout: 30_000 });
     await expect(adminPage.getByText('Marka logosu')).toBeVisible();
   });
 

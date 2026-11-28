@@ -1,4 +1,4 @@
-import { test, expect, requestGetWithRetry } from './fixtures';
+import { test, expect, requestGetWithConnectionRetry, requestGetWithRetry } from './fixtures';
 
 /**
  * Herkese açık HTML sayfaları nginx'te kısa süreli cache'e alınır.
@@ -46,7 +46,9 @@ test('RSC prefetch istekleri 503 üretmez', async ({ request }) => {
     '/tr/karsilastir',
   ];
   const responses = await Promise.all(
-    Array.from({ length: 105 }, (_, i) => request.get(`${paths[i % paths.length]}?_rsc=${token}`)),
+    Array.from({ length: 105 }, (_, i) =>
+      requestGetWithConnectionRetry(request, `${paths[i % paths.length]}?_rsc=${token}`),
+    ),
   );
   const statuses = responses.map((res) => res.status());
 

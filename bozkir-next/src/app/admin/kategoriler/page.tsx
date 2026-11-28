@@ -35,7 +35,7 @@ export default async function AdminCategoriesPage() {
           <h1 className="text-2xl font-medium tracking-tight">Kategoriler</h1>
           <p className="mt-1 text-sm text-muted-strong">Koleksiyonlar ve vitrin. Ürünler kategorilere göre gruplanır.</p>
         </div>
-        <Link
+        <Link prefetch={false}
           href="/admin/kategoriler/yeni"
           className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
         >
@@ -69,7 +69,7 @@ export default async function AdminCategoriesPage() {
                   )}
                 </td>
                 <td className="p-4">
-                  <Link href={`/admin/kategoriler/${c.id}`} className="font-medium hover:underline">
+                  <Link prefetch={false} href={`/admin/kategoriler/${c.id}`} className="font-medium hover:underline">
                     {c.name}
                   </Link>
                 </td>
@@ -86,7 +86,7 @@ export default async function AdminCategoriesPage() {
                 <td className="numerals p-4 text-muted-strong">{c.sortOrder}</td>
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-2">
-                    <Link href={`/admin/kategoriler/${c.id}`} className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2">
+                    <Link prefetch={false} href={`/admin/kategoriler/${c.id}`} className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2">
                       Düzenle
                     </Link>
                     <DeleteCategoryButton id={c.id} name={c.name} />

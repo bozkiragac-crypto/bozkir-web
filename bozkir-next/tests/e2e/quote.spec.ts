@@ -47,6 +47,26 @@ test.describe('Teklif formu', () => {
     await expect(page.getByText('Devam etmek için onay verin')).toBeVisible();
   });
 
+  test('zorunlu alanlar semantik olarak işaretli ve hataları bağlı', async ({ page }) => {
+    await page.goto('/tr/teklif-al');
+    const requiredIds = ['fullName', 'phone', 'email'];
+    for (const id of requiredIds) {
+      const input = page.locator(`#${id}`);
+      await expect(input).toHaveAttribute('required', '');
+      await expect(input).toHaveAttribute('aria-required', 'true');
+    }
+    const consent = page.locator('form input[type="checkbox"]').first();
+    await expect(consent).toHaveAttribute('required', '');
+    await expect(consent).toHaveAttribute('aria-required', 'true');
+
+    // Mevcut hata mesajı bağlantısı korunmalı (native required noValidate ile çakışmaz).
+    await page.getByRole('button', { name: 'Teklif İste' }).click();
+    for (const id of requiredIds) {
+      await expect(page.locator(`#${id}`)).toHaveAttribute('aria-describedby', `${id}-error`);
+    }
+    await expect(consent).toHaveAttribute('aria-describedby', 'consent-error');
+  });
+
   test('geçersiz e-posta uyarır', async ({ page }) => {
     await page.goto('/tr/teklif-al');
     await page.getByLabel(/^Ad Soyad/).fill('Test Kişi');

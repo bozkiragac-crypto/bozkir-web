@@ -49,7 +49,7 @@ export default async function AdminContentPage() {
           const title = titleByKey.get(b.key) || fallbackContent[b.key]?.title || b.label;
           const active = activeByKey.has(b.key) ? activeByKey.get(b.key) : true;
           return (
-            <Link
+            <Link prefetch={false}
               key={b.key}
               href={`/admin/icerik/${b.key}`}
               className="group rounded-xl border border-border bg-surface p-6 transition-colors hover:bg-surface-2"

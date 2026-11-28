@@ -5,7 +5,7 @@ import { CatalogForm } from '@/components/admin/CatalogForm';
 export default function NewCatalogPage() {
   return (
     <div>
-      <Link href="/admin/kataloglar" className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
+      <Link prefetch={false} href="/admin/kataloglar" className="inline-flex items-center gap-2 text-sm text-muted-strong hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Kataloglar
       </Link>
       <h1 className="mt-6 text-2xl font-medium tracking-tight">Yeni Katalog</h1>

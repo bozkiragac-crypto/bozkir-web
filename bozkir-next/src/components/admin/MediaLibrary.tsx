@@ -164,7 +164,7 @@ export function MediaLibrary({
           ))}
         </Select>
         {q && (
-          <Link
+          <Link prefetch={false}
             href={buildUrl(folder, '')}
             className="text-xs text-muted-strong transition-colors hover:text-foreground"
           >
@@ -223,7 +223,7 @@ export function MediaLibrary({
       {totalPages > 1 && (
         <nav aria-label="Medya sayfaları" className="mt-8 flex items-center justify-center gap-2">
           {page > 1 && (
-            <Link
+            <Link prefetch={false}
               href={buildUrl(folder, q, page - 1)}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >
@@ -234,7 +234,7 @@ export function MediaLibrary({
             {page} / {totalPages}
           </span>
           {page < totalPages && (
-            <Link
+            <Link prefetch={false}
               href={buildUrl(folder, q, page + 1)}
               className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
             >

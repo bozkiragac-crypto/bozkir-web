@@ -84,7 +84,9 @@ export function CategoryForm({ initial }: CategoryFormProps) {
       setError(res.error ?? 'Kaydedilemedi.');
       return;
     }
-    router.push('/admin/kategoriler');
+    // Server action'ın kendi RSC tazelemesiyle `router.push` yarışıyor; DOM
+    // listeye geçmesine rağmen URL `/yeni` kalabiliyordu. Tam gezinme atomik.
+    window.location.assign('/admin/kategoriler');
   }
 
   return (

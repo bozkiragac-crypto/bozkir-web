@@ -138,6 +138,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
           </label>
           <Link
             href="/admin/urunler/yeni"
+            prefetch={false}
             className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background hover:opacity-90"
           >
             <Plus className="h-4 w-4" /> Yeni Ürün
@@ -256,7 +257,11 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
                 </td>
                 <td className="numerals p-4 text-muted-strong">{p.code}</td>
                 <td className="p-4">
-                  <Link href={`/admin/urunler/${p.id}`} className="font-medium hover:underline">
+                  <Link
+                    href={`/admin/urunler/${p.id}`}
+                    prefetch={false}
+                    className="font-medium hover:underline"
+                  >
                     {p.name}
                   </Link>
                 </td>
@@ -279,6 +284,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
                   <div className="flex justify-end gap-2">
                     <Link
                       href={`/admin/urunler/${p.id}`}
+                      prefetch={false}
                       className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-surface-2"
                     >
                       Düzenle
@@ -303,6 +309,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
         <nav className="mt-8 flex items-center justify-between text-sm" aria-label="Sayfalama">
           <Link
             href={pageHref(Math.max(1, page - 1))}
+            prefetch={false}
             aria-disabled={page === 1 || undefined}
             tabIndex={page === 1 ? -1 : undefined}
             className={page === 1 ? 'pointer-events-none opacity-40' : ''}
@@ -314,6 +321,7 @@ export function ProductsTable({ rows, cats, total, page, totalPages, filters }: 
           </span>
           <Link
             href={pageHref(Math.min(totalPages, page + 1))}
+            prefetch={false}
             aria-disabled={page === totalPages || undefined}
             tabIndex={page === totalPages ? -1 : undefined}
             className={page === totalPages ? 'pointer-events-none opacity-40' : ''}

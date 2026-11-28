@@ -20,7 +20,7 @@ export default async function AdminBrandsPage() {
           <h1 className="text-2xl font-medium tracking-tight">Bayilikler / Markalar</h1>
           <p className="mt-1 text-sm text-muted-strong">Bayilikler sayfasında gösterilen markalar.</p>
         </div>
-        <Link
+        <Link prefetch={false}
           href="/admin/bayilikler/yeni"
           className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
         >
@@ -52,7 +52,7 @@ export default async function AdminBrandsPage() {
                   )}
                 </td>
                 <td className="p-4">
-                  <Link href={`/admin/bayilikler/${b.id}`} className="font-medium hover:underline">
+                  <Link prefetch={false} href={`/admin/bayilikler/${b.id}`} className="font-medium hover:underline">
                     {b.name}
                   </Link>
                 </td>
@@ -65,7 +65,7 @@ export default async function AdminBrandsPage() {
                 <td className="numerals p-4 text-muted-strong">{b.sortOrder}</td>
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-2">
-                    <Link href={`/admin/bayilikler/${b.id}`} className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2">
+                    <Link prefetch={false} href={`/admin/bayilikler/${b.id}`} className="rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2">
                       Düzenle
                     </Link>
                     <DeleteBrandButton id={b.id} />

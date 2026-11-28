@@ -129,6 +129,29 @@ export async function requestGetWithRetry(
   return last;
 }
 
+/**
+ * Yalnızca ağ seviyesindeki geçici reset/timeout'ları yeniden dener.
+ * HTTP 503 yanıtı aynen döner; testin "503 üretmez" iddiası maskelenmez.
+ */
+export async function requestGetWithConnectionRetry(
+  request: APIRequestContext,
+  url: string,
+  attempts = 3,
+): Promise<APIResponse> {
+  let lastError: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await request.get(url);
+    } catch (err) {
+      lastError = err;
+      if (i < attempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
+    }
+  }
+  throw lastError ?? new Error(`İstek başarısız: ${url}`);
+}
+
 /** Çerez bandı açıksa kabul eder (tıklamaları örtmesini engeller). */
 export async function dismissConsent(page: Page): Promise<void> {
   const accept = page.getByRole('button', { name: /Kabul Et|Accept/ }).first();

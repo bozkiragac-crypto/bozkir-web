@@ -87,7 +87,8 @@ export function CampaignForm({ initial }: CampaignFormProps) {
       setError(res.error ?? 'Kaydedilemedi.');
       return;
     }
-    router.push('/admin/kampanyalar');
+    // Server action sonrası client router geçişi, action tazelemesiyle yarışır.
+    window.location.assign('/admin/kampanyalar');
   }
 
   return (
